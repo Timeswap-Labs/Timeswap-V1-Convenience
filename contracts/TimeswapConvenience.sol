@@ -1,0 +1,458 @@
+// SPDX-License-Identifier: MIT
+pragma solidity =0.8.1;
+
+import {InterfaceTimeswapConvenience} from "./interfaces/InterfaceTimeswapConvenience.sol";
+import {InterfaceTimeswapFactory} from "./interfaces/InterfaceTimeswapFactory.sol";
+import {InterfaceTimeswapPool} from "./interfaces/InterfaceTimeswapPool.sol";
+import {InterfaceERC20} from "./interfaces/InterfaceERC20.sol";
+import {TimeswapCalculate} from "./libraries/TimeswapCalculate.sol";
+
+/// @title Timeswap Convenience
+/// @author Ricsson W. Ngo
+/// @dev Conveniently call the core functions in Timeswap Core contract
+/// @dev Precalculate and transfer necessary tokens to the Timeswap Core contract
+/// @dev Does safety checks in regards to slippage and deadline
+contract TimeswapConvenience is InterfaceTimeswapConvenience {
+    using TimeswapCalculate for InterfaceTimeswapPool;
+
+    /* ===== MODEL ===== */
+
+    bytes4 private constant TRANSFER_FROM = bytes4(keccak256(bytes("transferFrom(address,address,uint256)")));
+    InterfaceTimeswapPool private constant ZERO = InterfaceTimeswapPool(address(type(uint160).min));
+
+    /// @dev The address of the Timeswap Core factory contract that deploys Timeswap pools
+    InterfaceTimeswapFactory public immutable override factory;
+
+    /// @dev Set deadlines for when the transactions are not executed fast enough
+    modifier ensure(uint256 _deadline) {
+        require(_deadline >= block.timestamp, "TimeswapConvenience :: ensure : Expired");
+        _;
+    }
+
+    /* ===== INIT ===== */
+
+    /// @dev First deploy the Timeswap Core factory contract
+    /// @dev Then deploy the Timeswap Convenience contract
+    /// @param _factory The address of the Timeswap Core factory contract
+    constructor(InterfaceTimeswapFactory _factory) {
+        factory = _factory;
+    }
+
+    /* ===== UPDATE ===== */
+
+    /// @dev Deploy a new Timeswap pool contract and initialize the liquidity with the first mint function in the Timeswap Core contract
+    /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _to The receiver of the mint function
+    /// @param _insuranceReceivedAndAssetIn The amount of insurance ERC20 received by the receiver and the increase in the X pool
+    /// @param _bondIncreaseAndCollateralPaid The increase in the Y pool and the amount of collateral ERC20 to be deposited to the pool contract
+    /// @param _bondReceivedAndCollateralLocked The amount of bond ERC20 received by the receiver and the amount of collateral ERC20 to be locked
+    /// @param _deadline The unix timestamp where the transactions must revert after
+    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract
+    /// @return _insuranceIncreaseAndDebtRequired The increase in the V pool and the amount of debt received
+    /// @return _liquidityReceived The amount of liquidity ERC20 received
+    function mint(
+        Parameter memory _parameter,
+        address _to,
+        uint256 _insuranceReceivedAndAssetIn,
+        uint256 _bondIncreaseAndCollateralPaid,
+        uint256 _bondReceivedAndCollateralLocked,
+        uint256 _deadline
+    )
+        external
+        override
+        ensure(_deadline)
+        returns (
+            uint256 _tokenId,
+            uint256 _insuranceIncreaseAndDebtRequired,
+            uint256 _liquidityReceived
+        )
+    {
+        // Get the address of the pool
+        InterfaceTimeswapPool _pool = _getPool(_parameter);
+
+        // Deploy a new Timeswap pool if the pool does not exist
+        if (_pool == ZERO) _pool = _createPool(_parameter);
+
+        // Check if pool have liquidity
+        require(_pool.totalSupply() == 0, "TimeswapConvenience :: mint : Pool already have Liquidity");
+        
+        // Calculate one of the parameter for the mint function in the Timeswap Core contract
+        _insuranceIncreaseAndDebtRequired = _insuranceReceivedAndAssetIn * _bondReceivedAndCollateralLocked / _bondIncreaseAndCollateralPaid;
+
+        // Safely transfer the necessary tokens to the Timeswap Core pool
+        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _insuranceReceivedAndAssetIn);
+        _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _bondIncreaseAndCollateralPaid + _bondReceivedAndCollateralLocked);
+        
+        // Call the mint function in the Timeswap Core
+        (_tokenId,,, _liquidityReceived) = _pool.mint(
+            _to,
+            _bondIncreaseAndCollateralPaid,
+            _insuranceIncreaseAndDebtRequired
+        );
+    }
+
+    /// @dev Add more liquidity into an existing Timeswap pool with the mint function in the Timeswap Core contract
+    /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _to The receiver of the mint function
+    /// @param _insuranceReceivedAndAssetIn The amount of insurance ERC20 received by the receiver and the increase in the X pool
+    /// @param _safe The slippage protections of the mint transaction
+    /// @param _deadline The unix timestamp where the transactions must revert after
+    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract
+    /// @return _bondIncreaseAndCollateralPaid The increase in the Y pool and the amount of collateral ERC20 to be deposited to the pool contract
+    /// @return _insuranceIncreaseAndDebtRequired The increase in the V pool and the amount of debt received
+    /// @return _bondReceivedAndCollateralLocked The amount of bond ERC20 received by the receiver and the amount of collateral ERC20 to be locked
+    /// @return _liquidityReceived The amount of liquidity ERC20 received
+    function mint(
+        Parameter memory _parameter,
+        address _to,
+        uint256 _insuranceReceivedAndAssetIn,
+        SafeMint memory _safe,
+        uint256 _deadline
+    )
+        external
+        override
+        ensure(_deadline)
+        returns (
+            uint256 _tokenId,
+            uint256 _bondIncreaseAndCollateralPaid,
+            uint256 _insuranceIncreaseAndDebtRequired,
+            uint256 _bondReceivedAndCollateralLocked,
+            uint256 _liquidityReceived
+        )
+    {
+        // Get the address of the pool
+        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        // Sanity checks
+        require(_pool != ZERO, "TimeswapConvenience :: mint : Pool Does Not Exist");
+        require(_pool.maturity() > block.timestamp, "TimeswapConvenience :: mint : Pool Matured");
+        require(_pool.totalSupply() > 0, "TimeswapConvenience :: mint : No Liquidity");
+
+        // Calculate the necessary parameters for the mint function in the Timeswap Core contract
+        (_bondIncreaseAndCollateralPaid, _insuranceIncreaseAndDebtRequired, _bondReceivedAndCollateralLocked) = _pool.calculateMint(_insuranceReceivedAndAssetIn);
+        
+        // Safely transfer the necessary tokens to the Timeswap Core pool
+        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _insuranceReceivedAndAssetIn);
+        _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _bondIncreaseAndCollateralPaid + _bondReceivedAndCollateralLocked);
+        
+        // Call the mint function in the Timeswap Core
+        (_tokenId, _bondReceivedAndCollateralLocked,, _liquidityReceived) = _pool.mint(
+            _to,
+            _bondIncreaseAndCollateralPaid,
+            _insuranceIncreaseAndDebtRequired
+        );
+
+        // Check slippage protection
+        require(_insuranceIncreaseAndDebtRequired <= _safe.maxDebt, "TimeswapConvenience :: mint : Over the maxDebt");
+        require(_bondIncreaseAndCollateralPaid <= _safe.maxCollateralPaid, "TimeswapConvenience :: mint : Over the maxCollateralPaid");
+        require(_bondReceivedAndCollateralLocked <= _safe.maxCollateralLocked, "TimeswapConvenience :: mint : Over the maxCollateralLocked");
+    }
+
+    /// @dev Withdraw liquidity from a Timeswap pool before maturity with the burn function in the Timeswap Core contract
+    /// @dev Precalculate the collateral ERC20 to be locked
+    /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _to The receiver of the burn function
+    /// @param _liquidityIn The amount of liquidity ERC20 to be burnt
+    /// @param _maxCollateralLocked The maximum amount of collateral ERC20 willing to be locked
+    /// @param _safe The slippage protections of the burn transaction
+    /// @param _deadline The unix timestamp where the transactions must revert after
+    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract, returns zero if no Collateralized Debt ERC721 is minted
+    /// @return _collateralLocked The actual collateral ERC20 locked in the Timeswap Core
+    /// @return _debtRequiredAndAssetReceived The debt required and the asset ERC20 received by the receiver
+    /// @return _bondReceived The amount of bond ERC20 received by the receiver
+    /// @return _insuranceReceived The amount of insurance ERC20 received by the receiver
+    function burn(
+        Parameter memory _parameter,
+        address _to,
+        uint256 _liquidityIn,
+        uint256 _maxCollateralLocked,
+        SafeBurn memory _safe,
+        uint256 _deadline
+    )
+        external
+        override
+        ensure(_deadline)
+        returns (
+            uint256 _tokenId,
+            uint256 _collateralLocked,
+            uint256 _debtRequiredAndAssetReceived,
+            uint256 _bondReceived,
+            uint256 _insuranceReceived
+        )
+    {
+        // Get the address of the pool
+        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        // Sanity checks
+        require(_pool != ZERO, "TimeswapConvenience :: burn : Pool Does Not Exist");
+        require(_pool.maturity() > block.timestamp, "TimeswapConvenience :: burn : Pool Matured");
+        require(_pool.totalSupply() > 0, "TimeswapConvenience :: burn : No Liquidity");
+
+        // Safely transfer liquidity ERC20 to the Timeswap Core pool
+        _safeTransferFrom(_pool, msg.sender, _pool, _liquidityIn);
+
+        if (_maxCollateralLocked > 0) {
+            // Calculate the collateral ERC20 required to lock
+            _collateralLocked = _pool.calculateBurn(_liquidityIn, _maxCollateralLocked);
+
+            // Safely transfer collateral ERC20 to the Timeswap Core pool
+            _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _collateralLocked);
+        }
+
+        // Call the burn function in the Timeswap Core
+        (_tokenId, _collateralLocked, _debtRequiredAndAssetReceived, _bondReceived, _insuranceReceived) = _pool.burn(_to);
+
+        // Check slippage protection
+        require(_debtRequiredAndAssetReceived >= _safe.minAsset, "TimeswapConvenience :: burn : Under the minAsset");
+        require(_bondReceived >= _safe.minBond, "TimeswapConvenience :: burn : Under the minBond");
+        require(_insuranceReceived >= _safe.minInsurance, "TimeswapConvenience :: burn : Under the minInsurance");
+    }
+
+    /// @dev Withdraw liquidity from a Timeswap pool after maturity with the burn function in the Timeswap Core contract
+    /// @dev No need for deadline and slippage protection as no slippage can happen after maturity of the pool
+    /// @dev No Collateralized Debt ERC721 will be minted anymore after maturity of the pool
+    /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _to The receiver of the burn function
+    /// @param _liquidityIn The amount of liquidity ERC20 to be burnt
+    /// @return _bondReceived The amount of bond ERC20 received by the receiver
+    /// @return _insuranceReceived The amount of insurance ERC20 received by the receiver
+    function burn(
+        Parameter memory _parameter,
+        address _to,
+        uint256 _liquidityIn
+    )
+        external
+        override
+        returns (
+            uint256 _bondReceived,
+            uint256 _insuranceReceived
+        )
+    {
+        // Get the address of the pool
+        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        // Sanity checks
+        require(_pool != ZERO, "TimeswapConvenience :: burn : Pool Does Not Exist");
+        require(_pool.maturity() <= block.timestamp, "TimeswapConvenience :: burn : Pool Not Matured");
+        require(_pool.totalSupply() > 0, "TimeswapConvenience :: burn : No Liquidity");
+
+        // Safely transfer liquidity ERC20 to the Timeswap Core pool
+        _safeTransferFrom(_pool, msg.sender, _pool, _liquidityIn);
+
+        // Call the burn function in the Timeswap Core
+        (,,, _bondReceived, _insuranceReceived) = _pool.burn(_to);
+    }
+
+    /// @dev Lend asset ERC20 with the lend function in the Timeswap Core contract
+    /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _to The receiver of the lend function
+    /// @param _assetIn The amount of asset ERC20 to be lent
+    /// @param _isBondReceivedGiven Determines whether the lender provides desired bond receive, if false assume lender provide desired insurance receive
+    /// @param _bondReceivedOrInsuranceReceived The desired amount of bond ERC20 received or the desired amount of insurance ERC20 received
+    /// @param _safe The slippage protections of the lend transaction
+    /// @param _deadline The unix timestamp where the transactions must revert after
+    /// @return _bondReceived The actual amount of bond ERC20 received by the receiver
+    /// @return _insuranceReceived The actual amount of insurance ERC20 received by the receiver
+    function lend(
+        Parameter memory _parameter,
+        address _to,
+        uint256 _assetIn,
+        bool _isBondReceivedGiven,
+        uint256 _bondReceivedOrInsuranceReceived,
+        SafeLend memory _safe,
+        uint256 _deadline
+    )
+        external
+        override
+        ensure(_deadline)
+        returns (
+            uint256 _bondReceived,
+            uint256 _insuranceReceived
+        )
+    {
+        // Get the address of the pool
+        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        // Sanity checks
+        require(_pool != ZERO, "TimeswapConvenience :: lend : Pool Does Not Exist");
+        require(_pool.maturity() > block.timestamp, "TimeswapConvenience :: lend : Pool Matured");
+        require(_pool.totalSupply() > 0, "TimeswapConvenience :: lend : No Liquidity");
+
+        // Calculate the necessary parameters for the lend function in the Timeswap Core contract
+        uint256 _bondDecrease;
+        uint256 _rateDecrease;
+        if (_isBondReceivedGiven) {
+            (_bondDecrease, _rateDecrease) = _pool.calculateLendGivenBondReceived(
+                _assetIn,
+                _bondReceivedOrInsuranceReceived
+            );
+        }
+        else {
+            (_bondDecrease, _rateDecrease) = _pool.calculateLendGivenInsuranceReceived(
+                _assetIn,
+                _bondReceivedOrInsuranceReceived
+            );
+        }
+
+        // Safely transfer asset ERC20 to the Timeswap Core pool
+        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetIn);
+
+        // Call the lend function in the Timeswap Core
+        (_bondReceived, _insuranceReceived) = _pool.lend(_to, _bondDecrease, _rateDecrease);
+
+        // Check slippage protection
+        require(_bondReceived >= _safe.minBond, "TimeswapConvenience :: lend : Under the minBond");
+        require(_insuranceReceived >= _safe.minInsurance, "TimeswapConvenience :: lend : Under the minInsurance");
+    }
+
+    /// @dev Borrw asset ERC20 and lock collateral with the borrow function in the Timeswap Core contract
+    /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _to The receiver of the borrow function
+    /// @param _assetReceived The amount of asset ERC20 to be borrowed
+    /// @param _isDesiredCollateralLockedGiven Determines whether the borrower provides desired collateral lock, if false assume lender provide desired interest required
+    /// @param _desiredCollateralLockedOrInterestRequired The desired amount of collateral ERC20 lock or the desired amount of interest required
+    /// @param _safe The slippage protections of the borrow transaction
+    /// @param _deadline The unix timestamp where the transactions must revert after
+    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract
+    /// @return _collateralLocked The actual amount of collateral ERC20 locked by the receiver
+    /// @return _debtRequired The actual amount of debt required
+    function borrow(
+        Parameter memory _parameter,
+        address _to,
+        uint256 _assetReceived,
+        bool _isDesiredCollateralLockedGiven,
+        uint256 _desiredCollateralLockedOrInterestRequired,
+        SafeBorrow memory _safe,
+        uint256 _deadline
+    )
+        external
+        override
+        ensure(_deadline)
+        returns (
+            uint256 _tokenId,
+            uint256 _collateralLocked,
+            uint256 _debtRequired
+        )
+    {
+        // Get the address of the pool
+        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        // Sanity checks
+        require(_pool != ZERO, "TimeswapConvenience :: borrow : Pool Does Not Exist");
+        require(_pool.maturity() > block.timestamp, "TimeswapConvenience :: borrow : Pool Matured");
+        require(_pool.totalSupply() > 0, "TimeswapConvenience :: borrow : No Liquidity");
+
+        // Calculate the necessary parameters for the borrow function in the Timeswap Core contract
+        uint256 _bondIncrease;
+        uint256 _rateIncrease;
+        if (_isDesiredCollateralLockedGiven) {
+            (_bondIncrease, _rateIncrease, _collateralLocked) = _pool.calculateBorrowGivenDesiredCollateralLocked(
+                _assetReceived,
+                _desiredCollateralLockedOrInterestRequired
+            );
+        }
+        else {
+            (_bondIncrease, _rateIncrease, _collateralLocked) = _pool.calculateBorrowGivenInterestRequired(
+                _assetReceived,
+                _desiredCollateralLockedOrInterestRequired
+            );
+        }
+
+        // Safely transfer collateral ERC20 to the Timeswap Core pool
+        _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _collateralLocked);
+
+        // Call the borrow function in the Timeswap Core
+        (_tokenId, _collateralLocked, _debtRequired) = _pool.borrow(_to, _assetReceived, _bondIncrease, _rateIncrease);
+
+        // Check slippage protection
+        require(_collateralLocked <= _safe.maxCollateralLocked, "TimeswapConvenience :: borrow : Over the maxCollateralLocked");
+        require(_debtRequired - _assetReceived <= _safe.maxInterestRequired, "TimeswapConvenience :: borrow : Over the maxInterestRequired");
+    }
+
+    /// @dev Pay back the debt of the collateralized debt ERC721 with the pay function in the Tiemswap Core contract
+    /// @dev No need for slippage protection as no slippage can happen with debt payment
+    /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _tokenId The id of the collateralized debt ERC721, the receiver is the owner of the token
+    /// @param _assetIn The amount of asset ERC20 to be deposited to pay back debt
+    /// @param _deadline The unix timestamp where the transactions must revert after
+    /// @return _collateralReceived The amount of collateral ERC20 to be unlocked and received by the receiver
+    function pay(
+        Parameter memory _parameter,
+        uint256 _tokenId,
+        uint256 _assetIn,
+        uint256 _deadline
+    )
+        external
+        override
+        ensure(_deadline)
+        returns (
+            uint256 _collateralReceived
+        )
+    {
+        // Get the address of the pool
+        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        // Sanity checks
+        require(_pool != ZERO, "TimeswapConvenience :: pay : Pool Does Not Exist");
+        require(_pool.maturity() > block.timestamp, "TimeswapConvenience :: pay : Pool Matured");
+        require(_pool.totalSupply() > 0, "TimeswapConvenience :: pay : No Liquidity");
+
+        // Safely transfer asset ERC20 to the Timeswap Core pool
+        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetIn);
+
+        // Call the pay function in the Timeswap Core
+        _collateralReceived = _pool.pay(_tokenId);
+    }
+
+    /// @dev Pay back the debt of multiple collateralized debt ERC721 with the multiple pay function in the Tiemswap Core contract
+    /// @dev No need for slippage protection as no slippage can happen with debt payment
+    /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _tokenIds The array of ids of the collateralized debt ERC721, the receiver is the owner of the token
+    /// @param _assetsIn The array of amount of asset ERC20 to be deposited to pay back debt per collateralized debt ERC721
+    /// @param _deadline The unix timestamp where the transactions must revert after
+    /// @return _collateralReceived The total amount of collateral ERC20 to be unlocked
+    function pay(
+        Parameter memory _parameter,
+        uint256[] memory _tokenIds,
+        uint256[] memory _assetsIn,
+        uint256 _deadline
+    )
+        external
+        override
+        ensure(_deadline)
+        returns (
+            uint256 _collateralReceived
+        )
+    {
+        // Must have equal lengths array
+        require(_tokenIds.length == _assetsIn.length, "TimeswapConvenience :: pay : Unequal Length");
+        
+        // Get the address of the pool
+        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        // Sanity checks
+        require(_pool != ZERO, "TimeswapConvenience :: pay : Pool Does Not Exist");
+        require(_pool.maturity() > block.timestamp, "TimeswapConvenience :: pay : Pool Matured");
+        require(_pool.totalSupply() > 0, "TimeswapConvenience :: pay : No Liquidity");
+        
+        for (uint256 _index = 0; _index < _tokenIds.length; _index++) {
+            // Safely transfer asset ERC20 to the Timeswap Core pool
+            _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetsIn[_index]);
+            
+            // Call the pay function in the Timeswap Core
+            _collateralReceived += _pool.pay(_tokenIds[_index]);
+        }
+    }
+
+    /* ===== HELPER ===== */
+
+    /// @dev Safely transfer the tokens of an ERC20 token contract
+    /// @dev Will revert if failed at calling the transfer function
+    function _safeTransferFrom(InterfaceERC20 _token, address _from, InterfaceTimeswapPool _to, uint256 _value) private {
+        (bool _success, bytes memory _data) = address(_token).call(abi.encodeWithSelector(TRANSFER_FROM, _from, address(_to), _value));
+        require(_success && (_data.length == 0 || abi.decode(_data, (bool))), "TimeswapConvenience :: _safeTransfer : Transfer Failed");
+    }
+
+    /// @dev Get the address of the Timeswap Core pool given the parameters
+    function _getPool(Parameter memory _parameter) private view returns (InterfaceTimeswapPool _pool) {
+        _pool = factory.getPool(_parameter.asset, _parameter.collateral, _parameter.maturity);
+    }
+
+    /// @dev Deploy a new Timeswap Core pool given the parameters
+    function _createPool(Parameter memory _parameter) private returns (InterfaceTimeswapPool _pool) {
+        _pool = factory.createPool(_parameter.asset, _parameter.collateral, _parameter.maturity);
+    }
+}
