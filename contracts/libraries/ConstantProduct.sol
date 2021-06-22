@@ -7,13 +7,13 @@ library ConstantProduct {
     using Math for uint256;
 
     function calculate(
-        uint256 a,
-        uint256 b,
-        uint256 c,
-        uint256 d
+        uint256 x,
+        uint256 yz,
+        uint256 denominator1,
+        uint256 denominator2
     ) internal pure returns (uint256 result) {
-        result = mulDivUp(a, b, c);
-        result = result.divUp(d);
+        result = mulDivUp(x, yz, denominator1);
+        result = result.divUp(denominator2);
     }
     
     function mulDiv(
@@ -88,9 +88,6 @@ library ConstantProduct {
         uint256 denominator
     ) private pure returns (uint256 result) {
         result = mulDiv(a, b, denominator);
-        if (mulmod(a, b, denominator) > 0) {
-            require(result < type(uint256).max);
-            result++;
-        }
+        if (mulmod(a, b, denominator) > 0) result++;
     }
 }
