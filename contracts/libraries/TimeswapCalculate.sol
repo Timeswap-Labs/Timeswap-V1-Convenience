@@ -5,6 +5,7 @@ import {InterfaceTimeswapPool} from "./../interfaces/InterfaceTimeswapPool.sol";
 import {InterfaceTimeswapFactory} from "./../interfaces/InterfaceTimeswapFactory.sol";
 import {InterfaceERC20} from "./../interfaces/InterfaceERC20.sol";
 import {Math} from "./Math.sol";
+import {ConstantProduct} from "./ConstantProduct.sol";
 
 /// @title Timeswap Calculate Library
 /// @author Ricsson W. Ngo
@@ -17,7 +18,7 @@ library TimeswapCalculate {
     // @dev The number of seconds in an epoch year
     uint256 private constant YEAR = 31556926;
 
-    InterfaceTimeswapPool private constant ZERO = InterfaceTimeswapPool(address(type(uint160).min));
+    InterfaceTimeswapPool private constant ZERO_ADDRESS = InterfaceTimeswapPool(address(type(uint160).min));
 
     /// @dev Calculate the necessary parameters for the mint function in Timeswap Core contract
     /// @dev Precalculate the collateral ERC20 required to transfer
@@ -95,17 +96,29 @@ library TimeswapCalculate {
         uint256 _transactionFeeBase = BASE + _pool.transactionFee(); // gas saving
         uint256 _duration = _pool.maturity() - block.timestamp;
 
-        // Get the K constant, X pool, Y pool, and Z pool
-        (uint256 _invariance, uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReservesForLend(_pool);
+        // Get the X pool, Y pool, and Z pool
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves(_pool);
 
         // Get the bond decrease parameter
         _bondDecrease = (_bondReceived * _assetReserve).divUp(_rateReserve * _duration / YEAR + _assetReserve);
+
         // Adjust the bond decrease and bond reserve with the transaction fee
-        uint256 _bondBalanceAdjusted = _bondReserve * BASE - (_bondDecrease * _transactionFeeBase);
+        uint256 _bondBalanceAdjusted = _bondReserve * BASE;
+        _bondBalanceAdjusted -= _bondDecrease * _transactionFeeBase;
+        _bondBalanceAdjusted /= BASE;
+
         // Get the adjusted rate balance following the constant product formula
-        uint256 _rateBalanceAdjusted = (_invariance * BASE * BASE).divUp(_assetReserve + _assetIn).divUp(_bondBalanceAdjusted);
+        uint256 _rateBalanceAdjusted = ConstantProduct.calculate(
+            _assetReserve,
+            _bondReserve * _rateReserve,
+            _assetReserve + _assetIn,
+            _bondBalanceAdjusted
+        );
+
         // Derive the rate decrease from the adjusted rate balance with the transaction fee
-        _rateDecrease = (_rateReserve * BASE - _rateBalanceAdjusted) / _transactionFeeBase;
+        _rateDecrease = _rateReserve - _rateBalanceAdjusted;
+        _rateDecrease *= BASE;
+        _rateDecrease /= _transactionFeeBase;
     }
 
     /// @dev Calculate the necessary parameters for the lend function in Timeswap Core contract given that users received desired insurance amount
@@ -129,17 +142,29 @@ library TimeswapCalculate {
         uint256 _transactionFeeBase = BASE + _pool.transactionFee(); // gas saving
         uint256 _duration = _pool.maturity() - block.timestamp;
         
-        // Get the K constant, X pool, Y pool, and Z pool
-        (uint256 _invariance, uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReservesForLend(_pool);
+        // Get the X pool, Y pool, and Z pool
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves(_pool);
 
         // Get the rate decrease parameter
         _rateDecrease = (_insuranceReceived * _rateReserve).divUp(_rateReserve * _duration / YEAR + _assetReserve + _assetIn);
+
         // Adjust the rate decrease and rate reserve with the transaction fee
-        uint256 _rateBalanceAdjusted = _rateReserve * BASE - (_rateDecrease * _transactionFeeBase);
+        uint256 _rateBalanceAdjusted = _rateReserve * BASE;
+        _rateBalanceAdjusted -= _rateDecrease * _transactionFeeBase;
+        _rateBalanceAdjusted /= BASE;
+
         // Get the adjusted bond balance following the constant product formula
-        uint256 _bondBalanceAdjusted = (_invariance * BASE * BASE).divUp(_assetReserve + _assetIn).divUp(_rateBalanceAdjusted);
+        uint256 _bondBalanceAdjusted = ConstantProduct.calculate(
+            _assetReserve,
+            _bondReserve * _rateReserve,
+            _assetReserve + _assetIn,
+            _rateBalanceAdjusted
+        );
+
         // Derive the bond decrease from the adjusted bond balance with the transaction fee
-        _bondDecrease = (_bondReserve * BASE - _bondBalanceAdjusted) / _transactionFeeBase;
+        _bondDecrease = (_bondReserve - _bondBalanceAdjusted);
+        _bondDecrease *= BASE;
+        _bondDecrease /= _transactionFeeBase;
     }
 
     /// @dev Calculate the necessary parameters for the burn function in Timeswap Core contract given that users lock desired collateral
@@ -166,8 +191,8 @@ library TimeswapCalculate {
         uint256 _transactionFeeBase = BASE - _pool.transactionFee(); // gas saving
         uint256 _duration = _pool.maturity() - block.timestamp;
         
-        // Get the K constant, X pool, Y pool, and Z pool
-        (uint256 _invariance, uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReservesForBorrow(_pool);
+        // Get the X pool, Y pool, and Z pool
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves(_pool);
 
         { // avoids stack too deep error
         uint256 _bondMax = _assetReceived * _bondReserve / (_assetReserve - _assetReceived);
@@ -186,11 +211,22 @@ library TimeswapCalculate {
         }
 
         // Adjust the bond increase and bond reserve with the transaction fee
-        uint256 _bondBalanceAdjusted = _bondReserve * BASE + (_bondIncrease * _transactionFeeBase);
+        uint256 _bondBalanceAdjusted = _bondReserve * BASE;
+        _bondBalanceAdjusted += _bondIncrease * _transactionFeeBase;
+        _bondBalanceAdjusted /= BASE;
+
         // Get the adjusted rate balance following the constant product formula
-        uint256 _rateBalanceAdjusted = (_invariance * BASE * BASE).divUp(_assetReserve - _assetReceived).divUp(_bondBalanceAdjusted);
+        uint256 _rateBalanceAdjusted = ConstantProduct.calculate(
+            _assetReserve,
+            _bondReserve * _rateReserve,
+            _bondBalanceAdjusted,
+            _assetReserve - _assetReceived
+        );
+
         // Derive the rate increase from the adjusted rate balance with the transaction fee
-        _rateIncrease = (_rateBalanceAdjusted - (_rateReserve * BASE)).divUp(_transactionFeeBase);
+        _rateIncrease = _rateBalanceAdjusted - _rateReserve;
+        _rateIncrease *= BASE;
+        _rateIncrease = _rateIncrease.divUp(_transactionFeeBase);
     }
 
     /// @dev Calculate the necessary parameters for the burn function in Timeswap Core contract given that users receive desired interest
@@ -217,8 +253,8 @@ library TimeswapCalculate {
         uint256 _transactionFeeBase = BASE - _pool.transactionFee(); // gas saving
         uint256 _duration = _pool.maturity() - block.timestamp;
         
-        // Get the K constant, X pool, Y pool, and Z pool
-        (uint256 _invariance, uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReservesForBorrow(_pool);
+        // Get the X pool, Y pool, and Z pool
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves(_pool);
 
         { // avoids stack too deep error
         uint256 _rateMax = _assetReceived * _rateReserve / (_assetReserve - _assetReceived);
@@ -230,11 +266,22 @@ library TimeswapCalculate {
 
         { // avoids stack too deep error
         // Adjust the rate increase and rate reserve with the transaction fee
-        uint256 _rateBalanceAdjusted = _rateReserve * BASE + (_rateIncrease * _transactionFeeBase);
+        uint256 _rateBalanceAdjusted = _rateReserve * BASE;
+        _rateBalanceAdjusted += _rateIncrease * _transactionFeeBase;
+        _rateBalanceAdjusted /= BASE;
+
         // Get the adjusted bond balance following the constant product formula
-        uint256 _bondBalanceAdjusted = (_invariance * BASE * BASE).divUp(_assetReserve - _assetReceived).divUp(_rateBalanceAdjusted);
+        uint256 _bondBalanceAdjusted = ConstantProduct.calculate(
+            _assetReserve,
+            _bondReserve * _rateReserve,
+            _rateBalanceAdjusted,
+            _assetReserve - _assetReceived
+        );
+
         // Derive the bond increase from the adjusted bond balance with the transaction fee
-        _bondIncrease = (_bondBalanceAdjusted - (_bondReserve * BASE)).divUp(_transactionFeeBase);
+        _bondIncrease = _bondBalanceAdjusted - _bondReserve;
+        _bondIncrease *= BASE;
+        _bondIncrease = _bondIncrease.divUp(_transactionFeeBase);
         }
 
         uint256 _bondMax = _assetReceived * _bondReserve / (_assetReserve - _assetReceived);
@@ -248,43 +295,20 @@ library TimeswapCalculate {
 
     // HELPER
 
-    /// @dev Return the K constant, X pool, Y pool, and the Z pool
-    /// @dev Only used for the lend function
-    function _viewReservesForLend(
+    /// @dev Return the X pool, Y pool, and the Z pool
+    function _viewReserves(
         InterfaceTimeswapPool _pool
     )
         private
         view
         returns (
-            uint256 _invariance,
             uint256 _assetReserve,
             uint256 _bondReserve,
             uint256 _rateReserve
         )
     {
-        _invariance = _pool.invariance();
         _assetReserve = _pool.assetReserve();
         _bondReserve = _pool.bond().balanceOf(address(_pool));
-        _rateReserve = _invariance.divUp(_assetReserve).divUp(_bondReserve);
-    }
-
-    /// @dev Return the K constant, X pool, Y pool, and the Z pool
-    /// @dev Only used for the borrow function
-    function _viewReservesForBorrow(
-        InterfaceTimeswapPool _pool
-    )
-        private
-        view
-        returns (
-            uint256 _invariance,
-            uint256 _assetReserve,
-            uint256 _bondReserve,
-            uint256 _rateReserve
-        )
-    {
-        _invariance = _pool.invariance();
-        _assetReserve = _pool.assetReserve();
-        _bondReserve = _pool.bond().balanceOf(address(_pool));
-        _rateReserve = _invariance / _assetReserve / _bondReserve;
+        _rateReserve = _pool.rateReserve();
     }
 }
