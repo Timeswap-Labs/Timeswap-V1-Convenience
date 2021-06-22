@@ -140,6 +140,7 @@ package-lock.json
 contracts/interfaces/artifacts
 artifacts
 cache
+typechain
 
 
 .vscode/
