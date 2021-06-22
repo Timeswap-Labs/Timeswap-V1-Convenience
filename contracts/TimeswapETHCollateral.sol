@@ -6,7 +6,7 @@ import {InterfaceTimeswapFactory} from "./interfaces/InterfaceTimeswapFactory.so
 import {InterfaceTimeswapPool} from "./interfaces/InterfaceTimeswapPool.sol";
 import {InterfaceWETH9} from "./interfaces/InterfaceWETH9.sol";
 import {InterfaceERC20} from "./interfaces/InterfaceERC20.sol";
-import {InterfaceTimeswapERC721} from "./interfaces/InterfaceTimeswapERC721.sol";
+import {InterfaceERC721} from "./interfaces/InterfaceERC721.sol";
 import {TimeswapCalculate} from "./libraries/TimeswapCalculate.sol";
 
 /// @title Timeswap Convenience ETH Collateral
@@ -378,12 +378,14 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
     /// @dev Pay back the debt of the collateralized debt ERC721 with the pay function in the Tiemswap Core contract
     /// @dev No need for slippage protection as no slippage can happen with debt payment
     /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _to The receiver of the pay function
     /// @param _tokenId The id of the collateralized debt ERC721, the receiver is the owner of the token
     /// @param _assetIn The amount of asset ERC20 to be deposited to pay back debt
     /// @param _deadline The unix timestamp where the transactions must revert after
     /// @return _collateralReceived The amount of collateral ERC20 to be unlocked and received by the receiver
     function pay(
         Parameter memory _parameter,
+        address payable _to,
         uint256 _tokenId,
         uint256 _assetIn,
         uint256 _deadline
@@ -402,14 +404,19 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         require(_pool.maturity() > block.timestamp, "TimeswapETHCollateral :: pay : Pool Matured");
         require(_pool.totalSupply() > 0, "TimeswapETHCollateral :: pay : No Liquidity");
 
+        InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
+
+        // Safely transfer collateralized debt ERC721 to this contract
+        _collateralizedDebt.safeTransferFrom(msg.sender, address(this), _tokenId);
+
         // Safely transfer asset ERC20 to the Timeswap Core pool
         _safeTransferFrom(_parameter.asset, msg.sender, address(_pool), _assetIn);
         
         // Call the pay function in the Timeswap Core
-        _collateralReceived = _pool.pay(_tokenId);
+        _collateralReceived = _pool.pay(_to, _tokenId);
 
-        // Get the owner of the collateralized debt ERC721
-        address payable _to = payable(_pool.collateralizedDebt().ownerOf(_tokenId));
+        // Safely transfer back the collateralized debt ERC721 to msg.sender
+        _collateralizedDebt.safeTransferFrom(address(this), msg.sender, _tokenId);
 
         // Safely unwrap and transfer ETH to the receiver
         _wethWithdrawTransfer(_to, _collateralReceived);
@@ -418,12 +425,14 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
     /// @dev Pay back the debt of multiple collateralized debt ERC721 with the multiple pay function in the Tiemswap Core contract
     /// @dev No need for slippage protection as no slippage can happen with debt payment
     /// @param _parameter The three parameters for the Timeswap pool
+    /// @param _to The receiver of the pay function
     /// @param _tokenIds The array of ids of the collateralized debt ERC721, the receiver is the owner of the token
     /// @param _assetsIn The array of amount of asset ERC20 to be deposited to pay back debt per collateralized debt ERC721
     /// @param _deadline The unix timestamp where the transactions must revert after
     /// @return _collateralReceived The total amount of collateral ERC20 to be unlocked
     function pay(
         Parameter memory _parameter,
+        address payable _to,
         uint256[] memory _tokenIds,
         uint256[] memory _assetsIn,
         uint256 _deadline
@@ -445,24 +454,27 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         require(_pool.maturity() > block.timestamp, "TimeswapETHCollateral :: pay : Pool Matured");
         require(_pool.totalSupply() > 0, "TimeswapETHCollateral :: pay : No Liquidity");
         
-        InterfaceTimeswapERC721 _collateralizedDebt = _pool.collateralizedDebt(); // gas saving
+        InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt(); // gas saving
 
         for (uint256 _index = 0; _index < _tokenIds.length; _index++) {
             uint256 _tokenId = _tokenIds[_index]; // gas saving
             
+            // Safely transfer collateralized debt ERC721 to this contract
+            _collateralizedDebt.safeTransferFrom(msg.sender, address(this), _tokenId);
+
             // Safely transfer asset ERC20 to the Timeswap Core pool
             _safeTransferFrom(_parameter.asset, msg.sender, address(_pool), _assetsIn[_index]);
 
             // Call the pay function in the Timeswap Core
-            uint256 _tokendCollateralReceived = _pool.pay(_tokenId);
+            uint256 _tokenCollateralReceived = _pool.pay(_to, _tokenId);
 
-            // Get the owner of the collateralized debt ERC721
-            address payable _to = payable(_collateralizedDebt.ownerOf(_tokenId));
+            // Safely transfer back the collateralized debt ERC721 to msg.sender
+            _collateralizedDebt.safeTransferFrom(address(this), msg.sender, _tokenId);
 
             // Safely unwrap and transfer ETH to the receiver
-            _wethWithdrawTransfer(_to, _tokendCollateralReceived);
+            _wethWithdrawTransfer(_to, _tokenCollateralReceived);
             
-            _collateralReceived += _tokendCollateralReceived;
+            _collateralReceived += _tokenCollateralReceived;
         }
     }
 

@@ -2,7 +2,7 @@
 pragma solidity =0.8.1;
 
 import {InterfaceERC20} from "./InterfaceERC20.sol";
-import {InterfaceTimeswapERC721} from "./InterfaceTimeswapERC721.sol";
+import {InterfaceERC721} from "./InterfaceERC721.sol";
 
 /// @title Timeswap Pool Interface
 /// @author Ricsson W. Ngo
@@ -20,7 +20,7 @@ interface InterfaceTimeswapPool is InterfaceERC20 {
 
     function bond() external view returns (InterfaceERC20);
 
-    function collateralizedDebt() external view returns (InterfaceTimeswapERC721);
+    function collateralizedDebt() external view returns (InterfaceERC721);
 
     function assetReserve() external view returns (uint128);
 
@@ -95,6 +95,7 @@ interface InterfaceTimeswapPool is InterfaceERC20 {
         );
 
     function pay(
+        address _to,
         uint256 _tokenId
     )
         external

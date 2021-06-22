@@ -138,6 +138,7 @@ interface InterfaceTimeswapETHAsset is InterfaceERC721Receiver {
 
     function pay(
         Parameter memory _parameter,
+        address _to,
         uint256 _tokenId,
         uint256 _deadline
     )
@@ -149,6 +150,7 @@ interface InterfaceTimeswapETHAsset is InterfaceERC721Receiver {
 
     function pay(
         Parameter memory _parameter,
+        address _to,
         uint256[] memory _tokenIds,
         uint256[] memory _assetsIn,
         uint256 _deadline
