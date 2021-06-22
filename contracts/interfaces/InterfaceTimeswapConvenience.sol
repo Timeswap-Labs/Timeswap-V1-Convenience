@@ -3,10 +3,11 @@ pragma solidity =0.8.1;
 
 import {InterfaceTimeswapFactory} from "./InterfaceTimeswapFactory.sol";
 import {InterfaceERC20} from "./InterfaceERC20.sol";
+import {InterfaceERC721Receiver} from "./InterfaceERC721Receiver.sol";
 
 /// @title Timeswap Convenience Interface
 /// @author Ricsson W. Ngo
-interface InterfaceTimeswapConvenience {
+interface InterfaceTimeswapConvenience is InterfaceERC721Receiver {
     
     struct Parameter {
         InterfaceERC20 asset;
@@ -134,6 +135,7 @@ interface InterfaceTimeswapConvenience {
 
     function pay(
         Parameter memory _parameter,
+        address _to,
         uint256 _tokenId,
         uint256 _assetIn,
         uint256 _deadline
@@ -145,6 +147,7 @@ interface InterfaceTimeswapConvenience {
 
     function pay(
         Parameter memory _parameter,
+        address _to,
         uint256[] memory _tokenIds,
         uint256[] memory _assetsIn,
         uint256 _deadline
