@@ -24,9 +24,9 @@ interface InterfaceTimeswapPool is InterfaceERC20 {
 
     function assetReserve() external view returns (uint128);
 
-    function collateralReserve() external view returns (uint128);
+    function rateReserve() external view returns (uint128);
 
-    function invariance() external view returns (uint256);
+    function collateralReserve() external view returns (uint256);
 
     function transactionFee() external view returns (uint128);
 
