@@ -382,6 +382,8 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Calculate the necessary parameters for the lend function in the Timeswap Core contract
         uint256 _bondDecrease;
         uint256 _rateDecrease;
+
+        console.log("bond given? sol", _isBondReceivedGiven);
         if (_isBondReceivedGiven) {
             (_bondDecrease, _rateDecrease) = _pool
             .calculateLendGivenBondReceived(
@@ -395,6 +397,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
                 _bondReceivedOrInsuranceReceived
             );
         }
+        console.log("calculated rateDecrease", _rateDecrease);
 
         // Safely transfer asset ERC20 to the Timeswap Core pool
         _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetIn);

@@ -108,7 +108,7 @@ library TimeswapCalculate {
             (_rateReserve * _duration) / YEAR + _assetReserve
         );
 
-        console.log("Bond Decrease sol", _bondDecrease);
+        // console.log("Bond Decrease sol", _bondDecrease);
 
         // Adjust the bond decrease and bond reserve with the transaction fee
         uint256 _bondBalanceAdjusted = _bondReserve * BASE;
@@ -124,6 +124,7 @@ library TimeswapCalculate {
             _assetReserve + _assetIn,
             _bondBalanceAdjusted
         );
+      console.log("SOL rateReserve, rateBalanceAdjusted", _rateReserve, _rateBalanceAdjusted);
 
         // Derive the rate decrease from the adjusted rate balance with the transaction fee
         _rateDecrease = _rateReserve - _rateBalanceAdjusted;

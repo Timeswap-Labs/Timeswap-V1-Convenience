@@ -1883,22 +1883,24 @@ describe("lend", () => {
         bondReceived * assetReserve,
         (rateReserve * (maturity - BigInt(timestamp))) / year + assetReserve
         );
-        console.log("Bond Decrease", bondDecrease);
+        // console.log("Bond Decrease", bondDecrease);
     };
 
 
     const calculate = () => {
       const bondBalanceAdjusted =
-        bondReserve * base - bondDecrease * (base + transactionFee);
+        (bondReserve * base - bondDecrease * (base + transactionFee)) / base;
+        console.log("JS BondbalanceAdjusted", bondBalanceAdjusted)
       const rateBalanceAdjusted = divUp(
-        divUp(invariance * base * base, assetReserve + assetIn),
+        divUp(invariance * base, assetReserve + assetIn),
         bondBalanceAdjusted
       );
+      console.log("JS rateReserve, rateBalanceAdjusted", rateReserve, rateBalanceAdjusted);
       rateDecrease =
         (rateReserve * base - rateBalanceAdjusted) / (base + transactionFee);
 
         console.log("Rate Decrease at 1900", rateDecrease)
-        console.log("Timestamp at 1901 ", timestamp);
+        // console.log("Timestamp at 1901 ", timestamp);
 
       bondMint =
         (((bondDecrease * rateReserve) / assetReserve) *
@@ -1918,7 +1920,7 @@ describe("lend", () => {
       };
     };
 
-    describe.only("success case", () => {
+    describe("success case", () => {
       before(async () => {
         await deployAndMint(
           assetReserve,
@@ -1939,7 +1941,7 @@ describe("lend", () => {
         timestamp = await now();
 
         timestamp += 50
-        console.log("1942 timestamp ", timestamp)
+
         await setTime(timestamp);
 
         calculateBondDecrease();
@@ -1960,11 +1962,11 @@ describe("lend", () => {
 
         timestamp = await getTimestamp(transaction.blockHash!)
 
-        console.log("timestamp after transaction ", timestamp)
+        // console.log("timestamp after transaction ", timestamp)
 
-        calculateBondDecrease();
+        // calculateBondDecrease();
 
-        calculate();
+        // calculate();
 
       //   bondMint =
       //   (((bondDecrease * rateReserve) / assetReserve) *
@@ -2006,8 +2008,8 @@ describe("lend", () => {
         
         const insuranceReceived = insuranceDecrease + insuranceMint;
         
-        console.log("From ts ", insuranceDecrease, insuranceMint);
-        console.log("Timestamp ts ", timestamp);
+        // console.log("From ts ", insuranceDecrease, insuranceMint);
+        // console.log("Timestamp ts ", timestamp);
         console.log("Rate Decrease at 1979", rateDecrease)
         
         checkBigIntEquality(result, insuranceReceived);
@@ -2190,7 +2192,7 @@ describe("lend", () => {
     });
   });
 
-  describe("lend given insurance received", () => {
+  describe.only("lend given insurance received", () => {
     const insuranceReceived = 800000n;
     let bondReceived: bigint;
 
@@ -2205,9 +2207,9 @@ describe("lend", () => {
 
     const calculate = () => {
       const rateBalanceAdjusted =
-        rateReserve * base - rateDecrease * (base + transactionFee);
+        rateReserve * base - rateDecrease * (base + transactionFee) / base;
       const bondBalanceAdjusted = divUp(
-        divUp(invariance * base * base, assetReserve + assetIn),
+        divUp(invariance * base, assetReserve + assetIn),
         rateBalanceAdjusted
       );
       bondDecrease =
@@ -2243,6 +2245,12 @@ describe("lend", () => {
 
         rateReserve = (await pool.rateReserve()).toBigInt();
         invariance = assetReserve * bondReserve * rateReserve;
+
+        timestamp = await now();
+
+        timestamp += 50
+
+        await setTime(timestamp);
 
         calculateRateDecrease();
 
