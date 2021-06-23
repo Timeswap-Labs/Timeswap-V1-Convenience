@@ -323,13 +323,13 @@ describe("mint", () => {
                 expect(result).to.equal(liquidityFeeTo)
             })
 
-            it("Should have a correct invariance", async () => {
-                const resultHex = await pool.invariance()
+            it("Should have a correct rateReserve", async () => {
+                const resultHex = await pool.rateReserve()
                 const result = web3.utils.hexToNumber(resultHex)
 
-                const invariance = assetIn * bondIncrease * div(insuranceIncrease * year, maturity - timestamp)
+                const rateReserve = div(insuranceIncrease * year, maturity - timestamp)
 
-                expect(result).to.equal(invariance)
+                expect(result).to.equal(rateReserve)
             })
 
             it("Should have the correct bond total supply", async () => {
@@ -588,7 +588,8 @@ describe("mint", () => {
 
                 receiver = accounts[4]
 
-                rateReserve = divUp(divUp(web3.utils.hexToNumber(await pool.invariance()), assetReserve), bondReserve)
+                // rateReserve = divUp(divUp(web3.utils.hexToNumber(await pool.invariance()), assetReserve), bondReserve)
+                rateReserve = await pool.rateReserve()
 
                 await mintToken(assetIn, collateralIn)
 
@@ -696,17 +697,15 @@ describe("mint", () => {
                 expect(result).to.equal(feeToBalance + liquidityFeeTo)
             })
 
-            it("Should have a correct invariance", async () => {
-                const resultHex = await pool.invariance()
+            it("Should have a correct rateReserve", async () => {
+                const resultHex = await pool.rateReserve()
                 const result = web3.utils.hexToNumber(resultHex)
 
                 const rateIncrease = divUp(rateReserve * (liquidityReceived + liquidityFeeTo), 1100)
 
-                const invariance = (assetReserve + assetIn)
-                    * (bondReserve + bondIncrease)
-                    * (rateReserve + rateIncrease)
+                const newRateReserve = (rateReserve + rateIncrease)
 
-                expect(result).to.equal(invariance)
+                expect(result).to.equal(newRateReserve)
             })
 
             it("Should have the correct ratio on its asset reserves", async () => {
@@ -1016,7 +1015,8 @@ describe("burn", () => {
                 const owner = accounts[3]
                 receiver = accounts[4]
 
-                rateReserve = div(div(web3.utils.hexToNumber(await pool.invariance()), assetReserve), bondReserve)
+                // rateReserve = div(div(web3.utils.hexToNumber(await pool.invariance()), assetReserve), bondReserve)
+                rateReserve = await pool.rateReserve()
 
                 await timeswapConvenience.methods["burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"](
                     parameter,
@@ -1114,17 +1114,15 @@ describe("burn", () => {
                 expect(result).to.equal(insuranceBalance)
             })
 
-            it("Should have a correct invariance", async () => {
-                const resultHex = await pool.invariance()
+            it("Should have a correct rateReserve", async () => {
+                const resultHex = await pool.rateReserve()
                 const result = web3.utils.hexToNumber(resultHex)
 
                 const rateDecrease = div(rateReserve * liquidityIn, liquidityTotalSupplyBefore)
 
-                    const invariance = (assetReserve - assetMax)
-                        * (bondReserve - bondReceived)
-                        * (rateReserve - rateDecrease)
+                    const newRateReserve = (rateReserve - rateDecrease)
 
-                expect(result).to.equal(invariance)
+                expect(result).to.equal(newRateReserve)
             })
 
             it("Should have the correct ratio on its bond reserves", async () => {
@@ -1187,7 +1185,8 @@ describe("burn", () => {
             beforeEach(async () => {
                 await deployAndMint(assetReserve, bondReserve, collateralReserve - bondReserve)
 
-                rateReserve = div(div(web3.utils.hexToNumber(await pool.invariance()), assetReserve), bondReserve)
+                // rateReserve = div(div(web3.utils.hexToNumber(await pool.invariance()), assetReserve), bondReserve)
+                rateReserve = await pool.rateReserve()
             })
 
             it("Should revert if the pool does not exist", async () => {
@@ -1657,9 +1656,13 @@ describe("lend", () => {
 
                 receiver = accounts[4]
 
-                invariance = web3.utils.hexToNumber(await pool.invariance())
+                // invariance = web3.utils.hexToNumber(await pool.invariance())
 
-                rateReserve = divUp(divUp(invariance, assetReserve), bondReserve)
+                // rateReserve = divUp(divUp(invariance, assetReserve), bondReserve)
+
+                rateReserve = await pool.rateReserve()
+
+                invariance = assetReserve * bondReserve * rateReserve
 
                 calculateBondDecrease()
 
@@ -1776,9 +1779,14 @@ describe("lend", () => {
 
                 receiver = accounts[4]
 
-                invariance = web3.utils.hexToNumber(await pool.invariance())
+                // invariance = web3.utils.hexToNumber(await pool.invariance())
 
-                rateReserve = divUp(divUp(invariance, assetReserve), bondReserve)
+                // rateReserve = divUp(divUp(invariance, assetReserve), bondReserve)
+
+                rateReserve = await pool.rateReserve()
+
+                invariance = assetReserve * bondReserve * rateReserve
+
 
                 calculateBondDecrease()
 
@@ -1898,9 +1906,13 @@ describe("lend", () => {
 
                 receiver = accounts[4]
 
-                invariance = web3.utils.hexToNumber(await pool.invariance())
+                // invariance = web3.utils.hexToNumber(await pool.invariance())
 
-                rateReserve = divUp(divUp(invariance, assetReserve), bondReserve)
+                // rateReserve = divUp(divUp(invariance, assetReserve), bondReserve)
+
+                rateReserve = await pool.rateReserve()
+
+                invariance = assetReserve * bondReserve * rateReserve
 
                 calculateRateDecrease()
 
@@ -2017,9 +2029,13 @@ describe("lend", () => {
 
                 receiver = accounts[4]
 
-                invariance = web3.utils.hexToNumber(await pool.invariance())
+                // invariance = web3.utils.hexToNumber(await pool.invariance())
 
-                rateReserve = divUp(divUp(invariance, assetReserve), bondReserve)
+                // rateReserve = divUp(divUp(invariance, assetReserve), bondReserve)
+
+                rateReserve = await pool.rateReserve()
+
+                invariance = assetReserve * bondReserve * rateReserve
 
                 calculateRateDecrease()
 
@@ -2173,9 +2189,13 @@ describe("borrow", () => {
 
                 receiver = accounts[4]
 
-                invariance = web3.utils.hexToNumber(await pool.invariance())
+                // invariance = web3.utils.hexToNumber(await pool.invariance())
 
-                rateReserve = div(div(invariance, assetReserve), bondReserve)
+                // rateReserve = div(div(invariance, assetReserve), bondReserve)
+
+                rateReserve = await pool.rateReserve()
+
+                invariance = assetReserve * bondReserve * rateReserve
 
                 calculateBondIncrease()
 
@@ -2300,9 +2320,13 @@ describe("borrow", () => {
 
                 receiver = accounts[4]
 
-                invariance = web3.utils.hexToNumber(await pool.invariance())
+                // invariance = web3.utils.hexToNumber(await pool.invariance())
 
-                rateReserve = div(div(invariance, assetReserve), bondReserve)
+                // rateReserve = div(div(invariance, assetReserve), bondReserve)
+
+                rateReserve = await pool.rateReserve()
+
+                invariance = assetReserve * bondReserve * rateReserve
 
                 calculateBondIncrease()
 
