@@ -2527,13 +2527,13 @@ describe("borrow", () => {
 
     const calculate = () => {
       const bondBalanceAdjusted =
-        bondReserve * base + bondIncrease * (base - transactionFee);
+        (bondReserve * base + bondIncrease * (base - transactionFee))/base;
       const rateBalanceAdjusted = divUp(
-        divUp(invariance * base * base, assetReserve - assetReceived),
+        divUp(invariance, assetReserve - assetReceived),
         bondBalanceAdjusted
       );
       rateIncrease = divUp(
-        rateBalanceAdjusted - rateReserve * base,
+        (rateBalanceAdjusted - rateReserve) * base,
         base - transactionFee
       );
 
@@ -2600,20 +2600,28 @@ describe("borrow", () => {
         rateReserve = (await pool.rateReserve()).toBigInt();
         invariance = assetReserve * bondReserve * rateReserve;
 
+        
+        await mintToken(0n, divUp(collateralLocked * 110000n, 100000n));
+        
+        await approve(0n, 0n, divUp(collateralLocked * 110000n, 100000n));
+        
+        timestamp = await now();
+        
+        timestamp += 50
+        
+        await setTime(timestamp);
+
+        console.log("timestamp before call", timestamp)
+        
         calculateBondIncrease();
 
         calculate();
-
-        await mintToken(0n, divUp(collateralLocked * 110000n, 100000n));
-
-        await approve(0n, 0n, divUp(collateralLocked * 110000n, 100000n));
-
         safeBorrow = {
           maxCollateralLocked: divUp(collateralLocked * 110000n, 100000n),
           maxInterestRequired: divUp(interestRequired * 110000n, 100000n),
         };
 
-        await timeswapConvenience
+        const transaction = await timeswapConvenience
           .connect(receiver)
           .borrow(
             parameter,
@@ -2624,6 +2632,10 @@ describe("borrow", () => {
             safeBorrow,
             deadline
           );
+
+          timestamp = await getTimestamp(transaction.blockHash!)
+
+          console.log("timestamp after the call", timestamp)
 
         calculateCollateralLocked();
       });
@@ -2699,6 +2711,8 @@ describe("borrow", () => {
 
         const insuranceBalance = insuranceReserve + insuranceIncrease;
 
+        console.log("ir, ii", insuranceReserve, insuranceIncrease);
+
         checkBigIntEquality(result, insuranceBalance);
       });
 
@@ -2721,6 +2735,8 @@ describe("borrow", () => {
 
         const insuranceTotalSupply =
           insuranceTotalSupplyBefore + insuranceIncrease;
+
+        console.log("itsb, ii", insuranceTotalSupplyBefore, insuranceIncrease);
 
         checkBigIntEquality(result, insuranceTotalSupply);
       });

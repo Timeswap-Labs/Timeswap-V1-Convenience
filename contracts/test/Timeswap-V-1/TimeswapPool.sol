@@ -1012,6 +1012,8 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Get the amount of insurance increase of the pool contract from rate increase multiply by duration from now to the maturity of the pool
         uint256 _insuranceIncrease = (_rateIncrease * _duration).divUp(YEAR);
 
+        console.log("ii from sol", _insuranceIncrease);
+
         // Mint bond ERC20 and insurance ERC20 to the pool contract
         bond.mint(address(this), _bondIncrease);
         insurance.mint(address(this), _insuranceIncrease);

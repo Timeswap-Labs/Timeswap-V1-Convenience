@@ -254,6 +254,8 @@ library TimeswapCalculate {
         _rateIncrease = _rateBalanceAdjusted - _rateReserve;
         _rateIncrease *= BASE;
         _rateIncrease = _rateIncrease.divUp(_transactionFeeBase);
+
+        console.log("ri from sol", _rateIncrease);
     }
 
     /// @dev Calculate the necessary parameters for the burn function in Timeswap Core contract given that users receive desired interest
