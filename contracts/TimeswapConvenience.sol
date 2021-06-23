@@ -8,8 +8,6 @@ import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
 import {InterfaceERC721} from './interfaces/InterfaceERC721.sol';
 import {TimeswapCalculate} from './libraries/TimeswapCalculate.sol';
 
-import 'hardhat/console.sol';
-
 /// @title Timeswap Convenience
 /// @author Ricsson W. Ngo
 /// @dev Conveniently call the core functions in Timeswap Core contract
@@ -287,8 +285,6 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
 
         (_bondDecrease, _rateDecrease) = _pool.calculateLendGivenBondReceived(_assetIn, _givenBondReceived);
 
-        console.log('calculated rateDecrease', _rateDecrease);
-
         // Safely transfer asset ERC20 to the Timeswap Core pool
         _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetIn);
 
@@ -329,8 +325,6 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         uint256 _rateDecrease;
 
         (_bondDecrease, _rateDecrease) = _pool.calculateLendGivenInsuranceReceived(_assetIn, _givenInsuranceReceived);
-
-        console.log('calculated rateDecrease', _rateDecrease);
 
         // Safely transfer asset ERC20 to the Timeswap Core pool
         _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetIn);

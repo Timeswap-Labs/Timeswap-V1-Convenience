@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceTimeswapPool} from "./../interfaces/InterfaceTimeswapPool.sol";
-import {InterfaceTimeswapFactory} from "./../interfaces/InterfaceTimeswapFactory.sol";
-import {InterfaceERC20} from "./../interfaces/InterfaceERC20.sol";
-import {Math} from "./Math.sol";
-import {ConstantProduct} from "./ConstantProduct.sol";
-
-import "hardhat/console.sol";
+import {InterfaceTimeswapPool} from './../interfaces/InterfaceTimeswapPool.sol';
+import {InterfaceTimeswapFactory} from './../interfaces/InterfaceTimeswapFactory.sol';
+import {InterfaceERC20} from './../interfaces/InterfaceERC20.sol';
+import {Math} from './Math.sol';
+import {ConstantProduct} from './ConstantProduct.sol';
 
 /// @title Timeswap Calculate Library
 /// @author Ricsson W. Ngo
@@ -20,8 +18,7 @@ library TimeswapCalculate {
     // @dev The number of seconds in an epoch year
     uint256 private constant YEAR = 31556926;
 
-    InterfaceTimeswapPool private constant ZERO_ADDRESS =
-        InterfaceTimeswapPool(address(type(uint160).min));
+    InterfaceTimeswapPool private constant ZERO_ADDRESS = InterfaceTimeswapPool(address(type(uint160).min));
 
     /// @dev Calculate the necessary parameters for the mint function in Timeswap Core contract
     /// @dev Precalculate the collateral ERC20 required to transfer
@@ -30,10 +27,7 @@ library TimeswapCalculate {
     /// @return _bondIncreaseAndCollateralPaid The increase in the Y pool and the amount of collateral ERC20 to be deposited to the Timeswap Core contract
     /// @return _insuranceIncreaseAndDebtRequired The increase in the V pool and the amount of debt received
     /// @return _bondReceivedAndCollateralLocked The amount of bond ERC20 received by the receiver and the amount of collateral ERC20 to be locked
-    function calculateMint(
-        InterfaceTimeswapPool _pool,
-        uint256 _insuranceReceivedAndAssetIn
-    )
+    function calculateMint(InterfaceTimeswapPool _pool, uint256 _insuranceReceivedAndAssetIn)
         internal
         view
         returns (
@@ -47,18 +41,16 @@ library TimeswapCalculate {
 
         // The increase of Y pool and V pool must be the same proportional increase to the X pool
         _bondIncreaseAndCollateralPaid =
-            (_insuranceReceivedAndAssetIn *
-                _pool.bond().balanceOf(address(_pool))) /
+            (_insuranceReceivedAndAssetIn * _pool.bond().balanceOf(address(_pool))) /
             _assetReserve;
         _insuranceIncreaseAndDebtRequired =
-            (_insuranceReceivedAndAssetIn *
-                _pool.insurance().balanceOf(address(_pool))) /
+            (_insuranceReceivedAndAssetIn * _pool.insurance().balanceOf(address(_pool))) /
             _assetReserve;
 
         // Calculate how much collateral to be locked
-        _bondReceivedAndCollateralLocked = (_bondIncreaseAndCollateralPaid *
-            _insuranceIncreaseAndDebtRequired)
-        .divUp(_insuranceReceivedAndAssetIn);
+        _bondReceivedAndCollateralLocked = (_bondIncreaseAndCollateralPaid * _insuranceIncreaseAndDebtRequired).divUp(
+            _insuranceReceivedAndAssetIn
+        );
     }
 
     /// @dev Precalculate the collateral ERC20 required to transfer for the burn function in Timeswap Core contract
@@ -77,9 +69,7 @@ library TimeswapCalculate {
         // Get the maximum collateral ERC20 that could be locked in the Timeswap core to borrow the maximum amount of asset ERC20
         _collateralLocked = (_liquidityIn * _bondReserve) / _totalSupply;
         // Restrict the amount of collateral ERC20 to be locked based on _maxCollateralLocked
-        _collateralLocked = _collateralLocked < _maxCollateralLocked
-            ? _collateralLocked
-            : _maxCollateralLocked;
+        _collateralLocked = _collateralLocked < _maxCollateralLocked ? _collateralLocked : _maxCollateralLocked;
     }
 
     /// @dev Calculate the necessary parameters for the lend function in Timeswap Core contract given that users received desired bond amount
@@ -97,25 +87,15 @@ library TimeswapCalculate {
         uint256 _duration = _pool.maturity() - block.timestamp;
 
         // Get the X pool, Y pool, and Z pool
-        (
-            uint256 _assetReserve,
-            uint256 _bondReserve,
-            uint256 _rateReserve
-        ) = _viewReserves(_pool);
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves(_pool);
 
         // Get the bond decrease parameter
-        _bondDecrease = (_bondReceived * _assetReserve).divUp(
-            (_rateReserve * _duration) / YEAR + _assetReserve
-        );
-
-        // console.log("Bond Decrease sol", _bondDecrease);
+        _bondDecrease = (_bondReceived * _assetReserve).divUp((_rateReserve * _duration) / YEAR + _assetReserve);
 
         // Adjust the bond decrease and bond reserve with the transaction fee
         uint256 _bondBalanceAdjusted = _bondReserve * BASE;
         _bondBalanceAdjusted -= _bondDecrease * _transactionFeeBase;
         _bondBalanceAdjusted /= BASE;
-
-        console.log("Bond Balance Adjusted sol", _bondBalanceAdjusted);
 
         // Get the adjusted rate balance following the constant product formula
         uint256 _rateBalanceAdjusted = ConstantProduct.calculate(
@@ -124,7 +104,6 @@ library TimeswapCalculate {
             _assetReserve + _assetIn,
             _bondBalanceAdjusted
         );
-      console.log("SOL rateReserve, rateBalanceAdjusted", _rateReserve, _rateBalanceAdjusted);
 
         // Derive the rate decrease from the adjusted rate balance with the transaction fee
         _rateDecrease = _rateReserve - _rateBalanceAdjusted;
@@ -147,11 +126,7 @@ library TimeswapCalculate {
         uint256 _duration = _pool.maturity() - block.timestamp;
 
         // Get the X pool, Y pool, and Z pool
-        (
-            uint256 _assetReserve,
-            uint256 _bondReserve,
-            uint256 _rateReserve
-        ) = _viewReserves(_pool);
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves(_pool);
 
         // Get the rate decrease parameter
         _rateDecrease = (_insuranceReceived * _rateReserve).divUp(
@@ -201,38 +176,25 @@ library TimeswapCalculate {
         uint256 _transactionFeeBase = BASE - _pool.transactionFee(); // gas saving
         uint256 _duration = _pool.maturity() - block.timestamp;
 
-        console.log("values from sol asset received colloc ", _assetReceived, _desiredCollateralLocked);
-
         // Get the X pool, Y pool, and Z pool
-        (
-            uint256 _assetReserve,
-            uint256 _bondReserve,
-            uint256 _rateReserve
-        ) = _viewReserves(_pool);
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves(_pool);
 
         {
             // avoids stack too deep error
-            (uint256 _bondMax, uint256 _bondMaxUp) = (_assetReceived *
-                _bondReserve)
-            .divDownAndUp(_assetReserve - _assetReceived);
-            uint256 _collateralAdditionalUp = _desiredCollateralLocked -
-                _bondMax;
-            uint256 _collateralAdditional = _desiredCollateralLocked -
-                _bondMaxUp;
+            (uint256 _bondMax, uint256 _bondMaxUp) = (_assetReceived * _bondReserve).divDownAndUp(
+                _assetReserve - _assetReceived
+            );
+            uint256 _collateralAdditionalUp = _desiredCollateralLocked - _bondMax;
+            uint256 _collateralAdditional = _desiredCollateralLocked - _bondMaxUp;
             // Use round down and round up in division to minimize the bond increase
             _bondIncrease = _collateralAdditional * _bondMax;
             _bondIncrease /=
-                ((_bondMaxUp * _rateReserve).divUp(_assetReserve) * _duration)
-                .divUp(YEAR) +
+                ((_bondMaxUp * _rateReserve).divUp(_assetReserve) * _duration).divUp(YEAR) +
                 _collateralAdditionalUp;
 
             // Use round down and round up in division to maximize the return to the Timeswap Core pool contract
-            _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(
-                _bondMax - _bondIncrease
-            );
-            _collateralLocked = (_collateralLocked * _rateReserve).divUp(
-                _assetReserve
-            );
+            _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(_bondMax - _bondIncrease);
+            _collateralLocked = (_collateralLocked * _rateReserve).divUp(_assetReserve);
             _collateralLocked = (_collateralLocked * _duration).divUp(YEAR);
             _collateralLocked += _bondMaxUp;
         }
@@ -254,8 +216,6 @@ library TimeswapCalculate {
         _rateIncrease = _rateBalanceAdjusted - _rateReserve;
         _rateIncrease *= BASE;
         _rateIncrease = _rateIncrease.divUp(_transactionFeeBase);
-
-        console.log("ri from sol", _rateIncrease);
     }
 
     /// @dev Calculate the necessary parameters for the burn function in Timeswap Core contract given that users receive desired interest
@@ -283,22 +243,16 @@ library TimeswapCalculate {
         uint256 _duration = _pool.maturity() - block.timestamp;
 
         // Get the X pool, Y pool, and Z pool
-        (
-            uint256 _assetReserve,
-            uint256 _bondReserve,
-            uint256 _rateReserve
-        ) = _viewReserves(_pool);
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves(_pool);
 
         {
             // avoids stack too deep error
-            (uint256 _rateMax, uint256 _rateMaxUp) = (_assetReceived *
-                _rateReserve)
-            .divDownAndUp(_assetReserve - _assetReceived);
+            (uint256 _rateMax, uint256 _rateMaxUp) = (_assetReceived * _rateReserve).divDownAndUp(
+                _assetReserve - _assetReceived
+            );
             // Use round down and round up in division to minimize the rate increase
             _rateIncrease = _interestRequired * _rateMax;
-            _rateIncrease /=
-                (_rateMaxUp * _duration).divUp(YEAR) +
-                _interestRequired;
+            _rateIncrease /= (_rateMaxUp * _duration).divUp(YEAR) + _interestRequired;
         }
 
         {
@@ -322,18 +276,11 @@ library TimeswapCalculate {
             _bondIncrease = _bondIncrease.divUp(_transactionFeeBase);
         }
 
-        uint256 _bondMax = (_assetReceived * _bondReserve) /
-            (_assetReserve - _assetReceived);
-        uint256 _bondMaxUp = (_assetReceived * _bondReserve).divUp(
-            _assetReserve - _assetReceived
-        );
+        uint256 _bondMax = (_assetReceived * _bondReserve) / (_assetReserve - _assetReceived);
+        uint256 _bondMaxUp = (_assetReceived * _bondReserve).divUp(_assetReserve - _assetReceived);
         // Use round down and round up in division to maximize the return to the Timeswap Core pool contract
-        _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(
-            _bondMax - _bondIncrease
-        );
-        _collateralLocked = (_collateralLocked * _rateReserve).divUp(
-            _assetReserve
-        );
+        _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(_bondMax - _bondIncrease);
+        _collateralLocked = (_collateralLocked * _rateReserve).divUp(_assetReserve);
         _collateralLocked = (_collateralLocked * _duration).divUp(YEAR);
         _collateralLocked += _bondMaxUp;
     }
