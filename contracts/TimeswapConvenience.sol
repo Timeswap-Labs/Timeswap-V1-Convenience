@@ -449,6 +449,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
             uint256 _debtRequired
         )
     {
+        console.log("point 1");
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
@@ -464,6 +465,8 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
             _pool.totalSupply() > 0,
             "TimeswapConvenience :: borrow : No Liquidity"
         );
+
+        console.log("This is from sol ", _desiredCollateralLockedOrInterestRequired);
 
         // Calculate the necessary parameters for the borrow function in the Timeswap Core contract
         uint256 _bondIncrease;

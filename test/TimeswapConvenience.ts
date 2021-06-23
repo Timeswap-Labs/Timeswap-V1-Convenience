@@ -2192,7 +2192,7 @@ describe("lend", () => {
     });
   });
 
-  describe.only("lend given insurance received", () => {
+  describe("lend given insurance received", () => {
     const insuranceReceived = 800000n;
     let bondReceived: bigint;
 
@@ -2207,7 +2207,7 @@ describe("lend", () => {
 
     const calculate = () => {
       const rateBalanceAdjusted =
-        rateReserve * base - rateDecrease * (base + transactionFee) / base;
+        (rateReserve * base - rateDecrease * (base + transactionFee)) / base;
       const bondBalanceAdjusted = divUp(
         divUp(invariance * base, assetReserve + assetIn),
         rateBalanceAdjusted
@@ -2245,6 +2245,9 @@ describe("lend", () => {
 
         rateReserve = (await pool.rateReserve()).toBigInt();
         invariance = assetReserve * bondReserve * rateReserve;
+        await mintToken(assetIn, 0n);
+
+        await approve(0n, assetIn, 0n);
 
         timestamp = await now();
 
@@ -2256,9 +2259,8 @@ describe("lend", () => {
 
         calculate();
 
-        await mintToken(assetIn, 0n);
+        console.log("Bond Receive", bondReceived)
 
-        await approve(0n, assetIn, 0n);
 
         await timeswapConvenience
           .connect(receiver)
@@ -2280,6 +2282,8 @@ describe("lend", () => {
         const result = resultHex.toBigInt();
 
         const bondReceived = bondDecrease + bondMint;
+
+        console.log(" bd bm ts times", bondDecrease, bondMint, timestamp)
 
         checkBigIntEquality(result, bondReceived);
       });
@@ -2493,7 +2497,7 @@ describe("borrow", () => {
   const insuranceTotalSupplyBefore = 1200000n;
 
   describe("borrow given collateral locked", () => {
-    let collateralLocked = 30n;
+    let collateralLocked = 300000n;
     let debtRequired: bigint;
     let interestRequired: bigint;
 
@@ -2504,6 +2508,9 @@ describe("borrow", () => {
         assetReceived * bondReserve,
         assetReserve - assetReceived
       );
+
+      console.log("bond max", bondMax);
+
       const collateralAdditionalUp = collateralLocked - bondMax;
       const collateralAdditional = collateralLocked - bondMaxUp;
       bondIncrease =
@@ -2514,6 +2521,8 @@ describe("borrow", () => {
           year
         ) +
           collateralAdditionalUp);
+
+        console.log ("bond increase", bondIncrease)
     };
 
     const calculate = () => {
@@ -2528,6 +2537,9 @@ describe("borrow", () => {
         base - transactionFee
       );
 
+      console.log("rateIncrease num", (rateBalanceAdjusted - rateReserve) * base)
+      console.log("rateIncrease den", base - transactionFee);
+
       insuranceIncrease = divUp(
         rateIncrease * (maturity - BigInt(timestamp)),
         year
@@ -2539,10 +2551,14 @@ describe("borrow", () => {
         assetReceived * rateReserve,
         assetReserve - assetReceived
       );
-      debtRequired = divUp(rateMaxUp * rateIncrease, rateMax - rateIncrease);
-      debtRequired = divUp(debtRequired * (maturity - BigInt(timestamp)), year);
-      interestRequired = debtRequired;
-      debtRequired += assetReceived;
+      interestRequired = divUp(rateMaxUp * rateIncrease, rateMax - rateIncrease);
+      interestRequired = divUp(interestRequired * (maturity - BigInt(timestamp)), year);
+      debtRequired = interestRequired + assetReceived;
+
+      console.log("rm ri mat times", rateMax, rateIncrease, maturity, timestamp);
+      console.log("rate res", rateReserve)
+
+      
     };
 
     const calculateCollateralLocked = () => {
@@ -2735,6 +2751,9 @@ describe("borrow", () => {
           maxCollateralLocked: divUp(collateralLocked * 110000n, 100000n),
           maxInterestRequired: divUp(interestRequired * 110000n, 100000n),
         };
+
+        console.log(parameter, assetReceived, collateralLocked, safeBorrow, deadline);
+        console.log(interestRequired);
 
         await timeswapConvenience
           .connect(receiver)

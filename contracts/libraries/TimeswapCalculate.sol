@@ -201,6 +201,8 @@ library TimeswapCalculate {
         uint256 _transactionFeeBase = BASE - _pool.transactionFee(); // gas saving
         uint256 _duration = _pool.maturity() - block.timestamp;
 
+        console.log("values from sol asset received colloc ", _assetReceived, _desiredCollateralLocked);
+
         // Get the X pool, Y pool, and Z pool
         (
             uint256 _assetReserve,
