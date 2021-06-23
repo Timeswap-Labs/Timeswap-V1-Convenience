@@ -12,6 +12,8 @@ import {String} from "./libraries/String.sol";
 import {ConstantProduct} from "./libraries/ConstantProduct.sol";
 import {ERC20Permit} from "./ERC20Permit.sol";
 
+import "hardhat/console.sol";
+
 /// @title Timeswap Pool
 /// @author Ricsson W. Ngo
 /// @notice It is recommended to use Timeswap Convenience Contracts to interact with this contract
@@ -791,6 +793,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Safely transfer and mint bond ERC20 to the receiver
         _safeTransfer(_bond, _to, _bondDecrease);
         if (_bondMint > 0) _bond.mint(_to, _bondMint);
+
+        console.log("Sent bond decrease", _bondDecrease);
+        console.log("Sent bond mint ", _bondMint);
     }
 
     /// @dev Transfer insurance ERC20 from the pool to the receiver
@@ -810,6 +815,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
             (maturity - block.timestamp)) / YEAR;
         uint256 _insuranceMint = (_rateDecrease * _assetBalance) / _rateReserve;
         _insuranceReceived = _insuranceDecrease + _insuranceMint;
+
+        console.log("Insurance mint and decrease sol ", _insuranceMint, _insuranceDecrease);
+        console.log("Timestamp sol ", block.timestamp);
+        console.log("Rate decrease at sol ", _rateDecrease);
 
         // Safely transfer and mint insurance ERC20 to the receiver
         _safeTransfer(_insurance, _to, _insuranceDecrease);

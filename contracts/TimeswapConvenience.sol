@@ -8,6 +8,8 @@ import {InterfaceERC20} from "./interfaces/InterfaceERC20.sol";
 import {InterfaceERC721} from "./interfaces/InterfaceERC721.sol";
 import {TimeswapCalculate} from "./libraries/TimeswapCalculate.sol";
 
+import "hardhat/console.sol";
+
 /// @title Timeswap Convenience
 /// @author Ricsson W. Ngo
 /// @dev Conveniently call the core functions in Timeswap Core contract
@@ -360,6 +362,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         ensure(_deadline)
         returns (uint256 _bondReceived, uint256 _insuranceReceived)
     {
+        console.log("Bond received sol ", _bondReceivedOrInsuranceReceived);
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks

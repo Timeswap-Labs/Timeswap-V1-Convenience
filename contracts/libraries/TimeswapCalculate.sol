@@ -7,6 +7,8 @@ import {InterfaceERC20} from "./../interfaces/InterfaceERC20.sol";
 import {Math} from "./Math.sol";
 import {ConstantProduct} from "./ConstantProduct.sol";
 
+import "hardhat/console.sol";
+
 /// @title Timeswap Calculate Library
 /// @author Ricsson W. Ngo
 /// @dev Do all the necessary precalculation for token transfers
@@ -106,10 +108,14 @@ library TimeswapCalculate {
             (_rateReserve * _duration) / YEAR + _assetReserve
         );
 
+        console.log("Bond Decrease sol", _bondDecrease);
+
         // Adjust the bond decrease and bond reserve with the transaction fee
         uint256 _bondBalanceAdjusted = _bondReserve * BASE;
         _bondBalanceAdjusted -= _bondDecrease * _transactionFeeBase;
         _bondBalanceAdjusted /= BASE;
+
+        console.log("Bond Balance Adjusted sol", _bondBalanceAdjusted);
 
         // Get the adjusted rate balance following the constant product formula
         uint256 _rateBalanceAdjusted = ConstantProduct.calculate(

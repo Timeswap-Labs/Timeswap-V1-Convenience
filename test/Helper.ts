@@ -24,6 +24,29 @@ const advanceTime = (time: number) => {
   });
 };
 
+const setTime = (time: number) => {
+  return new Promise((resolve, reject) => {
+    let provider = web3.currentProvider!;
+
+    if (!(typeof provider === "string" || provider instanceof String)) {
+      provider.send?.(
+        {
+          jsonrpc: "2.0",
+          method: "evm_setNextBlockTimestamp",
+          params: [time],
+          id: new Date().getTime(),
+        },
+        (err, result) => {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(result);
+        }
+      );
+    }
+  });
+};
+
 const advanceBlock = () => {
   return new Promise((resolve, reject) => {
     let provider = web3.currentProvider!;
@@ -98,4 +121,5 @@ export default {
   now,
   advanceTimeAndBlock,
   getTimestamp,
+  setTime,
 };
