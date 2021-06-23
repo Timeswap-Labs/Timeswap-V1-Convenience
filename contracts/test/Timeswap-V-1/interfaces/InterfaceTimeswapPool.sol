@@ -57,7 +57,7 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
         uint256 _assetReceived,
         uint256 _collateralReceived
     );
-    
+
     event Pay(
         address indexed _sender,
         address indexed _to,
@@ -69,9 +69,9 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
     event Sync(
         uint256 _assetBalance,
         uint256 _collateralBalance,
+        uint256 _rateBalance,
         uint256 _bondBalance,
-        uint256 _insuranceBalancee,
-        uint256 _invariance
+        uint256 _insuranceBalancee
     );
 
     // VIEW
@@ -94,13 +94,16 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
 
     function insurance() external view returns (InterfaceTimeswapERC20);
 
-    function collateralizedDebt() external view returns (InterfaceTimeswapERC721);
+    function collateralizedDebt()
+        external
+        view
+        returns (InterfaceTimeswapERC721);
 
     function assetReserve() external view returns (uint128);
 
-    function collateralReserve() external view returns (uint128);
+    function rateReserve() external view returns (uint128);
 
-    function invariance() external view returns (uint256);
+    function collateralReserve() external view returns (uint256);
 
     function transactionFee() external view returns (uint128);
 
@@ -132,9 +135,7 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
             uint256 _liquidityReceived
         );
 
-    function burn(
-        address _to
-    )
+    function burn(address _to)
         external
         returns (
             uint256 _tokenId,
@@ -148,12 +149,7 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
         address _to,
         uint256 _bondDecrease,
         uint256 _rateDecrease
-    )
-        external
-        returns (
-            uint256 _bondReceived,
-            uint256 _insuranceReceived
-        );
+    ) external returns (uint256 _bondReceived, uint256 _insuranceReceived);
 
     function borrow(
         address _to,
@@ -172,20 +168,14 @@ interface InterfaceTimeswapPool is InterfaceERC20Permit {
         address _to,
         uint256 _bondIn,
         uint256 _insuranceIn
-    )
-        external
-        returns (
-            uint256 _assetReceived,
-            uint256 _collateralReceived
-        );
+    ) external returns (uint256 _assetReceived, uint256 _collateralReceived);
 
     function pay(
+        address _to,
         uint256 _tokenId
     )
         external
-        returns (
-            uint256 _collateralReceived
-        );
+        returns (uint256 _collateralReceived);
 
     function skim(address _to) external;
 }
