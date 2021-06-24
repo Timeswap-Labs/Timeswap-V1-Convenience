@@ -178,7 +178,7 @@ const deployAndMint = async (
 
   const transaction = await timeswapConvenience
     .connect(receiver)
-    ["mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"](
+    .newLiquidity(
       parameter,
       receiver.address,
       assetIn,
@@ -420,17 +420,15 @@ describe("mint", () => {
       });
 
       // FIXME!!
-      // it("Should have a correct invariance", async () => {
-      //   const resultHex = await pool.invariance();
-      //   const result = resultHex.toBigInt();
+      it("Should have a correct rate reserve", async () => {
+        const resultHex = await pool.rateReserve();
+        const result = resultHex.toBigInt();
 
-      //   const invariance =
-      //     assetIn *
-      //     bondIncrease *
-      //     ((insuranceIncrease * year) / (maturity - BigInt(timestamp)));
+        const rateReserve =
+          ((insuranceIncrease * year) / (maturity - BigInt(timestamp)));
 
-      //   checkBigIntEquality(result, invariance);
-      // });
+        checkBigIntEquality(result, rateReserve);
+      });
 
       it("Should have the correct bond total supply", async () => {
         const bondERC20 = await bondAt(await pool.bond());
@@ -470,9 +468,7 @@ describe("mint", () => {
 
         timeswapConvenience
           .connect(receiver)
-          [
-            "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-          ](
+          .newLiquidity(
             parameter,
             receiver.address,
             assetIn,
@@ -488,9 +484,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               assetIn,
@@ -511,9 +505,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               wrongAssetIn,
@@ -534,9 +526,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               assetIn,
@@ -557,9 +547,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               assetIn,
@@ -580,9 +568,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               assetIn,
@@ -600,9 +586,7 @@ describe("mint", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          [
-            "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-          ](
+          .newLiquidity(
             parameter,
             receiver.address,
             assetIn,
@@ -618,9 +602,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               assetIn,
@@ -641,9 +623,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               assetIn,
@@ -664,9 +644,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               assetIn,
@@ -687,9 +665,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,uint256,uint256,uint256)"
-            ](
+            .newLiquidity(
               parameter,
               receiver.address,
               assetIn,
@@ -749,9 +725,13 @@ describe("mint", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          [
-            "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-          ](parameter, receiver.address, assetIn, safeMint, deadline);
+          .addLiquidity(
+            parameter,
+            receiver.address,
+            assetIn,
+            safeMint,
+            deadline
+          );
       });
 
       it("Should have receiver have correct amount of liquidity tokens", async () => {
@@ -851,22 +831,19 @@ describe("mint", () => {
       });
 
       // FIXME!!
-      // it("Should have a correct invariance", async () => {
-      //   const resultHex = await pool.invariance();
-      //   const result = resultHex.toBigInt();
+      it("Should have a correct rate reserve", async () => {
+        const resultHex = await pool.rateReserve();
+        const result = resultHex.toBigInt();
 
-      //   const rateIncrease = divUp(
-      //     rateReserve * (liquidityReceived + liquidityFeeTo),
-      //     1100n
-      //   );
+        const rateIncrease = divUp(
+          rateReserve * (liquidityReceived + liquidityFeeTo),
+          1100n
+        );
 
-      //   const invariance =
-      //     (assetReserve + assetIn) *
-      //     (bondReserve + bondIncrease) *
-      //     (rateReserve + rateIncrease);
+        const rateBalance = rateReserve + rateIncrease;
 
-      //   checkBigIntEquality(10n, 10n);
-      // });
+        checkBigIntEquality(result, rateBalance);
+      });
 
       it("Should have the correct ratio on its asset reserves", async () => {
         const totalSupply = (await pool.totalSupply()).toBigInt();
@@ -976,9 +953,13 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](wrongParameter, receiver.address, assetIn, safeMint, deadline)
+            .addLiquidity(
+              wrongParameter,
+              receiver.address,
+              assetIn,
+              safeMint,
+              deadline
+            )
         ).to.be.reverted;
       });
 
@@ -992,9 +973,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, wrongAssetIn, safeMint, deadline)
+            .addLiquidity(parameter, receiver.address, wrongAssetIn, safeMint, deadline)
         ).to.be.reverted;
       });
 
@@ -1008,9 +987,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, assetIn, safeMint, deadline)
+            .addLiquidity(parameter, receiver.address, assetIn, safeMint, deadline)
         ).to.be.reverted;
       });
 
@@ -1024,9 +1001,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, assetIn, safeMint, deadline)
+            .addLiquidity(parameter, receiver.address, assetIn, safeMint, deadline)
         ).to.be.reverted;
       });
 
@@ -1040,9 +1015,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, assetIn, safeMint, deadline)
+            .addLiquidity(parameter, receiver.address, assetIn, safeMint, deadline)
         ).to.be.reverted;
       });
 
@@ -1056,9 +1029,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, assetIn, safeMint, deadline)
+            .addLiquidity(parameter, receiver.address, assetIn, safeMint, deadline)
         ).to.be.reverted;
       });
 
@@ -1076,9 +1047,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, assetIn, wrongSafeMint, deadline)
+            .addLiquidity(parameter, receiver.address, assetIn, wrongSafeMint, deadline)
         ).to.be.reverted;
       });
 
@@ -1096,9 +1065,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, assetIn, wrongSafeMint, deadline)
+            .addLiquidity(parameter, receiver.address, assetIn, wrongSafeMint, deadline)
         ).to.be.reverted;
       });
 
@@ -1116,9 +1083,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, assetIn, wrongSafeMint, deadline)
+            .addLiquidity(parameter, receiver.address, assetIn, wrongSafeMint, deadline)
         ).to.be.reverted;
       });
 
@@ -1132,9 +1097,7 @@ describe("mint", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-            ](parameter, receiver.address, assetIn, safeMint, wrongDeadline)
+            .addLiquidity(parameter, receiver.address, assetIn, safeMint, wrongDeadline)
         ).to.be.reverted;
       });
     });
@@ -1187,9 +1150,7 @@ describe("burn", () => {
 
         await timeswapConvenience
           .connect(owner)
-          [
-            "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-          ](
+          .removeLiquidityBeforeMaturity(
             parameter,
             receiver.address,
             liquidityIn,
@@ -1289,20 +1250,17 @@ describe("burn", () => {
       });
 
       // FIXME!!
-      // it("Should have a correct invariance", async () => {
-      //   const resultHex = await pool.invariance();
-      //   const result = resultHex.toBigInt();
+      it("Should have a correct rate reserve", async () => {
+        const resultHex = await pool.rateReserve();
+        const result = resultHex.toBigInt();
 
-      //   const rateDecrease =
-      //     (rateReserve * liquidityIn) / liquidityTotalSupplyBefore;
+        const rateDecrease =
+          (rateReserve * liquidityIn) / liquidityTotalSupplyBefore;
 
-      //   const invariance =
-      //     (assetReserve - assetMax) *
-      //     (bondReserve - bondReceived) *
-      //     (rateReserve - rateDecrease);
+        const rateBalance = rateReserve - rateDecrease;
 
-      //   checkBigIntEquality(result, invariance);
-      // });
+        checkBigIntEquality(result, rateBalance);
+      });
 
       it("Should have the correct ratio on its bond reserves", async () => {
         const resultLiquidityHex = await pool.balanceOf(receiver.address);
@@ -1394,9 +1352,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            [
-              "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-            ](
+            .removeLiquidityBeforeMaturity(
               wrongParameter,
               receiver.address,
               liquidityIn,
@@ -1420,9 +1376,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            [
-              "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-            ](
+            .removeLiquidityBeforeMaturity(
               parameter,
               receiver.address,
               wrongLiquidityIn,
@@ -1446,9 +1400,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            [
-              "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-            ](
+            .removeLiquidityBeforeMaturity(
               parameter,
               receiver.address,
               liquidityIn,
@@ -1472,9 +1424,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            [
-              "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-            ](
+            .removeLiquidityBeforeMaturity(
               parameter,
               receiver.address,
               wrongLiquidityIn,
@@ -1502,9 +1452,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            [
-              "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-            ](
+            .removeLiquidityBeforeMaturity(
               parameter,
               receiver.address,
               liquidityIn,
@@ -1532,9 +1480,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            [
-              "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-            ](
+            .removeLiquidityBeforeMaturity(
               parameter,
               receiver.address,
               liquidityIn,
@@ -1562,9 +1508,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            [
-              "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-            ](
+            .removeLiquidityBeforeMaturity(
               parameter,
               receiver.address,
               liquidityIn,
@@ -1588,9 +1532,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            [
-              "burn((address,address,uint256),address,uint256,uint256,(uint256,uint256,uint256),uint256)"
-            ](
+            .removeLiquidityBeforeMaturity(
               parameter,
               receiver.address,
               liquidityIn,
@@ -1621,7 +1563,7 @@ describe("burn", () => {
 
         await timeswapConvenience
           .connect(owner)
-          ["burn((address,address,uint256),address,uint256)"](
+          .removeLiquidityAfterMaturity(
             parameter,
             receiver.address,
             liquidityIn
@@ -1783,7 +1725,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            ["burn((address,address,uint256),address,uint256)"](
+            .removeLiquidityAfterMaturity(
               wrongParameter,
               receiver.address,
               liquidityIn
@@ -1802,7 +1744,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            ["burn((address,address,uint256),address,uint256)"](
+            .removeLiquidityAfterMaturity(
               parameter,
               receiver.address,
               wrongLiquidityIn
@@ -1819,7 +1761,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            ["burn((address,address,uint256),address,uint256)"](
+            .removeLiquidityAfterMaturity(
               parameter,
               receiver.address,
               liquidityIn
@@ -1840,7 +1782,7 @@ describe("burn", () => {
         await expect(
           timeswapConvenience
             .connect(owner)
-            ["burn((address,address,uint256),address,uint256)"](
+            .removeLiquidityAfterMaturity(
               parameter,
               receiver.address,
               wrongLiquidityIn
@@ -1950,11 +1892,10 @@ describe("lend", () => {
 
         const transaction = await timeswapConvenience
           .connect(receiver)
-          .lend(
+          .lendGivenBondReceived(
             parameter,
             receiver.address,
             assetIn,
-            true,
             bondReceived,
             safeLend(),
             deadline
@@ -2106,11 +2047,10 @@ describe("lend", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .lend(
+            .lendGivenBondReceived(
               parameter,
               receiver.address,
               wrongAssetIn,
-              true,
               bondReceived,
               safeLend(),
               deadline
@@ -2131,11 +2071,10 @@ describe("lend", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .lend(
+            .lendGivenBondReceived(
               parameter,
               receiver.address,
               assetIn,
-              true,
               bondReceived,
               wrongSafeLend,
               deadline
@@ -2156,11 +2095,10 @@ describe("lend", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .lend(
+            .lendGivenBondReceived(
               parameter,
               receiver.address,
               assetIn,
-              true,
               bondReceived,
               wrongSafeLend,
               deadline
@@ -2178,11 +2116,10 @@ describe("lend", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .lend(
+            .lendGivenBondReceived(
               parameter,
               receiver.address,
               assetIn,
-              true,
               bondReceived,
               safeLend(),
               deadline
@@ -2264,11 +2201,10 @@ describe("lend", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          .lend(
+          .lendGivenInsuranceReceived(
             parameter,
             receiver.address,
             assetIn,
-            false,
             insuranceReceived,
             safeLend(),
             deadline
@@ -2390,11 +2326,10 @@ describe("lend", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .lend(
+            .lendGivenInsuranceReceived(
               parameter,
               receiver.address,
               wrongAssetIn,
-              false,
               insuranceReceived,
               safeLend(),
               deadline
@@ -2415,11 +2350,10 @@ describe("lend", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .lend(
+            .lendGivenInsuranceReceived(
               parameter,
               receiver.address,
               assetIn,
-              false,
               insuranceReceived,
               wrongSafeLend,
               deadline
@@ -2440,11 +2374,10 @@ describe("lend", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .lend(
+            .lendGivenInsuranceReceived(
               parameter,
               receiver.address,
               assetIn,
-              false,
               insuranceReceived,
               wrongSafeLend,
               deadline
@@ -2462,11 +2395,10 @@ describe("lend", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .lend(
+            .lendGivenInsuranceReceived(
               parameter,
               receiver.address,
               assetIn,
-              false,
               insuranceReceived,
               safeLend(),
               deadline
@@ -2557,8 +2489,6 @@ describe("borrow", () => {
 
       console.log("rm ri mat times", rateMax, rateIncrease, maturity, timestamp);
       console.log("rate res", rateReserve)
-
-      
     };
 
     const calculateCollateralLocked = () => {
@@ -2579,7 +2509,8 @@ describe("borrow", () => {
         year
       );
       collateralLocked += bondMaxUp;
-      collateralLocked--;
+      console.log("collateral reserve", collateralReserve)
+      console.log("Collateral locked", collateralLocked)
     };
 
     let safeBorrow: {
@@ -2623,49 +2554,48 @@ describe("borrow", () => {
 
         const transaction = await timeswapConvenience
           .connect(receiver)
-          .borrow(
+          .borrowGivenCollateralLocked(
             parameter,
             receiver.address,
             assetReceived,
-            true,
             collateralLocked,
             safeBorrow,
             deadline
           );
 
-          timestamp = await getTimestamp(transaction.blockHash!)
+        timestamp = await getTimestamp(transaction.blockHash!)
 
-          console.log("timestamp after the call", timestamp)
+        console.log("timestamp after the call", timestamp)
 
         calculateCollateralLocked();
       });
 
       // FIXME!!
-      // it("Should have receiver have correct amount of asset", async () => {
-      //   const resultHex = await testToken1.balanceOf(receiver.address);
-      //   const result = resultHex.toBigInt();
+      it("Should have receiver have correct amount of asset", async () => {
+        const resultHex = await testToken1.balanceOf(receiver.address);
+        const result = resultHex.toBigInt();
 
-      //   checkBigIntEquality(result, assetReceived);
-      // });
+        checkBigIntEquality(result, assetReceived);
+      });
 
       // FIXME!!
-      // it("Should have receiver have a correct collateralized debt token", async () => {
-      //   const collateralizedDebtERC721 = await collateralizedDebtAt(
-      //     await pool.collateralizedDebt()
-      //   );
+      it("Should have receiver have a correct collateralized debt token", async () => {
+        const collateralizedDebtERC721 = await collateralizedDebtAt(
+          await pool.collateralizedDebt()
+        );
 
-      //   const tokenId = await collateralizedDebtERC721.totalSupply();
-      //   const result = await collateralizedDebtERC721.ownerOf(tokenId);
-      //   const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-      //     tokenId
-      //   );
-      //   const resultDebt = resultHex.debt.toBigInt();
-      //   const resultCollateral = resultHex.collateral.toBigInt();
+        const tokenId = await collateralizedDebtERC721.totalSupply();
+        const result = await collateralizedDebtERC721.ownerOf(tokenId);
+        const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
+          tokenId
+        );
+        const resultDebt = resultHex.debt.toBigInt();
+        const resultCollateral = resultHex.collateral.toBigInt();
 
-      //   checkBigIntEquality(result, receiver.address);
-      //   checkBigIntEquality(resultDebt, debtRequired);
-      //   checkBigIntEquality(resultCollateral, collateralLocked);
-      // });
+        expect(result).to.equal(receiver.address);
+        checkBigIntEquality(resultDebt, debtRequired);
+        checkBigIntEquality(resultCollateral, collateralLocked);
+      });
 
       it("Should have pool have a correct assets", async () => {
         const resultHex = await testToken1.balanceOf(pool.address);
@@ -2680,17 +2610,17 @@ describe("borrow", () => {
       });
 
       // FIXME!!
-      // it("Should have pool have correct collateral", async () => {
-      //   const resultHex = await testToken2.balanceOf(pool.address);
-      //   const result = resultHex.toBigInt();
-      //   const resultReserveHex = await pool.collateralReserve();
-      //   const resultReserve = resultReserveHex.toBigInt();
+      it("Should have pool have correct collateral", async () => {
+        const resultHex = await testToken2.balanceOf(pool.address);
+        const result = resultHex.toBigInt();
+        const resultReserveHex = await pool.collateralReserve();
+        const resultReserve = resultReserveHex.toBigInt();
 
-      //   const collateralBalance = collateralReserve + collateralLocked;
+        const collateralBalance = collateralReserve + collateralLocked;
 
-      //   checkBigIntEquality(result, collateralBalance);
-      //   checkBigIntEquality(resultReserve, collateralBalance);
-      // });
+        checkBigIntEquality(result, collateralBalance);
+        checkBigIntEquality(resultReserve, collateralBalance);
+      });
 
       it("Should have pool have correct amount of bond tokens", async () => {
         const bondERC20 = await bondAt(await pool.bond());
@@ -2773,11 +2703,10 @@ describe("borrow", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          .borrow(
+          .borrowGivenCollateralLocked(
             parameter,
             receiver.address,
             assetReceived,
-            true,
             collateralLocked,
             safeBorrow,
             deadline
@@ -2792,11 +2721,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenCollateralLocked(
               parameter,
               receiver.address,
               wrongAssetReceived,
-              true,
               collateralLocked,
               safeBorrow,
               deadline
@@ -2814,11 +2742,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenCollateralLocked(
               parameter,
               receiver.address,
               assetReceived,
-              true,
               wrongCollateralLocked,
               safeBorrow,
               deadline
@@ -2839,11 +2766,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenCollateralLocked(
               parameter,
               receiver.address,
               assetReceived,
-              true,
               collateralLocked,
               wrongSafeBorrow,
               deadline
@@ -2864,11 +2790,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenCollateralLocked(
               parameter,
               receiver.address,
               assetReceived,
-              true,
               collateralLocked,
               wrongSafeBorrow,
               deadline
@@ -2886,11 +2811,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenCollateralLocked(
               parameter,
               receiver.address,
               assetReceived,
-              true,
               collateralLocked,
               safeBorrow,
               deadline
@@ -2918,16 +2842,17 @@ describe("borrow", () => {
 
     const calculate = () => {
       const rateBalanceAdjusted =
-        rateReserve * base + rateIncrease * (base - transactionFee);
+        (rateReserve * base + rateIncrease * (base - transactionFee)) / base;
       const bondBalanceAdjusted = divUp(
-        divUp(invariance * base * base, assetReserve - assetReceived),
+        divUp(invariance, assetReserve - assetReceived),
         rateBalanceAdjusted
       );
       bondIncrease = divUp(
-        bondBalanceAdjusted - bondReserve * base,
+        (bondBalanceAdjusted - bondReserve) * base,
         base - transactionFee
       );
 
+      console.log("test", bondIncrease)
       const bondMax =
         (assetReceived * bondReserve) / (assetReserve - assetReceived);
       const bondMaxUp = divUp(
@@ -2945,7 +2870,10 @@ describe("borrow", () => {
         year
       );
       collateralLocked += bondMaxUp;
-      collateralLocked--;
+
+      console.log("test time", maturity - BigInt(timestamp), year)
+      console.log("conv test", bondMax, bondMaxUp)
+      console.log("conv test collateralLocked", collateralLocked)
 
       insuranceIncrease = divUp(
         rateIncrease * (maturity - BigInt(timestamp)),
@@ -2992,6 +2920,16 @@ describe("borrow", () => {
 
         await approve(0n, 0n, divUp(collateralLocked * 11000n, 10000n));
 
+        timestamp = await now();
+
+        timestamp += 50
+
+        await setTime(timestamp);
+
+        calculateRateIncrease();
+
+        calculate();
+
         safeBorrow = {
           maxCollateralLocked: divUp(collateralLocked * 11000n, 10000n),
           maxInterestRequired: divUp(interestRequired * 11000n, 10000n),
@@ -2999,11 +2937,10 @@ describe("borrow", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          .borrow(
+          .borrowGivenInterestRequired(
             parameter,
             receiver.address,
             assetReceived,
-            false,
             interestRequired,
             safeBorrow,
             deadline
@@ -3020,23 +2957,24 @@ describe("borrow", () => {
       });
 
       // FIXME!!
-      // it("Should have receiver have a correct collateralized debt token", async () => {
-      //   const collateralizedDebtERC721 = await collateralizedDebtAt(
-      //     await pool.collateralizedDebt()
-      //   );
+      it("Should have receiver have a correct collateralized debt token", async () => {
+        const collateralizedDebtERC721 = await collateralizedDebtAt(
+          await pool.collateralizedDebt()
+        );
 
-      //   const tokenId = await collateralizedDebtERC721.totalSupply();
-      //   const result = await collateralizedDebtERC721.ownerOf(tokenId);
-      //   const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
-      //     tokenId
-      //   );
-      //   const resultDebt = resultHex.debt.toBigInt();
-      //   const resultCollateral = resultHex.collateral.toBigInt();
+        const tokenId = await collateralizedDebtERC721.totalSupply();
+        const result = await collateralizedDebtERC721.ownerOf(tokenId);
+        const resultHex = await collateralizedDebtERC721.collateralizedDebtOf(
+          tokenId
+        );
+        const resultDebt = resultHex.debt.toBigInt();
+        const resultCollateral = resultHex.collateral.toBigInt();
+        console.log("results 123", resultDebt, resultCollateral)
 
-      //   checkBigIntEquality(result, receiver.address);
-      //   checkBigIntEquality(resultDebt, debtRequired);
-      //   checkBigIntEquality(resultCollateral, collateralLocked);
-      // });
+        expect(result).to.equal(receiver.address);
+        checkBigIntEquality(resultDebt, debtRequired);
+        checkBigIntEquality(resultCollateral, collateralLocked);
+      });
 
       it("Should have pool have a correct assets", async () => {
         const resultHex = await testToken1.balanceOf(pool.address);
@@ -3051,17 +2989,17 @@ describe("borrow", () => {
       });
 
       // FIXME!!
-      // it("Should have pool have correct collateral", async () => {
-      //   const resultHex = await testToken2.balanceOf(pool.address);
-      //   const result = resultHex.toBigInt();
-      //   const resultReserveHex = await pool.collateralReserve();
-      //   const resultReserve = resultReserveHex.toBigInt();
+      it("Should have pool have correct collateral", async () => {
+        const resultHex = await testToken2.balanceOf(pool.address);
+        const result = resultHex.toBigInt();
+        const resultReserveHex = await pool.collateralReserve();
+        const resultReserve = resultReserveHex.toBigInt();
 
-      //   const collateralBalance = collateralReserve + collateralLocked;
+        const collateralBalance = collateralReserve + collateralLocked;
 
-      //   checkBigIntEquality(result, collateralBalance);
-      //   checkBigIntEquality(resultReserve, collateralBalance);
-      // });
+        checkBigIntEquality(result, collateralBalance);
+        checkBigIntEquality(resultReserve, collateralBalance);
+      });
 
       it("Should have pool have correct amount of bond tokens", async () => {
         const bondERC20 = await bondAt(await pool.bond());
@@ -3138,11 +3076,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenInterestRequired(
               parameter,
               receiver.address,
               wrongAssetReceived,
-              false,
               interestRequired,
               safeBorrow,
               deadline
@@ -3163,11 +3100,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenInterestRequired(
               parameter,
               receiver.address,
               assetReceived,
-              false,
               interestRequired,
               wrongSafeBorrow,
               deadline
@@ -3188,11 +3124,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenInterestRequired(
               parameter,
               receiver.address,
               assetReceived,
-              false,
               interestRequired,
               wrongSafeBorrow,
               deadline
@@ -3210,11 +3145,10 @@ describe("borrow", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            .borrow(
+            .borrowGivenInterestRequired(
               parameter,
               receiver.address,
               assetReceived,
-              false,
               interestRequired,
               safeBorrow,
               deadline
@@ -3258,7 +3192,7 @@ describe("pay", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          ["pay((address,address,uint256),address,uint256,uint256,uint256)"](
+          .repay(
             parameter,
             receiver.address,
             tokenId,
@@ -3341,7 +3275,7 @@ describe("pay", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            ["pay((address,address,uint256),address,uint256,uint256,uint256)"](
+            .repay(
               parameter,
               receiver.address,
               tokenId,
@@ -3387,9 +3321,7 @@ describe("pay", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          [
-            "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-          ](parameter, receiver.address, assetInMint, safeMint, deadline);
+          .addLiquidity(parameter, receiver.address, assetInMint, safeMint, deadline);
 
         await mintToken(assetsIn[0] + assetsIn[1], 0n);
 
@@ -3402,9 +3334,7 @@ describe("pay", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          [
-            "pay((address,address,uint256),address,uint256[],uint256[],uint256)"
-          ](parameter, receiver.address, tokenIds, assetsIn, deadline);
+          .repayMultiple(parameter, receiver.address, tokenIds, assetsIn, deadline);
       });
 
       it("Should have receiver have correct amount of collateral", async () => {
@@ -3496,9 +3426,7 @@ describe("pay", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          [
-            "mint((address,address,uint256),address,uint256,(uint256,uint256,uint256),uint256)"
-          ](parameter, receiver.address, assetInMint, safeMint, deadline);
+          .addLiquidity(parameter, receiver.address, assetInMint, safeMint, deadline);
 
         await mintToken(assetsIn[0] + assetsIn[1], 0n);
 
@@ -3511,9 +3439,7 @@ describe("pay", () => {
 
         await timeswapConvenience
           .connect(receiver)
-          [
-            "pay((address,address,uint256),address,uint256[],uint256[],uint256)"
-          ](parameter, receiver.address, tokenIds, assetsIn, deadline);
+          .repayMultiple(parameter, receiver.address, tokenIds, assetsIn, deadline);
       });
 
       it("Should revert if pool already matured", async () => {
@@ -3526,9 +3452,7 @@ describe("pay", () => {
         await expect(
           timeswapConvenience
             .connect(receiver)
-            [
-              "pay((address,address,uint256),address,uint256[],uint256[],uint256)"
-            ](parameter, receiver.address, tokenIds, assetsIn, deadline)
+            .repayMultiple(parameter, receiver.address, tokenIds, assetsIn, deadline)
         ).to.be.reverted;
       });
     });

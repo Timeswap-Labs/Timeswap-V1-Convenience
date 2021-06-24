@@ -15,7 +15,7 @@ library Math {
         returns (uint256 w, uint256 z)
     {
         w = x / y;
-        if (x == z * y) {
+        if (x == w * y) {
             z = w;
         } else {
             z = w + 1;

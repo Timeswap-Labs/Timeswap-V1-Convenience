@@ -12,6 +12,8 @@ import {String} from './libraries/String.sol';
 import {ConstantProduct} from './libraries/ConstantProduct.sol';
 import {ERC20Permit} from './ERC20Permit.sol';
 
+import "hardhat/console.sol";
+
 /// @title Timeswap Pool
 /// @author Ricsson W. Ngo
 /// @notice It is recommended to use Timeswap Convenience Contracts to interact with this contract
@@ -820,15 +822,26 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _bondReserve,
         uint256 _rateReserve,
         uint256 _duration
-    ) private pure returns (uint256 _collateralLocked) {
+    ) private view returns (uint256 _collateralLocked) {
         uint256 _bondMax = (_assetReceived * _bondReserve) / _assetBalance;
         uint256 _bondMaxUp = (_assetReceived * _bondReserve).divUp(_assetBalance);
+
+        console.log("div check1", _assetReceived, _bondReserve, _assetBalance);
+
+        console.log("core bondMax bondMaxUp", _bondMax, _bondMaxUp);
+         console.log("core bondIncrease", _bondIncrease);
+            console.log("core bondMax", _bondMax, _bondMaxUp);
+            console.log("core rateReserve", _rateReserve);
+            console.log("core assetReserve", _assetBalance + _assetReceived);
+            console.log("core duration", _duration, YEAR);
 
         // Use round down and round up in division to maximize the return to the pool contract
         _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(_bondMax - _bondIncrease);
         _collateralLocked = (_collateralLocked * _rateReserve).divUp(_assetBalance + _assetReceived);
         _collateralLocked = (_collateralLocked * _duration).divUp(YEAR);
         _collateralLocked += _bondMaxUp;
+
+        console.log("core collateralLocked", _collateralLocked);
 
         require(_collateralLocked <= MAXIMUM_BALANCE, 'Timeswap :: _updateBondForBorrow : Collateral Overflow');
     }

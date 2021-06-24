@@ -8,6 +8,8 @@ import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
 import {InterfaceERC721} from './interfaces/InterfaceERC721.sol';
 import {TimeswapCalculate} from './libraries/TimeswapCalculate.sol';
 
+import "hardhat/console.sol";
+
 /// @title Timeswap Convenience
 /// @author Ricsson W. Ngo
 /// @dev Conveniently call the core functions in Timeswap Core contract
@@ -378,12 +380,15 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
             _assetReceived,
             _givenCollateralLocked
         );
+        console.log("calculated collateral", _collateralLocked);
 
         // Safely transfer collateral ERC20 to the Timeswap Core pool
         _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _collateralLocked);
 
         // Call the borrow function in the Timeswap Core
         (_tokenId, _collateralLocked, _debtRequired) = _pool.borrow(_to, _assetReceived, _bondIncrease, _rateIncrease);
+
+        console.log("result collateral", _collateralLocked);
 
         // Check slippage protection
         require(
