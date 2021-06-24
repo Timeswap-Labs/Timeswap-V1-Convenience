@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {Math} from "./Math.sol";
+import {Math} from './Math.sol';
 
 library ConstantProduct {
     using Math for uint256;
@@ -15,7 +15,7 @@ library ConstantProduct {
         result = mulDivUp(x, yz, denominator1);
         result = result.divUp(denominator2);
     }
-    
+
     /// @notice Calculates floor(a×b÷denominator) with full precision. Throws if result overflows a uint256 or denominator == 0
     /// @param a The multiplicand
     /// @param b The multiplier
@@ -36,13 +36,13 @@ library ConstantProduct {
         uint256 prod1; // Most significant 256 bits of the product
         assembly {
             let mm := mulmod(a, b, not(0))
-            prod0 := mul(a,b)
+            prod0 := mul(a, b)
             prod1 := sub(sub(mm, prod0), lt(mm, prod0))
         }
 
         // Handle non-overflow cases, 256 by 256 division
         if (prod1 == 0) {
-            require (denominator > 0);
+            require(denominator > 0);
             assembly {
                 result := div(prod0, denominator)
             }
@@ -120,7 +120,7 @@ library ConstantProduct {
             // is no longer required.
             result = prod0 * inv;
         }
-        
+
         return result;
     }
 

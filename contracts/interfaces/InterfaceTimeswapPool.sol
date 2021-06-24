@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC20} from "./InterfaceERC20.sol";
-import {InterfaceERC721} from "./InterfaceERC721.sol";
+import {InterfaceERC20} from './InterfaceERC20.sol';
+import {InterfaceERC721} from './InterfaceERC721.sol';
 
 /// @title Timeswap Pool Interface
 /// @author Ricsson W. Ngo
 interface InterfaceTimeswapPool is InterfaceERC20 {
-
     /* ===== VIEW ===== */
 
     function maturity() external view returns (uint256);
@@ -47,9 +46,7 @@ interface InterfaceTimeswapPool is InterfaceERC20 {
             uint256 _liquidityReceived
         );
 
-    function burn(
-        address _to
-    )
+    function burn(address _to)
         external
         returns (
             uint256 _tokenId,
@@ -63,12 +60,7 @@ interface InterfaceTimeswapPool is InterfaceERC20 {
         address _to,
         uint256 _bondDecrease,
         uint256 _rateDecrease
-    )
-        external
-        returns (
-            uint256 _bondReceived,
-            uint256 _insuranceReceived
-        );
+    ) external returns (uint256 _bondReceived, uint256 _insuranceReceived);
 
     function borrow(
         address _to,
@@ -87,19 +79,7 @@ interface InterfaceTimeswapPool is InterfaceERC20 {
         address _to,
         uint256 _bondIn,
         uint256 _insuranceIn
-    )
-        external
-        returns (
-            uint256 _assetReceived,
-            uint256 _collateralReceived
-        );
+    ) external returns (uint256 _assetReceived, uint256 _collateralReceived);
 
-    function pay(
-        address _to,
-        uint256 _tokenId
-    )
-        external
-        returns (
-            uint256 _collateralReceived
-        );
+    function pay(address _to, uint256 _tokenId) external returns (uint256 _collateralReceived);
 }

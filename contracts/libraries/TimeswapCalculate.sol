@@ -191,7 +191,7 @@ library TimeswapCalculate {
             _bondIncrease /=
                 ((_bondMaxUp * _rateReserve).divUp(_assetReserve) * _duration).divUp(YEAR) +
                 _collateralAdditionalUp;
-            
+
             // Use round down and round up in division to maximize the return to the Timeswap Core pool contract
             _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(_bondMax - _bondIncrease);
             _collateralLocked = (_collateralLocked * _rateReserve).divUp(_assetReserve);
@@ -276,7 +276,9 @@ library TimeswapCalculate {
             _bondIncrease = _bondIncrease.divUp(_transactionFeeBase);
         }
 
-        (uint256 _bondMax, uint256 _bondMaxUp) = (_assetReceived * _bondReserve).divDownAndUp(_assetReserve - _assetReceived);
+        (uint256 _bondMax, uint256 _bondMaxUp) = (_assetReceived * _bondReserve).divDownAndUp(
+            _assetReserve - _assetReceived
+        );
         // Use round down and round up in division to maximize the return to the Timeswap Core pool contract
         _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(_bondMax - _bondIncrease);
         _collateralLocked = (_collateralLocked * _rateReserve).divUp(_assetReserve);

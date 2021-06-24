@@ -156,7 +156,10 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         );
 
         // Check slippage protection
-        require(_insuranceIncreaseAndDebtRequired <= _safe.maxDebt, 'TimeswapETHCollateral :: addLiquidity : Over the maxDebt');
+        require(
+            _insuranceIncreaseAndDebtRequired <= _safe.maxDebt,
+            'TimeswapETHCollateral :: addLiquidity : Over the maxDebt'
+        );
         require(
             _bondIncreaseAndCollateralPaid <= _safe.maxCollateralPaid,
             'TimeswapETHCollateral :: addLiquidity : Over the maxCollateralPaid'
@@ -199,7 +202,10 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Pool Matured');
+        require(
+            _pool.maturity() > block.timestamp,
+            'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Pool Matured'
+        );
         require(_pool.totalSupply() > 0, 'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : No Liquidity');
 
         // Safely transfer liquidity ERC20 to the Timeswap Core pool
@@ -219,9 +225,18 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         );
 
         // Check slippage protection
-        require(_debtRequiredAndAssetReceived >= _safe.minAsset, 'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Under the minAsset');
-        require(_bondReceived >= _safe.minBond, 'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Under the minInsurance');
+        require(
+            _debtRequiredAndAssetReceived >= _safe.minAsset,
+            'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Under the minAsset'
+        );
+        require(
+            _bondReceived >= _safe.minBond,
+            'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Under the minBond'
+        );
+        require(
+            _insuranceReceived >= _safe.minInsurance,
+            'TimeswapETHCollateral :: removeLiquidityBeforeMaturity : Under the minInsurance'
+        );
     }
 
     /// @dev Withdraw liquidity from a Timeswap pool after maturity with the burn function in the Timeswap Core contract
@@ -241,7 +256,10 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHCollateral :: removeLiquidityAfterMaturity : Pool Does Not Exist');
-        require(_pool.maturity() <= block.timestamp, 'TimeswapETHCollateral :: removeLiquidityAfterMaturity : Pool Not Matured');
+        require(
+            _pool.maturity() <= block.timestamp,
+            'TimeswapETHCollateral :: removeLiquidityAfterMaturity : Pool Not Matured'
+        );
         require(_pool.totalSupply() > 0, 'TimeswapETHCollateral :: removeLiquidityAfterMaturity : No Liquidity');
 
         // Safely transfer liquidity ERC20 to the Timeswap Core pool
@@ -288,7 +306,10 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
 
         // Check slippage protection
         require(_bondReceived >= _safe.minBond, 'TimeswapETHCollateral :: lendGivenBondReceived : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapETHCollateral :: lendGivenBondReceived : Under the minInsurance');
+        require(
+            _insuranceReceived >= _safe.minInsurance,
+            'TimeswapETHCollateral :: lendGivenBondReceived : Under the minInsurance'
+        );
     }
 
     /// @dev Lend asset ERC20 with the lend function in the Timeswap Core contract given insurance received
@@ -312,7 +333,10 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHCollateral :: lendGivenInsuranceReceived : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapETHCollateral :: lendGivenInsuranceReceived : Pool Matured');
+        require(
+            _pool.maturity() > block.timestamp,
+            'TimeswapETHCollateral :: lendGivenInsuranceReceived : Pool Matured'
+        );
         require(_pool.totalSupply() > 0, 'TimeswapETHCollateral :: lendGivenInsuranceReceived : No Liquidity');
 
         // Calculate the necessary parameters for the lend function in the Timeswap Core contract
@@ -327,8 +351,14 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         (_bondReceived, _insuranceReceived) = _pool.lend(_to, _bondDecrease, _rateDecrease);
 
         // Check slippage protection
-        require(_bondReceived >= _safe.minBond, 'TimeswapETHCollateral :: lendGivenInsuranceReceived : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapETHCollateral :: lendGivenInsuranceReceived : Under the minInsurance');
+        require(
+            _bondReceived >= _safe.minBond,
+            'TimeswapETHCollateral :: lendGivenInsuranceReceived : Under the minBond'
+        );
+        require(
+            _insuranceReceived >= _safe.minInsurance,
+            'TimeswapETHCollateral :: lendGivenInsuranceReceived : Under the minInsurance'
+        );
     }
 
     /// @dev Borrw asset ERC20 and lock collateral with the borrow function in the Timeswap Core contract given collateral locked
@@ -364,7 +394,10 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHCollateral :: borrowGivenCollateralLocked : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapETHCollateral :: borrowGivenCollateralLocked : Pool Matured');
+        require(
+            _pool.maturity() > block.timestamp,
+            'TimeswapETHCollateral :: borrowGivenCollateralLocked : Pool Matured'
+        );
         require(_pool.totalSupply() > 0, 'TimeswapETHCollateral :: borrowGivenCollateralLocked : No Liquidity');
 
         // Calculate the necessary parameters for the borrow function in the Timeswap Core contract
@@ -421,7 +454,10 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHCollateral :: borrowGivenInterestRequired : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapETHCollateral :: borrowGivenInterestRequired : Pool Matured');
+        require(
+            _pool.maturity() > block.timestamp,
+            'TimeswapETHCollateral :: borrowGivenInterestRequired : Pool Matured'
+        );
         require(_pool.totalSupply() > 0, 'TimeswapETHCollateral :: borrowGivenInterestRequired : No Liquidity');
 
         // Calculate the necessary parameters for the borrow function in the Timeswap Core contract

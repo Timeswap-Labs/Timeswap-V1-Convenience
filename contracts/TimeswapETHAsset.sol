@@ -164,7 +164,10 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         );
 
         // Check slippage protection
-        require(_insuranceIncreaseAndDebtRequired <= _safe.maxDebt, 'TimeswapETHAsset :: addLiquidity : Over the maxDebt');
+        require(
+            _insuranceIncreaseAndDebtRequired <= _safe.maxDebt,
+            'TimeswapETHAsset :: addLiquidity : Over the maxDebt'
+        );
         require(
             _bondIncreaseAndCollateralPaid <= _safe.maxCollateralPaid,
             'TimeswapETHAsset :: addLiquidity : Over the maxCollateralPaid'
@@ -234,9 +237,18 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         if (_debtRequiredAndAssetReceived > 0) _wethWithdrawTransfer(_to, _debtRequiredAndAssetReceived);
 
         // Check slippage protection
-        require(_debtRequiredAndAssetReceived >= _safe.minAsset, 'TimeswapETHAsset :: removeLiquidityBeforeMaturity : Under the minAsset');
-        require(_bondReceived >= _safe.minBond, 'TimeswapETHAsset :: removeLiquidityBeforeMaturity : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapETHAsset :: removeLiquidityBeforeMaturity : Under the minInsurance');
+        require(
+            _debtRequiredAndAssetReceived >= _safe.minAsset,
+            'TimeswapETHAsset :: removeLiquidityBeforeMaturity : Under the minAsset'
+        );
+        require(
+            _bondReceived >= _safe.minBond,
+            'TimeswapETHAsset :: removeLiquidityBeforeMaturity : Under the minBond'
+        );
+        require(
+            _insuranceReceived >= _safe.minInsurance,
+            'TimeswapETHAsset :: removeLiquidityBeforeMaturity : Under the minInsurance'
+        );
     }
 
     /// @dev Withdraw liquidity from a Timeswap pool after maturity with the burn function in the Timeswap Core contract
@@ -256,7 +268,10 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: removeLiquidityAfterMaturity : Pool Does Not Exist');
-        require(_pool.maturity() <= block.timestamp, 'TimeswapETHAsset :: removeLiquidityAfterMaturity : Pool Not Matured');
+        require(
+            _pool.maturity() <= block.timestamp,
+            'TimeswapETHAsset :: removeLiquidityAfterMaturity : Pool Not Matured'
+        );
         require(_pool.totalSupply() > 0, 'TimeswapETHAsset :: removeLiquidityAfterMaturity : No Liquidity');
 
         // Safely transfer liquidity ERC20 to the Timeswap Core pool
@@ -302,7 +317,10 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
 
         // Check slippage protection
         require(_bondReceived >= _safe.minBond, 'TimeswapETHAsset :: lendGivenBondReceived : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapETHAsset :: lendGivenBondReceived : Under the minInsurance');
+        require(
+            _insuranceReceived >= _safe.minInsurance,
+            'TimeswapETHAsset :: lendGivenBondReceived : Under the minInsurance'
+        );
     }
 
     /// @dev Lend asset ERC20 with the lend function in the Timeswap Core contract given insurance received
@@ -341,7 +359,10 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
 
         // Check slippage protection
         require(_bondReceived >= _safe.minBond, 'TimeswapETHAsset :: lendGivenInsuranceReceived : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapETHAsset :: lendGivenInsuranceReceived : Under the minInsurance');
+        require(
+            _insuranceReceived >= _safe.minInsurance,
+            'TimeswapETHAsset :: lendGivenInsuranceReceived : Under the minInsurance'
+        );
     }
 
     /// @dev Borrw asset ERC20 and lock collateral with the borrow function in the Timeswap Core contract given collateral locked
