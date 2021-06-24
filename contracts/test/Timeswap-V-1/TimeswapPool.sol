@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {InterfaceTimeswapPool} from "./interfaces/InterfaceTimeswapPool.sol";
-import {InterfaceTimeswapFactory} from "./interfaces/InterfaceTimeswapFactory.sol";
-import {InterfaceERC20} from "./interfaces/InterfaceERC20.sol";
-import {InterfaceTimeswapERC20} from "./interfaces/InterfaceTimeswapERC20.sol";
-import {InterfaceTimeswapERC721} from "./interfaces/InterfaceTimeswapERC721.sol";
-import {Math} from "./libraries/Math.sol";
-import {String} from "./libraries/String.sol";
-import {ERC20Permit} from "./ERC20Permit.sol";
+import {Clones} from '@openzeppelin/contracts/proxy/Clones.sol';
+import {InterfaceTimeswapPool} from './interfaces/InterfaceTimeswapPool.sol';
+import {InterfaceTimeswapFactory} from './interfaces/InterfaceTimeswapFactory.sol';
+import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
+import {InterfaceTimeswapERC20} from './interfaces/InterfaceTimeswapERC20.sol';
+import {InterfaceTimeswapERC721} from './interfaces/InterfaceTimeswapERC721.sol';
+import {Math} from './libraries/Math.sol';
+import {String} from './libraries/String.sol';
+import {ConstantProduct} from './libraries/ConstantProduct.sol';
+import {ERC20Permit} from './ERC20Permit.sol';
 
 /// @title Timeswap Pool
 /// @author Ricsson W. Ngo
@@ -25,10 +26,6 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
     /// @dev The base precision when dealing with transaction fee and protocol fee
     uint256 private constant BASE = 10000;
-    /// @dev Invariance cannot be greater than this value since invariance is mutiplied by BASE twice per constant product check
-    uint256 private constant MAXIMUM_INVARIANCE = type(uint256).max / BASE / BASE;
-    /// @dev Native tokens balances are capped at this value
-    uint256 private constant MAXIMUM_BALANCE = type(uint128).max;
     /// @dev The minimum liquidity minted and sent to the zero address for the first mint
     uint256 private constant MINIMUM_LIQUIDITY = 1000;
     /// @dev The number of seconds in a year
@@ -45,11 +42,11 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Stores the balance of the contract in the ERC20 being lent and borrowed (asset ERC20)
     /// @dev The X pool or the Principal pool
     uint128 public override assetReserve;
+    /// @dev Stores the virtual rate reserves
+    uint128 public override rateReserve;
     /// @dev Stores the balance of the contract in the ERC20 used as collateral (collateral ERC20)
     /// @dev The W pool or the Collateral Locked pool
-    uint128 public override collateralReserve;
-    /// @dev Stores the constant value for the constant product check
-    uint256 public override invariance;
+    uint256 public override collateralReserve;
 
     /// @dev The address of the factory contract that deployed this contract
     InterfaceTimeswapFactory public override factory; //immutable
@@ -69,27 +66,25 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     InterfaceTimeswapERC721 public override collateralizedDebt; //immutable
 
     /// @dev The name of the native liquidity ERC20 token contract based on ERC20 Metadata standard
-    string public constant override name = "Timeswap Liquidity";
+    string public constant override name = 'Timeswap Liquidity';
     /// @dev The symbol ticker of the native liquidity ERC20 token contract based on ERC20 Metadata standard
     string public override symbol; //immutable
     /// @dev The decimal place precision of the native liquidity ERC20 token contract based on ERC20 Metadata standard
     uint8 public override decimals; //immutable
 
     /// @dev The function selector of the symbol function on ERC20 Metadata standard
-    bytes4 private constant SYMBOL = bytes4(keccak256(bytes("symbol()")));
+    bytes4 private constant SYMBOL = bytes4(keccak256(bytes('symbol()')));
     /// @dev The function selector of the decimals function on ERC20 Metadata standard
-    bytes4 private constant DECIMALS = bytes4(keccak256(bytes("decimals()")));
+    bytes4 private constant DECIMALS = bytes4(keccak256(bytes('decimals()')));
     /// @dev The function selector of the transfer function on ERC20 standard
-    bytes4 private constant TRANSFER = bytes4(keccak256(bytes("transfer(address,uint256)")));
-
-    address private constant ZERO = address(type(uint160).min);
+    bytes4 private constant TRANSFER = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
     /// @dev Stores the access state of the contract for reentrancy guard
     bool private locked;
 
     /// @dev Locks the contract from reentering when calling a function and unlocks at the end of the call
     modifier reentrancyLock() {
-        require(!locked, "TimeswapPool :: reentrancyLock : Locked");
+        require(!locked, 'TimeswapPool :: reentrancyLock : Locked');
         locked = true;
         _;
         locked = false;
@@ -118,10 +113,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint128 _protocolFee
     ) external override {
         // Sanity check
-        require(block.timestamp < _maturity, "TimeswapPool :: initialize : Invalid Maturity");
+        require(block.timestamp < _maturity, 'TimeswapPool :: initialize : Invalid Maturity');
         // Can only be called once
-        require(factory == InterfaceTimeswapFactory(ZERO), "TimeswapPool :: initialize : Forbidden");
-        
+        require(factory == InterfaceTimeswapFactory(ZERO), 'TimeswapPool :: initialize : Forbidden');
 
         maturity = _maturity;
 
@@ -131,9 +125,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         collateral = _collateral;
 
         // Clone and deploy the three native token contracts
-        bond = InterfaceTimeswapERC20(address(_bond).cloneDeterministic(keccak256("0")));
-        insurance = InterfaceTimeswapERC20(address(_insurance).cloneDeterministic(keccak256("0")));
-        collateralizedDebt = InterfaceTimeswapERC721(address(_collateralizedDebt).cloneDeterministic(keccak256("0")));
+        bond = InterfaceTimeswapERC20(address(_bond).cloneDeterministic(keccak256('0')));
+        insurance = InterfaceTimeswapERC20(address(_insurance).cloneDeterministic(keccak256('0')));
+        collateralizedDebt = InterfaceTimeswapERC721(address(_collateralizedDebt).cloneDeterministic(keccak256('0')));
 
         transactionFee = _transactionFee;
         protocolFee = _protocolFee;
@@ -143,7 +137,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         string memory _collateralSymbol = _safeSymbol(_collateral);
         // The symbol tickers of all native tokens end with this format
         // -{asset symbol}-{collateral symbol}-{maturity time in unix timestamp}
-        string memory _symbol = string(abi.encodePacked("-", _assetSymbol, "-", _collateralSymbol, "-", _maturity.toString()));
+        string memory _symbol = string(
+            abi.encodePacked('-', _assetSymbol, '-', _collateralSymbol, '-', _maturity.toString())
+        );
         // Safely get the decimal places of the pair ERC20 token contracts
         uint8 _assetDecimal = _safeDecimals(_asset);
         uint8 _collateralDecimal = _safeDecimals(_collateral);
@@ -159,7 +155,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // LP-DAI-WETH-1750000000
         // Example for another pair DAI as the asset but the collateral ERC20 has no symbol ticker with the same maturity as above
         // LP-DAI--1750000000
-        symbol = string(abi.encodePacked("LP", _symbol));
+        symbol = string(abi.encodePacked('LP', _symbol));
         // Initialize the liquidity ERC20 contract with the correct decimal places
         decimals = _assetDecimal;
 
@@ -172,12 +168,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Returns an empty string if failed at calling the symbol function
     function _safeSymbol(InterfaceERC20 _token) private returns (string memory _symbol) {
         (bool _success, bytes memory _data) = address(_token).call(abi.encodeWithSelector(SYMBOL));
-
-        _symbol = _success ? abi.decode(_data, (string)) : "";
+        _symbol = _success ? abi.decode(_data, (string)) : '';
 
         bytes memory _bt = bytes(_symbol);
-
-        if (_bt.length > 5) _symbol = string(abi.encodePacked(_bt[0], _bt[1], _bt[2], _bt[3], _bt[4], "..."));
+        if (_bt.length > 5) _symbol = string(abi.encodePacked(_bt[0], _bt[1], _bt[2], _bt[3], _bt[4], '...'));
     }
 
     /// @dev Safely gets the decimal place of an ERC20 token contract
@@ -195,7 +189,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _value
     ) private {
         (bool _success, bytes memory _data) = address(_token).call(abi.encodeWithSelector(TRANSFER, _to, _value));
-        require(_success && (_data.length == 0 || abi.decode(_data, (bool))), "TimeswapPool :: _safeTransfer : Transfer Failed");
+        require(
+            _success && (_data.length == 0 || abi.decode(_data, (bool))),
+            'TimeswapPool :: _safeTransfer : Transfer Failed'
+        );
     }
 
     /// @dev Safely transfer the tokens of an ERC20 token contract and return the new balance of the pool contract
@@ -214,70 +211,46 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev The Z pool or Interest Rate pool is the asset ERC20 annual interest rate
     /// @return _assetReserve The X pool or Principal pool
     /// @return _bondReserve The Y pool or Collateral Required pool
-    /// @return _rateReserve The Z pool, a virtual pool calculated from XYZ=K algorithm
-    function _viewReservesForMintOrLend() private view returns (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) {
+    /// @return _rateReserve The Z pool, a virtual pool
+    function _viewReserves()
+        private
+        view
+        returns (
+            uint256 _assetReserve,
+            uint256 _bondReserve,
+            uint256 _rateReserve
+        )
+    {
         _assetReserve = assetReserve;
         _bondReserve = bond.balanceOf(address(this));
-        // Always round up in division operations for calculating the Z virual pool
-        if (_assetReserve != 0 && _bondReserve != 0)
-            _rateReserve = invariance.divUp(_assetReserve).divUp(_bondReserve);
-    }
-
-    /// @dev Return the X pool, Y pool, and the Z pool
-    /// @dev Only used for the burn function and borrow function
-    /// @dev The Z pool or Interest Rate pool is the asset ERC20 annual interest rate
-    /// @return _assetReserve The X pool or Principal pool
-    /// @return _bondReserve The Y pool or Collateral Required pool
-    /// @return _rateReserve The Z pool, a virtual pool calculated from XYZ=K algorithm
-    function _viewReservesForBurnOrBorrow() private view returns (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) {
-        _assetReserve = assetReserve;
-        _bondReserve = bond.balanceOf(address(this));
-        // Always round down in division operations for calculating the Z virual pool
-        if (_assetReserve != 0 && _bondReserve != 0)
-            _rateReserve = invariance / _assetReserve / _bondReserve;
+        _rateReserve = rateReserve;
     }
 
     /// @dev Update the assetReserve and collateralReserve with the given balances of the pair ERC20 tokens
     /// @dev The Y pool and V pool is always equal to the bond and insurance balance of the pool contract
     /// @param _assetBalance The new balance to replace the assetReserve or X pool
     /// @param _collateralBalance The new balance to replace the collateralReserve of W pool
+    /// @param _rateBalance The new balance to replace the Z pool
     function _updateReserves(
         uint256 _assetBalance,
-        uint256 _collateralBalance
+        uint256 _collateralBalance,
+        uint256 _rateBalance
     ) private {
         // Get the bond and insurance balance of the pool contract
         uint256 _bondBalance = bond.balanceOf(address(this));
         uint256 _insuranceBalance = insurance.balanceOf(address(this));
-        
+
         // The pair ERC20 balance of the pool contract is capped at uint128
         // Can be resolved with the sync function if someone transfer tokens to the pool contract such that the balance is greater than uint128
         require(
-            _assetBalance <= MAXIMUM_BALANCE && _collateralBalance <= MAXIMUM_BALANCE,
-            "TimeswapPool :: _updateReserves : Reserve Overflow"
+            _assetBalance <= MAXIMUM_BALANCE && _rateBalance <= MAXIMUM_BALANCE,
+            'TimeswapPool :: _updateReserves : Reserve Overflow'
         );
         assetReserve = uint128(_assetBalance);
-        collateralReserve = uint128(_collateralBalance);
+        rateReserve = uint128(_rateBalance);
+        collateralReserve = _collateralBalance;
 
-        emit Sync(_assetBalance, _collateralBalance, _bondBalance, _insuranceBalance, invariance);
-    }
-
-    /// @dev Update the new invariance when liquidity providers add and remove liquidity with the mint and burn functions respectively
-    /// @param _assetBalance The new balance of the assetReserve of X pool
-    /// @param _bondBalance The new balance of the Y pool
-    /// @param _rateBalance The new balance of the virtual Z pool
-    function _updateInvariance(
-        uint256 _assetBalance,
-        uint256 _bondBalance,
-        uint256 _rateBalance
-    ) private {
-        uint256 _invariance = _assetBalance * _bondBalance * _rateBalance; 
-
-        // The new invariance cannot be greater than the MAXIMUM_INVARIANCE since invariance is mutiplied by BASE twice per constant product check
-        require(
-            _invariance <= MAXIMUM_INVARIANCE,
-            "TimeswapPool :: _updateInvariance : Invariance greater than Maximum Invariance"
-        );
-        invariance = _invariance;
+        emit Sync(_assetBalance, _collateralBalance, _rateBalance, _bondBalance, _insuranceBalance);
     }
 
     /* ====== MINT ===== */
@@ -310,51 +283,51 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
             uint256 _liquidityReceived
         )
     {
-        require(block.timestamp < maturity, "TimeswapPool :: mint : Pool Matured");
-        require(_bondIncreaseAndCollateralPaid > 0 && _insuranceIncreaseAndDebtRequired > 0, "TimeswapPool :: mint : Insufficient Increase");
-        
+        require(block.timestamp < maturity, 'TimeswapPool :: mint : Pool Matured');
+        require(
+            _bondIncreaseAndCollateralPaid > 0 && _insuranceIncreaseAndDebtRequired > 0,
+            'TimeswapPool :: mint : Insufficient Increase'
+        );
+
         // Get the X pool, Y pool, and Z pool
-        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReservesForMintOrLend();
-        
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves();
+
         // Get the difference of the stored X pool and the asset ERC20 balance of the pool contract to get the _insuranceReceivedAndAssetIn
         uint256 _assetBalance = asset.balanceOf(address(this));
-        _insuranceReceivedAndAssetIn = _assetBalance.subOrZero(uint256(_assetReserve));
-        require(_insuranceReceivedAndAssetIn > 0, "TimeswapPool :: mint : Insufficient Asset Input Amount");
+        _insuranceReceivedAndAssetIn = _assetBalance.subOrZero(_assetReserve);
+        require(_insuranceReceivedAndAssetIn > 0, 'TimeswapPool :: mint : Insufficient Asset Input Amount');
 
-        
         // Call the function _mintInitialLiquidity for the first mint function, will only be called once
         // Call the function _mintProportionalLiquidity for all subsequent mint functions
         // The invariance is updated within these two functions
-        _liquidityReceived = totalSupply == 0
-            ? _mintInitialLiquidity(
-                _to,
-                _bondIncreaseAndCollateralPaid,
-                _insuranceIncreaseAndDebtRequired,
-                _assetBalance
-            )
+        uint256 _rateBalance;
+        (_rateBalance, _liquidityReceived) = totalSupply == 0
+            ? _mintInitialLiquidity(_to, _insuranceIncreaseAndDebtRequired)
             : _mintProportionalLiquidity(
                 _to,
                 _insuranceReceivedAndAssetIn,
                 _bondIncreaseAndCollateralPaid,
                 _insuranceIncreaseAndDebtRequired,
-                _assetBalance,
                 _assetReserve,
                 _bondReserve,
                 _rateReserve
             );
 
-        // Mint and increase the bond balance and insurance balance of the pool contract 
+        // Mint and increase the bond balance and insurance balance of the pool contract
         bond.mint(address(this), _bondIncreaseAndCollateralPaid);
         insurance.mint(address(this), _insuranceIncreaseAndDebtRequired);
 
         // Get the difference of the stored W pool and the collateral ERC20 balance of the pool contract to get the collateralIn
         // Check that there is enough collateralIn for both collateral deposited and collateral locked
         // Must precalculate the collateralIn with a convenience contract to avoid unecessary loss of collateral ERC20
-        _bondReceivedAndCollateralLocked = (_bondIncreaseAndCollateralPaid * _insuranceIncreaseAndDebtRequired).divUp(_insuranceReceivedAndAssetIn);
-        uint256 _collateralBalance = collateral.balanceOf(address(this));     
+        _bondReceivedAndCollateralLocked = (_bondIncreaseAndCollateralPaid * _insuranceIncreaseAndDebtRequired).divUp(
+            _insuranceReceivedAndAssetIn
+        );
+        uint256 _collateralBalance = collateral.balanceOf(address(this));
         require(
-            _collateralBalance.subOrZero(collateralReserve) >= _bondIncreaseAndCollateralPaid + _bondReceivedAndCollateralLocked,
-            "Timeswap :: _mintInitial : Insufficient Collateral Input Amount"
+            _collateralBalance.subOrZero(collateralReserve) >=
+                _bondIncreaseAndCollateralPaid + _bondReceivedAndCollateralLocked,
+            'Timeswap :: _mintInitial : Insufficient Collateral Input Amount'
         );
 
         // Mint and increase the bond balance and insurance balance of the receiver
@@ -366,7 +339,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         _tokenId = collateralizedDebt.totalSupply();
 
         // Update all the pool
-        _updateReserves(_assetBalance, _collateralBalance);
+        _updateReserves(_assetBalance, _collateralBalance, _rateBalance);
 
         emit Mint(
             msg.sender,
@@ -382,19 +355,20 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
     /// @dev Mint the initial liquidity for the first mint function
     /// @dev Initial supply of liquidity ERC20 is equal to the initial insurance ERC20 minted to the pool contract
-    function _mintInitialLiquidity(
-        address _to,
-        uint256 _bondIncreaseAndCollateralPaid,
-        uint256 _insuranceIncreaseAndDebtRequired,
-        uint256 _assetBalance
-    ) private returns (uint256 _liquidityReceived) {
-        require(_insuranceIncreaseAndDebtRequired > MINIMUM_LIQUIDITY, "Timeswap :: _mintInitialLiquidity : Must Mint more Liquidity");
+    function _mintInitialLiquidity(address _to, uint256 _insuranceIncreaseAndDebtRequired)
+        private
+        returns (uint256 _rateBalance, uint256 _liquidityReceived)
+    {
+        require(
+            _insuranceIncreaseAndDebtRequired > MINIMUM_LIQUIDITY,
+            'Timeswap :: _mintInitialLiquidity : Must Mint more Liquidity'
+        );
 
         uint256 _protocolFeeBase = protocolFee + BASE; // gas saving
 
         // Adjust liquidity received with protocol fee and base precision
-        _liquidityReceived = (_insuranceIncreaseAndDebtRequired - MINIMUM_LIQUIDITY) * BASE / _protocolFeeBase;
-        
+        _liquidityReceived = ((_insuranceIncreaseAndDebtRequired - MINIMUM_LIQUIDITY) * BASE) / _protocolFeeBase;
+
         // Burn MINIMUM_LIQUIDITY amount of liquidity ERC20 to avoid DOS attack to other liquidity providers
         // Enforce protocol fee minted to the feeTo address
         _mint(ZERO, MINIMUM_LIQUIDITY); // burn minimum liquidity
@@ -403,10 +377,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
         // The initial Z pool is calculated from the initial insurance ERC20 minted divided by duration from now to the maturity of the pool
         // The initial Z pool is adjusted with YEAR so that it becomes the annual interest rate
-        uint256 _rateBalance = _insuranceIncreaseAndDebtRequired * YEAR / (maturity - block.timestamp);
-
-        // Update the invariance given the initial X pool, Y pool, and Z pool
-        _updateInvariance(_assetBalance, _bondIncreaseAndCollateralPaid, _rateBalance);
+        _rateBalance = (_insuranceIncreaseAndDebtRequired * YEAR) / (maturity - block.timestamp);
     }
 
     /// @dev Mint more liquidity for all the subsequent mint functions
@@ -416,40 +387,32 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _insuranceReceivedAndAssetIn,
         uint256 _bondIncreaseAndCollateralPaid,
         uint256 _insuranceIncreaseAndDebtRequired,
-        uint256 _assetBalance,
         uint256 _assetReserve,
         uint256 _bondReserve,
         uint256 _rateReserve
-    ) private returns (uint256 _liquidityReceived) {   
+    ) private returns (uint256 _rateBalance, uint256 _liquidityReceived) {
         uint256 _protocolFeeBase = protocolFee + BASE; // gas saving
 
         uint256 _totalSupply = totalSupply; // gas saving
-        
+
         // Compare the proportional increase of X pool, Y pool, and V pool
         // The total increase of the liquidity ERC20 must be less than or equal to all the proportional increase of the pools
         // Must precalculate the inputs with a convenience contract to make the proportion close and minimize cost
-        uint256 _insuranceReserve = insurance.balanceOf(address(this));
         uint256 _liquidityReceivedAdjusted = Math.min(
-            _insuranceReceivedAndAssetIn * _totalSupply / _assetReserve,
-            _bondIncreaseAndCollateralPaid * _totalSupply / _bondReserve,
-            _insuranceIncreaseAndDebtRequired * _totalSupply / _insuranceReserve
+            (_insuranceReceivedAndAssetIn * _totalSupply) / _assetReserve,
+            (_bondIncreaseAndCollateralPaid * _totalSupply) / _bondReserve,
+            (_insuranceIncreaseAndDebtRequired * _totalSupply) / insurance.balanceOf(address(this))
         );
-        
+
         // Adjust liquidity received with protocol fee and base precision
-        _liquidityReceived = _liquidityReceivedAdjusted * BASE / _protocolFeeBase;
+        _liquidityReceived = (_liquidityReceivedAdjusted * BASE) / _protocolFeeBase;
 
         // Enforce the protocol fee minted to the feeTo address
         _mint(_to, _liquidityReceived);
         _mint(factory.feeTo(), _liquidityReceivedAdjusted - _liquidityReceived);
 
-        // Calculate the new Y pool
-        uint256 _bondBalance = _bondReserve + _bondIncreaseAndCollateralPaid;
-
         // The increase in the Z pool must also be proportional to the proportional increase of the pools
-        uint256 _rateBalance = _rateReserve + (_liquidityReceivedAdjusted * _rateReserve).divUp(_totalSupply);
-
-        // Update the invariance given the new X pool, Y pool, and Z pool
-        _updateInvariance(_assetBalance, _bondBalance, _rateBalance);
+        _rateBalance = _rateReserve + (_liquidityReceivedAdjusted * _rateReserve).divUp(_totalSupply);
     }
 
     /* ===== BURN ===== */
@@ -467,9 +430,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @return _debtRequiredAndAssetReceived The amount of debt received by the receiver and the asset ERC20 received by the receiver
     /// @return _bondReceived The amount of bond ERC20 received by the receiver
     /// @return _insuranceReceived The amount of insurance ERC20 received by the receiver
-    function burn(
-        address _to
-    )
+    function burn(address _to)
         external
         override
         reentrancyLock()
@@ -485,14 +446,14 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
         // Get liquidity ERC20 balance of the pool contract to get the _liquidityIn
         uint256 _liquidityIn = balanceOf[address(this)];
-        require(_liquidityIn > 0, "Timeswap :: burn : Insufficient Liquidity Input Amount");
+        require(_liquidityIn > 0, 'Timeswap :: burn : Insufficient Liquidity Input Amount');
 
         // Get the X pool, Y pool, and Z pool
-        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReservesForBurnOrBorrow();
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves();
 
         // Get the proportional withdraw of the Y pool and V pool to the receiver
-        _bondReceived = _liquidityIn * _bondReserve / _totalSupply;
-        _insuranceReceived = _liquidityIn * insurance.balanceOf(address(this)) / _totalSupply;
+        _bondReceived = (_liquidityIn * _bondReserve) / _totalSupply;
+        _insuranceReceived = (_liquidityIn * insurance.balanceOf(address(this))) / _totalSupply;
 
         // Safely transfer the bond ERC20 and insurance ERC20 to the receiver
         _safeTransfer(bond, _to, _bondReceived);
@@ -509,7 +470,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
                 _liquidityIn,
                 _totalSupply,
                 _bondReceived,
-                _assetReserve, 
+                _assetReserve,
                 _rateReserve
             );
 
@@ -538,10 +499,17 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _bondReceived,
         uint256 _assetReserve,
         uint256 _rateReserve
-    ) private returns (uint256 _tokenId, uint256 _collateralLocked, uint256 _debtRequiredAndAssetReceived) {
+    )
+        private
+        returns (
+            uint256 _tokenId,
+            uint256 _collateralLocked,
+            uint256 _debtRequiredAndAssetReceived
+        )
+    {
         // Get the maximum amount of asset ERC20 possible to be borrowed based on the proportional decrease of the pools
-        uint256 _assetMax = _liquidityIn * _assetReserve / _totalSupply;
-        
+        uint256 _assetMax = (_liquidityIn * _assetReserve) / _totalSupply;
+
         // Get the difference of the stored W pool and the collateral ERC20 balance of the pool contract to get the collateralLocked
         // The maximum necessary collateralLocked is the proportional decrease of the Y pool
         // Must precalculate the collateralLocked with a convenience contract to avoid unecessary loss of collateral ERC20
@@ -550,7 +518,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         _collateralLocked = _collateralLocked >= _bondReceived ? _bondReceived : _collateralLocked;
 
         // Get the debt received and the asset received based on the amount of collateral locked
-        _debtRequiredAndAssetReceived = _assetMax * _collateralLocked / _bondReceived;
+        _debtRequiredAndAssetReceived = (_assetMax * _collateralLocked) / _bondReceived;
 
         // Mint collateralized debt ERC721 when there is collateral locked and debt received
         if (_debtRequiredAndAssetReceived > 0) {
@@ -562,16 +530,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _assetBalance = _transferAndBalanceOf(asset, _to, _debtRequiredAndAssetReceived);
 
         // The decrease in the Z pool must also be proportional to the proportional decrease of the pools
-        uint256 _rateBalance = _rateReserve - (_liquidityIn * _rateReserve / _totalSupply);
-
-        // Update the invariance given the new X pool, Y pool, and Z pool
-        // Note that X pool is treated with the same proportional decrease with Y pool, Z pool, and V pool
-        // When liquidity provider chooses not to borrow the maximum amount of asset
-        // Any difference to the maximum asset amount is treated like paying back the debt, which does not change the invariance
-        _updateInvariance(_assetReserve - _assetMax, bond.balanceOf(address(this)), _rateBalance);
+        uint256 _rateBalance = _rateReserve - ((_liquidityIn * _rateReserve) / _totalSupply);
 
         // Update all the pools
-        _updateReserves(_assetBalance, _collateralBalance);  
+        _updateReserves(_assetBalance, _collateralBalance, _rateBalance);
     }
 
     /* ===== LEND ===== */
@@ -588,30 +550,22 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         address _to,
         uint256 _bondDecrease,
         uint256 _rateDecrease
-    )
-        external
-        override
-        reentrancyLock()
-        returns (
-            uint256 _bondReceived,
-            uint256 _insuranceReceived
-        )
-    {
-        require(block.timestamp < maturity, "TimeswapPool :: lend : Pool Matured");
-        require(_bondDecrease > 0 || _rateDecrease > 0, "TimeswapPool :: lend : Insufficient Decrease");
-        require(invariance > 0, "TimeswapPool :: lend : Invariance must not be Zero");
+    ) external override reentrancyLock() returns (uint256 _bondReceived, uint256 _insuranceReceived) {
+        require(block.timestamp < maturity, 'TimeswapPool :: lend : Pool Matured');
+        require(_bondDecrease > 0 || _rateDecrease > 0, 'TimeswapPool :: lend : Insufficient Decrease');
+        require(totalSupply > 0, 'TimeswapPool :: lend : Total supply must not be Zero');
 
         // Get the X pool, Y pool, and Z pool
-        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReservesForMintOrLend();
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves();
 
         // Get the difference of the stored X pool and the asset ERC20 balance of the pool contract to get the _assetIn
         // _assetIn is the increase in the X pool
         uint256 _assetBalance = asset.balanceOf(address(this));
         uint256 _assetIn = _assetBalance.subOrZero(_assetReserve);
-        require(_assetIn > 0, "TimeswapPool :: lend : Insufficient Asset Input Amount");
+        require(_assetIn > 0, 'TimeswapPool :: lend : Insufficient Asset Input Amount');
 
         // Check that the constant product formula is followed
-        _checkInvarianceForLend(_assetBalance, _bondReserve, _rateReserve, _bondDecrease, _rateDecrease);
+        _checkInvarianceForLend(_assetBalance, _assetReserve, _bondReserve, _rateReserve, _bondDecrease, _rateDecrease);
 
         // Transfer and mint bond ERC20 and insurance ERC20 to the receiver
         _bondReceived = _bondDecrease > 0
@@ -622,7 +576,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
             : 0;
 
         // Update all the pools
-        _updateReserves(_assetBalance, collateral.balanceOf(address(this)));
+        _updateReserves(_assetBalance, collateral.balanceOf(address(this)), _rateReserve - _rateDecrease);
 
         emit Lend(msg.sender, _to, _assetIn, _bondReceived, _insuranceReceived);
     }
@@ -630,6 +584,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Check the constant product formula is followed for a lending transaction
     function _checkInvarianceForLend(
         uint256 _assetBalance,
+        uint256 _assetReserve,
         uint256 _bondReserve,
         uint256 _rateReserve,
         uint256 _bondDecrease,
@@ -643,9 +598,11 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
         // Check the constant product formula is followed
         // _bondDecrease and _rateDecrease must be precalculated by a convenience contract
-        require(
-            _assetBalance * _bondBalanceAdjusted * _rateBalanceAdjusted >= invariance * BASE * BASE,
-            "TimeswapPool :: _checkInvarianceForLend : Reserve Invariance"
+        ConstantProduct.check(
+            _assetBalance,
+            _bondBalanceAdjusted * _rateBalanceAdjusted,
+            _assetReserve,
+            _bondReserve * _rateReserve
         );
     }
 
@@ -657,10 +614,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _transactionFeeBase
     ) private pure returns (uint256 _tokenBalanceAdjusted) {
         // Adjust all value with the base precision
-        uint256 _tokenDecreaseAdjusted = _tokenDecrease * _transactionFeeBase;
-        uint256 _tokenReserveAdjusted = _tokenReserve * BASE;
-        require(_tokenDecreaseAdjusted < _tokenReserveAdjusted, "TimeswapPool :: _tokenDecreaseAdjusted : Insufficient Reserve");
-        _tokenBalanceAdjusted = _tokenReserveAdjusted - _tokenDecreaseAdjusted;
+        _tokenBalanceAdjusted += _tokenReserve * BASE;
+        _tokenBalanceAdjusted -= _tokenDecrease * _transactionFeeBase;
+        _tokenBalanceAdjusted /= BASE;
     }
 
     /// @dev Transfer bond ERC20 from the pool to the receiver
@@ -672,11 +628,11 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _rateReserve
     ) private returns (uint256 _bondReceived) {
         InterfaceTimeswapERC20 _bond = bond; // gas saving
-        
+
         // Get the amount of bond ERC20 minted
         // Always round down in division to minimize the cost to the pool contract
-        uint256 _bondMint = _bondDecrease * _rateReserve / _assetReserve;
-        _bondMint = _bondMint * (maturity - block.timestamp) / YEAR;
+        uint256 _bondMint = (_bondDecrease * _rateReserve) / _assetReserve;
+        _bondMint = (_bondMint * (maturity - block.timestamp)) / YEAR;
         _bondReceived = _bondDecrease + _bondMint;
 
         // Safely transfer and mint bond ERC20 to the receiver
@@ -693,12 +649,12 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _rateReserve
     ) private returns (uint256 _insuranceReceived) {
         InterfaceTimeswapERC20 _insurance = insurance; // gas saving
-        
+
         // Get the amount of insurance decrease of the pool from rate decrease multiply by duration from now to the maturity of the pool
         // Get the amount of insurance ERC20 minted
         // Always round down in division to minimize cost to the pool contract
-        uint256 _insuranceDecrease = _rateDecrease * (maturity - block.timestamp) / YEAR;
-        uint256 _insuranceMint = _rateDecrease * _assetBalance / _rateReserve;
+        uint256 _insuranceDecrease = (_rateDecrease * (maturity - block.timestamp)) / YEAR;
+        uint256 _insuranceMint = (_rateDecrease * _assetBalance) / _rateReserve;
         _insuranceReceived = _insuranceDecrease + _insuranceMint;
 
         // Safely transfer and mint insurance ERC20 to the receiver
@@ -733,21 +689,28 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
             uint256 _debtRequired
         )
     {
-        require(block.timestamp < maturity, "TimeswapPool :: borrow : Pool Matured");
-        require(_assetReceived > 0, "TimeswapPool :: borrow : Insufficient Asset Output Amount");
+        require(block.timestamp < maturity, 'TimeswapPool :: borrow : Pool Matured');
+        require(_assetReceived > 0, 'TimeswapPool :: borrow : Insufficient Asset Output Amount');
         // It is impossible for either bond pool or rate pool to not increase as it will result in infinite debt required or infinite collateral locked
-        require(_bondIncrease > 0 && _rateIncrease > 0, "TimeswapPool :: borrow : Insufficient Increase");
-        require(invariance > 0, "TimeswapPool :: borrow : Invariance must not be Zero");
+        require(_bondIncrease > 0 && _rateIncrease > 0, 'TimeswapPool :: borrow : Insufficient Increase');
+        require(totalSupply > 0, 'TimeswapPool :: borrow : Total supply must not be Zero');
 
         // Get the Y pool, and Z pool
-        (, uint256 _bondReserve, uint256 _rateReserve) = _viewReservesForBurnOrBorrow();
+        (uint256 _assetReserve, uint256 _bondReserve, uint256 _rateReserve) = _viewReserves();
 
         // Transfer the asset ERC20 to the receiver
         uint256 _assetBalance = _transferAndBalanceOf(asset, _to, _assetReceived);
 
         // Check that the constant product formula is followed
-        _checkInvarianceForBorrow(_assetBalance, _bondReserve, _rateReserve, _bondIncrease, _rateIncrease);
-        
+        _checkInvarianceForBorrow(
+            _assetBalance,
+            _assetReserve,
+            _bondReserve,
+            _rateReserve,
+            _bondIncrease,
+            _rateIncrease
+        );
+
         // Mint collateralized debt ERC721 to the receiver
         // Mint bond ERC20 and insurance ERC20 to the pool contract
         (_collateralLocked, _debtRequired) = _mintCollateralizedDebt(
@@ -767,11 +730,11 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _collateralBalance = collateral.balanceOf(address(this));
         require(
             _collateralBalance.subOrZero(collateralReserve) >= _collateralLocked,
-            "TimeswapPool :: borrow : Insufficient Collateral Input Amount"
+            'TimeswapPool :: borrow : Insufficient Collateral Input Amount'
         );
 
         // Update all the pools
-        _updateReserves(_assetBalance, _collateralBalance);
+        _updateReserves(_assetBalance, _collateralBalance, _rateReserve + _rateIncrease);
 
         emit Borrow(msg.sender, _to, _tokenId, _assetReceived, _collateralLocked, _debtRequired);
     }
@@ -779,6 +742,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Check the constant product formula is followed for a borrowing transaction
     function _checkInvarianceForBorrow(
         uint256 _assetBalance,
+        uint256 _assetReserve,
         uint256 _bondReserve,
         uint256 _rateReserve,
         uint256 _bondIncrease,
@@ -789,12 +753,13 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Adjust the bond and rate increase to enforce the transaction fee to the liquidity provider
         uint256 _bondBalanceAdjusted = _tokenIncreaseAdjust(_bondIncrease, _bondReserve, _transactionFeeBase);
         uint256 _rateBalanceAdjusted = _tokenIncreaseAdjust(_rateIncrease, _rateReserve, _transactionFeeBase);
-        
         // Check the constant product formula is followed
         // _bondIncrease and _rateIncrease must be precalculated by a convenience contract
-        require(
-            _assetBalance * _bondBalanceAdjusted * _rateBalanceAdjusted >= invariance * BASE * BASE,
-            "TimeswapPool :: _checkInvarianceForBorrow : Reserve Invariance"
+        ConstantProduct.check(
+            _assetBalance,
+            _bondBalanceAdjusted * _rateBalanceAdjusted,
+            _assetReserve,
+            _bondReserve * _rateReserve
         );
     }
 
@@ -806,8 +771,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _transactionFeeBase
     ) private pure returns (uint256 _tokenBalanceAdjusted) {
         // Adjust all value with the base precision
-        uint256 _tokenIncreaseAdjusted = _tokenIncrease * _transactionFeeBase;
-        _tokenBalanceAdjusted = _tokenReserve * BASE + _tokenIncreaseAdjusted;
+        _tokenBalanceAdjusted += _tokenReserve * BASE;
+        _tokenBalanceAdjusted += _tokenIncrease * _transactionFeeBase;
+        _tokenBalanceAdjusted /= BASE;
     }
 
     /// @dev Mint collateralized debt ERC721 to the receiver
@@ -832,13 +798,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
             _rateReserve,
             _duration
         );
-        _debtRequired = _calculateDebtRequired(
-            _assetReceived,
-            _rateIncrease,
-            _assetBalance,
-            _rateReserve,
-            _duration
-        );
+        _debtRequired = _calculateDebtRequired(_assetReceived, _rateIncrease, _assetBalance, _rateReserve, _duration);
 
         // Get the amount of insurance increase of the pool contract from rate increase multiply by duration from now to the maturity of the pool
         uint256 _insuranceIncrease = (_rateIncrease * _duration).divUp(YEAR);
@@ -859,15 +819,15 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _rateReserve,
         uint256 _duration
     ) private pure returns (uint256 _collateralLocked) {
-        uint256 _bondMax = _assetReceived * _bondReserve / _assetBalance;
-        uint256 _bondMaxUp = (_assetReceived * _bondReserve).divUp(_assetBalance);
+        (uint256 _bondMax, uint256 _bondMaxUp) = (_assetReceived * _bondReserve).divDownAndUp(_assetBalance);
 
         // Use round down and round up in division to maximize the return to the pool contract
         _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(_bondMax - _bondIncrease);
         _collateralLocked = (_collateralLocked * _rateReserve).divUp(_assetBalance + _assetReceived);
         _collateralLocked = (_collateralLocked * _duration).divUp(YEAR);
         _collateralLocked += _bondMaxUp;
-        require(_collateralLocked <= MAXIMUM_BALANCE, "Timeswap :: _updateBondForBorrow : Collateral Overflow");
+
+        require(_collateralLocked <= MAXIMUM_BALANCE, 'Timeswap :: _calculateCollateralLocked : Collateral Overflow');
     }
 
     /// @dev Calculate the debt required for the collateralized debt ERC721
@@ -878,14 +838,14 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _rateReserve,
         uint256 _duration
     ) private pure returns (uint256 _debtRequired) {
-        uint256 _rateMax = _assetReceived * _rateReserve / _assetBalance;
-        uint256 _rateMaxUp = (_assetReceived * _rateReserve).divUp(_assetBalance);
+        (uint256 _rateMax, uint256 _rateMaxUp) = (_assetReceived * _rateReserve).divDownAndUp(_assetBalance);
 
         // Use round down and round up in division to maximize the return to the pool contract
         _debtRequired = (_rateMaxUp * _rateIncrease).divUp(_rateMax - _rateIncrease);
         _debtRequired = (_debtRequired * _duration).divUp(YEAR);
         _debtRequired += _assetReceived;
-        require(_debtRequired <= MAXIMUM_BALANCE, "Timeswap :: _updateInsuranceForBorrow : Debt Overflow");
+
+        require(_debtRequired <= MAXIMUM_BALANCE, 'Timeswap :: _calculateDebtRequired : Debt Overflow');
     }
 
     /* ===== WITHDRAW ===== */
@@ -900,18 +860,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         address _to,
         uint256 _bondIn,
         uint256 _insuranceIn
-    )
-        external
-        override
-        reentrancyLock()
-        returns (
-            uint256 _assetReceived,
-            uint256 _collateralReceived
-        )
-    {
-        require(block.timestamp >= maturity, "TimeswapPool :: withdraw : Pool Not Matured");
-        require(_bondIn > 0 || _insuranceIn > 0, "TimeswapPool :: withdraw : Insufficient Input Amount");
-        require(_to != address(this), "TimeswapPool :: withdraw : Invalid To");
+    ) external override reentrancyLock() returns (uint256 _assetReceived, uint256 _collateralReceived) {
+        require(block.timestamp >= maturity, 'TimeswapPool :: withdraw : Pool Not Matured');
+        require(_bondIn > 0 || _insuranceIn > 0, 'TimeswapPool :: withdraw : Insufficient Input Amount');
+        require(_to != address(this), 'TimeswapPool :: withdraw : Invalid To');
 
         // Get the amount of asset ERC20 received and collateral ERC20 received based on the proportion of bond ERC20 burnt and insurance ERC20 burnt respectively
         _assetReceived = _bondIn > 0 ? _swapProportional(bond, asset, _to, _bondIn) : 0;
@@ -932,9 +884,10 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
         // Get the ERC20 balance of the pool contract, capped to uint128
         // Get the correct proportion of ERC20 received
-        uint256 _tokenBalance = _token.balanceOf(address(this));
-        _tokenBalance = _tokenBalance >= MAXIMUM_BALANCE ? MAXIMUM_BALANCE : _tokenBalance;
-        _tokenOut = _timeswapTokenIn * _tokenBalance / _timeswapTokenBalance;
+        _tokenOut = _token.balanceOf(address(this));
+        _tokenOut = _tokenOut >= MAXIMUM_BALANCE ? MAXIMUM_BALANCE : _tokenOut;
+        _tokenOut *= _timeswapTokenIn;
+        _tokenOut /= _timeswapTokenBalance;
 
         // Transfer the ERC20 to the receiver
         // Burn the native ERC20
@@ -948,20 +901,16 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev Proportionally unlock and transfer collateral ERC20 back to the owner of collateralized debt ERC721
     /// @dev Must atomically increase the asset ERC20 balance of the pool contract with a transaction before calling the pay function
     /// @dev Increasing the asset ERC20 balance of the pool contract before calling this function will determine the assetIn parameter
+    /// @param _to The receiver of the pay function
     /// @param _tokenId The id of the collateralized debt ERC721
     /// @return _collateralReceived The collateral ERC20 received by the owner of collateralized debt ERC721
-    function pay(
-        uint256 _tokenId
-    )
+    function pay(address _to, uint256 _tokenId)
         external
         override
         reentrancyLock()
-        returns (
-            uint256 _collateralReceived
-        )
+        returns (uint256 _collateralReceived)
     {
-        // Sanity checks
-        require(block.timestamp < maturity, "TimeswapPool :: pay : Pool Matured");
+        require(block.timestamp < maturity, 'TimeswapPool :: pay : Pool Matured');
 
         InterfaceTimeswapERC721 _collateralizedDebt = collateralizedDebt; // gas saving
 
@@ -969,28 +918,33 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // _assetIn is the increase in the X pool
         uint256 _assetBalance = asset.balanceOf(address(this));
         uint256 _assetIn = _assetBalance.subOrZero(uint256(assetReserve));
-        require(_assetIn > 0, "TimeswapPool :: pay : Insufficient Asset Input Amount");
+        require(_assetIn > 0, 'TimeswapPool :: pay : Insufficient Asset Input Amount');
 
         // Get the collateral locked and asset debt information from the collateralized debt ERC721
         (uint128 _tokenCollateral, uint128 _tokenDebt) = _collateralizedDebt.collateralizedDebtOf(_tokenId);
-        require(_tokenDebt > 0, "TimeswapPool :: pay : Debt Already Paid");
-        
+
+        require(_tokenDebt > 0, 'TimeswapPool :: pay : Debt Already Paid');
+
         // Calculate collateral ERC20 received by the borrower based on assetIn amount
         // Capped the assetIn at the debt required from the collateralized debt ERC721
         // Must precalculate the assetIn with a convenience contract to avoid unecessary loss of asset ERC20
         (_assetIn, _collateralReceived) = _assetIn >= _tokenDebt
             ? (_tokenDebt, _tokenCollateral)
-            : (_assetIn, _assetIn * _tokenCollateral / _tokenDebt);
-        _collateralizedDebt.burn(_tokenId, _collateralReceived, _assetIn);
+            : (_assetIn, (_assetIn * _tokenCollateral) / _tokenDebt);
 
         // Get the owner of the collateralized debt ERC721
         // Transfer the collateral received to the owner
-        address _to = _collateralizedDebt.ownerOf(_tokenId);
-        uint256 _collateralBalance = _transferAndBalanceOf(collateral, _to, _collateralReceived);
+        address _owner = _collateralizedDebt.ownerOf(_tokenId);
+
+        _collateralReceived = _owner == msg.sender ? _collateralReceived : 0;
+        _collateralizedDebt.burn(_tokenId, _collateralReceived, _assetIn);
+
+        uint256 _collateralBalance;
+        if (_collateralReceived > 0) _collateralBalance = _transferAndBalanceOf(collateral, _to, _collateralReceived);
 
         // Update all the pools
         // The pay function simply increase the X pool and decrease the W pool which means the Z virtual pool for the next transaction decreases
-        _updateReserves(_assetBalance, _collateralBalance);
+        _updateReserves(_assetBalance, _collateralBalance, rateReserve);
 
         emit Pay(msg.sender, _to, _tokenId, _assetIn, _collateralReceived);
     }
@@ -1004,13 +958,9 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         InterfaceERC20 _asset = asset; // gas saving
         InterfaceERC20 _collateral = collateral; // gas saving
 
-        // Get the ERC20 balances of the pool contract
-        uint256 _assetBalance = _asset.balanceOf(address(this));
-        uint256 _collateralBalance = _collateral.balanceOf(address(this));
-
         // Get the difference to the stored pools amount to get the excess ERC20
-        uint256 _assetOut = _assetBalance.subOrZero(assetReserve);
-        uint256 _collateralOut = _collateralBalance.subOrZero(collateralReserve);
+        uint256 _assetOut = _asset.balanceOf(address(this)).subOrZero(assetReserve);
+        uint256 _collateralOut = _collateral.balanceOf(address(this)).subOrZero(collateralReserve);
 
         // Transfer the excess ERC20 to the receiver
         if (_assetOut > 0) _safeTransfer(_asset, _to, _assetOut);

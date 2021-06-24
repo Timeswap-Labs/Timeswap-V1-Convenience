@@ -2,11 +2,10 @@
 pragma solidity =0.8.1;
 
 contract TestToken {
-
     // MODEL
 
-    string public constant name = "Test Token";
-    string public constant symbol = "TEST";
+    string public constant name = 'Test Token';
+    string public constant symbol = 'TEST';
     uint8 public immutable decimals;
 
     address private constant ZERO = address(type(uint160).min);
@@ -18,7 +17,7 @@ contract TestToken {
     // EVENT
 
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    
+
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
     // INIT
@@ -28,7 +27,7 @@ contract TestToken {
     }
 
     // UPDATE
-    
+
     function approve(address _spender, uint256 _value) external returns (bool) {
         _approve(msg.sender, _spender, _value);
         return true;
@@ -39,7 +38,11 @@ contract TestToken {
         return true;
     }
 
-    function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) external returns (bool) {
         if (msg.sender != _from && allowance[_from][msg.sender] != type(uint256).max) {
             allowance[_from][msg.sender] -= _value;
 
@@ -57,12 +60,20 @@ contract TestToken {
 
     // HELPER
 
-    function _approve(address _owner, address _spender, uint256 _value) private {
+    function _approve(
+        address _owner,
+        address _spender,
+        uint256 _value
+    ) private {
         allowance[_owner][_spender] = _value;
         emit Approval(_owner, _spender, _value);
     }
 
-    function _transfer(address _from, address _to, uint256 _value) private {
+    function _transfer(
+        address _from,
+        address _to,
+        uint256 _value
+    ) private {
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
         emit Transfer(_from, _to, _value);

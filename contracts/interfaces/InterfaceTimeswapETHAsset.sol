@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceTimeswapFactory} from "./InterfaceTimeswapFactory.sol";
-import {InterfaceTimeswapPool} from "./InterfaceTimeswapPool.sol";
-import {InterfaceERC20} from "./InterfaceERC20.sol";
-import {InterfaceERC721Receiver} from "./InterfaceERC721Receiver.sol";
-import {InterfaceWETH9} from "./InterfaceWETH9.sol";
+import {InterfaceTimeswapFactory} from './InterfaceTimeswapFactory.sol';
+import {InterfaceTimeswapPool} from './InterfaceTimeswapPool.sol';
+import {InterfaceERC20} from './InterfaceERC20.sol';
+import {InterfaceERC721Receiver} from './InterfaceERC721Receiver.sol';
+import {InterfaceWETH9} from './InterfaceWETH9.sol';
 
 /// @title Timeswap Convenience ETH Asset Interface
 /// @author Ricsson W. Ngo
 interface InterfaceTimeswapETHAsset is InterfaceERC721Receiver {
-    
     struct Parameter {
         InterfaceERC20 collateral;
         uint256 maturity;
@@ -46,7 +45,7 @@ interface InterfaceTimeswapETHAsset is InterfaceERC721Receiver {
 
     /* ===== UPDATE ===== */
 
-    function mint(
+    function newLiquidity(
         Parameter memory _parameter,
         address _to,
         uint256 _bondIncreaseAndCollateralPaid,
@@ -61,7 +60,7 @@ interface InterfaceTimeswapETHAsset is InterfaceERC721Receiver {
             uint256 _liquidityReceived
         );
 
-    function mint(
+    function addLiquidity(
         Parameter memory _parameter,
         address _to,
         SafeMint memory _safe,
@@ -77,7 +76,7 @@ interface InterfaceTimeswapETHAsset is InterfaceERC721Receiver {
             uint256 _liquidityReceived
         );
 
-    function burn(
+    function removeLiquidityBeforeMaturity(
         Parameter memory _parameter,
         address payable _to,
         uint256 _liquidityIn,
@@ -94,38 +93,33 @@ interface InterfaceTimeswapETHAsset is InterfaceERC721Receiver {
             uint256 _insuranceReceived
         );
 
-    function burn(
+    function removeLiquidityAfterMaturity(
         Parameter memory _parameter,
         address _to,
         uint256 _liquidityIn
-    )
-        external
-        returns (
-            uint256 _bondReceived,
-            uint256 _insuranceReceived
-        );
+    ) external returns (uint256 _bondReceived, uint256 _insuranceReceived);
 
-    function lend(
+    function lendGivenBondReceived(
         Parameter memory _parameter,
         address _to,
-        bool _isBondReceivedGiven,
-        uint256 _bondReceivedOrInsuranceReceived,
+        uint256 _givenBondReceived,
         SafeLend memory _safe,
         uint256 _deadline
-    )
-        external
-        payable
-        returns (
-            uint256 _bondReceived,
-            uint256 _insuranceReceived
-        );
+    ) external payable returns (uint256 _bondReceived, uint256 _insuranceReceived);
 
-    function borrow(
+    function lendGivenInsuranceReceived(
+        Parameter memory _parameter,
+        address _to,
+        uint256 _givenInsuranceReceived,
+        SafeLend memory _safe,
+        uint256 _deadline
+    ) external payable returns (uint256 _bondReceived, uint256 _insuranceReceived);
+
+    function borrowGivenCollateralLocked(
         Parameter memory _parameter,
         address payable _to,
         uint256 _assetReceived,
-        bool _isDesiredCollateralLockedGiven,
-        uint256 _desiredCollateralLockedOrInterestRequired,
+        uint256 _givenCollateralLocked,
         SafeBorrow memory _safe,
         uint256 _deadline
     )
@@ -136,26 +130,33 @@ interface InterfaceTimeswapETHAsset is InterfaceERC721Receiver {
             uint256 _debtRequired
         );
 
-    function pay(
+    function borrowGivenInterestRequired(
         Parameter memory _parameter,
-        uint256 _tokenId,
+        address payable _to,
+        uint256 _assetReceived,
+        uint256 _givenInterestRequired,
+        SafeBorrow memory _safe,
         uint256 _deadline
     )
         external
-        payable
         returns (
-            uint256 _collateralReceived
+            uint256 _tokenId,
+            uint256 _collateralLocked,
+            uint256 _debtRequired
         );
 
-    function pay(
+    function repay(
         Parameter memory _parameter,
+        address _to,
+        uint256 _tokenId,
+        uint256 _deadline
+    ) external payable returns (uint256 _collateralReceived);
+
+    function repayMultiple(
+        Parameter memory _parameter,
+        address _to,
         uint256[] memory _tokenIds,
         uint256[] memory _assetsIn,
         uint256 _deadline
-    )
-        external
-        payable
-        returns (
-            uint256 _collateralReceived
-        );
+    ) external payable returns (uint256 _collateralReceived);
 }
