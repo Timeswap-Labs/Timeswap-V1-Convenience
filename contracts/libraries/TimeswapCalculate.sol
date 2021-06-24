@@ -7,8 +7,6 @@ import {InterfaceERC20} from './../interfaces/InterfaceERC20.sol';
 import {Math} from './Math.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 
-import "hardhat/console.sol";
-
 /// @title Timeswap Calculate Library
 /// @author Ricsson W. Ngo
 /// @dev Do all the necessary precalculation for token transfers
@@ -193,20 +191,12 @@ library TimeswapCalculate {
             _bondIncrease /=
                 ((_bondMaxUp * _rateReserve).divUp(_assetReserve) * _duration).divUp(YEAR) +
                 _collateralAdditionalUp;
-
-            console.log("conv bondIncrease", _bondIncrease);
-            console.log("conv bondMax", _bondMax, _bondMaxUp);
-            console.log("conv rateReserve", _rateReserve);
-            console.log("conv assetReserve", _assetReserve);
-            console.log("duration", _duration, YEAR);
             
             // Use round down and round up in division to maximize the return to the Timeswap Core pool contract
             _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(_bondMax - _bondIncrease);
             _collateralLocked = (_collateralLocked * _rateReserve).divUp(_assetReserve);
             _collateralLocked = (_collateralLocked * _duration).divUp(YEAR);
             _collateralLocked += _bondMaxUp;
-
-            console.log("conv collateralLocked", _collateralLocked);
         }
 
         // Adjust the bond increase and bond reserve with the transaction fee
@@ -285,7 +275,6 @@ library TimeswapCalculate {
             _bondIncrease *= BASE;
             _bondIncrease = _bondIncrease.divUp(_transactionFeeBase);
         }
-        console.log("conv _bondIncrease", _bondIncrease);
 
         (uint256 _bondMax, uint256 _bondMaxUp) = (_assetReceived * _bondReserve).divDownAndUp(_assetReserve - _assetReceived);
         // Use round down and round up in division to maximize the return to the Timeswap Core pool contract
@@ -293,8 +282,6 @@ library TimeswapCalculate {
         _collateralLocked = (_collateralLocked * _rateReserve).divUp(_assetReserve);
         _collateralLocked = (_collateralLocked * _duration).divUp(YEAR);
         _collateralLocked += _bondMaxUp;
-
-        console.log("conv collateralLocked calculated", _collateralLocked);
     }
 
     // HELPER

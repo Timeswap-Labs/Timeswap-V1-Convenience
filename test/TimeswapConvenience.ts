@@ -419,7 +419,7 @@ describe("mint", () => {
         checkBigIntEquality(result, liquidityFeeTo);
       });
 
-      // FIXME!!
+      
       it("Should have a correct rate reserve", async () => {
         const resultHex = await pool.rateReserve();
         const result = resultHex.toBigInt();
@@ -830,7 +830,7 @@ describe("mint", () => {
         checkBigIntEquality(result, feeToBalance + liquidityFeeTo);
       });
 
-      // FIXME!!
+      
       it("Should have a correct rate reserve", async () => {
         const resultHex = await pool.rateReserve();
         const result = resultHex.toBigInt();
@@ -1249,7 +1249,7 @@ describe("burn", () => {
         checkBigIntEquality(result, insuranceBalance);
       });
 
-      // FIXME!!
+      
       it("Should have a correct rate reserve", async () => {
         const resultHex = await pool.rateReserve();
         const result = resultHex.toBigInt();
@@ -1825,24 +1825,24 @@ describe("lend", () => {
         bondReceived * assetReserve,
         (rateReserve * (maturity - BigInt(timestamp))) / year + assetReserve
         );
-        // console.log("Bond Decrease", bondDecrease);
+        
     };
 
 
     const calculate = () => {
       const bondBalanceAdjusted =
         (bondReserve * base - bondDecrease * (base + transactionFee)) / base;
-        console.log("JS BondbalanceAdjusted", bondBalanceAdjusted)
+        
       const rateBalanceAdjusted = divUp(
         divUp(invariance * base, assetReserve + assetIn),
         bondBalanceAdjusted
       );
-      console.log("JS rateReserve, rateBalanceAdjusted", rateReserve, rateBalanceAdjusted);
+      
       rateDecrease =
         (rateReserve * base - rateBalanceAdjusted) / (base + transactionFee);
 
-        console.log("Rate Decrease at 1900", rateDecrease)
-        // console.log("Timestamp at 1901 ", timestamp);
+        
+        
 
       bondMint =
         (((bondDecrease * rateReserve) / assetReserve) *
@@ -1903,7 +1903,7 @@ describe("lend", () => {
 
         timestamp = await getTimestamp(transaction.blockHash!)
 
-        // console.log("timestamp after transaction ", timestamp)
+        
 
         // calculateBondDecrease();
 
@@ -1932,7 +1932,7 @@ describe("lend", () => {
         // year;
 
         const bondReceived = bondDecrease + bondMint;
-        // console.log("TS, bd, bm", bondDecrease, bondMint);
+        
         
         checkBigIntEquality(result, bondReceived);
       });
@@ -1949,9 +1949,9 @@ describe("lend", () => {
         
         const insuranceReceived = insuranceDecrease + insuranceMint;
         
-        // console.log("From ts ", insuranceDecrease, insuranceMint);
-        // console.log("Timestamp ts ", timestamp);
-        console.log("Rate Decrease at 1979", rateDecrease)
+        
+        
+        
         
         checkBigIntEquality(result, insuranceReceived);
       });
@@ -2196,7 +2196,7 @@ describe("lend", () => {
 
         calculate();
 
-        console.log("Bond Receive", bondReceived)
+        
 
 
         await timeswapConvenience
@@ -2219,7 +2219,7 @@ describe("lend", () => {
 
         const bondReceived = bondDecrease + bondMint;
 
-        console.log(" bd bm ts times", bondDecrease, bondMint, timestamp)
+        
 
         checkBigIntEquality(result, bondReceived);
       });
@@ -2441,7 +2441,7 @@ describe("borrow", () => {
         assetReserve - assetReceived
       );
 
-      console.log("bond max", bondMax);
+      
 
       const collateralAdditionalUp = collateralLocked - bondMax;
       const collateralAdditional = collateralLocked - bondMaxUp;
@@ -2454,7 +2454,7 @@ describe("borrow", () => {
         ) +
           collateralAdditionalUp);
 
-        console.log ("bond increase", bondIncrease)
+        
     };
 
     const calculate = () => {
@@ -2469,8 +2469,8 @@ describe("borrow", () => {
         base - transactionFee
       );
 
-      console.log("rateIncrease num", (rateBalanceAdjusted - rateReserve) * base)
-      console.log("rateIncrease den", base - transactionFee);
+      
+      
 
       insuranceIncrease = divUp(
         rateIncrease * (maturity - BigInt(timestamp)),
@@ -2487,8 +2487,8 @@ describe("borrow", () => {
       interestRequired = divUp(interestRequired * (maturity - BigInt(timestamp)), year);
       debtRequired = interestRequired + assetReceived;
 
-      console.log("rm ri mat times", rateMax, rateIncrease, maturity, timestamp);
-      console.log("rate res", rateReserve)
+      
+      
     };
 
     const calculateCollateralLocked = () => {
@@ -2509,8 +2509,8 @@ describe("borrow", () => {
         year
       );
       collateralLocked += bondMaxUp;
-      console.log("collateral reserve", collateralReserve)
-      console.log("Collateral locked", collateralLocked)
+      
+      
     };
 
     let safeBorrow: {
@@ -2542,7 +2542,7 @@ describe("borrow", () => {
         
         await setTime(timestamp);
 
-        console.log("timestamp before call", timestamp)
+        
         
         calculateBondIncrease();
 
@@ -2565,12 +2565,12 @@ describe("borrow", () => {
 
         timestamp = await getTimestamp(transaction.blockHash!)
 
-        console.log("timestamp after the call", timestamp)
+        
 
         calculateCollateralLocked();
       });
 
-      // FIXME!!
+      
       it("Should have receiver have correct amount of asset", async () => {
         const resultHex = await testToken1.balanceOf(receiver.address);
         const result = resultHex.toBigInt();
@@ -2578,7 +2578,7 @@ describe("borrow", () => {
         checkBigIntEquality(result, assetReceived);
       });
 
-      // FIXME!!
+      
       it("Should have receiver have a correct collateralized debt token", async () => {
         const collateralizedDebtERC721 = await collateralizedDebtAt(
           await pool.collateralizedDebt()
@@ -2609,7 +2609,7 @@ describe("borrow", () => {
         checkBigIntEquality(resultReserve, assetBalance);
       });
 
-      // FIXME!!
+      
       it("Should have pool have correct collateral", async () => {
         const resultHex = await testToken2.balanceOf(pool.address);
         const result = resultHex.toBigInt();
@@ -2641,7 +2641,7 @@ describe("borrow", () => {
 
         const insuranceBalance = insuranceReserve + insuranceIncrease;
 
-        console.log("ir, ii", insuranceReserve, insuranceIncrease);
+        
 
         checkBigIntEquality(result, insuranceBalance);
       });
@@ -2666,7 +2666,7 @@ describe("borrow", () => {
         const insuranceTotalSupply =
           insuranceTotalSupplyBefore + insuranceIncrease;
 
-        console.log("itsb, ii", insuranceTotalSupplyBefore, insuranceIncrease);
+        
 
         checkBigIntEquality(result, insuranceTotalSupply);
       });
@@ -2698,8 +2698,8 @@ describe("borrow", () => {
           maxInterestRequired: divUp(interestRequired * 110000n, 100000n),
         };
 
-        console.log(parameter, assetReceived, collateralLocked, safeBorrow, deadline);
-        console.log(interestRequired);
+        
+        
 
         await timeswapConvenience
           .connect(receiver)
@@ -2852,7 +2852,7 @@ describe("borrow", () => {
         base - transactionFee
       );
 
-      console.log("test", bondIncrease)
+      
       const bondMax =
         (assetReceived * bondReserve) / (assetReserve - assetReceived);
       const bondMaxUp = divUp(
@@ -2871,9 +2871,9 @@ describe("borrow", () => {
       );
       collateralLocked += bondMaxUp;
 
-      console.log("test time", maturity - BigInt(timestamp), year)
-      console.log("conv test", bondMax, bondMaxUp)
-      console.log("conv test collateralLocked", collateralLocked)
+      
+      
+      
 
       insuranceIncrease = divUp(
         rateIncrease * (maturity - BigInt(timestamp)),
@@ -2955,8 +2955,7 @@ describe("borrow", () => {
 
         checkBigIntEquality(result, assetReceived);
       });
-
-      // FIXME!!
+      
       it("Should have receiver have a correct collateralized debt token", async () => {
         const collateralizedDebtERC721 = await collateralizedDebtAt(
           await pool.collateralizedDebt()
@@ -2969,8 +2968,7 @@ describe("borrow", () => {
         );
         const resultDebt = resultHex.debt.toBigInt();
         const resultCollateral = resultHex.collateral.toBigInt();
-        console.log("results 123", resultDebt, resultCollateral)
-
+        
         expect(result).to.equal(receiver.address);
         checkBigIntEquality(resultDebt, debtRequired);
         checkBigIntEquality(resultCollateral, collateralLocked);
@@ -2983,12 +2981,11 @@ describe("borrow", () => {
         const resultReserve = resultReserveHex.toBigInt();
 
         const assetBalance = assetReserve - assetReceived;
-
+        
         checkBigIntEquality(result, assetBalance);
         checkBigIntEquality(resultReserve, assetBalance);
       });
 
-      // FIXME!!
       it("Should have pool have correct collateral", async () => {
         const resultHex = await testToken2.balanceOf(pool.address);
         const result = resultHex.toBigInt();

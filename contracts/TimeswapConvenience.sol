@@ -8,8 +8,6 @@ import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
 import {InterfaceERC721} from './interfaces/InterfaceERC721.sol';
 import {TimeswapCalculate} from './libraries/TimeswapCalculate.sol';
 
-import "hardhat/console.sol";
-
 /// @title Timeswap Convenience
 /// @author Ricsson W. Ngo
 /// @dev Conveniently call the core functions in Timeswap Core contract
@@ -77,7 +75,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         if (_pool == ZERO) _pool = _createPool(_parameter);
 
         // Check if pool have liquidity
-        require(_pool.totalSupply() == 0, 'TimeswapConvenience :: mint : Pool already have Liquidity');
+        require(_pool.totalSupply() == 0, 'TimeswapConvenience :: newLiquidity : Pool already have Liquidity');
 
         // Calculate one of the parameter for the mint function in the Timeswap Core contract
         _insuranceIncreaseAndDebtRequired =
@@ -133,9 +131,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: mint : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: mint : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: mint : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: addLiquidity : Pool Does Not Exist');
+        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: addLiquidity : Pool Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: addLiquidity : No Liquidity');
 
         // Calculate the necessary parameters for the mint function in the Timeswap Core contract
         (_bondIncreaseAndCollateralPaid, _insuranceIncreaseAndDebtRequired, _bondReceivedAndCollateralLocked) = _pool
@@ -158,14 +156,14 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         );
 
         // Check slippage protection
-        require(_insuranceIncreaseAndDebtRequired <= _safe.maxDebt, 'TimeswapConvenience :: mint : Over the maxDebt');
+        require(_insuranceIncreaseAndDebtRequired <= _safe.maxDebt, 'TimeswapConvenience :: addLiquidity : Over the maxDebt');
         require(
             _bondIncreaseAndCollateralPaid <= _safe.maxCollateralPaid,
-            'TimeswapConvenience :: mint : Over the maxCollateralPaid'
+            'TimeswapConvenience :: addLiquidity : Over the maxCollateralPaid'
         );
         require(
             _bondReceivedAndCollateralLocked <= _safe.maxCollateralLocked,
-            'TimeswapConvenience :: mint : Over the maxCollateralLocked'
+            'TimeswapConvenience :: addLiquidity : Over the maxCollateralLocked'
         );
     }
 
@@ -204,9 +202,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: burn : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: burn : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: burn : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : Pool Does Not Exist');
+        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : Pool Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : No Liquidity');
 
         // Safely transfer liquidity ERC20 to the Timeswap Core pool
         _safeTransferFrom(_pool, msg.sender, _pool, _liquidityIn);
@@ -225,9 +223,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         );
 
         // Check slippage protection
-        require(_debtRequiredAndAssetReceived >= _safe.minAsset, 'TimeswapConvenience :: burn : Under the minAsset');
-        require(_bondReceived >= _safe.minBond, 'TimeswapConvenience :: burn : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapConvenience :: burn : Under the minInsurance');
+        require(_debtRequiredAndAssetReceived >= _safe.minAsset, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : Under the minAsset');
+        require(_bondReceived >= _safe.minBond, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : Under the minBond');
+        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : Under the minInsurance');
     }
 
     /// @dev Withdraw liquidity from a Timeswap pool after maturity with the burn function in the Timeswap Core contract
@@ -246,9 +244,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: burn : Pool Does Not Exist');
-        require(_pool.maturity() <= block.timestamp, 'TimeswapConvenience :: burn : Pool Not Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: burn : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: removeLiquidityAfterMaturity : Pool Does Not Exist');
+        require(_pool.maturity() <= block.timestamp, 'TimeswapConvenience :: removeLiquidityAfterMaturity : Pool Not Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: removeLiquidityAfterMaturity : No Liquidity');
 
         // Safely transfer liquidity ERC20 to the Timeswap Core pool
         _safeTransferFrom(_pool, msg.sender, _pool, _liquidityIn);
@@ -277,9 +275,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: lend : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: lend : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: lend : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: lendGivenBondReceived : Pool Does Not Exist');
+        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: lendGivenBondReceived : Pool Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: lendGivenBondReceived : No Liquidity');
 
         // Calculate the necessary parameters for the lend function in the Timeswap Core contract
         uint256 _bondDecrease;
@@ -294,8 +292,8 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         (_bondReceived, _insuranceReceived) = _pool.lend(_to, _bondDecrease, _rateDecrease);
 
         // Check slippage protection
-        require(_bondReceived >= _safe.minBond, 'TimeswapConvenience :: lend : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapConvenience :: lend : Under the minInsurance');
+        require(_bondReceived >= _safe.minBond, 'TimeswapConvenience :: lendGivenBondReceived : Under the minBond');
+        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapConvenience :: lendGivenBondReceived : Under the minInsurance');
     }
 
     /// @dev Lend asset ERC20 with the lend function in the Timeswap Core contract by giving insurance received
@@ -318,9 +316,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: lend : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: lend : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: lend : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: lendGivenInsuranceReceived : Pool Does Not Exist');
+        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: lendGivenInsuranceReceived : Pool Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: lendGivenInsuranceReceived : No Liquidity');
 
         // Calculate the necessary parameters for the lend function in the Timeswap Core contract
         uint256 _bondDecrease;
@@ -335,8 +333,8 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         (_bondReceived, _insuranceReceived) = _pool.lend(_to, _bondDecrease, _rateDecrease);
 
         // Check slippage protection
-        require(_bondReceived >= _safe.minBond, 'TimeswapConvenience :: lend : Under the minBond');
-        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapConvenience :: lend : Under the minInsurance');
+        require(_bondReceived >= _safe.minBond, 'TimeswapConvenience :: lendGivenInsuranceReceived : Under the minBond');
+        require(_insuranceReceived >= _safe.minInsurance, 'TimeswapConvenience :: lendGivenInsuranceReceived : Under the minInsurance');
     }
 
     /// @dev Borrw asset ERC20 and lock collateral with the borrow function in the Timeswap Core contract given collateral locked
@@ -369,9 +367,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: borrow : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: borrow : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: borrow : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: borrowGivenCollateralLocked : Pool Does Not Exist');
+        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: borrowGivenCollateralLocked : Pool Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: borrowGivenCollateralLocked : No Liquidity');
 
         // Calculate the necessary parameters for the borrow function in the Timeswap Core contract
         uint256 _bondIncrease;
@@ -380,7 +378,6 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
             _assetReceived,
             _givenCollateralLocked
         );
-        console.log("calculated collateral", _collateralLocked);
 
         // Safely transfer collateral ERC20 to the Timeswap Core pool
         _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _collateralLocked);
@@ -388,16 +385,14 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Call the borrow function in the Timeswap Core
         (_tokenId, _collateralLocked, _debtRequired) = _pool.borrow(_to, _assetReceived, _bondIncrease, _rateIncrease);
 
-        console.log("result collateral", _collateralLocked);
-
         // Check slippage protection
         require(
             _collateralLocked <= _safe.maxCollateralLocked,
-            'TimeswapConvenience :: borrow : Over the maxCollateralLocked'
+            'TimeswapConvenience :: borrowGivenCollateralLocked : Over the maxCollateralLocked'
         );
         require(
             _debtRequired - _assetReceived <= _safe.maxInterestRequired,
-            'TimeswapConvenience :: borrow : Over the maxInterestRequired'
+            'TimeswapConvenience :: borrowGivenCollateralLocked : Over the maxInterestRequired'
         );
     }
 
@@ -431,9 +426,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: borrow : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: borrow : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: borrow : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: borrowGivenInterestRequired : Pool Does Not Exist');
+        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: borrowGivenInterestRequired : Pool Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: borrowGivenInterestRequired : No Liquidity');
 
         // Calculate the necessary parameters for the borrow function in the Timeswap Core contract
         uint256 _bondIncrease;
@@ -452,11 +447,11 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Check slippage protection
         require(
             _collateralLocked <= _safe.maxCollateralLocked,
-            'TimeswapConvenience :: borrow : Over the maxCollateralLocked'
+            'TimeswapConvenience :: borrowGivenInterestRequired : Over the maxCollateralLocked'
         );
         require(
             _debtRequired - _assetReceived <= _safe.maxInterestRequired,
-            'TimeswapConvenience :: borrow : Over the maxInterestRequired'
+            'TimeswapConvenience :: borrowGivenInterestRequired : Over the maxInterestRequired'
         );
     }
 
@@ -478,9 +473,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: pay : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: pay : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: pay : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: repay : Pool Does Not Exist');
+        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: repay : Pool Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: repay : No Liquidity');
 
         InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
 
@@ -513,14 +508,14 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         uint256 _deadline
     ) external override ensure(_deadline) returns (uint256 _collateralReceived) {
         // Must have equal lengths array
-        require(_tokenIds.length == _assetsIn.length, 'TimeswapConvenience :: pay : Unequal Length');
+        require(_tokenIds.length == _assetsIn.length, 'TimeswapConvenience :: repayMultiple : Unequal Length');
 
         // Get the address of the pool
         InterfaceTimeswapPool _pool = _getPool(_parameter);
         // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: pay : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: pay : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: pay : No Liquidity');
+        require(_pool != ZERO, 'TimeswapConvenience :: repayMultiple : Pool Does Not Exist');
+        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: repayMultiple : Pool Matured');
+        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: repayMultiple : No Liquidity');
 
         InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
 

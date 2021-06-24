@@ -12,8 +12,6 @@ import {String} from './libraries/String.sol';
 import {ConstantProduct} from './libraries/ConstantProduct.sol';
 import {ERC20Permit} from './ERC20Permit.sol';
 
-import "hardhat/console.sol";
-
 /// @title Timeswap Pool
 /// @author Ricsson W. Ngo
 /// @notice It is recommended to use Timeswap Convenience Contracts to interact with this contract
@@ -81,8 +79,6 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
     /// @dev The function selector of the transfer function on ERC20 standard
     bytes4 private constant TRANSFER = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
-    address private constant ZERO_ADDRESS = address(type(uint160).min);
-
     /// @dev Stores the access state of the contract for reentrancy guard
     bool private locked;
 
@@ -119,7 +115,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // Sanity check
         require(block.timestamp < _maturity, 'TimeswapPool :: initialize : Invalid Maturity');
         // Can only be called once
-        require(factory == InterfaceTimeswapFactory(ZERO_ADDRESS), 'TimeswapPool :: initialize : Forbidden');
+        require(factory == InterfaceTimeswapFactory(ZERO), 'TimeswapPool :: initialize : Forbidden');
 
         maturity = _maturity;
 
@@ -375,7 +371,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
 
         // Burn MINIMUM_LIQUIDITY amount of liquidity ERC20 to avoid DOS attack to other liquidity providers
         // Enforce protocol fee minted to the feeTo address
-        _mint(ZERO_ADDRESS, MINIMUM_LIQUIDITY); // burn minimum liquidity
+        _mint(ZERO, MINIMUM_LIQUIDITY); // burn minimum liquidity
         _mint(_to, _liquidityReceived);
         _mint(factory.feeTo(), _insuranceIncreaseAndDebtRequired - _liquidityReceived - MINIMUM_LIQUIDITY);
 
@@ -822,18 +818,8 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _bondReserve,
         uint256 _rateReserve,
         uint256 _duration
-    ) private view returns (uint256 _collateralLocked) {
-        uint256 _bondMax = (_assetReceived * _bondReserve) / _assetBalance;
-        uint256 _bondMaxUp = (_assetReceived * _bondReserve).divUp(_assetBalance);
-
-        console.log("div check1", _assetReceived, _bondReserve, _assetBalance);
-
-        console.log("core bondMax bondMaxUp", _bondMax, _bondMaxUp);
-         console.log("core bondIncrease", _bondIncrease);
-            console.log("core bondMax", _bondMax, _bondMaxUp);
-            console.log("core rateReserve", _rateReserve);
-            console.log("core assetReserve", _assetBalance + _assetReceived);
-            console.log("core duration", _duration, YEAR);
+    ) private pure returns (uint256 _collateralLocked) {
+        (uint256 _bondMax, uint256 _bondMaxUp) = (_assetReceived * _bondReserve).divDownAndUp(_assetBalance);
 
         // Use round down and round up in division to maximize the return to the pool contract
         _collateralLocked = (_bondMaxUp * _bondIncrease).divUp(_bondMax - _bondIncrease);
@@ -841,9 +827,7 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         _collateralLocked = (_collateralLocked * _duration).divUp(YEAR);
         _collateralLocked += _bondMaxUp;
 
-        console.log("core collateralLocked", _collateralLocked);
-
-        require(_collateralLocked <= MAXIMUM_BALANCE, 'Timeswap :: _updateBondForBorrow : Collateral Overflow');
+        require(_collateralLocked <= MAXIMUM_BALANCE, 'Timeswap :: _calculateCollateralLocked : Collateral Overflow');
     }
 
     /// @dev Calculate the debt required for the collateralized debt ERC721
@@ -854,15 +838,14 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         uint256 _rateReserve,
         uint256 _duration
     ) private pure returns (uint256 _debtRequired) {
-        uint256 _rateMax = (_assetReceived * _rateReserve) / _assetBalance;
-        uint256 _rateMaxUp = (_assetReceived * _rateReserve).divUp(_assetBalance);
+        (uint256 _rateMax, uint256 _rateMaxUp) = (_assetReceived * _rateReserve).divDownAndUp(_assetBalance);
 
         // Use round down and round up in division to maximize the return to the pool contract
         _debtRequired = (_rateMaxUp * _rateIncrease).divUp(_rateMax - _rateIncrease);
         _debtRequired = (_debtRequired * _duration).divUp(YEAR);
         _debtRequired += _assetReceived;
 
-        require(_debtRequired <= MAXIMUM_BALANCE, 'Timeswap :: _updateInsuranceForBorrow : Debt Overflow');
+        require(_debtRequired <= MAXIMUM_BALANCE, 'Timeswap :: _calculateDebtRequired : Debt Overflow');
     }
 
     /* ===== WITHDRAW ===== */
@@ -935,9 +918,12 @@ contract TimeswapPool is InterfaceTimeswapPool, ERC20Permit {
         // _assetIn is the increase in the X pool
         uint256 _assetBalance = asset.balanceOf(address(this));
         uint256 _assetIn = _assetBalance.subOrZero(uint256(assetReserve));
+        require(_assetIn > 0, 'TimeswapPool :: pay : Insufficient Asset Input Amount');
 
         // Get the collateral locked and asset debt information from the collateralized debt ERC721
         (uint128 _tokenCollateral, uint128 _tokenDebt) = _collateralizedDebt.collateralizedDebtOf(_tokenId);
+
+        require(_tokenDebt > 0, 'TimeswapPool :: pay : Debt Already Paid');
 
         // Calculate collateral ERC20 received by the borrower based on assetIn amount
         // Capped the assetIn at the debt required from the collateralized debt ERC721
