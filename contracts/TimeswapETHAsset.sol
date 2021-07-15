@@ -599,6 +599,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         address _to,
         uint256 _value
     ) private {
+        require(_isContract(address(_token)), 'TimeswapETHAsset :: _safeTransfer : call to non-contract');
         (bool _success, bytes memory _data) = address(_token).call(
             abi.encodeWithSelector(TRANSFER_FROM, _from, _to, _value)
         );
@@ -663,5 +664,16 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
     /// @dev Deploy a new Timeswap Core pool given the parameters
     function _createPool(Parameter memory _parameter) private returns (InterfaceTimeswapPool _pool) {
         _pool = factory.createPool(weth, _parameter.collateral, _parameter.maturity);
+    }
+
+    /// @dev Checks an address if it has any data stored on it.
+    /// @dev If datasize > 0, the address is a contract otherwise EOA
+    /// @dev NOTICE: This method will not work if contract is still in constructor
+    /// @param _addr Address of contract which needs to be checked
+    /// @return _result boolean representing wether address is contract or not
+    function _isContract(address _addr) internal returns (bool _result) {
+        uint size;
+        assembly { size := extcodesize(_addr) }
+        return size > 0;
     }
 }
