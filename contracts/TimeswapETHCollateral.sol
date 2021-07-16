@@ -618,9 +618,9 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         // Return any ETH back
         uint256 _ethOut = address(this).balance;
         if (_ethOut > 0) {
-            (_success, _data) = payable(msg.sender).call{value: _ethOut}('');
+            (_success, _) = payable(msg.sender).call{value: _ethOut}('');
             require(
-                _success && (_data.length == 0 || abi.decode(_data, (bool))),
+                _success,
                 'TimeswapETHCollateral :: _wethDepositTransfer : ETH Transfer Failed'
             );
         }
@@ -637,9 +637,9 @@ contract TimeswapETHCollateral is InterfaceTimeswapETHCollateral {
         // Unwrap WETH and transfer ETH to the receiver
         uint256 _ethOut = _weth.balanceOf(address(this));
         _weth.withdraw(_ethOut);
-        (bool _success, bytes memory _data) = _to.call{value: _ethOut}('');
+        (bool _success, _) = _to.call{value: _ethOut}('');
         require(
-            _success && (_data.length == 0 || abi.decode(_data, (bool))),
+            _success,
             'TimeswapETHCollateral :: _wethWithdrawTransfer : ETH Transfer Failed'
         );
     }
