@@ -572,7 +572,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         // Return any ETH back
         uint256 _ethOut = address(this).balance;
         if (_ethOut > 0) {
-            (bool _success, _) = payable(msg.sender).call{value: _ethOut}('');
+            (bool _success,) = payable(msg.sender).call{value: _ethOut}('');
             require(
                 _success,
                 'TimeswapETHAsset :: repayMultiple : ETH Transfer Failed'
@@ -628,7 +628,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         // Return any ETH back
         uint256 _ethOut = address(this).balance;
         if (_ethOut > 0) {
-            (_success, _) = payable(msg.sender).call{value: _ethOut}('');
+            (_success,) = payable(msg.sender).call{value: _ethOut}('');
             require(
                 _success,
                 'TimeswapETHAsset :: _wethDepositTransfer : ETH Transfer Failed'
@@ -648,7 +648,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         // Unwrap WETH and transfer ETH to the receiver
         uint256 _ethOut = _weth.balanceOf(address(this));
         _weth.withdraw(_ethOut);
-        (bool _success, _) = _to.call{value: _ethOut}('');
+        (bool _success,) = _to.call{value: _ethOut}('');
         require(
             _success,
             'TimeswapETHAsset :: _wethWithdrawTransfer : ETH Transfer Failed'
