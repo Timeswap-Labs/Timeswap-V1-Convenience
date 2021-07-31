@@ -4,19 +4,11 @@ import {IPair} from './IPair.sol';
 import {IERC20} from './IERC20.sol';
 
 interface IFactory {
-    // EVENT
-
-    event CreatePair(IERC20 indexed asset, IERC20 indexed collateral, IPair pair);
-
-    event SetOwner(address indexed pendingOwner);
-
-    event AcceptOwner(address indexed owner);
-
     // VIEW
 
     function owner() external view returns (address);
 
-   function pendingOwner() external view returns (address);
+    function pendingOwner() external view returns (address);
 
     function fee() external view returns (uint16);
 

@@ -38,7 +38,7 @@ interface IConvenience is IERC721Receiver {
 
     /* ===== VIEW ===== */
 
-    function factory() external view returns (InterfaceTimeswapFactory);
+    function factory() external view returns (IFactory);
 
     /* ===== UPDATE ===== */
 

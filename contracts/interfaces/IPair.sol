@@ -18,14 +18,14 @@ interface IPair {
         uint32 startBlock;
     }
 
-    struct Parameter {
+    struct State {
         Tokens reserves;
         uint128 interest;
         uint128 cdp;
     }
 
     struct Pool {
-        Parameter parameter;
+        State state;
         uint256 totalLiquidity;
         mapping(address => uint256) liquidityOf;
         Claims totalClaims;
@@ -33,12 +33,26 @@ interface IPair {
         mapping(address => Debt[]) debtsOf;
     }
 
+    function lend(
+        uint256 maturity,
+        address bondTo,
+        address insuranceTo,
+        uint128 interestDecrease,
+        uint128 cdpDecrease
+    ) external returns (Claims memory claimsOut);
+
     function withdraw(
         uint256 maturity,
         address assetTo,
         address collateralTo,
         Claims memory claimsIn
     ) external returns (Tokens memory tokensOut);
+
+    function fee() external view returns (uint16);
+
+    function state(uint256 maturity) external view returns (State memory);
+
+    function totalLiquidity(uint256 maturity) external view returns (uint256);
 
     function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
 }
