@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceTimeswapPool} from './../interfaces/InterfaceTimeswapPool.sol';
-import {InterfaceTimeswapFactory} from './../interfaces/InterfaceTimeswapFactory.sol';
-import {InterfaceERC20} from './../interfaces/InterfaceERC20.sol';
+import {IPair} from './../interfaces/IPair.sol';
+import {IFactory} from './../interfaces/IFactory.sol';
+import {IERC20} from './../interfaces/IERC20.sol';
 import {Math} from './Math.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 
@@ -18,7 +18,7 @@ library TimeswapCalculate {
     // @dev The number of seconds in an epoch year
     uint256 private constant YEAR = 31556926;
 
-    InterfaceTimeswapPool private constant ZERO_ADDRESS = InterfaceTimeswapPool(address(type(uint160).min));
+    IPair private constant ZERO_ADDRESS = IPair(address(type(uint160).min));
 
     /// @dev Calculate the necessary parameters for the mint function in Timeswap Core contract
     /// @dev Precalculate the collateral ERC20 required to transfer
@@ -27,7 +27,7 @@ library TimeswapCalculate {
     /// @return _bondIncreaseAndCollateralPaid The increase in the Y pool and the amount of collateral ERC20 to be deposited to the Timeswap Core contract
     /// @return _insuranceIncreaseAndDebtRequired The increase in the V pool and the amount of debt received
     /// @return _bondReceivedAndCollateralLocked The amount of bond ERC20 received by the receiver and the amount of collateral ERC20 to be locked
-    function calculateMint(InterfaceTimeswapPool _pool, uint256 _insuranceReceivedAndAssetIn)
+    function calculateMint(IPair _pair, uint256 _insuranceReceivedAndAssetIn)
         internal
         view
         returns (
@@ -37,14 +37,14 @@ library TimeswapCalculate {
         )
     {
         // Get the X pool
-        uint256 _assetReserve = _pool.assetReserve(); // gas saving
+        uint256 _assetReserve = _pair.assetReserve(); // gas saving
 
         // The increase of Y pool and V pool must be the same proportional increase to the X pool
         _bondIncreaseAndCollateralPaid =
-            (_insuranceReceivedAndAssetIn * _pool.bond().balanceOf(address(_pool))) /
+            (_insuranceReceivedAndAssetIn * _pair.bond().balanceOf(address(_pair))) /
             _assetReserve;
         _insuranceIncreaseAndDebtRequired =
-            (_insuranceReceivedAndAssetIn * _pool.insurance().balanceOf(address(_pool))) /
+            (_insuranceReceivedAndAssetIn * _pair.insurance().balanceOf(address(_pair))) /
             _assetReserve;
 
         // Calculate how much collateral to be locked
@@ -59,7 +59,7 @@ library TimeswapCalculate {
     /// @param _maxCollateralLocked The maximum amount of collateral ERC20 to be locked
     /// @return _collateralLocked The actual amount of collateral ERC20 to be locked
     function calculateBurn(
-        InterfaceTimeswapPool _pool,
+        IPair _pool,
         uint256 _liquidityIn,
         uint256 _maxCollateralLocked
     ) internal view returns (uint256 _collateralLocked) {
@@ -79,7 +79,7 @@ library TimeswapCalculate {
     /// @return _bondDecrease The decrease in the Y pool parameter for the lend function in the Timeswap Core contract
     /// @return _rateDecrease The decrease in the Z pool parameter for the lend function in the Timeswap Core contract
     function calculateLendGivenBondReceived(
-        InterfaceTimeswapPool _pool,
+        IPair _pool,
         uint256 _assetIn,
         uint256 _bondReceived
     ) internal view returns (uint256 _bondDecrease, uint256 _rateDecrease) {
@@ -118,7 +118,7 @@ library TimeswapCalculate {
     /// @return _bondDecrease The decrease in the Y pool parameter for the lend function in the Timeswap Core contract
     /// @return _rateDecrease The decrease in the Z pool parameter for the lend function in the Timeswap Core contract
     function calculateLendGivenInsuranceReceived(
-        InterfaceTimeswapPool _pool,
+        IPair _pool,
         uint256 _assetIn,
         uint256 _insuranceReceived
     ) internal view returns (uint256 _bondDecrease, uint256 _rateDecrease) {
@@ -161,7 +161,7 @@ library TimeswapCalculate {
     /// @return _rateIncrease The increase in the Z pool parameter for the burn function in the Timeswap Core contract
     /// @return _collateralLocked The actual amount of collateral ERC20 to be locked
     function calculateBorrowGivenDesiredCollateralLocked(
-        InterfaceTimeswapPool _pool,
+        IPair _pool,
         uint256 _assetReceived,
         uint256 _desiredCollateralLocked
     )
@@ -227,7 +227,7 @@ library TimeswapCalculate {
     /// @return _rateIncrease The increase in the Z pool parameter for the burn function in the Timeswap Core contract
     /// @return _collateralLocked The actual amount of collateral ERC20 to be locked
     function calculateBorrowGivenInterestRequired(
-        InterfaceTimeswapPool _pool,
+        IPair _pool,
         uint256 _assetReceived,
         uint256 _interestRequired
     )
@@ -289,7 +289,7 @@ library TimeswapCalculate {
     // HELPER
 
     /// @dev Return the X pool, Y pool, and the Z pool
-    function _viewReserves(InterfaceTimeswapPool _pool)
+    function _viewReserves(IPair _pool)
         private
         view
         returns (

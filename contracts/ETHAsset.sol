@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceTimeswapETHAsset} from './interfaces/InterfaceTimeswapETHAsset.sol';
-import {InterfaceTimeswapFactory} from './interfaces/InterfaceTimeswapFactory.sol';
-import {InterfaceTimeswapPool} from './interfaces/InterfaceTimeswapPool.sol';
-import {InterfaceWETH9} from './interfaces/InterfaceWETH9.sol';
-import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
-import {InterfaceERC721} from './interfaces/InterfaceERC721.sol';
+import {IETHAsset} from './interfaces/IETHAsset.sol';
+import {IFactory} from './interfaces/IFactory.sol';
+import {IPair} from './interfaces/IPair.sol';
+import {IWETH9} from './interfaces/IWETH9.sol';
+import {IERC20} from './interfaces/IERC20.sol';
+import {IERC721} from './interfaces/IERC721.sol';
 import {TimeswapCalculate} from './libraries/TimeswapCalculate.sol';
 
 /// @title Timeswap Convenience ETH Asset
@@ -15,19 +15,19 @@ import {TimeswapCalculate} from './libraries/TimeswapCalculate.sol';
 /// @dev The asset parameter for all transaction is the WETH ERC20 for transactions with ETH
 /// @dev Precalculate and transfer necessary tokens to the Timeswap Core contract
 /// @dev Does safety checks in regards to slippage and deadline
-contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
-    using TimeswapCalculate for InterfaceTimeswapPool;
+contract TimeswapETHAsset is IETHAsset {
+    using TimeswapCalculate for IPair;
 
     /* ===== MODEL ===== */
 
     bytes4 private constant TRANSFER = bytes4(keccak256(bytes('transfer(address,uint256)')));
     bytes4 private constant TRANSFER_FROM = bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
-    InterfaceTimeswapPool private constant ZERO = InterfaceTimeswapPool(address(type(uint160).min));
+    IPair private constant ZERO = IPair(address(type(uint160).min));
 
     /// @dev The address of the Timeswap Core factory contract that deploys Timeswap pools
-    InterfaceTimeswapFactory public immutable override factory;
+    IFactory public immutable override factory;
     /// @dev The address of the WETH ERC20 contract that wraps ETH to follow the ERC20 standard
-    InterfaceWETH9 public immutable override weth;
+    IWETH9 public immutable override weth;
 
     /// @dev Set deadlines for when the transactions are not executed fast enough
     modifier ensure(uint256 _deadline) {
@@ -42,7 +42,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
     /// @dev Finally deploy the Timeswap Convenience contract
     /// @param _factory The address of the Timeswap Core factory contract
     /// @param _weth The address of the WETH ERC20 contract
-    constructor(InterfaceTimeswapFactory _factory, InterfaceWETH9 _weth) {
+    constructor(IFactory _factory, IWETH9 _weth) {
         factory = _factory;
         weth = _weth;
     }
@@ -77,7 +77,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
 
         // Deploy a new Timeswap pool if the pool does not exist
         if (_pool == ZERO) _pool = _createPool(_parameter);
@@ -137,7 +137,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: addLiquidity : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapETHAsset :: addLiquidity : Pool Matured');
@@ -145,7 +145,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
 
         // Calculate the necessary parameters for the mint function in the Timeswap Core contract
         (_bondIncreaseAndCollateralPaid, _insuranceIncreaseAndDebtRequired, _bondReceivedAndCollateralLocked) = _pool
-        .calculateMint(msg.value);
+            .calculateMint(msg.value);
 
         // Safely transfer and wrap the necessary tokens to the Timeswap Core pool
         _wethDepositTransfer(_pool, msg.value);
@@ -211,7 +211,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: removeLiquidityBeforeMaturity : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapETHAsset :: removeLiquidityBeforeMaturity : Pool Matured');
@@ -265,7 +265,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         uint256 _liquidityIn
     ) external override returns (uint256 _bondReceived, uint256 _insuranceReceived) {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: removeLiquidityAfterMaturity : Pool Does Not Exist');
         require(
@@ -298,7 +298,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         uint256 _deadline
     ) external payable override ensure(_deadline) returns (uint256 _bondReceived, uint256 _insuranceReceived) {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: lendGivenBondReceived : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapETHAsset :: lendGivenBondReceived : Pool Matured');
@@ -340,7 +340,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         uint256 _deadline
     ) external payable override ensure(_deadline) returns (uint256 _bondReceived, uint256 _insuranceReceived) {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: lendGivenInsuranceReceived : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapETHAsset :: lendGivenInsuranceReceived : Pool Matured');
@@ -393,7 +393,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: borrowGivenCollateralLocked : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapETHAsset :: borrowGivenCollateralLocked : Pool Matured');
@@ -455,7 +455,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: borrowGivenInterestRequired : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapETHAsset :: borrowGivenInterestRequired : Pool Matured');
@@ -504,13 +504,13 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         uint256 _deadline
     ) external payable override ensure(_deadline) returns (uint256 _collateralReceived) {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: repay : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapETHAsset :: repay : Pool Matured');
         require(_pool.totalSupply() > 0, 'TimeswapETHAsset :: repay : No Liquidity');
 
-        InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
+        IERC721 _collateralizedDebt = _pool.collateralizedDebt();
 
         // Safely transfer collateralized debt ERC721 to this contract
         _collateralizedDebt.safeTransferFrom(msg.sender, address(this), _tokenId);
@@ -545,13 +545,13 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
         require(_tokenIds.length == _assetsIn.length, 'TimeswapETHAsset :: repayMultiple : Unequal Length');
 
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapETHAsset :: repayMultiple : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapETHAsset :: repayMultiple : Pool Matured');
         require(_pool.totalSupply() > 0, 'TimeswapETHAsset :: repayMultiple : No Liquidity');
 
-        InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
+        IERC721 _collateralizedDebt = _pool.collateralizedDebt();
 
         for (uint256 _index = 0; _index < _tokenIds.length; _index++) {
             uint256 _tokenId = _tokenIds[_index]; // gas saving
@@ -594,7 +594,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
     /// @dev Safely transfer the tokens of an ERC20 token contract
     /// @dev Will revert if failed at calling the transfer function
     function _safeTransferFrom(
-        InterfaceERC20 _token,
+        IERC20 _token,
         address _from,
         address _to,
         uint256 _value
@@ -610,8 +610,8 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
 
     /// @dev Safely wrap and transfer ETH to the Timeswap Core pool
     /// @dev Will revert if failed at calling the transfer function
-    function _wethDepositTransfer(InterfaceTimeswapPool _pool, uint256 _value) private {
-        InterfaceWETH9 _weth = weth; // gas savings
+    function _wethDepositTransfer(IPair _pool, uint256 _value) private {
+        IWETH9 _weth = weth; // gas savings
 
         // Wrap ETH
         _weth.deposit{value: _value}();
@@ -640,7 +640,7 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
     /// @dev Required WETH contract approve from the receiver
     /// @dev Will revert if failed at calling the transfer function
     function _wethWithdrawTransfer(address payable _to, uint256 _value) private {
-        InterfaceWETH9 _weth = weth; // gas savings
+        IWETH9 _weth = weth; // gas savings
 
         // Safely transfer WETH to the this address
         _safeTransferFrom(_weth, _to, address(this), _value);
@@ -656,12 +656,12 @@ contract TimeswapETHAsset is InterfaceTimeswapETHAsset {
     }
 
     /// @dev Get the address of the Timeswap Core pool given the parameters
-    function _getPool(Parameter memory _parameter) private view returns (InterfaceTimeswapPool _pool) {
+    function _getPool(Parameter memory _parameter) private view returns (IPair _pool) {
         _pool = factory.getPool(weth, _parameter.collateral, _parameter.maturity);
     }
 
     /// @dev Deploy a new Timeswap Core pool given the parameters
-    function _createPool(Parameter memory _parameter) private returns (InterfaceTimeswapPool _pool) {
+    function _createPool(Parameter memory _parameter) private returns (IPair _pool) {
         _pool = factory.createPool(weth, _parameter.collateral, _parameter.maturity);
     }
 }

@@ -1,28 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceTimeswapConvenience} from './interfaces/InterfaceTimeswapConvenience.sol';
-import {InterfaceTimeswapFactory} from './interfaces/InterfaceTimeswapFactory.sol';
-import {InterfaceTimeswapPool} from './interfaces/InterfaceTimeswapPool.sol';
-import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
-import {InterfaceERC721} from './interfaces/InterfaceERC721.sol';
+import {IConvenience} from './interfaces/IConvenience.sol';
+import {IFactory} from './interfaces/IFactory.sol';
+import {IPair} from './interfaces/IPair.sol';
+import {IERC20} from './interfaces/IERC20.sol';
+import {IERC721} from './interfaces/IERC721.sol';
 import {TimeswapCalculate} from './libraries/TimeswapCalculate.sol';
 
 /// @title Timeswap Convenience
 /// @author Ricsson W. Ngo
 /// @dev Conveniently call the core functions in Timeswap Core contract
-/// @dev Precalculate and transfer necessary tokens to the Timeswap Core contract
+/// @dev Precalculate and transfer necessarys tokens to the Timeswap Core contract
 /// @dev Does safety checks in regards to slippage and deadline
-contract TimeswapConvenience is InterfaceTimeswapConvenience {
-    using TimeswapCalculate for InterfaceTimeswapPool;
+contract TimeswapConvenience is IConvenience {
+    using TimeswapCalculate for IPair;
 
     /* ===== MODEL ===== */
 
     bytes4 private constant TRANSFER_FROM = bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
-    InterfaceTimeswapPool private constant ZERO = InterfaceTimeswapPool(address(type(uint160).min));
+    IPair private constant ZERO = IPair(address(type(uint160).min));
 
     /// @dev The address of the Timeswap Core factory contract that deploys Timeswap pools
-    InterfaceTimeswapFactory public immutable override factory;
+    IFactory public immutable override factory;
 
     /// @dev Set deadlines for when the transactions are not executed fast enough
     modifier ensure(uint256 _deadline) {
@@ -35,7 +35,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
     /// @dev First deploy the Timeswap Core factory contract
     /// @dev Then deploy the Timeswap Convenience contract
     /// @param _factory The address of the Timeswap Core factory contract
-    constructor(InterfaceTimeswapFactory _factory) {
+    constructor(IFactory _factory) {
         factory = _factory;
     }
 
@@ -69,13 +69,13 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pair = _getPair(_parameter);
 
         // Deploy a new Timeswap pool if the pool does not exist
-        if (_pool == ZERO) _pool = _createPool(_parameter);
+        if (_pair == ZERO) _pair = _createPool(_parameter);
 
         // Check if pool have liquidity
-        require(_pool.totalSupply() == 0, 'TimeswapConvenience :: newLiquidity : Pool already have Liquidity');
+        require(_pair.totalSupply() == 0, 'TimeswapConvenience :: newLiquidity : Pool already have Liquidity');
 
         // Calculate one of the parameter for the mint function in the Timeswap Core contract
         _insuranceIncreaseAndDebtRequired =
@@ -129,7 +129,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: addLiquidity : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: addLiquidity : Pool Matured');
@@ -137,7 +137,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
 
         // Calculate the necessary parameters for the mint function in the Timeswap Core contract
         (_bondIncreaseAndCollateralPaid, _insuranceIncreaseAndDebtRequired, _bondReceivedAndCollateralLocked) = _pool
-        .calculateMint(_insuranceReceivedAndAssetIn);
+            .calculateMint(_insuranceReceivedAndAssetIn);
 
         // Safely transfer the necessary tokens to the Timeswap Core pool
         _safeTransferFrom(_parameter.asset, msg.sender, _pool, _insuranceReceivedAndAssetIn);
@@ -203,7 +203,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : Pool Does Not Exist');
         require(
@@ -257,7 +257,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         uint256 _liquidityIn
     ) external override returns (uint256 _bondReceived, uint256 _insuranceReceived) {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: removeLiquidityAfterMaturity : Pool Does Not Exist');
         require(
@@ -291,7 +291,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         uint256 _deadline
     ) external override ensure(_deadline) returns (uint256 _bondReceived, uint256 _insuranceReceived) {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: lendGivenBondReceived : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: lendGivenBondReceived : Pool Matured');
@@ -335,7 +335,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         uint256 _deadline
     ) external override ensure(_deadline) returns (uint256 _bondReceived, uint256 _insuranceReceived) {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: lendGivenInsuranceReceived : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: lendGivenInsuranceReceived : Pool Matured');
@@ -392,7 +392,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: borrowGivenCollateralLocked : Pool Does Not Exist');
         require(
@@ -454,7 +454,7 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         )
     {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: borrowGivenInterestRequired : Pool Does Not Exist');
         require(
@@ -504,13 +504,13 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         uint256 _deadline
     ) external override ensure(_deadline) returns (uint256 _collateralReceived) {
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: repay : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: repay : Pool Matured');
         require(_pool.totalSupply() > 0, 'TimeswapConvenience :: repay : No Liquidity');
 
-        InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
+        IERC721 _collateralizedDebt = _pool.collateralizedDebt();
 
         // Safely transfer collateralized debt ERC721 to this contract
         _collateralizedDebt.safeTransferFrom(msg.sender, address(this), _tokenId);
@@ -544,13 +544,13 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
         require(_tokenIds.length == _assetsIn.length, 'TimeswapConvenience :: repayMultiple : Unequal Length');
 
         // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
+        IPair _pool = _getPool(_parameter);
         // Sanity checks
         require(_pool != ZERO, 'TimeswapConvenience :: repayMultiple : Pool Does Not Exist');
         require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: repayMultiple : Pool Matured');
         require(_pool.totalSupply() > 0, 'TimeswapConvenience :: repayMultiple : No Liquidity');
 
-        InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
+        IERC721 _collateralizedDebt = _pool.collateralizedDebt();
 
         for (uint256 _index = 0; _index < _tokenIds.length; _index++) {
             uint256 _tokenId = _tokenIds[_index]; // gas saving
@@ -583,9 +583,9 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
     /// @dev Safely transfer the tokens of an ERC20 token contract
     /// @dev Will revert if failed at calling the transfer function
     function _safeTransferFrom(
-        InterfaceERC20 _token,
+        IERC20 _token,
         address _from,
-        InterfaceTimeswapPool _to,
+        IPair _to,
         uint256 _value
     ) private {
         (bool _success, bytes memory _data) = address(_token).call(
@@ -598,12 +598,12 @@ contract TimeswapConvenience is InterfaceTimeswapConvenience {
     }
 
     /// @dev Get the address of the Timeswap Core pool given the parameters
-    function _getPool(Parameter memory _parameter) private view returns (InterfaceTimeswapPool _pool) {
-        _pool = factory.getPool(_parameter.asset, _parameter.collateral, _parameter.maturity);
+    function _getPair(Parameter memory _parameter) private view returns (IPair _pair) {
+        _pair = factory.getPair(_parameter.asset, _parameter.collateral);
     }
 
     /// @dev Deploy a new Timeswap Core pool given the parameters
-    function _createPool(Parameter memory _parameter) private returns (InterfaceTimeswapPool _pool) {
-        _pool = factory.createPool(_parameter.asset, _parameter.collateral, _parameter.maturity);
+    function _createPair(Parameter memory _parameter) private returns (IPair _pair) {
+        _pair = factory.createPair(_parameter.asset, _parameter.collateral);
     }
 }

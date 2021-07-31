@@ -3,7 +3,7 @@ pragma solidity =0.8.1;
 
 /// @title ERC721 Interface
 /// @author Ricsson W. Ngo
-interface InterfaceERC721 {
+interface IERC721 {
     /* ===== VIEW ===== */
 
     function ownerOf(uint256 _tokenId) external view returns (address);

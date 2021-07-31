@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceTimeswapFactory} from './InterfaceTimeswapFactory.sol';
-import {InterfaceTimeswapPool} from './InterfaceTimeswapPool.sol';
-import {InterfaceERC20} from './InterfaceERC20.sol';
-import {InterfaceERC721Receiver} from './InterfaceERC721Receiver.sol';
-import {InterfaceWETH9} from './InterfaceWETH9.sol';
+import {IFactory} from './IFactory.sol';
+import {IPair} from './IPair.sol';
+import {IERC20} from './IERC20.sol';
+import {IERC721Receiver} from './IERC721Receiver.sol';
+import {IWETH9} from './IWETH9.sol';
 
 /// @title Timeswap Convenience ETH Collateral Interface
 /// @author Ricsson W. Ngo
-interface InterfaceTimeswapETHCollateral is InterfaceERC721Receiver {
+interface IETHCollateral is IERC721Receiver {
     struct Parameter {
-        InterfaceERC20 asset;
+        IERC20 asset;
         uint256 maturity;
     }
 
@@ -37,9 +37,9 @@ interface InterfaceTimeswapETHCollateral is InterfaceERC721Receiver {
 
     /* ===== VIEW ===== */
 
-    function factory() external returns (InterfaceTimeswapFactory);
+    function factory() external returns (IFactory);
 
-    function weth() external returns (InterfaceWETH9);
+    function weth() external returns (IWETH9);
 
     /* ===== UPDATE ===== */
 

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {InterfaceERC20} from './InterfaceERC20.sol';
+import {IERC20} from './IERC20.sol';
 
 /// @title WETH9 Interface
 /// @author Ricsson W. Ngo
-interface InterfaceWETH9 is InterfaceERC20 {
+interface IWETH9 is IERC20 {
     /* ===== UPDATE ===== */
 
     function deposit() external payable;
