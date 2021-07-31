@@ -33,66 +33,12 @@ interface IPair {
         mapping(address => Debt[]) debtsOf;
     }
 
-    event Sync(uint256 maturity, Parameter parameter);
-
-    event Mint(
+    function withdraw(
         uint256 maturity,
-        address indexed sender,
-        address indexed liquidityTo,
-        address indexed debtTo,
-        uint128 assetIn,
-        uint256 liquidityOut,
-        uint256 id,
-        Debt debtOut
-    );
+        address assetTo,
+        address collateralTo,
+        Claims memory claimsIn
+    ) external returns (Tokens memory tokensOut);
 
-    event Burn(
-        uint256 maturity,
-        address indexed sender,
-        address indexed assetTo,
-        address indexed debtTo,
-        uint256 liquidityIn,
-        Tokens tokensOut
-    );
-
-    event Lend(
-        uint256 maturity,
-        address indexed sender,
-        address indexed bondTo,
-        address indexed insuranceTo,
-        uint128 assetIn,
-        Claims claimsOut
-    );
-
-    event Withdraw(
-        uint256 maturity,
-        address indexed sender,
-        address indexed assetTo,
-        address indexed collateralTo,
-        Claims claimsIn,
-        Tokens tokensOut
-    );
-
-    event Borrow(
-        uint256 maturity,
-        address indexed sender,
-        address indexed assetTo,
-        address indexed debtTo,
-        uint128 assetOut,
-        uint256 id,
-        Debt debtOut
-    );
-
-    event Pay(
-        uint256 maturity,
-        address indexed sender,
-        address indexed to,
-        address indexed owner,
-        uint128 assetIn,
-        uint128 collateralOut,
-        uint256[] ids,
-        Debt[] debtsIn
-    );
-
-    event Skim(address indexed sender, address indexed assetTo, address indexed collateralTo, Tokens tokensOut);
+    function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
 }
