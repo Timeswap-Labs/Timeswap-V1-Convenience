@@ -2,20 +2,21 @@
 pragma solidity =0.8.1;
 
 import {IPair} from '../interfaces/IPair.sol';
-import {SafeCast} from './SafeCast.sol';
 import {Math} from './Math.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
+import {SafeCast} from './SafeCast.sol';
 
 library LendMath {
     using Math for uint256;
+    using ConstantProduct for IPair.State;
     using SafeCast for uint256;
 
-    function fromBond(
+    function givenBond(
         IPair pair,
         uint256 maturity,
         uint128 assetIn,
         uint128 bondOut
-    ) internal returns (uint128 interestDecrease, uint128 cdpDecrease) {
+    ) internal view returns (uint128 interestDecrease, uint128 cdpDecrease) {
         uint256 feeBase = 0x0000 + pair.fee();
         uint256 duration = maturity - block.timestamp;
 
@@ -33,6 +34,12 @@ library LendMath {
         interestAdjust >>= 16;
         interestAdjust = interestAdjust.toUint128();
 
-        // fix
+        uint256 cdpAdjust = state.calculate(state.reserves.asset + assetIn, interestAdjust);
+
+        uint256 _cdpDecrease = state.cdp;
+        _cdpDecrease -= cdpAdjust;
+        _cdpDecrease <<= 16;
+        _cdpDecrease /= feeBase;
+        cdpDecrease = _cdpDecrease.toUint128();
     }
 }

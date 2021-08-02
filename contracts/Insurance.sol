@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IERC20} from './interfaces/IERC20.sol';
+import {IClaim} from './interfaces/IClaim.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IPair} from './interfaces/IPair.sol';
 
-contract Insurance is IERC20 {
-    IConvenience public immutable convenience;
-    IPair public immutable pair;
-    uint256 public immutable maturity;
+contract Insurance is IClaim {
+    IConvenience public immutable override convenience;
+    IPair public immutable override pair;
+    uint256 public immutable override maturity;
 
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
+    mapping(address => uint256) public override balanceOf;
+    mapping(address => mapping(address => uint256)) public override allowance;
 
     modifier onlyConvenience() {
         require(msg.sender == address(convenience), 'Forbidden');
@@ -28,11 +28,11 @@ contract Insurance is IERC20 {
         maturity = _maturity;
     }
 
-    function totalSupply() external view returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return pair.claimsOf(maturity, address(this)).insurance;
     }
 
-    function transfer(address to, uint256 amount) external returns (bool) {
+    function transfer(address to, uint256 amount) external override returns (bool) {
         _transfer(msg.sender, to, amount);
 
         return true;
@@ -42,14 +42,14 @@ contract Insurance is IERC20 {
         address from,
         address to,
         uint256 amount
-    ) external returns (bool) {
+    ) external override returns (bool) {
         _approve(from, msg.sender, allowance[from][msg.sender] - amount);
         _transfer(from, to, amount);
 
         return true;
     }
 
-    function approve(address spender, uint256 amount) external returns (bool) {
+    function approve(address spender, uint256 amount) external override returns (bool) {
         _approve(msg.sender, spender, amount);
 
         return true;
@@ -67,23 +67,23 @@ contract Insurance is IERC20 {
         return true;
     }
 
-    function mint(address to, uint128 amount) external onlyConvenience {
+    function mint(address to, uint128 amount) external override onlyConvenience {
         require(to != address(0), 'Zero');
 
         balanceOf[to] += amount;
 
-        emit Transfer(address(0), owner, amount);
+        emit Transfer(address(0), to, amount);
     }
 
     function burn(
+        address from,
         address to,
-        address owner,
         uint128 amount
-    ) external onlyConvenience returns (uint128 collateralOut) {
-        balanceOf[owner] -= amount;
-        collateralOut = pair.withdraw(maturity, to, to, Claims(0, amount)).collateral;
+    ) external override onlyConvenience returns (uint128 tokenOut) {
+        balanceOf[from] -= amount;
+        tokenOut = pair.withdraw(maturity, to, to, IPair.Claims(0, amount)).collateral;
 
-        emit Transfer(owner, address(0), amount);
+        emit Transfer(from, address(0), amount);
     }
 
     function _transfer(
@@ -96,7 +96,7 @@ contract Insurance is IERC20 {
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
 
-        emit Transfer(from, owner, amount);
+        emit Transfer(from, to, amount);
     }
 
     function _approve(
@@ -106,6 +106,6 @@ contract Insurance is IERC20 {
     ) private {
         allowance[owner][spender] = amount;
 
-        emit Approval(owner, spender, value);
+        emit Approval(owner, spender, amount);
     }
 }

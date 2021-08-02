@@ -4,17 +4,29 @@ pragma solidity =0.8.1;
 /// @title ERC20 Interface
 /// @author Ricsson W. Ngo
 interface IERC20 {
-    /* ===== VIEW ===== */
+    // EVENT
+
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+
+    // VIEW
 
     function totalSupply() external view returns (uint256);
 
     function balanceOf(address _owner) external view returns (uint256);
 
-    function transfer(address to, uint256 amount) external view returns (bool);
+    function allowance(address _owner, address _spender) external view returns (uint256);
+
+    // UPDATE
+
+    function approve(address _spender, uint256 _value) external returns (bool);
+
+    function transfer(address _to, uint256 _value) external returns (bool);
 
     function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external view returns (bool);
+        address _from,
+        address _to,
+        uint256 _value
+    ) external returns (bool);
 }
