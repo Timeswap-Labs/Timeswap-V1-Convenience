@@ -74,4 +74,33 @@ contract Convenience {
         require(claims.bond >= safe.minBond, 'Safety');
         require(claims.insurance >= safe.minInsurance, 'Safety');
     }
+
+    function lendGivenInsurance(
+        Parameter memory parameter,
+        uint256 maturity,
+        address to,
+        uint128 assetIn,
+        uint128 insuranceOut,
+        SafeLend memory safe,
+        uint256 deadline
+    ) external ensure(deadline) returns (IPair.Claims memory claims) {
+        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+
+        require(address(pair) != address(0), 'Zero');
+        require(pair.totalLiquidity(maturity) > 0, 'Forbidden');
+
+        (uint128 interestDecrease, uint128 cdpDecrease) = pair.givenInsurance(maturity, assetIn, insuranceOut);
+
+        parameter.asset.safeTransferFrom(msg.sender, pair, assetIn);
+
+        Native memory native = natives[parameter.asset][parameter.collateral][maturity];
+
+        claims = pair.lend(maturity, address(native.bond), address(native.insurance), interestDecrease, cdpDecrease);
+
+        native.bond.mint(to, claims.bond);
+        native.insurance.mint(to, claims.insurance);
+
+        require(claims.bond >= safe.minBond, 'Safety');
+        require(claims.insurance >= safe.minInsurance, 'Safety');
+    }
 }
