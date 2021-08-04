@@ -1,25 +1,23 @@
-// SPDX-License-identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IERC721} from './interfaces/IERC721.sol';
+import {IDue} from './interfaces/IDue.sol';
 import {IERC721Receiver} from './interfaces/IERC721Receiver.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IPair} from './interfaces/IPair.sol';
 
-contract CollateralizedDebt is IERC721 {
-    IConvenience public immutable convenience;
-    IPair public immutable pair;
-    uint256 public immutable maturity;
+contract CollateralizedDebt is IDue {
+    IConvenience public immutable override convenience;
+    IPair public immutable override pair;
+    uint256 public immutable override maturity;
 
-    
     mapping(address => uint256) public override balanceOf;
-    mapping(uint256 => address) public  override ownerOf;
+    mapping(uint256 => address) public override ownerOf;
     mapping(uint256 => address) public override getApproved;
     mapping(address => mapping(address => bool)) public override isApprovedForAll;
 
-    
-    function debtOf(uint256 id) external view returns(IPair.Debt memory debt){
-        debt = pair.debtsOf(maturity,address(this))[id];
+    function dueOf(uint256 id) external view override returns (IPair.Due memory) {
+        return pair.duesOf(maturity, address(this))[id];
     }
 
     modifier onlyConvenience() {
@@ -27,7 +25,7 @@ contract CollateralizedDebt is IERC721 {
         _;
     }
 
-     modifier isApproved(address owner, uint256 id) {
+    modifier isApproved(address owner, uint256 id) {
         require(
             owner == msg.sender || getApproved[id] == msg.sender || isApprovedForAll[owner][msg.sender],
             'Forrbidden'
@@ -45,24 +43,26 @@ contract CollateralizedDebt is IERC721 {
         maturity = _maturity;
     }
 
-    function mint(
-        address _to,
-        uint256 id
-    ) external onlyConvenience {
-        _safeMint(_to, id);
+    function mint(address to, uint256 id) external override onlyConvenience {
+        _safeMint(to, id);
     }
 
-    function burn(address to, uint256[] memory ids, uint112[] memory assetsPay) external onlyConvenience {
+    function burn(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint112[] memory assetsPay
+    ) external override onlyConvenience returns (uint128 collateralOut) {
         require(ids.length == assetsPay.length, 'Invalid');
-        pair.pay(maturity,to,address(this),ids,assetsPay);
+        for (uint256 i; i < ids.length; i++) require(ownerOf[ids[i]] == from, 'Forbidden');
+        collateralOut = pair.pay(maturity, to, address(this), ids, assetsPay);
     }
-
 
     function safeTransferFrom(
         address from,
         address to,
         uint256 id
-    ) external  override isApproved(from,id){
+    ) external override isApproved(from, id) {
         _safeTransfer(from, to, id, '');
     }
 
@@ -71,7 +71,7 @@ contract CollateralizedDebt is IERC721 {
         address to,
         uint256 id,
         bytes memory data
-    ) external override isApproved(from,id){
+    ) external override isApproved(from, id) {
         _safeTransfer(from, to, id, data);
     }
 
@@ -79,7 +79,7 @@ contract CollateralizedDebt is IERC721 {
         address _from,
         address _to,
         uint256 _id
-    ) external  override isApproved(_from,_id){
+    ) external override isApproved(_from, _id) {
         _transfer(_from, _to, _id);
     }
 
@@ -99,7 +99,7 @@ contract CollateralizedDebt is IERC721 {
         emit ApprovalForAll(msg.sender, _operator, _approved);
     }
 
-       function _safeTransfer(
+    function _safeTransfer(
         address _from,
         address _to,
         uint256 _id,
@@ -166,13 +166,7 @@ contract CollateralizedDebt is IERC721 {
         } else {
             bytes memory _returnData;
             (bool _success, bytes memory _return) = _to.call(
-                abi.encodeWithSelector(
-                    IERC721Receiver(_to).onERC721Received.selector,
-                    msg.sender,
-                    _from,
-                    _id,
-                    _data
-                )
+                abi.encodeWithSelector(IERC721Receiver(_to).onERC721Received.selector, msg.sender, _from, _id, _data)
             );
             if (_success) {
                 _returnData = _return;
