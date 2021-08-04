@@ -2,6 +2,8 @@
 pragma solidity =0.8.1;
 
 interface IPair {
+    // STRUCT
+
     struct Tokens {
         uint128 asset;
         uint128 collateral;
@@ -33,6 +35,25 @@ interface IPair {
         mapping(address => Debt[]) debtsOf;
     }
 
+    // VIEW
+
+    function fee() external view returns (uint16);
+
+    function state(uint256 maturity) external view returns (State memory);
+
+    function totalLiquidity(uint256 maturity) external view returns (uint256);
+
+    function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
+
+    // UPDATE
+
+    function burn(
+        uint256 maturity,
+        address assetTo,
+        address collateralTo,
+        uint256 liquidityIn
+    ) external returns (Tokens memory tokensOut);
+
     function lend(
         uint256 maturity,
         address bondTo,
@@ -47,12 +68,4 @@ interface IPair {
         address collateralTo,
         Claims memory claimsIn
     ) external returns (Tokens memory tokensOut);
-
-    function fee() external view returns (uint16);
-
-    function state(uint256 maturity) external view returns (State memory);
-
-    function totalLiquidity(uint256 maturity) external view returns (uint256);
-
-    function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
 }

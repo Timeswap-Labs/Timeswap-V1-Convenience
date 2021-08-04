@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IClaim} from './interfaces/IClaim.sol';
+import {ILiquidity} from './interfaces/ILiquidity.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IPair} from './interfaces/IPair.sol';
 
-contract Bond is IClaim {
+contract Liquidity is ILiquidity {
     IConvenience public immutable override convenience;
     IPair public immutable override pair;
     uint256 public immutable override maturity;
@@ -67,7 +67,7 @@ contract Bond is IClaim {
         return true;
     }
 
-    function mint(address to, uint128 amount) external override onlyConvenience {
+    function mint(address to, uint256 amount) external override onlyConvenience {
         require(to != address(0), 'Zero');
 
         balanceOf[to] += amount;
@@ -78,10 +78,10 @@ contract Bond is IClaim {
     function burn(
         address from,
         address to,
-        uint128 amount
-    ) external override onlyConvenience returns (uint128 tokenOut) {
+        uint256 amount
+    ) external override onlyConvenience returns (IPair.Tokens memory tokensOut) {
         balanceOf[from] -= amount;
-        tokenOut = pair.withdraw(maturity, to, to, IPair.Claims(amount, 0)).asset;
+        tokensOut = pair.burn(maturity, to, to, amount);
 
         emit Transfer(from, address(0), amount);
     }
