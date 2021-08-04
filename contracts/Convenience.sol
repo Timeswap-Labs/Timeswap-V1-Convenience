@@ -8,11 +8,16 @@ import {IERC20} from './interfaces/IERC20.sol';
 import {IClaim} from './interfaces/IClaim.sol';
 import {IDue} from './interfaces/IDue.sol';
 import {ILiquidity} from './interfaces/ILiquidity.sol';
+import {MintMath} from './libraries/MintMath.sol';
 import {LendMath} from './libraries/LendMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
+import {Liquidity} from './Liquidity.sol';
+import {Bond} from './Bond.sol';
+import {Insurance} from './Insurance.sol';
 
-contract Convenience {
+contract Convenience is IConvenience {
+    using MintMath for IPair;
     using LendMath for IPair;
     using BorrowMath for IPair;
     using SafeTransfer for IERC20;
@@ -23,14 +28,30 @@ contract Convenience {
         uint256 maturity;
     }
 
+    struct MintTo {
+        address liquidity;
+        address due;
+    }
+
+    struct MintSafe {
+        uint128 minLiquidity;
+        uint112 maxDebt;
+        uint112 maxCollateral;
+    }
+
+    struct BurnTo {
+        address asset;
+        address collateral;
+    }
+
     struct LendTo {
         address bond;
         address insurance;
     }
 
     struct LendSafe {
-        uint256 minBond;
-        uint256 minInsurance;
+        uint128 minBond;
+        uint128 minInsurance;
     }
 
     struct WithdrawTo {
@@ -44,14 +65,14 @@ contract Convenience {
     }
 
     struct BorrowSafe {
-        uint256 maxDebt;
-        uint256 maxCollateral;
+        uint112 maxDebt;
+        uint112 maxCollateral;
     }
 
     IFactory public immutable factory;
 
     struct Native {
-        ILiquidity liquiidty;
+        ILiquidity liquidity;
         IClaim bond;
         IClaim insurance;
         IDue debt;
@@ -61,6 +82,107 @@ contract Convenience {
 
     constructor(IFactory _factory) {
         factory = _factory;
+    }
+
+    function newLiquidity(
+        Parameter memory parameter,
+        MintTo memory to,
+        uint128 assetIn,
+        uint112 debtOut,
+        uint112 collateralIn,
+        uint256 deadline
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        require(deadline >= block.timestamp, 'Expired');
+
+        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+
+        if (address(pair) == address(0)) pair = factory.createPair(parameter.asset, parameter.collateral);
+
+        require(pair.totalLiquidity(parameter.maturity) == 0, 'Forbidden');
+
+        (uint128 interestIncrease, uint128 cdpIncrease) = MintMath.givenNew(
+            parameter.maturity,
+            assetIn,
+            debtOut,
+            collateralIn
+        );
+
+        parameter.asset.safeTransferFrom(msg.sender, pair, assetIn);
+        parameter.collateral.safeTransferFrom(msg.sender, pair, collateralIn);
+
+        Native storage native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+
+        native.liquidity = new Liquidity{
+            salt: keccak256(abi.encode(parameter.asset, parameter.collateral, parameter.maturity))
+        }(this, pair, parameter.maturity);
+        native.bond = new Bond{salt: keccak256(abi.encode(parameter.asset, parameter.collateral, parameter.maturity))}(
+            this,
+            pair,
+            parameter.maturity
+        );
+        native.insurance = new Insurance{
+            salt: keccak256(abi.encode(parameter.asset, parameter.collateral, parameter.maturity))
+        }(this, pair, parameter.maturity);
+        // native.debt
+
+        (liquidityOut, id, dueOut) = pair.mint(parameter.maturity, to.liquidity, to.due, interestIncrease, cdpIncrease);
+
+        native.liquidity.mint(to.liquidity, liquidityOut);
+        native.debt.mint(to.due, id);
+    }
+
+    function newLiquidity(
+        Parameter memory parameter,
+        MintTo memory to,
+        uint128 assetIn,
+        MintSafe memory safe,
+        uint256 deadline
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        require(deadline >= block.timestamp, 'Expired');
+
+        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+        require(address(pair) != address(0), 'Zero');
+        require(pair.totalLiquidity(parameter.maturity) > 0, 'Forbidden');
+
+        (uint128 interestIncrease, uint128 cdpIncrease) = pair.givenAdd(parameter.maturity, assetIn);
+
+        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+
+        (liquidityOut, id, dueOut) = pair.mint(parameter.maturity, to.liquidity, to.due, interestIncrease, cdpIncrease);
+
+        native.liquidity.mint(to.liquidity, liquidityOut);
+        native.debt.mint(to.due, id);
+
+        require(liquidityOut >= safe.minLiquidity, 'Safety');
+        require(dueOut.debt <= safe.maxDebt, 'Safety');
+        require(dueOut.collateral <= safe.maxCollateral, 'Safety');
+    }
+
+    function removeLiquidity(
+        Parameter memory parameter,
+        BurnTo memory to,
+        uint256 liquidityIn
+    ) external returns (IPair.Tokens memory tokensOut) {
+        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+        require(address(pair) != address(0), 'Zero');
+
+        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+
+        tokensOut = native.liquidity.burn(msg.sender, to.asset, to.collateral, liquidityIn);
     }
 
     function lendGivenBond(
@@ -74,7 +196,6 @@ contract Convenience {
         require(deadline >= block.timestamp, 'Expired');
 
         IPair pair = factory.getPair(parameter.asset, parameter.collateral);
-
         require(address(pair) != address(0), 'Zero');
 
         (uint128 interestDecrease, uint128 cdpDecrease) = pair.givenBond(parameter.maturity, assetIn, bondOut);

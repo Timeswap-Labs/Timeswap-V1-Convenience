@@ -20,8 +20,9 @@ interface ILiquidity is IERC20 {
     function mint(address to, uint256 amount) external;
 
     function burn(
-        address to,
-        address owner,
+        address from,
+        address assetTo,
+        address collateralTo,
         uint256 amount
     ) external returns (IPair.Tokens memory tokensOut);
 }

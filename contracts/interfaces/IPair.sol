@@ -40,6 +40,20 @@ interface IPair {
 
     // UPDATE
 
+    function mint(
+        uint256 maturity,
+        address liquidityTo,
+        address dueTo,
+        uint128 interestIncrease,
+        uint128 cdpIncrease
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            Due memory dueOut
+        );
+
     function burn(
         uint256 maturity,
         address assetTo,
