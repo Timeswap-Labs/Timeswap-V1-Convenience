@@ -77,11 +77,12 @@ contract Liquidity is ILiquidity {
 
     function burn(
         address from,
-        address to,
+        address assetTo,
+        address collateralTo,
         uint256 amount
     ) external override onlyConvenience returns (IPair.Tokens memory tokensOut) {
         balanceOf[from] -= amount;
-        tokensOut = pair.burn(maturity, to, to, amount);
+        tokensOut = pair.burn(maturity, assetTo, collateralTo, amount);
 
         emit Transfer(from, address(0), amount);
     }
