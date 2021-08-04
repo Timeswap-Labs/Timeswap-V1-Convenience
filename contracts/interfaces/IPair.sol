@@ -14,7 +14,7 @@ interface IPair {
         uint128 insurance;
     }
 
-    struct Debt {
+    struct Due {
         uint112 debt;
         uint112 collateral;
         uint32 startBlock;
@@ -26,15 +26,6 @@ interface IPair {
         uint128 cdp;
     }
 
-    struct Pool {
-        State state;
-        uint256 totalLiquidity;
-        mapping(address => uint256) liquidityOf;
-        Claims totalClaims;
-        mapping(address => Claims) claimsOf;
-        mapping(address => Debt[]) debtsOf;
-    }
-
     // VIEW
 
     function fee() external view returns (uint16);
@@ -44,6 +35,8 @@ interface IPair {
     function totalLiquidity(uint256 maturity) external view returns (uint256);
 
     function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
+
+    function duesOf(uint256 maturity, address owner) external view returns (Due[] memory);
 
     // UPDATE
 
@@ -68,4 +61,21 @@ interface IPair {
         address collateralTo,
         Claims memory claimsIn
     ) external returns (Tokens memory tokensOut);
+
+    function borrow(
+        uint256 maturity,
+        address assetTo,
+        address dueTo,
+        uint128 assetOut,
+        uint128 interestIncrease,
+        uint128 cdpIncrease
+    ) external returns (uint256 id, Due memory dueOut);
+
+    function pay(
+        uint256 maturity,
+        address to,
+        address owner,
+        uint256[] memory ids,
+        uint112[] memory assetsPay
+    ) external returns (uint128 collateralOut);
 }

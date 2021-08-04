@@ -10,5 +10,5 @@ interface IWETH9 is IERC20 {
 
     function deposit() external payable;
 
-    function withdraw(uint256 wad) external;
+    function withdraw(uint256 amount) external;
 }
