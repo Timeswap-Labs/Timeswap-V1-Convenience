@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-identifier: MIT
 pragma solidity =0.8.1;
 
 import {IERC721} from './interfaces/IERC721.sol';
@@ -11,30 +11,29 @@ contract CollateralizedDebt is IERC721 {
     IPair public immutable pair;
     uint256 public immutable maturity;
 
-    struct CollateralizedDebt {
-        uint128 collateral;
-        uint128 debt;
-    }
+    
+    mapping(address => uint256) public override balanceOf;
+    mapping(uint256 => address) public  override ownerOf;
+    mapping(uint256 => address) public override getApproved;
+    mapping(address => mapping(address => bool)) public override isApprovedForAll;
 
-    uint256 internal tokenId;
-    mapping(address => uint256) public balanceOf;
-    mapping(uint256 => address) public ownerOf;
-    mapping(address => CollateralizedDebt) public collateralizedDebtOf;
-    mapping(uint256 => address) public getApproved;
-    mapping(address => mapping(address => bool)) public isApprovedForAll;
+    
+    function debtOf(uint256 id) external view returns(IPair.Debt memory debt){
+        debt = pair.debtsOf(maturity,address(this))[id];
+    }
 
     modifier onlyConvenience() {
         require(msg.sender == address(convenience), 'Forbidden');
         _;
     }
 
-    // modifier onlyConvenience(address _owner, uint256 _tokenId) {
-    //     require(
-    //         _owner == msg.sender || getApproved[_tokenId] == msg.sender || isApprovedForAll[_owner][msg.sender],
-    //         'Forrbidden'
-    //     );
-    //     _;
-    // }
+     modifier isApproved(address owner, uint256 id) {
+        require(
+            owner == msg.sender || getApproved[id] == msg.sender || isApprovedForAll[owner][msg.sender],
+            'Forrbidden'
+        );
+        _;
+    }
 
     constructor(
         IConvenience _convenience,
@@ -48,57 +47,50 @@ contract CollateralizedDebt is IERC721 {
 
     function mint(
         address _to,
-        uint256 _collateral,
-        uint256 _debt
+        uint256 id
     ) external onlyConvenience {
-        tokenId++;
-        uint256 _tokenId = tokenId;
-        collateralizedDebtOf[_tokenId] = CollateralizedDebt(uint128(_collateral), uint128(_debt));
-        _safeMint(_to, _tokenId);
+        _safeMint(_to, id);
     }
 
-    function burn(
-        uint256 _tokenId,
-        uint256 _collateral,
-        uint256 _debt
-    ) external onlyConvenience {
-        collateralizedDebtOf[_tokenId].collateral -= uint128(_collateral);
-        collateralizedDebtOf[_tokenId].debt -= uint128(_debt);
+    function burn(address to, uint256[] memory ids, uint112[] memory assetsPay) external onlyConvenience {
+        require(ids.length == assetsPay.length, 'Invalid');
+        pair.pay(maturity,to,address(this),ids,assetsPay);
+    }
+
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) external  override isApproved(from,id){
+        _safeTransfer(from, to, id, '');
     }
 
     function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId
-    ) external  onlyConvenience(ownerOf[_tokenId], _tokenId) {
-        _safeTransfer(_from, _to, _tokenId, '');
-    }
-
-    function safeTransferFrom(
-        address _from,
-        address _to,
-        uint256 _tokenId,
-        bytes memory _data
-    ) external onlyConvenience(ownerOf[_tokenId], _tokenId) {
-        _safeTransfer(_from, _to, _tokenId, _data);
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
+    ) external override isApproved(from,id){
+        _safeTransfer(from, to, id, data);
     }
 
     function transferFrom(
         address _from,
         address _to,
-        uint256 _tokenId
-    ) external  onlyConvenience(ownerOf[_tokenId], _tokenId) {
-        _transfer(_from, _to, _tokenId);
+        uint256 _id
+    ) external  override isApproved(_from,_id){
+        _transfer(_from, _to, _id);
     }
 
-    function approve(address _to, uint256 _tokenId) external override {
-        address _owner = ownerOf[_tokenId];
+    function approve(address _to, uint256 _id) external override {
+        address _owner = ownerOf[_id];
         require(
             _owner == msg.sender || isApprovedForAll[_owner][msg.sender],
             'ERC721 :: approve : Approve caller is not owner nor approved for all'
         );
         require(_to != _owner, 'ERC721 :: approve : Approval to current owner');
-        _approve(_to, _tokenId);
+        _approve(_to, _id);
     }
 
     function setApprovalForAll(address _operator, bool _approved) external override {
@@ -110,59 +102,59 @@ contract CollateralizedDebt is IERC721 {
        function _safeTransfer(
         address _from,
         address _to,
-        uint256 _tokenId,
+        uint256 _id,
         bytes memory _data
     ) private {
-        _transfer(_from, _to, _tokenId);
-        require(_checkOnERC721Received(_from, _to, _tokenId, _data), 'ERC721 :: _safeTransfer : Not Safe Transfer');
+        _transfer(_from, _to, _id);
+        require(_checkOnERC721Received(_from, _to, _id, _data), 'ERC721 :: _safeTransfer : Not Safe Transfer');
     }
 
-    function _approve(address _approved, uint256 _tokenId) private {
-        getApproved[_tokenId] = _approved;
-        emit Approval(ownerOf[_tokenId], _approved, _tokenId);
+    function _approve(address _approved, uint256 _id) private {
+        getApproved[_id] = _approved;
+        emit Approval(ownerOf[_id], _approved, _id);
     }
 
     function _setApprovalForAll(address _operator, bool _approved) private {
         isApprovedForAll[msg.sender][_operator] = _approved;
     }
 
-    function _safeMint(address _to, uint256 _tokenId) internal virtual {
-        _mint(_to, _tokenId);
+    function _safeMint(address _to, uint256 _id) internal virtual {
+        _mint(_to, _id);
         require(
-            _checkOnERC721Received(address(0), _to, _tokenId, ''),
+            _checkOnERC721Received(address(0), _to, _id, ''),
             'ERC721 :: _safeMint : Transfer to non ERC721Receiver implementer'
         );
     }
 
-    function _mint(address _to, uint256 _tokenId) private {
+    function _mint(address _to, uint256 _id) private {
         require(_to != address(0), 'ERC721 :: _mint : Mint to the address(0) address');
-        require(ownerOf[_tokenId] == address(0), 'ERC721 :: _mint : Already minted');
+        require(ownerOf[_id] == address(0), 'ERC721 :: _mint : Already minted');
 
         balanceOf[_to] += 1;
-        ownerOf[_tokenId] = _to;
+        ownerOf[_id] = _to;
 
-        emit Transfer(address(0), _to, _tokenId);
+        emit Transfer(address(0), _to, _id);
     }
 
     function _transfer(
         address _from,
         address _to,
-        uint256 _tokenId
+        uint256 _id
     ) private {
         require(_to != address(0), 'ERC721 :: _transfer : Transfer to the address(0) address');
 
-        ownerOf[_tokenId] = _to;
+        ownerOf[_id] = _to;
         balanceOf[_from] -= 1;
         balanceOf[_to] += 1;
-        getApproved[_tokenId] = address(0);
+        getApproved[_id] = address(0);
 
-        emit Transfer(_from, _to, _tokenId);
+        emit Transfer(_from, _to, _id);
     }
 
     function _checkOnERC721Received(
         address _from,
         address _to,
-        uint256 _tokenId,
+        uint256 _id,
         bytes memory _data
     ) private returns (bool) {
         uint256 _size;
@@ -178,7 +170,7 @@ contract CollateralizedDebt is IERC721 {
                     IERC721Receiver(_to).onERC721Received.selector,
                     msg.sender,
                     _from,
-                    _tokenId,
+                    _id,
                     _data
                 )
             );
