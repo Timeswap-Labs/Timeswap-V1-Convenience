@@ -40,6 +40,8 @@ library BorrowMath {
 
         uint256 cdpAdjust = state.calculate(state.reserves.asset - assetOut, interestAdjust);
 
+        
+
         uint256 _cdpIncrease = cdpAdjust;
         _cdpIncrease -= state.cdp;
         _cdpIncrease <<= 16;
@@ -53,8 +55,9 @@ library BorrowMath {
         uint128 assetOut,
         uint128 collateralLocked
     ) internal view returns (uint128 interestIncrease, uint128 cdpIncrease) {
+        //TODO Math is to be reworked to prevent the loss of precision while dividing
        
-        uint256 feeBase = 0x10000 - pair.fee();
+        uint256 feeBase = 0x10000 - pair.fee(); 
 
         IPair.State memory state = pair.state(maturity);
 
@@ -83,8 +86,7 @@ library BorrowMath {
         uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + cdpIncrease );
         _interestIncrease -= _interestReserve;
         _interestIncrease <<=16;
-        _interestIncrease += _interestIncrease * feeBase;
-        _interestIncrease >>=16;
+        _interestIncrease /= feeBase;
         interestIncrease = _interestIncrease.toUint128();
 
     }
