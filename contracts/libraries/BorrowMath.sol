@@ -29,11 +29,14 @@ library BorrowMath {
         _interestIncrease /= maturity - block.timestamp; // divUp?
         interestIncrease = _interestIncrease.toUint128();
 
+        // interestIncrease = uint128[((debtOut - assetOut)*2^32/duration)=>uint256]
+
         uint256 interestAdjust = state.interest;
         interestAdjust <<= 16;
         interestAdjust += _interestIncrease * feeBase;
         interestAdjust >>= 16;
         interestAdjust = interestAdjust.toUint128();
+        // interestAdjust = Interest + interestIncrease*2^16*baseFee
 
         uint256 cdpAdjust = state.calculate(state.reserves.asset - assetOut, interestAdjust);
 
@@ -42,6 +45,48 @@ library BorrowMath {
         _cdpIncrease <<= 16;
         _cdpIncrease /= feeBase; // Should divUp
         cdpIncrease = _cdpIncrease.toUint128();
+    }
+
+    function givenCollateral(
+        IPair pair,
+        uint256 maturity,
+        uint128 assetOut,
+        uint128 collateralLocked
+    ) internal view returns (uint128 interestIncrease, uint128 cdpIncrease) {
+       
+        uint256 feeBase = 0x10000 - pair.fee();
+
+        IPair.State memory state = pair.state(maturity);
+
+        uint256 _assetReserve = state.reserves.asset;
+        uint256 _cdpReserve = state.cdp;
+        uint256 _interestReserve = state.interest ;
+
+        uint256 _cdpMax  = _assetReserve;
+        _cdpMax *= _cdpReserve;
+        _cdpMax /=  (_assetReserve - assetOut);
+        _cdpMax -= _cdpReserve;
+
+
+        uint256 _r= maturity - block.timestamp;
+        _r *= _interestReserve;
+        _r += _assetReserve;
+        _r /= _assetReserve;
+
+
+        uint256 _cdpIncrease = collateralLocked;
+        _cdpIncrease -=(_cdpMax*_r);
+        _cdpIncrease <<=16;
+        _cdpIncrease /= feeBase;
+        cdpIncrease = _cdpIncrease.toUint128();
+
+        uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + _ );
+        _interestIncrease -= _interestReserve;
+        _interestIncrease <<=16;
+        _interestIncrease += _interestIncrease * feeBase;
+        _interestIncrease >>=16;
+        interestIncrease = _interestIncrease.toUint128();
+
     }
 
     function getCollateral(

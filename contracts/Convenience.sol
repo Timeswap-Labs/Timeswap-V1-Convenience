@@ -307,6 +307,42 @@ contract Convenience is IConvenience {
         require(dueOut.collateral <= safe.maxCollateral, 'Safety');
     }
 
+     function borrowGivenCollateral(
+        Parameter memory parameter,
+        BorrowTo memory to,
+        uint128 assetOut,
+        uint128 collateralLocked,
+        BorrowSafe memory safe,
+        uint256 deadline
+    ) external returns (uint256 id, IPair.Due memory dueOut) {
+        require(deadline >= block.timestamp, 'Expired');
+
+        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+        require(address(pair) != address(0), 'Zero');
+
+        (uint128 interestIncrease, uint128 cdpIncrease) = pair.givenCollateral(parameter.maturity, assetOut, collateralLocked);
+
+        dueOut.collateral = pair.getCollateral(parameter.maturity, assetOut, cdpIncrease);
+
+        parameter.collateral.safeTransferFrom(msg.sender, pair, dueOut.collateral);
+
+        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+
+        (id, dueOut) = pair.borrow(
+            parameter.maturity,
+            to.asset,
+            address(native.debt),
+            assetOut,
+            interestIncrease,
+            cdpIncrease
+        );
+
+        native.debt.mint(to.due, id);
+
+        require(dueOut.debt <= safe.maxDebt, 'Safety');
+        require(dueOut.collateral <= safe.maxCollateral, 'Safety');
+    }
+
     function repay(
         Parameter memory parameter,
         address to,
