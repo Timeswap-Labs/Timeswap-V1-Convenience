@@ -54,7 +54,7 @@ contract CollateralizedDebt is IDue {
         uint112[] memory assetsPay
     ) external override onlyConvenience returns (uint128 collateralOut) {
         require(ids.length == assetsPay.length, 'Invalid');
-        for (uint256 i; i < ids.length; i++) require(ownerOf[ids[i]] == from, 'Forbidden');
+        for (uint256 i=0; i < ids.length; i++) require(ownerOf[ids[i]] == from, 'Forbidden');
         collateralOut = pair.pay(maturity, to, address(this), ids, assetsPay);
     }
 
