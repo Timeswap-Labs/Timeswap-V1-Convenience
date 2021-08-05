@@ -3,6 +3,7 @@ pragma solidity =0.8.1;
 
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IFactory} from './interfaces/IFactory.sol';
+import {IWETH} from './interfaces/IWETH.sol';
 import {IPair} from './interfaces/IPair.sol';
 import {IERC20} from './interfaces/IERC20.sol';
 import {IClaim} from './interfaces/IClaim.sol';
@@ -12,6 +13,9 @@ import {MintMath} from './libraries/MintMath.sol';
 import {LendMath} from './libraries/LendMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
+import {MsgValue} from './libraries/MsgValue.sol';
+import {Param} from './libraries/Param.sol'; // change name
+import {ETH} from './libraries/ETH.sol';
 import {Liquidity} from './Liquidity.sol';
 import {Bond} from './Bond.sol';
 import {Insurance} from './Insurance.sol';
@@ -21,55 +25,11 @@ contract Convenience is IConvenience {
     using LendMath for IPair;
     using BorrowMath for IPair;
     using SafeTransfer for IERC20;
-
-    struct Parameter {
-        IERC20 asset;
-        IERC20 collateral;
-        uint256 maturity;
-    }
-
-    struct MintTo {
-        address liquidity;
-        address due;
-    }
-
-    struct MintSafe {
-        uint128 minLiquidity;
-        uint112 maxDebt;
-        uint112 maxCollateral;
-    }
-
-    struct BurnTo {
-        address asset;
-        address collateral;
-    }
-
-    struct LendTo {
-        address bond;
-        address insurance;
-    }
-
-    struct LendSafe {
-        uint128 minBond;
-        uint128 minInsurance;
-    }
-
-    struct WithdrawTo {
-        address asset;
-        address collateral;
-    }
-
-    struct BorrowTo {
-        address asset;
-        address due;
-    }
-
-    struct BorrowSafe {
-        uint112 maxDebt;
-        uint112 maxCollateral;
-    }
+    using Param for ETHAsset;
+    using Param for ETHCollateral;
 
     IFactory public immutable factory;
+    IWETH public immutable weth;
 
     struct Native {
         ILiquidity liquidity;
@@ -80,8 +40,9 @@ contract Convenience is IConvenience {
 
     mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native))) public natives;
 
-    constructor(IFactory _factory) {
+    constructor(IFactory _factory, IWETH _weth) {
         factory = _factory;
+        weth = _weth;
     }
 
     function newLiquidity(
@@ -138,7 +99,7 @@ contract Convenience is IConvenience {
         native.debt.mint(to.due, id);
     }
 
-    function newLiquidity(
+    function addLiquidity(
         Parameter memory parameter,
         MintTo memory to,
         uint128 assetIn,
@@ -185,90 +146,262 @@ contract Convenience is IConvenience {
         tokensOut = native.liquidity.burn(msg.sender, to.asset, to.collateral, liquidityIn);
     }
 
-    function lendGivenBond(
-        Parameter memory parameter,
-        LendTo memory to,
-        uint128 assetIn,
-        uint128 bondOut,
-        LendSafe memory safe,
-        uint256 deadline
-    ) external returns (IPair.Claims memory claims) {
-        require(deadline >= block.timestamp, 'Expired');
-
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
-        require(address(pair) != address(0), 'Zero');
-
-        (uint128 interestDecrease, uint128 cdpDecrease) = pair.givenBond(parameter.maturity, assetIn, bondOut);
-
-        parameter.asset.safeTransferFrom(msg.sender, pair, assetIn);
-
-        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
-
-        claims = pair.lend(
-            parameter.maturity,
-            address(native.bond),
-            address(native.insurance),
-            interestDecrease,
-            cdpDecrease
+    function lendGivenBond(LendGivenBond calldata params) external returns (IPair.Claims memory claimsOut) {
+        claimsOut = _lendGivenBond(
+            _LendGivenBond(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                params.bondOut,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
         );
-
-        native.bond.mint(to.bond, claims.bond);
-        native.insurance.mint(to.insurance, claims.insurance);
-
-        require(claims.bond >= safe.minBond, 'Safety');
-        require(claims.insurance >= safe.minInsurance, 'Safety');
     }
 
-    function lendGivenInsurance(
-        Parameter memory parameter,
-        LendTo memory to,
-        uint128 assetIn,
-        uint128 insuranceOut,
-        LendSafe memory safe,
-        uint256 deadline
-    ) external returns (IPair.Claims memory claims) {
-        require(deadline >= block.timestamp, 'Expired');
+    function lendGivenBondETHAsset(LendGivenBondETHAsset calldata params)
+        external
+        payable
+        returns (IPair.Claims memory claimsOut)
+    {
+        uint128 value = MsgValue.getUint128();
+        weth.deposit{value: value}();
 
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+        claimsOut = _lendGivenBond(
+            _LendGivenBond(
+                weth,
+                params.collateral,
+                params.maturity,
+                address(this),
+                params.bondTo,
+                params.insuranceTo,
+                value,
+                params.bondOut,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
+        external
+        payable
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = _lendGivenBond(
+            _LendGivenBond(
+                params.asset,
+                weth,
+                params.maturity,
+                msg.sender,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                params.bondOut,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function _lendGivenBond(_LendGivenBond memory params) private returns (IPair.Claims memory claimsOut) {
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'Zero');
+
+        (uint128 interestDecrease, uint128 cdpDecrease) = pair.givenBond(
+            params.maturity,
+            params.assetIn,
+            params.bondOut
+        );
+
+        claimsOut = _lend(
+            _Lend(
+                pair,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.from,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                interestDecrease,
+                cdpDecrease,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function lendGivenInsurance(LendGivenInsurance calldata params) external returns (IPair.Claims memory claimsOut) {
+        claimsOut = _lendGivenInsurance(
+            _LendGivenInsurance(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                params.insuranceOut,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function lendGivenInsuranceETHAsset(LendGivenInsuranceETHAsset calldata params)
+        external
+        returns (IPair.Claims memory claimsOut)
+    {
+        uint128 value = MsgValue.getUint128();
+        weth.deposit{value: value}();
+
+        claimsOut = _lendGivenInsurance(
+            _LendGivenInsurance(
+                weth,
+                params.collateral,
+                params.maturity,
+                address(this),
+                params.bondTo,
+                params.insuranceTo,
+                value,
+                params.insuranceOut,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function lendGivenInsuranceETHCollateral(LendGivenInsuranceETHCollateral calldata params)
+        external
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = _lendGivenInsurance(
+            _LendGivenInsurance(
+                params.asset,
+                weth,
+                params.maturity,
+                msg.sender,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                params.insuranceOut,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function _lendGivenInsurance(_LendGivenInsurance memory params) private returns (IPair.Claims memory claimsOut) {
+        IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
         (uint128 interestDecrease, uint128 cdpDecrease) = pair.givenInsurance(
-            parameter.maturity,
-            assetIn,
-            insuranceOut
+            params.maturity,
+            params.assetIn,
+            params.insuranceOut
         );
 
-        parameter.asset.safeTransferFrom(msg.sender, pair, assetIn);
-
-        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
-
-        claims = pair.lend(
-            parameter.maturity,
-            address(native.bond),
-            address(native.insurance),
-            interestDecrease,
-            cdpDecrease
+        claimsOut = _lend(
+            _Lend(
+                pair,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.from,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                interestDecrease,
+                cdpDecrease,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
         );
-
-        native.bond.mint(to.bond, claims.bond);
-        native.insurance.mint(to.insurance, claims.insurance);
-
-        require(claims.bond >= safe.minBond, 'Safety');
-        require(claims.insurance >= safe.minInsurance, 'Safety');
     }
 
-    function collect(
-        Parameter memory parameter,
-        WithdrawTo memory to,
-        IPair.Claims memory claimsIn
-    ) external returns (IPair.Tokens memory tokens) {
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+    function _lend(_Lend memory params) private returns (IPair.Claims memory claimsOut) {
+        require(params.deadline >= block.timestamp, 'Expired');
+
+        params.asset.safeTransferFrom(params.from, params.pair, params.assetIn);
+
+        Native memory native = natives[params.asset][params.collateral][params.maturity];
+
+        claimsOut = params.pair.lend(
+            params.maturity,
+            address(native.bond),
+            address(native.insurance),
+            params.interestDecrease,
+            params.cdpDecrease
+        );
+
+        native.bond.mint(params.bondTo, claimsOut.bond);
+        native.insurance.mint(params.insuranceTo, claimsOut.insurance);
+
+        require(claimsOut.bond >= params.minBond, 'Safety');
+        require(claimsOut.insurance >= params.minInsurance, 'Safety');
+    }
+
+    function collect(Collect calldata params) external returns (IPair.Tokens memory tokensOut) {
+        tokensOut = _collect(
+            _Collect(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetTo,
+                params.collateralTo,
+                params.claimsIn
+            )
+        );
+    }
+
+    function collectETHAsset(CollectETHAsset calldata params) external returns (IPair.Tokens memory tokensOut) {
+        tokensOut = _collect(
+            _Collect(weth, params.collateral, params.maturity, address(this), params.collateralTo, params.claimsIn)
+        );
+
+        if (tokensOut.asset > 0) {
+            weth.withdraw(tokensOut.asset);
+            ETH.transfer(params.assetTo, tokensOut.asset); // fix
+        }
+    }
+
+    function collectETHCollateral(CollectETHCollateral calldata params)
+        external
+        returns (IPair.Tokens memory tokensOut)
+    {
+        tokensOut = _collect(
+            _Collect(params.asset, weth, params.maturity, params.assetTo, address(this), params.claimsIn)
+        );
+
+        if (tokensOut.collateral > 0) {
+            weth.withdraw(tokensOut.collateral);
+            ETH.transfer(params.collateralTo, tokensOut.collateral); // fix
+        }
+    }
+
+    function _collect(_Collect memory params) private returns (IPair.Tokens memory tokensOut) {
+        IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+        Native memory native = natives[params.asset][params.collateral][params.maturity];
 
-        tokens.asset = native.bond.burn(msg.sender, to.asset, claimsIn.bond);
-        tokens.collateral = native.insurance.burn(msg.sender, to.collateral, claimsIn.insurance);
+        if (params.claimsIn.bond > 0)
+            tokensOut.asset = native.bond.burn(msg.sender, params.assetTo, params.claimsIn.bond);
+        if (params.claimsIn.insurance > 0)
+            tokensOut.collateral = native.insurance.burn(msg.sender, params.collateralTo, params.claimsIn.insurance);
     }
 
     function borrowGivenDebt(
