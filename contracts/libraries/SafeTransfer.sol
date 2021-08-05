@@ -27,4 +27,9 @@ library SafeTransfer {
         );
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'TF');
     }
+
+    function safeTransfer(address payable to, uint256 amount) internal {
+        (bool success, ) = to.call{value: amount}('');
+        require(success, 'TF');
+    }
 }
