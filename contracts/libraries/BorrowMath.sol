@@ -80,7 +80,7 @@ library BorrowMath {
         _cdpIncrease /= feeBase;
         cdpIncrease = _cdpIncrease.toUint128();
 
-        uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + _ );
+        uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + cdpIncrease );
         _interestIncrease -= _interestReserve;
         _interestIncrease <<=16;
         _interestIncrease += _interestIncrease * feeBase;
