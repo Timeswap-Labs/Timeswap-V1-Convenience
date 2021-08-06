@@ -16,7 +16,7 @@ library LendMath {
         uint256 maturity,
         uint128 assetIn,
         uint128 bondOut
-    ) internal view returns (uint128 interestDecrease, uint128 cdpDecrease) {
+    ) internal view returns (uint112 interestDecrease, uint112 cdpDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
         uint256 duration = maturity - block.timestamp;
 
@@ -26,7 +26,7 @@ library LendMath {
         _interestDecrease -= assetIn;
         _interestDecrease <<= 32;
         _interestDecrease /= duration;
-        interestDecrease = _interestDecrease.toUint128();
+        interestDecrease = _interestDecrease.toUint112();
 
         uint256 interestAdjust = state.interest;
         interestAdjust <<= 16;
@@ -40,7 +40,7 @@ library LendMath {
         _cdpDecrease -= cdpAdjust;
         _cdpDecrease <<= 16;
         _cdpDecrease /= feeBase;
-        cdpDecrease = _cdpDecrease.toUint128();
+        cdpDecrease = _cdpDecrease.toUint112();
     }
 
     function givenInsurance(
@@ -48,7 +48,7 @@ library LendMath {
         uint256 maturity,
         uint128 assetIn,
         uint128 insuranceOut
-    ) internal view returns (uint128 interestDecrease, uint128 cdpDecrease) {
+    ) internal view returns (uint112 interestDecrease, uint112 cdpDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
         uint256 duration = maturity - block.timestamp;
 
@@ -66,7 +66,7 @@ library LendMath {
         _cdpDecrease = insuranceOut - _cdpDecrease;
         _cdpDecrease <<= 16;
         _cdpDecrease /= feeBase;
-        cdpDecrease = _cdpDecrease.toUint128();
+        cdpDecrease = _cdpDecrease.toUint112();
 
         uint256 cdpAdjust = state.cdp;
         cdpAdjust -= cdpDecrease;
@@ -77,6 +77,6 @@ library LendMath {
         _interestDecrease -= interestAdjust;
         _interestDecrease <<= 16;
         _interestDecrease /= feeBase;
-        interestDecrease = _interestDecrease.toUint128();
+        interestDecrease = _interestDecrease.toUint112();
     }
 }

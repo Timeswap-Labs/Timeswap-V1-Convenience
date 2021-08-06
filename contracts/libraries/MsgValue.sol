@@ -7,7 +7,7 @@ import {SafeCast} from './SafeCast.sol';
 library MsgValue {
     using SafeCast for uint256;
 
-    function getUint112() internal returns (uint128 value) {
+    function getUint112() internal returns (uint112 value) {
         value = msg.value.truncateUint112();
         if (msg.value > value) ETH.transfer(payable(msg.sender), msg.value - value);
     }

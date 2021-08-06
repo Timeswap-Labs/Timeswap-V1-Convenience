@@ -44,8 +44,8 @@ interface IPair {
         uint256 maturity,
         address liquidityTo,
         address dueTo,
-        uint128 interestIncrease,
-        uint128 cdpIncrease
+        uint112 interestIncrease,
+        uint112 cdpIncrease
     )
         external
         returns (
@@ -65,8 +65,8 @@ interface IPair {
         uint256 maturity,
         address bondTo,
         address insuranceTo,
-        uint128 interestDecrease,
-        uint128 cdpDecrease
+        uint112 interestDecrease,
+        uint112 cdpDecrease
     ) external returns (Claims memory claimsOut);
 
     function withdraw(
@@ -81,8 +81,8 @@ interface IPair {
         address assetTo,
         address dueTo,
         uint128 assetOut,
-        uint128 interestIncrease,
-        uint128 cdpIncrease
+        uint112 interestIncrease,
+        uint112 cdpIncrease
     ) external returns (uint256 id, Due memory dueOut);
 
     function pay(
