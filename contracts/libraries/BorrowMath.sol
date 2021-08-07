@@ -18,7 +18,7 @@ library BorrowMath {
         uint256 maturity,
         uint128 assetOut,
         uint128 debtOut
-    ) internal view returns (uint128 interestIncrease, uint128 cdpIncrease) {
+    ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
         uint256 feeBase = 0x10000 - pair.fee();
 
         IPair.State memory state = pair.state(maturity);
@@ -27,7 +27,7 @@ library BorrowMath {
         _interestIncrease -= assetOut;
         _interestIncrease <<= 32; // shift up?
         _interestIncrease /= maturity - block.timestamp; // divUp?
-        interestIncrease = _interestIncrease.toUint128();
+        interestIncrease = _interestIncrease.toUint112();
 
         // interestIncrease = uint128[((debtOut - assetOut)*2^32/duration)=>uint256]
 
@@ -44,7 +44,7 @@ library BorrowMath {
         _cdpIncrease -= state.cdp;
         _cdpIncrease <<= 16;
         _cdpIncrease /= feeBase; // Should divUp
-        cdpIncrease = _cdpIncrease.toUint128();
+        cdpIncrease = _cdpIncrease.toUint112();
     }
 
     function givenCollateral(

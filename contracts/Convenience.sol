@@ -14,29 +14,21 @@ import {LendMath} from './libraries/LendMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {MsgValue} from './libraries/MsgValue.sol';
-import {Param} from './libraries/Param.sol'; // change name
 import {ETH} from './libraries/ETH.sol';
+import {Native} from './libraries/Native.sol';
 import {Liquidity} from './Liquidity.sol';
 import {Bond} from './Bond.sol';
 import {Insurance} from './Insurance.sol';
+import {CollateralizedDebt} from './CollateralizedDebt.sol';
 
 contract Convenience is IConvenience {
     using MintMath for IPair;
     using LendMath for IPair;
     using BorrowMath for IPair;
     using SafeTransfer for IERC20;
-    using Param for ETHAsset;
-    using Param for ETHCollateral;
 
     IFactory public immutable factory;
     IWETH public immutable weth;
-
-    struct Native {
-        ILiquidity liquidity;
-        IClaim bond;
-        IClaim insurance;
-        IDue debt;
-    }
 
     mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native))) public natives;
 
@@ -45,14 +37,42 @@ contract Convenience is IConvenience {
         weth = _weth;
     }
 
-    function newLiquidity(
-        Parameter memory parameter,
-        MintTo memory to,
-        uint128 assetIn,
-        uint112 debtOut,
-        uint112 collateralIn,
-        uint256 deadline
-    )
+    function _getOrCreateNative(
+        IPair pair,
+        IERC20 asset,
+        IERC20 collateral,
+        uint256 maturity
+    ) private returns (Native memory native) {
+        Native storage _native = natives[asset][collateral][maturity];
+        if (address(_native.liquidity) == address(0)) {
+            _native.liquidity = new Liquidity{salt: keccak256(abi.encode(asset, collateral, maturity))}(
+                this,
+                pair,
+                maturity
+            );
+            _native.bond = new Bond{salt: keccak256(abi.encode(asset, collateral, maturity))}(this, pair, maturity);
+            _native.insurance = new Insurance{salt: keccak256(abi.encode(asset, collateral, maturity))}(
+                this,
+                pair,
+                maturity
+            );
+            _native.collateralizedDebt = new CollateralizedDebt{
+                salt: keccak256(abi.encode(asset, collateral, maturity))
+            }(this, pair, maturity);
+        }
+        native = _native;
+    }
+
+    function _getNative(
+        IERC20 asset,
+        IERC20 collateral,
+        uint256 maturity
+    ) private view returns (Native memory native) {
+        native = natives[asset][collateral][maturity];
+        require(address(native.liquidity) != address(0), 'Forbidden');
+    }
+
+    function newLiquidity(NewLiquidity calldata params)
         external
         returns (
             uint256 liquidityOut,
@@ -60,43 +80,117 @@ contract Convenience is IConvenience {
             IPair.Due memory dueOut
         )
     {
-        require(deadline >= block.timestamp, 'Expired');
+        (liquidityOut, id, dueOut) = _newLiquidity(
+            _NewLiquidity(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                params.assetIn,
+                params.debtOut,
+                params.collateralIn,
+                params.deadline
+            )
+        );
+    }
 
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+    function newLiquidityETHAsset(NewLiquidityETHAsset calldata params)
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        uint128 value = MsgValue.getUint128();
+        weth.deposit{value: value}();
 
-        if (address(pair) == address(0)) pair = factory.createPair(parameter.asset, parameter.collateral);
+        (liquidityOut, id, dueOut) = _newLiquidity(
+            _NewLiquidity(
+                weth,
+                params.collateral,
+                params.maturity,
+                address(this),
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                value,
+                params.debtOut,
+                params.collateralIn,
+                params.deadline
+            )
+        );
+    }
 
-        require(pair.totalLiquidity(parameter.maturity) == 0, 'Forbidden');
+    function newLiquidityETHCollateral(NewLiquidityETHCollateral calldata params)
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        uint112 value = MsgValue.getUint112();
+        weth.deposit{value: value}();
 
-        (uint128 interestIncrease, uint128 cdpIncrease) = MintMath.givenNew(
-            parameter.maturity,
-            assetIn,
-            debtOut,
-            collateralIn
+        (liquidityOut, id, dueOut) = _newLiquidity(
+            _NewLiquidity(
+                params.asset,
+                weth,
+                params.maturity,
+                msg.sender,
+                address(this),
+                params.liquidityTo,
+                params.dueTo,
+                params.assetIn,
+                params.debtOut,
+                value,
+                params.deadline
+            )
+        );
+    }
+
+    function _newLiquidity(_NewLiquidity memory params)
+        private
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        require(params.deadline >= block.timestamp, 'Expired');
+
+        IPair pair = factory.getPair(params.asset, params.collateral);
+
+        if (address(pair) == address(0)) pair = factory.createPair(params.asset, params.collateral);
+
+        require(pair.totalLiquidity(params.maturity) == 0, 'Forbidden');
+
+        (uint112 interestIncrease, uint112 cdpIncrease) = MintMath.givenNew(
+            params.maturity,
+            params.assetIn,
+            params.debtOut,
+            params.collateralIn
         );
 
-        parameter.asset.safeTransferFrom(msg.sender, pair, assetIn);
-        parameter.collateral.safeTransferFrom(msg.sender, pair, collateralIn);
+        params.asset.safeTransferFrom(params.assetFrom, pair, params.assetIn);
+        params.collateral.safeTransferFrom(params.collateralFrom, pair, params.collateralIn);
 
-        Native storage native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+        Native storage native = natives[params.asset][params.collateral][params.maturity];
 
-        native.liquidity = new Liquidity{
-            salt: keccak256(abi.encode(parameter.asset, parameter.collateral, parameter.maturity))
-        }(this, pair, parameter.maturity);
-        native.bond = new Bond{salt: keccak256(abi.encode(parameter.asset, parameter.collateral, parameter.maturity))}(
-            this,
-            pair,
-            parameter.maturity
+        (liquidityOut, id, dueOut) = pair.mint(
+            params.maturity,
+            params.liquidityTo,
+            params.dueTo,
+            interestIncrease,
+            cdpIncrease
         );
-        native.insurance = new Insurance{
-            salt: keccak256(abi.encode(parameter.asset, parameter.collateral, parameter.maturity))
-        }(this, pair, parameter.maturity);
-        // native.debt
 
-        (liquidityOut, id, dueOut) = pair.mint(parameter.maturity, to.liquidity, to.due, interestIncrease, cdpIncrease);
-
-        native.liquidity.mint(to.liquidity, liquidityOut);
-        native.debt.mint(to.due, id);
+        native.liquidity.mint(params.liquidityTo, liquidityOut);
+        native.collateralizedDebt.mint(params.dueTo, id);
     }
 
     function addLiquidity(
@@ -119,14 +213,14 @@ contract Convenience is IConvenience {
         require(address(pair) != address(0), 'Zero');
         require(pair.totalLiquidity(parameter.maturity) > 0, 'Forbidden');
 
-        (uint128 interestIncrease, uint128 cdpIncrease) = pair.givenAdd(parameter.maturity, assetIn);
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenAdd(parameter.maturity, assetIn);
 
         Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
 
         (liquidityOut, id, dueOut) = pair.mint(parameter.maturity, to.liquidity, to.due, interestIncrease, cdpIncrease);
 
         native.liquidity.mint(to.liquidity, liquidityOut);
-        native.debt.mint(to.due, id);
+        native.collateralizedDebt.mint(to.due, id);
 
         require(liquidityOut >= safe.minLiquidity, 'Safety');
         require(dueOut.debt <= safe.maxDebt, 'Safety');
@@ -215,7 +309,7 @@ contract Convenience is IConvenience {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint128 interestDecrease, uint128 cdpDecrease) = pair.givenBond(
+        (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenBond(
             params.maturity,
             params.assetIn,
             params.bondOut
@@ -307,7 +401,7 @@ contract Convenience is IConvenience {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint128 interestDecrease, uint128 cdpDecrease) = pair.givenInsurance(
+        (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenInsurance(
             params.maturity,
             params.assetIn,
             params.insuranceOut
@@ -374,7 +468,7 @@ contract Convenience is IConvenience {
 
         if (tokensOut.asset > 0) {
             weth.withdraw(tokensOut.asset);
-            ETH.transfer(params.assetTo, tokensOut.asset); // fix
+            ETH.transfer(params.assetTo, tokensOut.asset);
         }
     }
 
@@ -388,7 +482,7 @@ contract Convenience is IConvenience {
 
         if (tokensOut.collateral > 0) {
             weth.withdraw(tokensOut.collateral);
-            ETH.transfer(params.collateralTo, tokensOut.collateral); // fix
+            ETH.transfer(params.collateralTo, tokensOut.collateral);
         }
     }
 
@@ -417,7 +511,7 @@ contract Convenience is IConvenience {
         IPair pair = factory.getPair(parameter.asset, parameter.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint128 interestIncrease, uint128 cdpIncrease) = pair.givenDebt(parameter.maturity, assetOut, debtOut);
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(parameter.maturity, assetOut, debtOut);
 
         dueOut.collateral = pair.getCollateral(parameter.maturity, assetOut, cdpIncrease);
 
@@ -428,13 +522,13 @@ contract Convenience is IConvenience {
         (id, dueOut) = pair.borrow(
             parameter.maturity,
             to.asset,
-            address(native.debt),
+            address(native.collateralizedDebt),
             assetOut,
             interestIncrease,
             cdpIncrease
         );
 
-        native.debt.mint(to.due, id);
+        native.collateralizedDebt.mint(to.due, id);
 
         require(dueOut.debt <= safe.maxDebt, 'Safety');
         require(dueOut.collateral <= safe.maxCollateral, 'Safety');
@@ -491,6 +585,6 @@ contract Convenience is IConvenience {
 
         Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
 
-        collateralOut = native.debt.burn(owner, to, ids, assetsPay);
+        collateralOut = native.collateralizedDebt.burn(owner, to, ids, assetsPay);
     }
 }
