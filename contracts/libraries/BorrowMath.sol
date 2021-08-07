@@ -65,23 +65,20 @@ library BorrowMath {
         uint256 _cdpReserve = state.cdp;
         uint256 _interestReserve = state.interest ;
 
-        uint256 _cdpMax  = _assetReserve;
-        _cdpMax *= _cdpReserve;
-        _cdpMax /=  (_assetReserve - assetOut);
-        _cdpMax -= _cdpReserve;
+        uint256 assetBalanceMulAsset = (assetOut-_assetReserve)*_assetReserve;
 
 
-        uint256 _r= maturity - block.timestamp;
-        _r *= _interestReserve;
-        _r += _assetReserve;
-        _r /= _assetReserve;
-
-
-        uint256 _cdpIncrease = collateralLocked;
-        _cdpIncrease -=(_cdpMax*_r);
+        uint256 _cdpIncrease = maturity - block.timestamp;
+        _cdpIncrease *= _interestReserve;
+        _cdpIncrease += _assetReserve;
+        _cdpIncrease *= assetOut;
+        _cdpIncrease *= _cdpReserve;
+        _cdpIncrease /= assetBalanceMulAsset;
+        _cdpIncrease += collateralLocked;
         _cdpIncrease <<=16;
         _cdpIncrease /= feeBase;
         cdpIncrease = _cdpIncrease.toUint128();
+
 
         uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + cdpIncrease );
         _interestIncrease -= _interestReserve;
