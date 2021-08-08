@@ -5,6 +5,7 @@ import {IFactory} from './IFactory.sol';
 import {IPair} from './IPair.sol';
 import {IERC20} from './IERC20.sol';
 import {IMint} from './IMint.sol';
+import {IBurn} from './IBurn.sol';
 import {ILend} from './ILend.sol';
 import {IWithdraw} from './IWithdraw.sol';
 import {IERC721Receiver} from './IERC721Receiver.sol';
@@ -14,7 +15,7 @@ import {IDue} from './IDue.sol';
 
 /// @title Timeswap Convenience Interface
 /// @author Ricsson W. Ngo
-interface IConvenience is IMint, ILend, IWithdraw {
+interface IConvenience is IMint, IBurn, ILend, IWithdraw {
     struct Parameter {
         IERC20 asset;
         IERC20 collateral;
@@ -36,17 +37,6 @@ interface IConvenience is IMint, ILend, IWithdraw {
     struct ETHCollateral {
         IERC20 asset;
         uint256 maturity;
-    }
-
-    struct MintTo {
-        address liquidity;
-        address due;
-    }
-
-    struct MintSafe {
-        uint128 minLiquidity;
-        uint112 maxDebt;
-        uint112 maxCollateral;
     }
 
     struct BurnTo {
