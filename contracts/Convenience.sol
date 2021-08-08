@@ -5,6 +5,7 @@ import {IConvenience} from './interfaces/IConvenience.sol';
 import {IFactory} from './interfaces/IFactory.sol';
 import {IWETH} from './interfaces/IWETH.sol';
 import {IPair} from './interfaces/IPair.sol';
+import {IData} from './interfaces/IData.sol';
 import {IERC20} from './interfaces/IERC20.sol';
 import {IClaim} from './interfaces/IClaim.sol';
 import {IDue} from './interfaces/IDue.sol';
@@ -77,7 +78,7 @@ contract Convenience is IConvenience {
         returns (
             uint256 liquidityOut,
             uint256 id,
-            IPair.Due memory dueOut
+            IData.Due memory dueOut
         )
     {
         (liquidityOut, id, dueOut) = _newLiquidity(
@@ -102,11 +103,11 @@ contract Convenience is IConvenience {
         returns (
             uint256 liquidityOut,
             uint256 id,
-            IPair.Due memory dueOut
+            IData.Due memory dueOut
         )
     {
-        uint128 value = MsgValue.getUint128();
-        weth.deposit{value: value}();
+        uint128 assetIn = MsgValue.getUint128();
+        weth.deposit{value: assetIn}();
 
         (liquidityOut, id, dueOut) = _newLiquidity(
             _NewLiquidity(
@@ -117,7 +118,7 @@ contract Convenience is IConvenience {
                 msg.sender,
                 params.liquidityTo,
                 params.dueTo,
-                value,
+                assetIn,
                 params.debtOut,
                 params.collateralIn,
                 params.deadline
@@ -130,11 +131,11 @@ contract Convenience is IConvenience {
         returns (
             uint256 liquidityOut,
             uint256 id,
-            IPair.Due memory dueOut
+            IData.Due memory dueOut
         )
     {
-        uint112 value = MsgValue.getUint112();
-        weth.deposit{value: value}();
+        uint112 collateralIn = MsgValue.getUint112();
+        weth.deposit{value: collateralIn}();
 
         (liquidityOut, id, dueOut) = _newLiquidity(
             _NewLiquidity(
@@ -147,7 +148,7 @@ contract Convenience is IConvenience {
                 params.dueTo,
                 params.assetIn,
                 params.debtOut,
-                value,
+                collateralIn,
                 params.deadline
             )
         );
@@ -158,11 +159,9 @@ contract Convenience is IConvenience {
         returns (
             uint256 liquidityOut,
             uint256 id,
-            IPair.Due memory dueOut
+            IData.Due memory dueOut
         )
     {
-        require(params.deadline >= block.timestamp, 'Expired');
-
         IPair pair = factory.getPair(params.asset, params.collateral);
 
         if (address(pair) == address(0)) pair = factory.createPair(params.asset, params.collateral);
@@ -176,68 +175,234 @@ contract Convenience is IConvenience {
             params.collateralIn
         );
 
-        params.asset.safeTransferFrom(params.assetFrom, pair, params.assetIn);
-        params.collateral.safeTransferFrom(params.collateralFrom, pair, params.collateralIn);
-
-        Native storage native = natives[params.asset][params.collateral][params.maturity];
-
-        (liquidityOut, id, dueOut) = pair.mint(
-            params.maturity,
-            params.liquidityTo,
-            params.dueTo,
-            interestIncrease,
-            cdpIncrease
+        (liquidityOut, id, dueOut) = _mint(
+            _Mint(
+                pair,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetFrom,
+                params.collateralFrom,
+                params.liquidityTo,
+                params.dueTo,
+                params.assetIn,
+                interestIncrease,
+                cdpIncrease,
+                params.deadline
+            )
         );
-
-        native.liquidity.mint(params.liquidityTo, liquidityOut);
-        native.collateralizedDebt.mint(params.dueTo, id);
     }
 
-    function addLiquidity(
-        Parameter memory parameter,
-        MintTo memory to,
-        uint128 assetIn,
-        MintSafe memory safe,
-        uint256 deadline
-    )
+    function addLiquidity(AddLiquidity calldata params)
         external
         returns (
             uint256 liquidityOut,
             uint256 id,
-            IPair.Due memory dueOut
+            IData.Due memory dueOut
         )
     {
-        require(deadline >= block.timestamp, 'Expired');
-
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
-        require(address(pair) != address(0), 'Zero');
-        require(pair.totalLiquidity(parameter.maturity) > 0, 'Forbidden');
-
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenAdd(parameter.maturity, assetIn);
-
-        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
-
-        (liquidityOut, id, dueOut) = pair.mint(parameter.maturity, to.liquidity, to.due, interestIncrease, cdpIncrease);
-
-        native.liquidity.mint(to.liquidity, liquidityOut);
-        native.collateralizedDebt.mint(to.due, id);
-
-        require(liquidityOut >= safe.minLiquidity, 'Safety');
-        require(dueOut.debt <= safe.maxDebt, 'Safety');
-        require(dueOut.collateral <= safe.maxCollateral, 'Safety');
+        (liquidityOut, id, dueOut) = _addLiquidity(
+            _AddLiquidity(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                params.assetIn,
+                false,
+                params.minLiquidity,
+                params.maxDebt,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
     }
 
-    function removeLiquidity(
-        Parameter memory parameter,
-        BurnTo memory to,
-        uint256 liquidityIn
-    ) external returns (IPair.Tokens memory tokensOut) {
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+    function addLiquidityETHAsset(AddLiquidityETHAsset calldata params)
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IData.Due memory dueOut
+        )
+    {
+        uint128 assetIn = MsgValue.getUint128();
+        weth.deposit{value: assetIn}();
+
+        (liquidityOut, id, dueOut) = _addLiquidity(
+            _AddLiquidity(
+                weth,
+                params.collateral,
+                params.maturity,
+                address(this),
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                assetIn,
+                false,
+                params.minLiquidity,
+                params.maxDebt,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
+    }
+
+    function addLiquidityETHCollateral(AddLiquidityETHCollateral calldata params)
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IData.Due memory dueOut
+        )
+    {
+        uint112 maxCollateral = MsgValue.getUint112();
+
+        (liquidityOut, id, dueOut) = _addLiquidity(
+            _AddLiquidity(
+                params.asset,
+                weth,
+                params.maturity,
+                msg.sender,
+                address(this),
+                params.liquidityTo,
+                params.dueTo,
+                params.assetIn,
+                true,
+                params.minLiquidity,
+                params.maxDebt,
+                maxCollateral,
+                params.deadline
+            )
+        );
+
+        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
+    }
+
+    function _addLiquidity(_AddLiquidity memory params)
+        private
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IData.Due memory dueOut
+        )
+    {
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'Zero');
+        require(pair.totalLiquidity(params.maturity) > 0, 'Forbidden');
+
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenAdd(params.maturity, params.assetIn);
+
+        dueOut.collateral = MintMath.getCollateral(params.maturity, params.assetIn, interestIncrease, cdpIncrease);
+
+        if (params.isWeth) weth.deposit{value: dueOut.collateral}();
+
+        (liquidityOut, id, dueOut) = _mint(
+            _Mint(
+                pair,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetFrom,
+                params.collateralFrom,
+                params.liquidityTo,
+                params.dueTo,
+                params.assetIn,
+                interestIncrease,
+                cdpIncrease,
+                params.deadline
+            )
+        );
+
+        require(liquidityOut >= params.minLiquidity, 'Safety');
+        require(dueOut.debt <= params.maxDebt, 'Safety');
+        require(dueOut.collateral <= params.maxCollateral, 'Safety');
+    }
+
+    function _mint(_Mint memory params)
+        private
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IData.Due memory dueOut
+        )
+    {
+        params.asset.safeTransferFrom(params.assetFrom, params.pair, params.assetIn);
+        params.collateral.safeTransferFrom(params.collateralFrom, params.pair, dueOut.collateral);
+
+        Native memory native = natives[params.asset][params.collateral][params.maturity];
+
+        (liquidityOut, id, dueOut) = params.pair.mint(
+            params.maturity,
+            params.liquidityTo,
+            params.dueTo,
+            params.interestIncrease,
+            params.cdpIncrease
+        );
+
+        native.liquidity.mint(params.liquidityTo, liquidityOut);
+        native.collateralizedDebt.mint(params.dueTo, id);
+
+        require(params.deadline >= block.timestamp, 'Expired');
+    }
+
+    function removeLiquidity(RemoveLiquidity calldata params) external returns (IData.Tokens memory tokensOut) {
+        tokensOut = _removeLiquidity(
+            _RemoveLiquidity(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetTo,
+                params.collateralTo,
+                params.liquidityIn
+            )
+        );
+    }
+
+    function removeLiquidityETHAsset(RemoveLiquidityETHAsset calldata params)
+        external
+        returns (IData.Tokens memory tokensOut)
+    {
+        tokensOut = _removeLiquidity(
+            _RemoveLiquidity(
+                weth,
+                params.collateral,
+                params.maturity,
+                address(this),
+                params.collateralTo,
+                params.liquidityIn
+            )
+        );
+
+        if (tokensOut.asset > 0) {
+            weth.withdraw(tokensOut.asset);
+            ETH.transfer(params.assetTo, tokensOut.asset);
+        }
+    }
+
+    function removeLiquidityETHCollateral(RemoveLiquidityETHCollateral calldata params)
+        external
+        returns (IData.Tokens memory tokensOut)
+    {
+        tokensOut = _removeLiquidity(
+            _RemoveLiquidity(params.asset, weth, params.maturity, params.assetTo, address(this), params.liquidityIn)
+        );
+
+        if (tokensOut.collateral > 0) {
+            weth.withdraw(tokensOut.collateral);
+            ETH.transfer(params.collateralTo, tokensOut.collateral);
+        }
+    }
+
+    function _removeLiquidity(_RemoveLiquidity memory params) private returns (IData.Tokens memory tokensOut) {
+        IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+        Native memory native = natives[params.asset][params.collateral][params.maturity];
 
-        tokensOut = native.liquidity.burn(msg.sender, to.asset, to.collateral, liquidityIn);
+        tokensOut = native.liquidity.burn(msg.sender, params.assetTo, params.collateralTo, params.liquidityIn);
     }
 
     function lendGivenBond(LendGivenBond calldata params) external returns (IPair.Claims memory claimsOut) {
@@ -261,10 +426,10 @@ contract Convenience is IConvenience {
     function lendGivenBondETHAsset(LendGivenBondETHAsset calldata params)
         external
         payable
-        returns (IPair.Claims memory claimsOut)
+        returns (IData.Claims memory claimsOut)
     {
-        uint128 value = MsgValue.getUint128();
-        weth.deposit{value: value}();
+        uint128 assetIn = MsgValue.getUint128();
+        weth.deposit{value: assetIn}();
 
         claimsOut = _lendGivenBond(
             _LendGivenBond(
@@ -274,7 +439,7 @@ contract Convenience is IConvenience {
                 address(this),
                 params.bondTo,
                 params.insuranceTo,
-                value,
+                assetIn,
                 params.bondOut,
                 params.minBond,
                 params.minInsurance,
@@ -286,7 +451,7 @@ contract Convenience is IConvenience {
     function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
         external
         payable
-        returns (IPair.Claims memory claimsOut)
+        returns (IData.Claims memory claimsOut)
     {
         claimsOut = _lendGivenBond(
             _LendGivenBond(
@@ -305,7 +470,7 @@ contract Convenience is IConvenience {
         );
     }
 
-    function _lendGivenBond(_LendGivenBond memory params) private returns (IPair.Claims memory claimsOut) {
+    function _lendGivenBond(_LendGivenBond memory params) private returns (IData.Claims memory claimsOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
@@ -334,7 +499,7 @@ contract Convenience is IConvenience {
         );
     }
 
-    function lendGivenInsurance(LendGivenInsurance calldata params) external returns (IPair.Claims memory claimsOut) {
+    function lendGivenInsurance(LendGivenInsurance calldata params) external returns (IData.Claims memory claimsOut) {
         claimsOut = _lendGivenInsurance(
             _LendGivenInsurance(
                 params.asset,
@@ -354,10 +519,10 @@ contract Convenience is IConvenience {
 
     function lendGivenInsuranceETHAsset(LendGivenInsuranceETHAsset calldata params)
         external
-        returns (IPair.Claims memory claimsOut)
+        returns (IData.Claims memory claimsOut)
     {
-        uint128 value = MsgValue.getUint128();
-        weth.deposit{value: value}();
+        uint128 assetIn = MsgValue.getUint128();
+        weth.deposit{value: assetIn}();
 
         claimsOut = _lendGivenInsurance(
             _LendGivenInsurance(
@@ -367,7 +532,7 @@ contract Convenience is IConvenience {
                 address(this),
                 params.bondTo,
                 params.insuranceTo,
-                value,
+                assetIn,
                 params.insuranceOut,
                 params.minBond,
                 params.minInsurance,
@@ -378,7 +543,7 @@ contract Convenience is IConvenience {
 
     function lendGivenInsuranceETHCollateral(LendGivenInsuranceETHCollateral calldata params)
         external
-        returns (IPair.Claims memory claimsOut)
+        returns (IData.Claims memory claimsOut)
     {
         claimsOut = _lendGivenInsurance(
             _LendGivenInsurance(
@@ -397,7 +562,7 @@ contract Convenience is IConvenience {
         );
     }
 
-    function _lendGivenInsurance(_LendGivenInsurance memory params) private returns (IPair.Claims memory claimsOut) {
+    function _lendGivenInsurance(_LendGivenInsurance memory params) private returns (IData.Claims memory claimsOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
@@ -426,7 +591,7 @@ contract Convenience is IConvenience {
         );
     }
 
-    function _lend(_Lend memory params) private returns (IPair.Claims memory claimsOut) {
+    function _lend(_Lend memory params) private returns (IData.Claims memory claimsOut) {
         require(params.deadline >= block.timestamp, 'Expired');
 
         params.asset.safeTransferFrom(params.from, params.pair, params.assetIn);
@@ -448,7 +613,7 @@ contract Convenience is IConvenience {
         require(claimsOut.insurance >= params.minInsurance, 'Safety');
     }
 
-    function collect(Collect calldata params) external returns (IPair.Tokens memory tokensOut) {
+    function collect(Collect calldata params) external returns (IData.Tokens memory tokensOut) {
         tokensOut = _collect(
             _Collect(
                 params.asset,
@@ -461,7 +626,7 @@ contract Convenience is IConvenience {
         );
     }
 
-    function collectETHAsset(CollectETHAsset calldata params) external returns (IPair.Tokens memory tokensOut) {
+    function collectETHAsset(CollectETHAsset calldata params) external returns (IData.Tokens memory tokensOut) {
         tokensOut = _collect(
             _Collect(weth, params.collateral, params.maturity, address(this), params.collateralTo, params.claimsIn)
         );
@@ -474,7 +639,7 @@ contract Convenience is IConvenience {
 
     function collectETHCollateral(CollectETHCollateral calldata params)
         external
-        returns (IPair.Tokens memory tokensOut)
+        returns (IData.Tokens memory tokensOut)
     {
         tokensOut = _collect(
             _Collect(params.asset, weth, params.maturity, params.assetTo, address(this), params.claimsIn)
@@ -486,7 +651,7 @@ contract Convenience is IConvenience {
         }
     }
 
-    function _collect(_Collect memory params) private returns (IPair.Tokens memory tokensOut) {
+    function _collect(_Collect memory params) private returns (IData.Tokens memory tokensOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
@@ -502,10 +667,10 @@ contract Convenience is IConvenience {
         Parameter memory parameter,
         BorrowTo memory to,
         uint128 assetOut,
-        uint128 debtOut,
+        uint112 debtOut,
         BorrowSafe memory safe,
         uint256 deadline
-    ) external returns (uint256 id, IPair.Due memory dueOut) {
+    ) external returns (uint256 id, IData.Due memory dueOut) {
         require(deadline >= block.timestamp, 'Expired');
 
         IPair pair = factory.getPair(parameter.asset, parameter.collateral);

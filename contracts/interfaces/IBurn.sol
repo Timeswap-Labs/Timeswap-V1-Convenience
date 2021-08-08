@@ -2,40 +2,40 @@
 pragma solidity =0.8.1;
 
 import {IERC20} from './IERC20.sol';
-import {IData} from './IData.sol';
+import {IPair} from './IPair.sol';
 
-interface IWithdraw {
-    struct Collect {
+interface IBurn {
+    struct RemoveLiquidity {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
         address assetTo;
         address collateralTo;
-        IData.Claims claimsIn;
+        uint256 liquidityIn;
     }
 
-    struct CollectETHAsset {
+    struct RemoveLiquidityETHAsset {
         IERC20 collateral;
         uint256 maturity;
         address payable assetTo;
         address collateralTo;
-        IData.Claims claimsIn;
+        uint256 liquidityIn;
     }
 
-    struct CollectETHCollateral {
+    struct RemoveLiquidityETHCollateral {
         IERC20 asset;
         uint256 maturity;
         address assetTo;
         address payable collateralTo;
-        IData.Claims claimsIn;
+        uint256 liquidityIn;
     }
 
-    struct _Collect {
+    struct _RemoveLiquidity {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
         address assetTo;
         address collateralTo;
-        IData.Claims claimsIn;
+        uint256 liquidityIn;
     }
 }
