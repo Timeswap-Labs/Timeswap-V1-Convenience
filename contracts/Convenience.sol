@@ -498,93 +498,249 @@ contract Convenience is IConvenience {
             tokensOut.collateral = native.insurance.burn(msg.sender, params.collateralTo, params.claimsIn.insurance);
     }
 
-    function borrowGivenDebt(
-        Parameter memory parameter,
-        BorrowTo memory to,
-        uint128 assetOut,
-        uint128 debtOut,
-        BorrowSafe memory safe,
-        uint256 deadline
-    ) external returns (uint256 id, IPair.Due memory dueOut) {
-        require(deadline >= block.timestamp, 'Expired');
+    function borrowGivenDebt( BorrowGivenDebt calldata params) external returns (uint256 id, IPair.Due memory dueOut) {
+        (id, dueOut) = _borrowGivenDebt(
+            _BorrowGivenDebt(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
+                params.debt,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
+    }
 
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+    function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = _borrowGivenDebt(
+            _BorrowGivenDebt(
+                weth,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
+                params.debt,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
+    }
+
+    function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        uint128 value = MsgValue.getUint128();
+        weth.deposit{value: value}();
+        (id, dueOut) = _borrowGivenDebt(
+            _BorrowGivenDebt(
+                params.asset,
+                weth,
+                params.maturity,
+                address(this),
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
+                params.debt,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
+    }
+
+    function _borrowGivenDebt(_BorrowGivenDebt memory params) private returns (uint256 id, IPair.Due memory dueOut) {
+        IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(parameter.maturity, assetOut, debtOut);
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(params.maturity, params.assetOut, params.debt);
 
-        dueOut.collateral = pair.getCollateral(parameter.maturity, assetOut, cdpIncrease);
+        uint128 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
 
-        parameter.collateral.safeTransferFrom(msg.sender, pair, dueOut.collateral);
+        (id, dueOut) = _borrow(
+            _Borrow(
+                pair,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.from,
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
+                collateralIn,
+                interestIncrease,
+                cdpIncrease,
+                params.maxCollateral,
+                true,
+                params.deadline
+            )
+        );
+    }
 
-        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+    function borrowGivenCollateral(BorrowGivenCollateral calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = _borrowGivenCollateral(
+            _BorrowGivenCollateral(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
+                params.collateralLocked,
+                params.maxDebt,
+                params.deadline
+            )
+        );
+    }
 
+    function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = _borrowGivenCollateral(
+            _BorrowGivenCollateral(
+                weth,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
+                params.collateralLocked,
+                params.maxDebt,
+                params.deadline
+            )
+        );
+    }
+
+    function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        uint128 maxCollateral = MsgValue.getUint128();
+        
+        IPair pair = factory.getPair(params.asset, weth);
+        require(address(pair) != address(0), 'Zero');
+
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenCollateral(
+            params.maturity,
+            params.assetOut,
+            params.collateralLocked
+        );
+
+        uint128 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
+
+        weth.deposit{value: collateralIn}();
+
+        require(params.deadline >= block.timestamp, 'Expired');
+
+        IERC20(weth).safeTransferFrom(msg.sender, pair, collateralIn);
+
+        Native memory native = natives[params.asset][weth][params.maturity];
+
+        
         (id, dueOut) = pair.borrow(
-            parameter.maturity,
-            to.asset,
+            params.maturity,
+            params.assetTo,
             address(native.collateralizedDebt),
-            assetOut,
+            params.assetOut,
             interestIncrease,
             cdpIncrease
         );
 
-        native.collateralizedDebt.mint(to.due, id);
+        native.collateralizedDebt.mint(params.dueTo, id);
 
-        require(dueOut.debt <= safe.maxDebt, 'Safety');
-        require(dueOut.collateral <= safe.maxCollateral, 'Safety');
+        require(dueOut.debt <= params.maxDebt, 'Safety');
+
+        if (maxCollateral - dueOut.collateral > 0){
+            ETH.transfer(payable(msg.sender),maxCollateral-dueOut.collateral);
+        } 
+        
     }
 
-     function borrowGivenCollateral(
-        Parameter memory parameter,
-        BorrowTo memory to,
-        uint128 assetOut,
-        uint128 collateralLocked,
-        BorrowSafe memory safe,
-        uint256 deadline
-    ) external returns (uint256 id, IPair.Due memory dueOut) {
-        require(deadline >= block.timestamp, 'Expired');
-
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+    function _borrowGivenCollateral(_BorrowGivenCollateral memory params)
+        private
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint128 interestIncrease, uint128 cdpIncrease) = pair.givenCollateral(parameter.maturity, assetOut, collateralLocked);
-
-        dueOut.collateral = pair.getCollateral(parameter.maturity, assetOut, cdpIncrease);
-
-        parameter.collateral.safeTransferFrom(msg.sender, pair, dueOut.collateral);
-
-        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
-
-        (id, dueOut) = pair.borrow(
-            parameter.maturity,
-            to.asset,
-            address(native.debt),
-            assetOut,
-            interestIncrease,
-            cdpIncrease
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenCollateral(
+            params.maturity,
+            params.assetOut,
+            params.collateralLocked
         );
 
-        native.debt.mint(to.due, id);
+        uint128 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
 
-        require(dueOut.debt <= safe.maxDebt, 'Safety');
-        require(dueOut.collateral <= safe.maxCollateral, 'Safety');
+        (id, dueOut) = _borrow(
+            _Borrow(
+                pair,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.from,
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
+                collateralIn,
+                interestIncrease,
+                cdpIncrease,
+                params.maxDebt,
+                false,
+                params.deadline
+            )
+        );
     }
 
-    function repay(
-        Parameter memory parameter,
-        address to,
-        address owner,
-        uint256[] memory ids,
-        uint112[] memory assetsPay,
-        uint256 deadline
-    ) external returns (uint128 collateralOut) {
-        require(deadline >= block.timestamp, 'Expired');
+    function _borrow(_Borrow memory params) private returns (uint256 id, IPair.Due memory dueOut) {
+        require(params.deadline >= block.timestamp, 'Expired');
 
-        IPair pair = factory.getPair(parameter.asset, parameter.collateral);
+        params.collateral.safeTransferFrom(params.from, params.pair, params.collateralIn);
+
+        Native memory native = natives[params.asset][params.collateral][params.maturity];
+
+        (id, dueOut) = params.pair.borrow(
+            params.maturity,
+            params.assetTo,
+            address(native.collateralizedDebt),
+            params.assetOut,
+            params.interestIncrease,
+            params.cdpIncrease
+        );
+
+        native.collateralizedDebt.mint(params.dueTo, id);
+
+        if(params.isMaxCollateral==true){
+            require(dueOut.collateral <= params.maxCollateralOrDebt, 'Safety');
+        }
+        else{
+        require(dueOut.debt <= params.maxCollateralOrDebt, 'Safety');
+        }
+    }
+
+    function repay(Repay memory params) external returns (uint128 collateralOut) {
+        require(params.deadline >= block.timestamp, 'Expired');
+
+        IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        Native memory native = natives[parameter.asset][parameter.collateral][parameter.maturity];
+        Native memory native = natives[params.asset][params.collateral][params.maturity];
 
-        collateralOut = native.collateralizedDebt.burn(owner, to, ids, assetsPay);
+
+        collateralOut = native.collateralizedDebt.burn(params.owner, params.to, params.ids, params.assetsPay);
     }
+    
 }

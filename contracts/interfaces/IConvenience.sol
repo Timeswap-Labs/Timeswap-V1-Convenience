@@ -11,10 +11,12 @@ import {IERC721Receiver} from './IERC721Receiver.sol';
 import {ILiquidity} from './ILiquidity.sol';
 import {IClaim} from './IClaim.sol';
 import {IDue} from './IDue.sol';
+import {IBorrow} from './IBorrow.sol';
+import {IRepay} from './IRepay.sol';
 
 /// @title Timeswap Convenience Interface
 /// @author Ricsson W. Ngo
-interface IConvenience is IMint, ILend, IWithdraw {
+interface IConvenience is IMint, ILend, IWithdraw, IBorrow, IRepay {
     struct Parameter {
         IERC20 asset;
         IERC20 collateral;
