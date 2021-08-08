@@ -12,7 +12,7 @@ library MintMath {
         uint128 assetIn,
         uint112 debtOut,
         uint112 collateralIn
-    ) internal returns (uint112 interestIncrease, uint112 cdpIncrease) {
+    ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
         uint256 _interestIncrease = debtOut;
         _interestIncrease -= assetIn;
         _interestIncrease <<= 32;
@@ -35,4 +35,11 @@ library MintMath {
         uint256 maturity,
         uint128 assetIn
     ) internal returns (uint112 interestIncrease, uint112 cdpIncrease) {}
+
+    function getCollateral(
+        uint256 maturity,
+        uint128 assetIn,
+        uint112 interestIncrease,
+        uint112 cdpIncrease
+    ) internal view returns (uint112 collateralIn) {}
 }

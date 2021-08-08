@@ -4,6 +4,7 @@ pragma solidity =0.8.1;
 import {IClaim} from './interfaces/IClaim.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IPair} from './interfaces/IPair.sol';
+import {IData} from './interfaces/IData.sol';
 
 contract Insurance is IClaim {
     IConvenience public immutable override convenience;
@@ -81,7 +82,7 @@ contract Insurance is IClaim {
         uint128 amount
     ) external override onlyConvenience returns (uint128 tokenOut) {
         balanceOf[from] -= amount;
-        tokenOut = pair.withdraw(maturity, to, to, IPair.Claims(0, amount)).collateral;
+        tokenOut = pair.withdraw(maturity, to, to, IData.Claims(0, amount)).collateral;
 
         emit Transfer(from, address(0), amount);
     }

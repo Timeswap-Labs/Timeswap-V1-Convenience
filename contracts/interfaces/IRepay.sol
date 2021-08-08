@@ -9,8 +9,37 @@ interface IRepay {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
-        address assetTo;
+        address owner;
         address collateralTo;
-        IPair.Claims claimsIn;
+        uint256[] ids;
+        uint112[] assetsPay;
+        uint256 deadline;
     }
-
+    struct _Repay {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address owner;
+        address collateralTo;
+        uint256[] ids;
+        uint112[] assetsPay;
+    }
+    struct RepayETHAsset {
+        IERC20 collateral;
+        uint256 maturity;
+        address owner;
+        address collateralTo;
+        uint256[] ids;
+        uint112[] assetsPay;
+        uint256 deadline;
+    }
+    struct RepayETHCollateral {
+        IERC20 asset;
+        uint256 maturity;
+        address owner;
+        address collateralTo;
+        uint256[] ids;
+        uint112[] assetsPay;
+        uint256 deadline;
+    }
+}

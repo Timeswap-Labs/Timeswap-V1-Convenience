@@ -17,8 +17,8 @@ interface IBorrow {
         uint128 collateralIn;
         uint112 interestIncrease;
         uint112 cdpIncrease;
-        uint256 maxCollateralOrDebt;
         bool isMaxCollateral;
+        uint256 maxCollateralOrDebt;
         uint256 deadline;
     }
 
@@ -85,7 +85,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint128 assetOut;
-        uint128 debt;
+        uint112 debt;
         uint256 maxCollateral;
         uint256 deadline;
     }
@@ -98,7 +98,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint128 assetOut;
-        uint128 debt;
+        uint112 debt;
         uint256 maxCollateral;
         uint256 deadline;
     }
@@ -110,7 +110,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint128 assetOut;
-        uint128 debt;
+        uint112 debt;
         uint256 maxCollateral;
         uint256 deadline;
     }
@@ -122,7 +122,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint128 assetOut;
-        uint128 debt;
+        uint112 debt;
         uint256 maxCollateral;
         uint256 deadline;
     }

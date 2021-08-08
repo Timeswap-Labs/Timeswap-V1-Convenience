@@ -17,7 +17,7 @@ library BorrowMath {
         IPair pair,
         uint256 maturity,
         uint128 assetOut,
-        uint128 debtOut
+        uint112 debtOut
     ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
         uint256 feeBase = 0x10000 - pair.fee();
 
@@ -92,7 +92,7 @@ library BorrowMath {
         IPair pair,
         uint256 maturity,
         uint128 assetOut,
-        uint128 cdpIncrease
+        uint112 cdpIncrease
     ) internal view returns (uint112 collateralIn) {
         IPair.State memory state = pair.state(maturity);
 
