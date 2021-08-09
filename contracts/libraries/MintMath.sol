@@ -9,7 +9,7 @@ library MintMath {
 
     function givenNew(
         uint256 maturity,
-        uint128 assetIn,
+        uint112 assetIn,
         uint112 debtOut,
         uint112 collateralIn
     ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
@@ -33,12 +33,12 @@ library MintMath {
     function givenAdd(
         IPair pair,
         uint256 maturity,
-        uint128 assetIn
+        uint112 assetIn
     ) internal returns (uint112 interestIncrease, uint112 cdpIncrease) {}
 
     function getCollateral(
         uint256 maturity,
-        uint128 assetIn,
+        uint112 assetIn,
         uint112 interestIncrease,
         uint112 cdpIncrease
     ) internal view returns (uint112 collateralIn) {}

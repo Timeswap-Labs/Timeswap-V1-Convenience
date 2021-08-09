@@ -1,36 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {ILiquidity} from './interfaces/ILiquidity.sol';
-import {IConvenience} from './interfaces/IConvenience.sol';
-import {IPair} from './interfaces/IPair.sol';
+import {IERC20} from '../interfaces/IERC20.sol';
 
-contract Liquidity is ILiquidity {
-    IConvenience public immutable override convenience;
-    IPair public immutable override pair;
-    uint256 public immutable override maturity;
-
+abstract contract AERC20 is IERC20 {
     mapping(address => uint256) public override balanceOf;
     mapping(address => mapping(address => uint256)) public override allowance;
-
-    modifier onlyConvenience() {
-        require(msg.sender == address(convenience), 'Forbidden');
-        _;
-    }
-
-    constructor(
-        IConvenience _convenience,
-        IPair _pair,
-        uint256 _maturity
-    ) {
-        convenience = _convenience;
-        pair = _pair;
-        maturity = _maturity;
-    }
-
-    function totalSupply() external view override returns (uint256) {
-        return pair.liquidityOf(maturity, address(this));
-    }
 
     function transfer(address to, uint256 amount) external override returns (bool) {
         _transfer(msg.sender, to, amount);
@@ -65,26 +40,6 @@ contract Liquidity is ILiquidity {
         _approve(msg.sender, spender, allowance[msg.sender][spender] - amount);
 
         return true;
-    }
-
-    function mint(address to, uint256 amount) external override onlyConvenience {
-        require(to != address(0), 'Zero');
-
-        balanceOf[to] += amount;
-
-        emit Transfer(address(0), to, amount);
-    }
-
-    function burn(
-        address from,
-        address assetTo,
-        address collateralTo,
-        uint256 amount
-    ) external override onlyConvenience returns (IPair.Tokens memory tokensOut) {
-        balanceOf[from] -= amount;
-        tokensOut = pair.burn(maturity, assetTo, collateralTo, amount);
-
-        emit Transfer(from, address(0), amount);
     }
 
     function _transfer(

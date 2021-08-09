@@ -1,9 +1,31 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IData} from './IData.sol';
+interface IPair {
+    // STRUCT
 
-interface IPair is IData {
+    struct Tokens {
+        uint128 asset;
+        uint128 collateral;
+    }
+
+    struct Claims {
+        uint128 bond;
+        uint128 insurance;
+    }
+
+    struct Due {
+        uint112 debt;
+        uint112 collateral;
+        uint32 startBlock;
+    }
+
+    struct State {
+        uint112 asset;
+        uint128 interest;
+        uint128 cdp;
+    }
+
     // VIEW
 
     function fee() external view returns (uint16);
@@ -11,6 +33,8 @@ interface IPair is IData {
     function state(uint256 maturity) external view returns (State memory);
 
     function totalLiquidity(uint256 maturity) external view returns (uint256);
+
+    function liquidityOf(uint256 maturity, address owner) external view returns (uint256);
 
     function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
 
@@ -58,7 +82,7 @@ interface IPair is IData {
         uint256 maturity,
         address assetTo,
         address dueTo,
-        uint128 assetOut,
+        uint112 assetOut,
         uint112 interestIncrease,
         uint112 cdpIncrease
     ) external returns (uint256 id, Due memory dueOut);

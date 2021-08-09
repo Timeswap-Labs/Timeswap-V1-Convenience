@@ -2,7 +2,7 @@
 pragma solidity =0.8.1;
 
 import {IERC20} from './IERC20.sol';
-import {IData} from './IData.sol';
+import {IPair} from './IPair.sol';
 
 interface IWithdraw {
     struct Collect {
@@ -11,7 +11,7 @@ interface IWithdraw {
         uint256 maturity;
         address assetTo;
         address collateralTo;
-        IData.Claims claimsIn;
+        IPair.Claims claimsIn;
     }
 
     struct CollectETHAsset {
@@ -19,7 +19,7 @@ interface IWithdraw {
         uint256 maturity;
         address payable assetTo;
         address collateralTo;
-        IData.Claims claimsIn;
+        IPair.Claims claimsIn;
     }
 
     struct CollectETHCollateral {
@@ -27,7 +27,7 @@ interface IWithdraw {
         uint256 maturity;
         address assetTo;
         address payable collateralTo;
-        IData.Claims claimsIn;
+        IPair.Claims claimsIn;
     }
 
     struct _Collect {
@@ -36,6 +36,6 @@ interface IWithdraw {
         uint256 maturity;
         address assetTo;
         address collateralTo;
-        IData.Claims claimsIn;
+        IPair.Claims claimsIn;
     }
 }

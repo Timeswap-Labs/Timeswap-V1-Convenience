@@ -14,6 +14,14 @@ library ConstantProduct {
         uint256 denominator1,
         uint256 denominator2
     ) internal pure returns (uint256 result) {
-        result = (uint256(state.interest) * state.cdp).mulDivUp(state.reserves.asset, denominator1 * denominator2);
+        result = (uint256(state.interest) * state.cdp).mulDivUp(state.asset, denominator1 * denominator2);
+    }
+
+    function getConstantProduct(
+        IPair.State memory state,
+        uint256 denominator1,
+        uint256 denominator2
+    ) internal pure returns (uint256 result) {
+        result = ((uint256(state.interest) * state.cdp) << 32).mulDivUp(state.asset, denominator1 * denominator2);
     }
 }

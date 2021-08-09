@@ -16,7 +16,7 @@ library BorrowMath {
     function givenDebt(
         IPair pair,
         uint256 maturity,
-        uint128 assetOut,
+        uint112 assetOut,
         uint112 debtOut
     ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
         uint256 feeBase = 0x10000 - pair.fee();
@@ -25,73 +25,84 @@ library BorrowMath {
 
         uint256 _interestIncrease = debtOut;
         _interestIncrease -= assetOut;
-        _interestIncrease <<= 32; // shift up?
-        _interestIncrease /= maturity - block.timestamp; // divUp?
+        _interestIncrease <<= 32;
+        _interestIncrease /= maturity - block.timestamp;
         interestIncrease = _interestIncrease.toUint112();
-
-        // interestIncrease = uint128[((debtOut - assetOut)*2^32/duration)=>uint256]
 
         uint256 interestAdjust = state.interest;
         interestAdjust <<= 16;
         interestAdjust += _interestIncrease * feeBase;
-        interestAdjust >>= 16;
-        interestAdjust = interestAdjust.toUint128();
-        // interestAdjust = Interest + interestIncrease*2^16*baseFee
 
-        uint256 cdpAdjust = state.calculate(state.reserves.asset - assetOut, interestAdjust);
-
-        
+        uint256 cdpAdjust = state.getConstantProduct(state.asset - assetOut, interestAdjust);
 
         uint256 _cdpIncrease = cdpAdjust;
-        _cdpIncrease -= state.cdp;
-        _cdpIncrease <<= 16;
-        _cdpIncrease /= feeBase; // Should divUp
+        _cdpIncrease -= uint256(state.cdp) << 32;
+        _cdpIncrease = _cdpIncrease.divUp(feeBase);
         cdpIncrease = _cdpIncrease.toUint112();
     }
 
     function givenCollateral(
         IPair pair,
         uint256 maturity,
-        uint128 assetOut,
-        uint128 collateralLocked
+        uint112 assetOut,
+        uint112 collateralIn
     ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
-        //TODO Math is to be reworked to prevent the loss of precision while dividing
-       
-        uint256 feeBase = 0x10000 - pair.fee(); 
+        uint256 feeBase = 0x10000 - pair.fee();
 
         IPair.State memory state = pair.state(maturity);
 
-        uint256 _assetReserve = state.reserves.asset;
-        uint256 _cdpReserve = state.cdp;
-        uint256 _interestReserve = state.interest ;
+        uint256 subtrahend = maturity;
+        subtrahend -= block.timestamp;
+        subtrahend *= state.interest;
+        subtrahend += uint256(state.asset) << 32;
+        uint256 denominator = state.asset;
+        denominator -= assetOut;
+        denominator *= uint256(state.asset) << 32;
+        subtrahend = subtrahend.mulDivUp(assetOut * state.cdp, denominator);
 
-        uint256 assetBalanceMulAsset = (_assetReserve - assetOut)*_assetReserve;
-
-
-        uint256 _cdpIncrease = maturity - block.timestamp;
-        _cdpIncrease *= _interestReserve;
-        _cdpIncrease += _assetReserve;
-        _cdpIncrease *= assetOut;
-        _cdpIncrease *= _cdpReserve;
-        _cdpIncrease /= assetBalanceMulAsset;
-        _cdpIncrease = collateralLocked - _cdpIncrease;
-        _cdpIncrease <<=16;
-        _cdpIncrease /= feeBase;
+        uint256 _cdpIncrease = collateralIn;
+        _cdpIncrease -= subtrahend;
         cdpIncrease = _cdpIncrease.toUint112();
 
+        uint256 cdpAdjust = state.cdp;
+        cdpAdjust <<= 16;
+        cdpAdjust += _cdpIncrease * feeBase;
 
-        uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + cdpIncrease );
-        _interestIncrease -= _interestReserve;
-        _interestIncrease <<=16;
-        _interestIncrease /= feeBase;
+        uint256 interestAdjust = state.getConstantProduct(state.asset - assetOut, cdpAdjust);
+
+        uint256 _interestIncrease = interestAdjust;
+        _interestIncrease -= uint256(state.interest) << 32;
+        _interestIncrease = _interestIncrease.divUp(feeBase);
         interestIncrease = _interestIncrease.toUint112();
 
+        // uint256 _assetReserve = state.asset;
+        // uint256 _cdpReserve = state.cdp;
+        // uint256 _interestReserve = state.interest;
+
+        // uint256 assetBalanceMulAsset = (_assetReserve - assetOut) * _assetReserve;
+
+        // uint256 _cdpIncrease = maturity - block.timestamp;
+        // _cdpIncrease *= _interestReserve;
+        // _cdpIncrease += _assetReserve;
+        // _cdpIncrease *= assetOut;
+        // _cdpIncrease *= _cdpReserve;
+        // _cdpIncrease /= assetBalanceMulAsset;
+        // _cdpIncrease = collateralLocked - _cdpIncrease;
+        // _cdpIncrease <<= 16;
+        // _cdpIncrease /= feeBase;
+        // cdpIncrease = _cdpIncrease.toUint112();
+
+        // uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + cdpIncrease);
+        // _interestIncrease -= _interestReserve;
+        // _interestIncrease <<= 16;
+        // _interestIncrease /= feeBase;
+        // interestIncrease = _interestIncrease.toUint112();
     }
 
     function getCollateral(
         IPair pair,
         uint256 maturity,
-        uint128 assetOut,
+        uint112 assetOut,
         uint112 cdpIncrease
     ) internal view returns (uint112 collateralIn) {
         IPair.State memory state = pair.state(maturity);
@@ -100,10 +111,10 @@ library BorrowMath {
         _collateralIn -= block.timestamp;
         _collateralIn *= state.interest;
         _collateralIn = _collateralIn.shiftUp(32);
-        _collateralIn += state.reserves.asset;
-        uint256 denominator = state.reserves.asset;
+        _collateralIn += state.asset;
+        uint256 denominator = state.asset;
         denominator -= assetOut;
-        denominator *= state.reserves.asset;
+        denominator *= state.asset;
         _collateralIn = _collateralIn.mulDiv(uint256(assetOut) * state.cdp, denominator);
         _collateralIn += cdpIncrease;
         collateralIn = _collateralIn.toUint112();
