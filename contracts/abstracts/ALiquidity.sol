@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IClaim} from '../interfaces/IClaim.sol';
+import {ILiquidity} from '../interfaces/ILiquidity.sol';
 import {IConvenience} from '../interfaces/IConvenience.sol';
 import {IPair} from '../interfaces/IPair.sol';
 import {AERC20} from './AERC20.sol';
 
-abstract contract AClaim is AERC20, IClaim {
+abstract contract ALiquidity is AERC20, ILiquidity {
     IConvenience public immutable override convenience;
     IPair public immutable override pair;
     uint256 public immutable override maturity;
@@ -26,7 +26,7 @@ abstract contract AClaim is AERC20, IClaim {
         maturity = _maturity;
     }
 
-    function mint(address to, uint128 amount) external override onlyConvenience {
+    function mint(address to, uint256 amount) external override onlyConvenience {
         require(to != address(0), 'Zero');
 
         balanceOf[to] += amount;

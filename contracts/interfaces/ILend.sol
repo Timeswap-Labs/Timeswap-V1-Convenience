@@ -11,7 +11,7 @@ interface ILend {
         uint256 maturity;
         address bondTo;
         address insuranceTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint128 bondOut;
         uint128 minInsurance;
         uint256 deadline;
@@ -32,7 +32,7 @@ interface ILend {
         uint256 maturity;
         address bondTo;
         address insuranceTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint128 bondOut;
         uint128 minInsurance;
         uint256 deadline;
@@ -45,7 +45,7 @@ interface ILend {
         address from;
         address bondTo;
         address insuranceTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint128 bondOut;
         uint128 minInsurance;
         uint256 deadline;
@@ -57,7 +57,7 @@ interface ILend {
         uint256 maturity;
         address bondTo;
         address insuranceTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint128 insuranceOut;
         uint128 minBond;
         uint256 deadline;
@@ -78,7 +78,7 @@ interface ILend {
         uint256 maturity;
         address bondTo;
         address insuranceTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint128 insuranceOut;
         uint128 minBond;
         uint256 deadline;
@@ -91,7 +91,7 @@ interface ILend {
         address from;
         address bondTo;
         address insuranceTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint128 insuranceOut;
         uint128 minBond;
         uint256 deadline;
@@ -105,7 +105,7 @@ interface ILend {
         address from;
         address bondTo;
         address insuranceTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint112 interestDecrease;
         uint112 cdpDecrease;
         uint256 deadline;

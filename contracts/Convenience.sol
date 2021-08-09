@@ -105,7 +105,7 @@ contract Convenience is IConvenience {
             IPair.Due memory dueOut
         )
     {
-        uint128 assetIn = MsgValue.getUint128();
+        uint112 assetIn = MsgValue.getUint112();
         weth.deposit{value: assetIn}();
 
         (liquidityOut, id, dueOut) = _newLiquidity(
@@ -227,7 +227,7 @@ contract Convenience is IConvenience {
             IPair.Due memory dueOut
         )
     {
-        uint128 assetIn = MsgValue.getUint128();
+        uint112 assetIn = MsgValue.getUint112();
         weth.deposit{value: assetIn}();
 
         (liquidityOut, id, dueOut) = _addLiquidity(
@@ -333,7 +333,7 @@ contract Convenience is IConvenience {
         params.asset.safeTransferFrom(params.assetFrom, params.pair, params.assetIn);
         params.collateral.safeTransferFrom(params.collateralFrom, params.pair, dueOut.collateral);
 
-        Native memory native = natives[params.asset][params.collateral][params.maturity];
+        Native memory native = _getOrCreateNative(params.pair, params.asset, params.collateral, params.maturity);
 
         (liquidityOut, id, dueOut) = params.pair.mint(
             params.maturity,
@@ -399,7 +399,7 @@ contract Convenience is IConvenience {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        Native memory native = natives[params.asset][params.collateral][params.maturity];
+        Native memory native = _getNative(params.asset, params.collateral, params.maturity);
 
         tokensOut = native.liquidity.burn(msg.sender, params.assetTo, params.collateralTo, params.liquidityIn);
     }
@@ -426,7 +426,7 @@ contract Convenience is IConvenience {
         payable
         returns (IPair.Claims memory claimsOut)
     {
-        uint128 assetIn = MsgValue.getUint128();
+        uint112 assetIn = MsgValue.getUint112();
         weth.deposit{value: assetIn}();
 
         claimsOut = _lendGivenBond(
@@ -516,7 +516,7 @@ contract Convenience is IConvenience {
         external
         returns (IPair.Claims memory claimsOut)
     {
-        uint128 assetIn = MsgValue.getUint128();
+        uint112 assetIn = MsgValue.getUint112();
         weth.deposit{value: assetIn}();
 
         claimsOut = _lendGivenInsurance(
@@ -589,7 +589,7 @@ contract Convenience is IConvenience {
 
         params.asset.safeTransferFrom(params.from, params.pair, params.assetIn);
 
-        Native memory native = natives[params.asset][params.collateral][params.maturity];
+        Native memory native = _getOrCreateNative(params.pair, params.asset, params.collateral, params.maturity);
 
         claimsOut = params.pair.lend(
             params.maturity,
@@ -645,7 +645,7 @@ contract Convenience is IConvenience {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        Native memory native = natives[params.asset][params.collateral][params.maturity];
+        Native memory native = _getNative(params.asset, params.collateral, params.maturity);
 
         if (params.claimsIn.bond > 0)
             tokensOut.asset = native.bond.burn(msg.sender, params.assetTo, params.claimsIn.bond);
@@ -689,7 +689,7 @@ contract Convenience is IConvenience {
             )
         );
 
-        if (dueOut.debt > 0) {
+        if (params.assetOut > 0) {
             weth.withdraw(params.assetOut);
             ETH.transfer(payable(params.dueTo), params.assetOut);
         }
@@ -723,7 +723,7 @@ contract Convenience is IConvenience {
 
         (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(params.maturity, params.assetOut, params.debt);
 
-        uint128 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
+        uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
 
         (id, dueOut) = _borrow(
             _Borrow(
@@ -784,7 +784,7 @@ contract Convenience is IConvenience {
             )
         );
 
-        if (dueOut.debt > 0) {
+        if (params.assetOut > 0) {
             weth.withdraw(params.assetOut);
             ETH.transfer(payable(params.dueTo), params.assetOut);
         }
@@ -794,7 +794,8 @@ contract Convenience is IConvenience {
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        uint128 maxCollateral = MsgValue.getUint128();
+        uint112 collateralIn = MsgValue.getUint112();
+        weth.deposit{value: collateralIn}();
 
         IPair pair = factory.getPair(params.asset, weth);
         require(address(pair) != address(0), 'Zero');
@@ -805,15 +806,11 @@ contract Convenience is IConvenience {
             params.collateralLocked
         );
 
-        uint128 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
-
-        weth.deposit{value: collateralIn}();
-
         require(params.deadline >= block.timestamp, 'Expired');
 
         IERC20(weth).safeTransferFrom(msg.sender, pair, collateralIn);
 
-        Native memory native = natives[params.asset][weth][params.maturity];
+        Native memory native = _getOrCreateNative(pair, params.asset, weth, params.maturity);
 
         (id, dueOut) = pair.borrow(
             params.maturity,
@@ -827,10 +824,6 @@ contract Convenience is IConvenience {
         native.collateralizedDebt.mint(params.dueTo, id);
 
         require(dueOut.debt <= params.maxDebt, 'Safety');
-
-        if (maxCollateral - dueOut.collateral > 0) {
-            ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
-        }
     }
 
     function _borrowGivenCollateral(_BorrowGivenCollateral memory params)
@@ -846,7 +839,7 @@ contract Convenience is IConvenience {
             params.collateralLocked
         );
 
-        uint128 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
+        uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
 
         (id, dueOut) = _borrow(
             _Borrow(
@@ -873,7 +866,7 @@ contract Convenience is IConvenience {
 
         params.collateral.safeTransferFrom(params.from, params.pair, params.collateralIn);
 
-        Native memory native = natives[params.asset][params.collateral][params.maturity];
+        Native memory native = _getOrCreateNative(params.pair, params.asset, params.collateral, params.maturity);
 
         (id, dueOut) = params.pair.borrow(
             params.maturity,
@@ -911,8 +904,9 @@ contract Convenience is IConvenience {
 
     function repayETHAsset(RepayETHAsset memory params) external returns (uint128 collateralOut) {
         require(params.deadline >= block.timestamp, 'Expired');
-        uint256 wethToBeDeposited = 0;
+        uint256 wethToBeDeposited;
         for (uint256 i = 0; i < params.ids.length; i++) wethToBeDeposited += params.assetsPay[i];
+
         weth.deposit{value: wethToBeDeposited}();
 
         collateralOut = _repay(
@@ -945,7 +939,8 @@ contract Convenience is IConvenience {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        Native memory native = natives[params.asset][params.collateral][params.maturity];
+        Native memory native = _getNative(params.asset, params.collateral, params.maturity);
+
         collateralOut = native.collateralizedDebt.burn(params.owner, params.collateralTo, params.ids, params.assetsPay);
     }
 }

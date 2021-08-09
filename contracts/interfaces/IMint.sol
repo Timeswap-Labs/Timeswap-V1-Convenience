@@ -11,7 +11,7 @@ interface IMint {
         uint256 maturity;
         address liquidityTo;
         address dueTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint112 debtOut;
         uint112 collateralIn;
         uint256 deadline;
@@ -32,7 +32,7 @@ interface IMint {
         uint256 maturity;
         address liquidityTo;
         address dueTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint112 debtOut;
         uint256 deadline;
     }
@@ -45,7 +45,7 @@ interface IMint {
         address collateralFrom;
         address liquidityTo;
         address dueTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint112 debtOut;
         uint112 collateralIn;
         uint256 deadline;
@@ -57,7 +57,7 @@ interface IMint {
         uint256 maturity;
         address liquidityTo;
         address dueTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint256 minLiquidity;
         uint112 maxDebt;
         uint112 maxCollateral;
@@ -80,7 +80,7 @@ interface IMint {
         uint256 maturity;
         address liquidityTo;
         address dueTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint256 minLiquidity;
         uint112 maxDebt;
         uint256 deadline;
@@ -94,7 +94,7 @@ interface IMint {
         address collateralFrom;
         address liquidityTo;
         address dueTo;
-        uint128 assetIn;
+        uint112 assetIn;
         bool isWeth;
         uint256 minLiquidity;
         uint112 maxDebt;
@@ -111,7 +111,7 @@ interface IMint {
         address collateralFrom;
         address liquidityTo;
         address dueTo;
-        uint128 assetIn;
+        uint112 assetIn;
         uint112 interestIncrease;
         uint112 cdpIncrease;
         uint256 deadline;
