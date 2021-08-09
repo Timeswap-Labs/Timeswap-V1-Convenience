@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {ILiquidity} from './interfaces/ILiquidity.sol';
-import {IConvenience} from './interfaces/IConvenience.sol';
-import {IPair} from './interfaces/IPair.sol';
+import {IClaim} from '../interfaces/IClaim.sol';
+import {IConvenience} from '../interfaces/IConvenience.sol';
+import {IPair} from '../interfaces/IPair.sol';
+import {IData} from '../interfaces/IData.sol';
 
-contract Liquidity is ILiquidity {
+abstract contract AClaim is IClaim {
     IConvenience public immutable override convenience;
     IPair public immutable override pair;
     uint256 public immutable override maturity;
@@ -26,10 +27,6 @@ contract Liquidity is ILiquidity {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
-    }
-
-    function totalSupply() external view override returns (uint256) {
-        return pair.liquidityOf(maturity, address(this));
     }
 
     function transfer(address to, uint256 amount) external override returns (bool) {
@@ -67,24 +64,12 @@ contract Liquidity is ILiquidity {
         return true;
     }
 
-    function mint(address to, uint256 amount) external override onlyConvenience {
+    function mint(address to, uint128 amount) external override onlyConvenience {
         require(to != address(0), 'Zero');
 
         balanceOf[to] += amount;
 
         emit Transfer(address(0), to, amount);
-    }
-
-    function burn(
-        address from,
-        address assetTo,
-        address collateralTo,
-        uint256 amount
-    ) external override onlyConvenience returns (IPair.Tokens memory tokensOut) {
-        balanceOf[from] -= amount;
-        tokensOut = pair.burn(maturity, assetTo, collateralTo, amount);
-
-        emit Transfer(from, address(0), amount);
     }
 
     function _transfer(

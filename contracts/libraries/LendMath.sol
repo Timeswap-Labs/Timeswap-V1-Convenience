@@ -34,7 +34,7 @@ library LendMath {
         interestAdjust >>= 16;
         interestAdjust = interestAdjust.toUint128();
 
-        uint256 cdpAdjust = state.calculate(state.reserves.asset + assetIn, interestAdjust);
+        uint256 cdpAdjust = state.calculate(state.asset + assetIn, interestAdjust);
 
         uint256 _cdpDecrease = state.cdp;
         _cdpDecrease -= cdpAdjust;
@@ -54,13 +54,13 @@ library LendMath {
 
         IPair.State memory state = pair.state(maturity);
 
-        uint256 _r = state.reserves.asset;
+        uint256 _r = state.asset;
         _r += state.interest * duration;
-        _r /= state.reserves.asset;
+        _r /= state.asset;
 
-        uint256 _cdpDecrease = state.reserves.asset;
+        uint256 _cdpDecrease = state.asset;
         _cdpDecrease *= state.cdp;
-        _cdpDecrease /= (state.reserves.asset + assetIn);
+        _cdpDecrease /= (state.asset + assetIn);
         _cdpDecrease = state.cdp - _cdpDecrease;
         _cdpDecrease *= _r;
         _cdpDecrease = insuranceOut - _cdpDecrease;
@@ -71,7 +71,7 @@ library LendMath {
         uint256 cdpAdjust = state.cdp;
         cdpAdjust -= cdpDecrease;
 
-        uint256 interestAdjust = state.calculate(state.reserves.asset + assetIn, cdpAdjust);
+        uint256 interestAdjust = state.calculate(state.asset + assetIn, cdpAdjust);
 
         uint256 _interestDecrease = state.interest;
         _interestDecrease -= interestAdjust;

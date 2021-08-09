@@ -38,9 +38,7 @@ library BorrowMath {
         interestAdjust = interestAdjust.toUint128();
         // interestAdjust = Interest + interestIncrease*2^16*baseFee
 
-        uint256 cdpAdjust = state.calculate(state.reserves.asset - assetOut, interestAdjust);
-
-        
+        uint256 cdpAdjust = state.calculate(state.asset - assetOut, interestAdjust);
 
         uint256 _cdpIncrease = cdpAdjust;
         _cdpIncrease -= state.cdp;
@@ -56,17 +54,16 @@ library BorrowMath {
         uint128 collateralLocked
     ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
         //TODO Math is to be reworked to prevent the loss of precision while dividing
-       
-        uint256 feeBase = 0x10000 - pair.fee(); 
+
+        uint256 feeBase = 0x10000 - pair.fee();
 
         IPair.State memory state = pair.state(maturity);
 
-        uint256 _assetReserve = state.reserves.asset;
+        uint256 _assetReserve = state.asset;
         uint256 _cdpReserve = state.cdp;
-        uint256 _interestReserve = state.interest ;
+        uint256 _interestReserve = state.interest;
 
-        uint256 assetBalanceMulAsset = (_assetReserve - assetOut)*_assetReserve;
-
+        uint256 assetBalanceMulAsset = (_assetReserve - assetOut) * _assetReserve;
 
         uint256 _cdpIncrease = maturity - block.timestamp;
         _cdpIncrease *= _interestReserve;
@@ -75,17 +72,15 @@ library BorrowMath {
         _cdpIncrease *= _cdpReserve;
         _cdpIncrease /= assetBalanceMulAsset;
         _cdpIncrease = collateralLocked - _cdpIncrease;
-        _cdpIncrease <<=16;
+        _cdpIncrease <<= 16;
         _cdpIncrease /= feeBase;
         cdpIncrease = _cdpIncrease.toUint112();
 
-
-        uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + cdpIncrease );
+        uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + cdpIncrease);
         _interestIncrease -= _interestReserve;
-        _interestIncrease <<=16;
+        _interestIncrease <<= 16;
         _interestIncrease /= feeBase;
         interestIncrease = _interestIncrease.toUint112();
-
     }
 
     function getCollateral(
@@ -100,10 +95,10 @@ library BorrowMath {
         _collateralIn -= block.timestamp;
         _collateralIn *= state.interest;
         _collateralIn = _collateralIn.shiftUp(32);
-        _collateralIn += state.reserves.asset;
-        uint256 denominator = state.reserves.asset;
+        _collateralIn += state.asset;
+        uint256 denominator = state.asset;
         denominator -= assetOut;
-        denominator *= state.reserves.asset;
+        denominator *= state.asset;
         _collateralIn = _collateralIn.mulDiv(uint256(assetOut) * state.cdp, denominator);
         _collateralIn += cdpIncrease;
         collateralIn = _collateralIn.toUint112();
