@@ -9,13 +9,13 @@ import {IERC20} from './interfaces/IERC20.sol';
 import {IClaim} from './interfaces/IClaim.sol';
 import {IDue} from './interfaces/IDue.sol';
 import {ILiquidity} from './interfaces/ILiquidity.sol';
+import {IDeploy} from './interfaces/IDeploy.sol';
 import {MintMath} from './libraries/MintMath.sol';
 import {LendMath} from './libraries/LendMath.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {MsgValue} from './libraries/MsgValue.sol';
 import {ETH} from './libraries/ETH.sol';
-import {Native} from './libraries/Native.sol';
 import {Liquidity} from './Liquidity.sol';
 import {Bond} from './Bond.sol';
 import {Insurance} from './Insurance.sol';
@@ -603,6 +603,46 @@ contract Convenience is IConvenience {
         native.insurance.mint(params.insuranceTo, claimsOut.insurance);
     }
 
+    // function transferLend(TransferLend calldata params)
+    //     external
+    //     returns (IPair.Tokens memory tokensOut, IPair.Claims memory claimsOut)
+    // {
+    //     IPair pair = factory.getPair(params.asset, params.collateral);
+    //     require(address(pair) != address(0), 'Zero');
+
+    //     Native memory native = _getNative(params.asset, params.collateral, params.currentMaturity);
+
+    //     if (params.claimsIn.bond > 0)
+    //         tokensOut.asset = native.bond.burn(msg.sender, address(pair), params.claimsIn.bond);
+    //     if (params.claimsIn.insurance > 0)
+    //         tokensOut.collateral = native.insurance.burn(msg.sender, params.collateralTo, params.claimsIn.insurance);
+
+    //     (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenBond(
+    //         params.newMaturity,
+    //         uint112(tokensOut.asset) + params.assetIn, // fix it
+    //         params.bondOut
+    //     );
+
+    //     require(params.deadline >= block.timestamp, 'Expired');
+
+    //     if (params.assetIn > 0) params.asset.safeTransferFrom(msg.sender, pair, params.assetIn);
+
+    //     native = _getNative(params.asset, params.collateral, params.newMaturity);
+
+    //     claimsOut = pair.lend(
+    //         params.newMaturity,
+    //         address(native.bond),
+    //         address(native.insurance),
+    //         interestDecrease,
+    //         cdpDecrease
+    //     );
+
+    //     native.bond.mint(params.bondTo, claimsOut.bond);
+    //     native.insurance.mint(params.insuranceTo, claimsOut.insurance);
+
+    //     require(claimsOut.insurance >= params.minInsurance, 'Safety');
+    // }
+
     function collect(Collect calldata params) external returns (IPair.Tokens memory tokensOut) {
         tokensOut = _collect(
             _Collect(
@@ -690,6 +730,7 @@ contract Convenience is IConvenience {
         );
 
         if (params.assetOut > 0) {
+            // I think you can remove the if, since params.asset > 0 check has been done in the core contract already
             weth.withdraw(params.assetOut);
             ETH.transfer(payable(params.dueTo), params.assetOut);
         }
@@ -699,8 +740,11 @@ contract Convenience is IConvenience {
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        uint128 value = MsgValue.getUint128();
-        weth.deposit{value: value}();
+        uint128 value = MsgValue.getUint128(); // change name of value to maxCollateral
+        weth.deposit{value: value}(); // remove this
+
+        // Implement this similar to how addLiquiidytGivenETHCollateral
+
         (id, dueOut) = _borrowGivenDebt(
             _BorrowGivenDebt(
                 params.asset,
@@ -715,6 +759,8 @@ contract Convenience is IConvenience {
                 params.deadline
             )
         );
+
+        // Add the return ETH change transfer here
     }
 
     function _borrowGivenDebt(_BorrowGivenDebt memory params) private returns (uint256 id, IPair.Due memory dueOut) {
@@ -724,6 +770,8 @@ contract Convenience is IConvenience {
         (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(params.maturity, params.assetOut, params.debt);
 
         uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
+
+        // if (params.isWeth) weth.deposit{value: dueOut.collateral}(); implement something like this for the borrowGivenDebtETHCollateral
 
         (id, dueOut) = _borrow(
             _Borrow(
@@ -743,6 +791,8 @@ contract Convenience is IConvenience {
                 params.deadline
             )
         );
+
+        // put the safey check here
     }
 
     function borrowGivenCollateral(BorrowGivenCollateral calldata params)
@@ -785,6 +835,7 @@ contract Convenience is IConvenience {
         );
 
         if (params.assetOut > 0) {
+            // remove this if , since we know that assetOut is always > 0
             weth.withdraw(params.assetOut);
             ETH.transfer(payable(params.dueTo), params.assetOut);
         }
@@ -796,6 +847,8 @@ contract Convenience is IConvenience {
     {
         uint112 collateralIn = MsgValue.getUint112();
         weth.deposit{value: collateralIn}();
+
+        // abstract this to _borrowGivenCollateral
 
         IPair pair = factory.getPair(params.asset, weth);
         require(address(pair) != address(0), 'Zero');
@@ -839,7 +892,7 @@ contract Convenience is IConvenience {
             params.collateralLocked
         );
 
-        uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
+        uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease); // no need for this
 
         (id, dueOut) = _borrow(
             _Borrow(
@@ -859,6 +912,8 @@ contract Convenience is IConvenience {
                 params.deadline
             )
         );
+
+        // put the safety check here
     }
 
     function _borrow(_Borrow memory params) private returns (uint256 id, IPair.Due memory dueOut) {
@@ -879,6 +934,7 @@ contract Convenience is IConvenience {
 
         native.collateralizedDebt.mint(params.dueTo, id);
 
+        // remove this
         if (params.isMaxCollateral == true) {
             require(dueOut.collateral <= params.maxCollateralOrDebt, 'Safety');
         } else {
@@ -887,7 +943,7 @@ contract Convenience is IConvenience {
     }
 
     function repay(Repay memory params) external returns (uint128 collateralOut) {
-        require(params.deadline >= block.timestamp, 'Expired');
+        require(params.deadline >= block.timestamp, 'Expired'); // move to _repay
 
         collateralOut = _repay(
             _Repay(
@@ -903,9 +959,12 @@ contract Convenience is IConvenience {
     }
 
     function repayETHAsset(RepayETHAsset memory params) external returns (uint128 collateralOut) {
-        require(params.deadline >= block.timestamp, 'Expired');
-        uint256 wethToBeDeposited;
+        require(params.deadline >= block.timestamp, 'Expired'); // move to _repay
+        uint256 wethToBeDeposited; // change name to assetIn, also use uint128
         for (uint256 i = 0; i < params.ids.length; i++) wethToBeDeposited += params.assetsPay[i];
+
+        //Get the MsgValue at uint128 type here
+        // Do the require check that there are enough ETH
 
         weth.deposit{value: wethToBeDeposited}();
 
@@ -920,10 +979,12 @@ contract Convenience is IConvenience {
                 params.assetsPay
             )
         );
+
+        // Any excess ETH in the Msg.Value, return back to user, use an if impelementation to check if there is any excess
     }
 
     function repayETHCollateral(RepayETHCollateral memory params) external returns (uint128 collateralOut) {
-        require(params.deadline >= block.timestamp, 'Expired');
+        require(params.deadline >= block.timestamp, 'Expired'); // move to _repay
 
         collateralOut = _repay(
             _Repay(params.asset, weth, params.maturity, params.owner, params.collateralTo, params.ids, params.assetsPay)
@@ -936,8 +997,11 @@ contract Convenience is IConvenience {
     }
 
     function _repay(_Repay memory params) private returns (uint128 collateralOut) {
+        // pu the params.deadline require here
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
+
+        // Add here a safeTransfer implementation of sending the assetIn
 
         Native memory native = _getNative(params.asset, params.collateral, params.maturity);
 

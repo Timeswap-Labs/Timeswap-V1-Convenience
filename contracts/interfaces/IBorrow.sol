@@ -17,8 +17,8 @@ interface IBorrow {
         uint112 collateralIn;
         uint112 interestIncrease;
         uint112 cdpIncrease;
-        bool isMaxCollateral;
-        uint112 maxCollateralOrDebt;
+        bool isMaxCollateral; // remove this
+        uint112 maxCollateralOrDebt; // remove this
         uint256 deadline;
     }
 
@@ -30,7 +30,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 collateralLocked;
+        uint112 collateralLocked; // change collateralLocked to collateralIn, do the same for other structs
         uint112 maxDebt;
         uint256 deadline;
     }
@@ -42,7 +42,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 collateralLocked;
+        uint112 collateralLocked; // read above
         uint112 maxDebt;
         uint256 deadline;
     }
@@ -53,7 +53,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 collateralLocked;
+        uint112 collateralLocked; // read above
         uint112 maxDebt;
         uint256 deadline;
     }
@@ -64,7 +64,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 collateralLocked;
+        uint112 collateralLocked; // remove this
         uint112 maxDebt;
         uint256 deadline;
     }
@@ -77,7 +77,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 debt;
+        uint112 debt; // Change name from debt to debtIn
         uint112 maxCollateral;
         uint256 deadline;
     }
@@ -89,7 +89,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 debt;
+        uint112 debt; // read above
         uint112 maxCollateral;
         uint256 deadline;
     }
@@ -100,7 +100,7 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 debt;
+        uint112 debt; // read above
         uint112 maxCollateral;
         uint256 deadline;
     }
@@ -111,8 +111,8 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 debt;
-        uint112 maxCollateral;
+        uint112 debt; // read above
+        uint112 maxCollateral; // remove this as this is from mgs.value
         uint256 deadline;
     }
 }
