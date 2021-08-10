@@ -11,12 +11,13 @@ import {CollateralizedDebt} from '../CollateralizedDebt.sol';
 
 library Deploy {
     function deploy(
+        IConvenience.Native storage native,
         IConvenience convenience,
         IPair pair,
         IERC20 asset,
         IERC20 collateral,
         uint256 maturity
-    ) external returns (IConvenience.Native memory native) {
+    ) external {
         bytes32 salt = keccak256(abi.encode(asset, collateral, maturity));
         native.liquidity = new Liquidity{salt: salt}(convenience, pair, maturity);
         native.bond = new Bond{salt: salt}(convenience, pair, maturity);

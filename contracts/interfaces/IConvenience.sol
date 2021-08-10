@@ -24,4 +24,6 @@ interface IConvenience is IMint, ILend, IWithdraw, IBorrow, IRepay, IBurn {
         IClaim insurance;
         IDue collateralizedDebt;
     }
+
+    function factory() external returns (IFactory);
 }

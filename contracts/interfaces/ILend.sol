@@ -39,7 +39,7 @@ interface ILend {
         uint256 deadline;
     }
 
-    struct _LendGivenBond {
+    struct LendGivenBondBothERC20 {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -85,7 +85,7 @@ interface ILend {
         uint256 deadline;
     }
 
-    struct _LendGivenInsurance {
+    struct LendGivenInsuranceBothERC20 {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -98,8 +98,7 @@ interface ILend {
         uint256 deadline;
     }
 
-    struct _Lend {
-        IPair pair;
+    struct LendBothERC20 {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -111,19 +110,4 @@ interface ILend {
         uint112 cdpDecrease;
         uint256 deadline;
     }
-
-    // struct TransferLend {
-    //     IERC20 asset;
-    //     IERC20 collateral;
-    //     uint256 currentMaturity;
-    //     address collateralTo;
-    //     IPair.Claims claimsIn;
-    //     uint256 newMaturity;
-    //     address bondTo;
-    //     address insuranceTo;
-    //     uint112 assetIn;
-    //     uint128 bondOut;
-    //     uint128 minInsurance;
-    //     uint256 deadline;
-    // }
 }

@@ -2,6 +2,7 @@
 pragma solidity =0.8.1;
 
 import {IERC20} from './IERC20.sol';
+import {IWETH} from './IWETH.sol';
 import {IPair} from './IPair.sol';
 
 interface IMint {
@@ -37,7 +38,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct _NewLiquidity {
+    struct NewLiquidityBothERC20 {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -86,7 +87,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct _AddLiquidity {
+    struct AddLiquidityBothERC20 {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -95,46 +96,14 @@ interface IMint {
         address liquidityTo;
         address dueTo;
         uint112 assetIn;
-        bool isWeth;
+        IWETH weth;
         uint256 minLiquidity;
         uint112 maxDebt;
         uint112 maxCollateral;
         uint256 deadline;
     }
 
-    // struct TransferNewLiquidty {
-    //     IERC20 asset;
-    //     IERC20 collateral;
-    //     uint256 currentMaturity;
-    //     uint256 newMaturity;
-    //     address liquidityTo;
-    //     address dueTo;
-    //     uint256 liquidityIn;
-    //     uint112 assetIn;
-    //     uint112 debtOut;
-    //     uint112 collateralIn;
-    //     uint256 deadline;
-    // }
-
-    // struct TransferLiquidity {
-    //     IERC20 asset;
-    //     IERC20 collateral;
-    //     uint256 currentMaturity;
-    //     address assetTo;
-    //     address collateralTo;
-    //     uint256 liquidityIn;
-    //     uint256 newMaturity;
-    //     address liquidityTo;
-    //     address dueTo;
-    //     uint112 assetIn;
-    //     uint256 minLiquidity;
-    //     uint112 maxDebt;
-    //     uint112 maxCollateral;
-    //     uint256 deadline;
-    // }
-
-    struct _Mint {
-        IPair pair;
+    struct MintBothERC20 {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;

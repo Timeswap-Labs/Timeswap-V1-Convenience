@@ -2,6 +2,7 @@ import '@typechain/hardhat'
 import '@nomiclabs/hardhat-waffle'
 import { HardhatUserConfig } from 'hardhat/types'
 import * as dotenv from 'dotenv'
+import "hardhat-contract-sizer"
 
 dotenv.config()
 
@@ -28,6 +29,11 @@ const config: HardhatUserConfig = {
     outDir: 'typechain',
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
   },
 }
 
