@@ -29,13 +29,4 @@ interface IBurn {
         address payable collateralTo;
         uint256 liquidityIn;
     }
-
-    struct _RemoveLiquidity {
-        IERC20 asset;
-        IERC20 collateral;
-        uint256 maturity;
-        address assetTo;
-        address collateralTo;
-        uint256 liquidityIn;
-    }
 }

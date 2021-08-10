@@ -11,15 +11,19 @@ import {IDue} from './interfaces/IDue.sol';
 import {ILiquidity} from './interfaces/ILiquidity.sol';
 import {IDeploy} from './interfaces/IDeploy.sol';
 import {Mint} from './libraries/Mint.sol';
+import {Burn} from './libraries/Burn.sol';
 import {Lend} from './libraries/Lend.sol';
+import {Withdraw} from './libraries/Withdraw.sol';
 import {BorrowMath} from './libraries/BorrowMath.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {MsgValue} from './libraries/MsgValue.sol';
 import {ETH} from './libraries/ETH.sol';
 
 contract Convenience is IConvenience {
-    using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native)));
-    using Lend for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native)));
+    using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using Burn for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using Lend for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using Withdraw for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using BorrowMath for IPair;
     using SafeTransfer for IERC20;
 
@@ -100,60 +104,21 @@ contract Convenience is IConvenience {
     }
 
     function removeLiquidity(RemoveLiquidity calldata params) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = _removeLiquidity(
-            _RemoveLiquidity(
-                params.asset,
-                params.collateral,
-                params.maturity,
-                params.assetTo,
-                params.collateralTo,
-                params.liquidityIn
-            )
-        );
+        tokensOut = natives.removeLiquidity(factory, params);
     }
 
     function removeLiquidityETHAsset(RemoveLiquidityETHAsset calldata params)
         external
         returns (IPair.Tokens memory tokensOut)
     {
-        tokensOut = _removeLiquidity(
-            _RemoveLiquidity(
-                weth,
-                params.collateral,
-                params.maturity,
-                address(this),
-                params.collateralTo,
-                params.liquidityIn
-            )
-        );
-
-        if (tokensOut.asset > 0) {
-            weth.withdraw(tokensOut.asset);
-            ETH.transfer(params.assetTo, tokensOut.asset);
-        }
+        tokensOut = natives.removeLiquidityETHAsset(factory, weth, params);
     }
 
     function removeLiquidityETHCollateral(RemoveLiquidityETHCollateral calldata params)
         external
         returns (IPair.Tokens memory tokensOut)
     {
-        tokensOut = _removeLiquidity(
-            _RemoveLiquidity(params.asset, weth, params.maturity, params.assetTo, address(this), params.liquidityIn)
-        );
-
-        if (tokensOut.collateral > 0) {
-            weth.withdraw(tokensOut.collateral);
-            ETH.transfer(params.collateralTo, tokensOut.collateral);
-        }
-    }
-
-    function _removeLiquidity(_RemoveLiquidity memory params) private returns (IPair.Tokens memory tokensOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
-
-        Native memory native; // = _getNative(params.asset, params.collateral, params.maturity);
-
-        tokensOut = native.liquidity.burn(msg.sender, params.assetTo, params.collateralTo, params.liquidityIn);
+        tokensOut = natives.removeLiquidityETHCollateral(factory, weth, params);
     }
 
     function lendGivenBond(LendGivenBond calldata params) external returns (IPair.Claims memory claimsOut) {
@@ -195,53 +160,18 @@ contract Convenience is IConvenience {
     }
 
     function collect(Collect calldata params) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = _collect(
-            _Collect(
-                params.asset,
-                params.collateral,
-                params.maturity,
-                params.assetTo,
-                params.collateralTo,
-                params.claimsIn
-            )
-        );
+        tokensOut = natives.collect(factory, params);
     }
 
     function collectETHAsset(CollectETHAsset calldata params) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = _collect(
-            _Collect(weth, params.collateral, params.maturity, address(this), params.collateralTo, params.claimsIn)
-        );
-
-        if (tokensOut.asset > 0) {
-            weth.withdraw(tokensOut.asset);
-            ETH.transfer(params.assetTo, tokensOut.asset);
-        }
+        tokensOut = natives.collectETHAsset(factory, weth, params);
     }
 
     function collectETHCollateral(CollectETHCollateral calldata params)
         external
         returns (IPair.Tokens memory tokensOut)
     {
-        tokensOut = _collect(
-            _Collect(params.asset, weth, params.maturity, params.assetTo, address(this), params.claimsIn)
-        );
-
-        if (tokensOut.collateral > 0) {
-            weth.withdraw(tokensOut.collateral);
-            ETH.transfer(params.collateralTo, tokensOut.collateral);
-        }
-    }
-
-    function _collect(_Collect memory params) private returns (IPair.Tokens memory tokensOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
-
-        Native memory native; // = _getNative(params.asset, params.collateral, params.maturity);
-
-        if (params.claimsIn.bond > 0)
-            tokensOut.asset = native.bond.burn(msg.sender, params.assetTo, params.claimsIn.bond);
-        if (params.claimsIn.insurance > 0)
-            tokensOut.collateral = native.insurance.burn(msg.sender, params.collateralTo, params.claimsIn.insurance);
+        tokensOut = natives.collectETHCollateral(factory, weth, params);
     }
 
     function borrowGivenDebt(BorrowGivenDebt calldata params) external returns (uint256 id, IPair.Due memory dueOut) {

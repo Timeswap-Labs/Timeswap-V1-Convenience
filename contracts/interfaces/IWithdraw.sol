@@ -29,13 +29,4 @@ interface IWithdraw {
         address payable collateralTo;
         IPair.Claims claimsIn;
     }
-
-    struct _Collect {
-        IERC20 asset;
-        IERC20 collateral;
-        uint256 maturity;
-        address assetTo;
-        address collateralTo;
-        IPair.Claims claimsIn;
-    }
 }
