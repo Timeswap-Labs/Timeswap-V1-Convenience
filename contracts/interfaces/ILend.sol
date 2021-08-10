@@ -3,6 +3,7 @@ pragma solidity =0.8.1;
 
 import {IERC20} from './IERC20.sol';
 import {IPair} from './IPair.sol';
+import {IClaim} from './IClaim.sol';
 
 interface ILend {
     struct LendGivenBond {
@@ -110,4 +111,19 @@ interface ILend {
         uint112 cdpDecrease;
         uint256 deadline;
     }
+
+    // struct TransferLend {
+    //     IERC20 asset;
+    //     IERC20 collateral;
+    //     uint256 currentMaturity;
+    //     address collateralTo;
+    //     IPair.Claims claimsIn;
+    //     uint256 newMaturity;
+    //     address bondTo;
+    //     address insuranceTo;
+    //     uint112 assetIn;
+    //     uint128 bondOut;
+    //     uint128 minInsurance;
+    //     uint256 deadline;
+    // }
 }
