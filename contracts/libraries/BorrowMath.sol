@@ -74,29 +74,6 @@ library BorrowMath {
         _interestIncrease -= uint256(state.interest) << 32;
         _interestIncrease = _interestIncrease.divUp(feeBase);
         interestIncrease = _interestIncrease.toUint112();
-
-        // uint256 _assetReserve = state.asset;
-        // uint256 _cdpReserve = state.cdp;
-        // uint256 _interestReserve = state.interest;
-
-        // uint256 assetBalanceMulAsset = (_assetReserve - assetOut) * _assetReserve;
-
-        // uint256 _cdpIncrease = maturity - block.timestamp;
-        // _cdpIncrease *= _interestReserve;
-        // _cdpIncrease += _assetReserve;
-        // _cdpIncrease *= assetOut;
-        // _cdpIncrease *= _cdpReserve;
-        // _cdpIncrease /= assetBalanceMulAsset;
-        // _cdpIncrease = collateralLocked - _cdpIncrease;
-        // _cdpIncrease <<= 16;
-        // _cdpIncrease /= feeBase;
-        // cdpIncrease = _cdpIncrease.toUint112();
-
-        // uint256 _interestIncrease = state.calculate(_assetReserve - assetOut, _cdpReserve + cdpIncrease);
-        // _interestIncrease -= _interestReserve;
-        // _interestIncrease <<= 16;
-        // _interestIncrease /= feeBase;
-        // interestIncrease = _interestIncrease.toUint112();
     }
 
     function getCollateral(
