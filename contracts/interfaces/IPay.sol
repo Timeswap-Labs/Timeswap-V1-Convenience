@@ -10,43 +10,46 @@ interface IPay {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
-        address owner;
-        address assetFrom;
+        address owner; // necessary?
+        address assetFrom; // change name to from?
         address collateralTo;
         uint256[] ids;
-        uint112[] debtsIn; 
+        uint112[] debtsIn;
         uint256 deadline;
     }
+
     struct _Repay {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
-        address owner;
-        address assetFrom;
+        address owner; // necessary?
+        address assetFrom; // change name to from?
         address collateralTo;
         uint256[] ids;
         uint112[] debtsIn;
         uint256 assetIn;
         uint256 deadline;
     }
+
     struct RepayETHAsset {
         IERC20 collateral;
         uint256 maturity;
-        address owner;
-        address assetFrom;
+        address owner; // necessary?
+        address assetFrom; // change name to from?
         address collateralTo;
         uint256[] ids;
         uint112[] debtsIn;
         uint256 deadline;
     }
+
     struct RepayETHCollateral {
         IERC20 asset;
         uint256 maturity;
-        address owner;
-        address assetFrom;
+        address owner; // necessary?
+        address assetFrom; // change name to from?
         address payable collateralTo;
         uint256[] ids;
-        uint112[] debtsIn; 
+        uint112[] debtsIn;
         uint256 deadline;
     }
 }

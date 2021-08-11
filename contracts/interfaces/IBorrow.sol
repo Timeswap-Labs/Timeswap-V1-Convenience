@@ -21,6 +21,7 @@ interface IBorrow {
         uint256 deadline;
     }
 
+    // No need to IWETH weth anymore as we already know the amount to deposit
     struct _BorrowGivenCollateral {
         IERC20 asset;
         IERC20 collateral;
@@ -50,7 +51,7 @@ interface IBorrow {
     struct BorrowGivenCollateralETHAsset {
         IERC20 collateral;
         uint256 maturity;
-        address assetTo;
+        address assetTo; // make it payable
         address dueTo;
         uint112 assetOut;
         uint112 collateralIn;
@@ -58,6 +59,7 @@ interface IBorrow {
         uint256 deadline;
     }
 
+    // Remove collateralIn as it is the msg.value = collateralIn
     struct BorrowGivenCollateralETHCollateral {
         IERC20 asset;
         uint256 maturity;
@@ -69,6 +71,7 @@ interface IBorrow {
         uint256 deadline;
     }
 
+    // Move the IWETH weth to in between debtIn and maxCollateral
     struct _BorrowGivenDebt {
         IERC20 asset;
         IERC20 collateral;
@@ -98,7 +101,7 @@ interface IBorrow {
     struct BorrowGivenDebtETHAsset {
         IERC20 collateral;
         uint256 maturity;
-        address assetTo;
+        address assetTo; // make it payable
         address dueTo;
         uint112 assetOut;
         uint112 debtIn;

@@ -87,12 +87,11 @@ library BorrowMath {
         uint256 _collateralIn = maturity;
         _collateralIn -= block.timestamp;
         _collateralIn *= state.interest;
-        _collateralIn = _collateralIn.shiftUp(32);
-        _collateralIn += state.asset;
+        _collateralIn += uint256(state.asset) << 32;
         uint256 denominator = state.asset;
         denominator -= assetOut;
-        denominator *= state.asset;
-        _collateralIn = _collateralIn.mulDiv(uint256(assetOut) * state.cdp, denominator);
+        denominator *= uint256(state.asset) << 32;
+        _collateralIn = _collateralIn.mulDivUp(uint256(assetOut) * state.cdp, denominator);
         _collateralIn += cdpIncrease;
         collateralIn = _collateralIn.toUint112();
     }

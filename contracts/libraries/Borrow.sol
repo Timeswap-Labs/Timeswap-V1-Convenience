@@ -20,6 +20,9 @@ library Borrow {
     using SafeTransfer for IERC20;
     using Deploy for IConvenience.Native;
 
+    // Store the IConvenience as a parameter for the Deploy library
+
+    // No need to have IWETH weth as a parameter for borrowGivenDebt
     function borrowGivenDebt(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
@@ -29,7 +32,7 @@ library Borrow {
         (id, dueOut) = _borrowGivenDebt(
             natives,
             factory,
-            weth,
+            weth, // no need for weth here
             IBorrow._BorrowGivenDebt(
                 params.asset,
                 params.collateral,
@@ -55,13 +58,13 @@ library Borrow {
         (id, dueOut) = _borrowGivenDebt(
             natives,
             factory,
-            weth,
+            weth, // no need for weth here
             IBorrow._BorrowGivenDebt(
                 weth,
                 params.collateral,
                 params.maturity,
                 msg.sender,
-                params.assetTo,
+                params.assetTo, // You want to transfer it to this address, so that you can change it to ETH
                 params.dueTo,
                 params.assetOut,
                 params.debtIn,
@@ -70,8 +73,9 @@ library Borrow {
                 params.deadline
             )
         );
+
         weth.withdraw(params.assetOut);
-        ETH.transfer(payable(params.dueTo), params.assetOut);
+        ETH.transfer(payable(params.dueTo), params.assetOut); // should send to assetTo not dueTo, no need to wrap payable here
     }
 
     function borrowGivenDebtETHCollateral(
@@ -85,7 +89,7 @@ library Borrow {
         (id, dueOut) = _borrowGivenDebt(
             natives,
             factory,
-            weth,
+            weth, // no need for weth here
             IBorrow._BorrowGivenDebt(
                 params.asset,
                 weth,
@@ -104,6 +108,7 @@ library Borrow {
         if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
     }
 
+    // No need for IWETH weth as the parameter
     function _borrowGivenDebt(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
@@ -121,10 +126,11 @@ library Borrow {
 
         uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
 
-        IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
+        IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt; // Remove this and move it to _borrow so that it's not repeated
 
-        if (address(params.weth) != address(0)) weth.deposit{value: collateralIn}();
+        if (address(params.weth) != address(0)) weth.deposit{value: collateralIn}(); // should be params.weth.deposit ... For efficient weth usage
 
+        // feed the natives and pair here to _borrow instead of collateralizedDebt
         (id, dueOut) = _borrow(
             collateralizedDebt,
             IBorrow._Borrow(
@@ -146,6 +152,7 @@ library Borrow {
         require(dueOut.collateral <= params.maxCollateral, 'Safety');
     }
 
+    // No need for IWETH weth as parameter
     function borrowGivenCollateral(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
@@ -155,7 +162,7 @@ library Borrow {
         (id, dueOut) = _borrowGivenCollateral(
             natives,
             factory,
-            weth,
+            weth, // no need for weth
             IBorrow._BorrowGivenCollateral(
                 params.asset,
                 params.collateral,
@@ -181,13 +188,13 @@ library Borrow {
         (id, dueOut) = _borrowGivenCollateral(
             natives,
             factory,
-            weth,
+            weth, // no need for weth here
             IBorrow._BorrowGivenCollateral(
                 weth,
                 params.collateral,
                 params.maturity,
                 msg.sender,
-                params.assetTo,
+                params.assetTo, // should be sent to this address to transform to ETH
                 params.dueTo,
                 params.assetOut,
                 params.collateralIn,
@@ -198,7 +205,7 @@ library Borrow {
         );
 
         weth.withdraw(params.assetOut);
-        ETH.transfer(payable(params.dueTo), params.assetOut);
+        ETH.transfer(payable(params.dueTo), params.assetOut); // should be sent to assetTo no dueTo, also no need to wrap assetTo, make it payable
     }
 
     function borrowGivenCollateralETHCollateral(
@@ -207,7 +214,8 @@ library Borrow {
         IWETH weth,
         IBorrow.BorrowGivenCollateralETHCollateral calldata params
     ) external returns (uint256 id, IPair.Due memory dueOut) {
-        uint128 maxCollateral = MsgValue.getUint112();
+        uint128 maxCollateral = MsgValue.getUint112(); // This should be collateralIn
+        // Do the weth deposit here since we already know collateralIn
 
         (id, dueOut) = _borrowGivenCollateral(
             natives,
@@ -221,14 +229,14 @@ library Borrow {
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
-                params.collateralIn,
+                params.collateralIn, // collateralIn as msg.value
                 params.maxDebt,
                 weth,
                 params.deadline
             )
         );
 
-        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
+        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral); // no need for this
     }
 
     function _borrowGivenCollateral(
@@ -246,10 +254,11 @@ library Borrow {
             params.collateralIn
         );
 
-        IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
+        IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt; // No need to repeat this
 
-        if (address(params.weth) != address(0)) weth.deposit{value: params.collateralIn}();
+        if (address(params.weth) != address(0)) weth.deposit{value: params.collateralIn}(); // no need for this
 
+        // parameter should be natives and pair
         (id, dueOut) = _borrow(
             collateralizedDebt,
             IBorrow._Borrow(
@@ -275,6 +284,9 @@ library Borrow {
         returns (uint256 id, IPair.Due memory dueOut)
     {
         require(params.deadline >= block.timestamp, 'Expired');
+
+        // Do the get native here
+        // Also if native does not exist deploy the Bond, Insurnace, Collaterlized Debt, and Liquidity with Deploy library, check Lend and Mint library for reference
 
         params.collateral.safeTransferFrom(params.from, params.pair, params.collateralIn);
 
