@@ -51,11 +51,16 @@ contract CollateralizedDebt is IDue {
         address from,
         address to,
         uint256[] memory ids,
-        uint112[] memory assetsPay
+        uint112[] memory debtsIn
     ) external override onlyConvenience returns (uint128 collateralOut) {
-        require(ids.length == assetsPay.length, 'Invalid');
-        for (uint256 i=0; i < ids.length; i++) require(ownerOf[ids[i]] == from, 'Forbidden');
-        collateralOut = pair.pay(maturity, to, address(this), ids, assetsPay);
+        for (uint256 i; i < ids.length; i++) require(ownerOf[ids[i]] == from, 'Forbidden');
+        collateralOut = pair.pay(maturity, to, address(this), ids, debtsIn);
+
+        IPair.Due[] memory dues = pair.duesOf(maturity, address(this));
+        for (uint256 i; i < ids.length; i++) {
+            uint256 id = ids[i];
+            if (dues[id].collateral == 0) _burn(from, id);
+        }
     }
 
     function safeTransferFrom(
@@ -76,110 +81,127 @@ contract CollateralizedDebt is IDue {
     }
 
     function transferFrom(
-        address _from,
-        address _to,
-        uint256 _id
-    ) external override isApproved(_from, _id) {
-        _transfer(_from, _to, _id);
+        address from,
+        address to,
+        uint256 id
+    ) external override isApproved(from, id) {
+        _transfer(from, to, id);
     }
 
-    function approve(address _to, uint256 _id) external override {
-        address _owner = ownerOf[_id];
+    function approve(address to, uint256 id) external override {
+        address owner = ownerOf[id];
         require(
-            _owner == msg.sender || isApprovedForAll[_owner][msg.sender],
+            owner == msg.sender || isApprovedForAll[owner][msg.sender],
             'ERC721 :: approve : Approve caller is not owner nor approved for all'
         );
-        require(_to != _owner, 'ERC721 :: approve : Approval to current owner');
-        _approve(_to, _id);
+        require(to != owner, 'ERC721 :: approve : Approval to current owner');
+
+        _approve(to, id);
     }
 
-    function setApprovalForAll(address _operator, bool _approved) external override {
-        require(_operator != msg.sender, 'ERC721 :: setApprovalForAll : Approve to caller');
-        _setApprovalForAll(_operator, _approved);
-        emit ApprovalForAll(msg.sender, _operator, _approved);
+    function setApprovalForAll(address operator, bool approved) external override {
+        require(operator != msg.sender, 'ERC721 :: setApprovalForAll : Approve to caller');
+
+        _setApprovalForAll(operator, approved);
     }
 
     function _safeTransfer(
-        address _from,
-        address _to,
-        uint256 _id,
-        bytes memory _data
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
     ) private {
-        _transfer(_from, _to, _id);
-        require(_checkOnERC721Received(_from, _to, _id, _data), 'ERC721 :: _safeTransfer : Not Safe Transfer');
+        _transfer(from, to, id);
+
+        require(_checkOnERC721Received(from, to, id, data), 'ERC721 :: _safeTransfer : Not Safe Transfer');
     }
 
-    function _approve(address _approved, uint256 _id) private {
-        getApproved[_id] = _approved;
-        emit Approval(ownerOf[_id], _approved, _id);
+    function _approve(address to, uint256 id) private {
+        getApproved[id] = to;
+
+        emit Approval(ownerOf[id], to, id);
     }
 
-    function _setApprovalForAll(address _operator, bool _approved) private {
-        isApprovedForAll[msg.sender][_operator] = _approved;
+    function _setApprovalForAll(address operator, bool approved) private {
+        isApprovedForAll[msg.sender][operator] = approved;
+
+        emit ApprovalForAll(msg.sender, operator, approved);
     }
 
-    function _safeMint(address _to, uint256 _id) internal virtual {
-        _mint(_to, _id);
+    function _safeMint(address to, uint256 id) internal virtual {
+        _mint(to, id);
+
         require(
-            _checkOnERC721Received(address(0), _to, _id, ''),
+            _checkOnERC721Received(address(0), to, id, ''),
             'ERC721 :: _safeMint : Transfer to non ERC721Receiver implementer'
         );
     }
 
-    function _mint(address _to, uint256 _id) private {
-        require(_to != address(0), 'ERC721 :: _mint : Mint to the address(0) address');
-        require(ownerOf[_id] == address(0), 'ERC721 :: _mint : Already minted');
+    function _mint(address to, uint256 id) private {
+        require(to != address(0), 'ERC721 :: _mint : Mint to the address(0) address');
+        require(ownerOf[id] == address(0), 'ERC721 :: _mint : Already minted');
 
-        balanceOf[_to] += 1;
-        ownerOf[_id] = _to;
+        balanceOf[to]++;
+        ownerOf[id] = to;
 
-        emit Transfer(address(0), _to, _id);
+        emit Transfer(address(0), to, id);
+    }
+
+    function _burn(address from, uint256 id) private {
+        require(from != address(0), 'ERC721 :: _burn : Zero address');
+        require(ownerOf[id] == from, 'ERC721 :: _burn : Not owner of token');
+
+        balanceOf[from]--;
+        ownerOf[id] = address(0);
+
+        emit Transfer(from, address(0), id);
     }
 
     function _transfer(
-        address _from,
-        address _to,
-        uint256 _id
+        address from,
+        address to,
+        uint256 id
     ) private {
-        require(_to != address(0), 'ERC721 :: _transfer : Transfer to the address(0) address');
+        require(to != address(0), 'ERC721 :: _transfer : Transfer to the address(0) address');
 
-        ownerOf[_id] = _to;
-        balanceOf[_from] -= 1;
-        balanceOf[_to] += 1;
-        getApproved[_id] = address(0);
+        ownerOf[id] = to;
+        balanceOf[from]--;
+        balanceOf[to]++;
 
-        emit Transfer(_from, _to, _id);
+        _approve(address(0), id);
+
+        emit Transfer(from, to, id);
     }
 
     function _checkOnERC721Received(
-        address _from,
-        address _to,
-        uint256 _id,
-        bytes memory _data
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
     ) private returns (bool) {
-        uint256 _size;
+        uint256 size;
         assembly {
-            _size := extcodesize(_to)
+            size := extcodesize(to)
         }
-        if (_size == 0) {
+        if (size == 0) {
             return true;
         } else {
-            bytes memory _returnData;
-            (bool _success, bytes memory _return) = _to.call(
-                abi.encodeWithSelector(IERC721Receiver(_to).onERC721Received.selector, msg.sender, _from, _id, _data)
+            bytes memory returnData;
+            (bool success, bytes memory _return) = to.call(
+                abi.encodeWithSelector(IERC721Receiver(to).onERC721Received.selector, msg.sender, from, id, data)
             );
-            if (_success) {
-                _returnData = _return;
+            if (success) {
+                returnData = _return;
             } else if (_return.length > 0) {
                 assembly {
-                    let _returnDataSize := mload(_return)
-                    revert(add(32, _return), _returnDataSize)
+                    let returnDataSize := mload(_return)
+                    revert(add(32, _return), returnDataSize)
                 }
             } else {
                 revert('ERC721 :: _checkOnERC721Received : Transfer to non ERC721Receiver implementer');
             }
-            bytes4 _retval = abi.decode(_returnData, (bytes4));
-            return (_retval == 0x150b7a02);
+            bytes4 retval = abi.decode(returnData, (bytes4));
+            return (retval == 0x150b7a02);
         }
     }
 }

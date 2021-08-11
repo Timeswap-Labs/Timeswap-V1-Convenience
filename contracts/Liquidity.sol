@@ -32,6 +32,26 @@ contract Liquidity is ILiquidity {
         return pair.liquidityOf(maturity, address(this));
     }
 
+    function mint(address to, uint256 amount) external override onlyConvenience {
+        require(to != address(0), 'Zero');
+
+        balanceOf[to] += amount;
+
+        emit Transfer(address(0), to, amount);
+    }
+
+    function burn(
+        address from,
+        address assetTo,
+        address collateralTo,
+        uint256 amount
+    ) external override onlyConvenience returns (IPair.Tokens memory tokensOut) {
+        balanceOf[from] -= amount;
+        tokensOut = pair.burn(maturity, assetTo, collateralTo, amount);
+
+        emit Transfer(from, address(0), amount);
+    }
+
     function transfer(address to, uint256 amount) external override returns (bool) {
         _transfer(msg.sender, to, amount);
 
@@ -65,26 +85,6 @@ contract Liquidity is ILiquidity {
         _approve(msg.sender, spender, allowance[msg.sender][spender] - amount);
 
         return true;
-    }
-
-    function mint(address to, uint256 amount) external override onlyConvenience {
-        require(to != address(0), 'Zero');
-
-        balanceOf[to] += amount;
-
-        emit Transfer(address(0), to, amount);
-    }
-
-    function burn(
-        address from,
-        address assetTo,
-        address collateralTo,
-        uint256 amount
-    ) external override onlyConvenience returns (IPair.Tokens memory tokensOut) {
-        balanceOf[from] -= amount;
-        tokensOut = pair.burn(maturity, assetTo, collateralTo, amount);
-
-        emit Transfer(from, address(0), amount);
     }
 
     function _transfer(
