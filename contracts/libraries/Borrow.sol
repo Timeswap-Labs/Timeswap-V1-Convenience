@@ -64,7 +64,7 @@ library Borrow {
                 params.collateral,
                 params.maturity,
                 msg.sender,
-                params.assetTo, // You want to transfer it to this address, so that you can change it to ETH
+                params.assetTo, // You want to transfer it to address(this), so that you can change it to ETH
                 params.dueTo,
                 params.assetOut,
                 params.debtIn,
@@ -173,7 +173,7 @@ library Borrow {
                 params.assetOut,
                 params.collateralIn,
                 params.maxDebt,
-                IWETH(address(0)),
+                IWETH(address(0)), // no need
                 params.deadline
             )
         );
@@ -194,12 +194,12 @@ library Borrow {
                 params.collateral,
                 params.maturity,
                 msg.sender,
-                params.assetTo, // should be sent to this address to transform to ETH
+                params.assetTo, // should be sent to this address(this) to transform to ETH
                 params.dueTo,
                 params.assetOut,
                 params.collateralIn,
                 params.maxDebt,
-                IWETH(address(0)),
+                IWETH(address(0)), // no need
                 params.deadline
             )
         );
@@ -231,7 +231,7 @@ library Borrow {
                 params.assetOut,
                 params.collateralIn, // collateralIn as msg.value
                 params.maxDebt,
-                weth,
+                weth, // mo need
                 params.deadline
             )
         );

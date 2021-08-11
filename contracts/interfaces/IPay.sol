@@ -10,7 +10,7 @@ interface IPay {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
-        address owner; // necessary?
+        address owner; // not necessary
         address assetFrom; // change name to from?
         address collateralTo;
         uint256[] ids;
