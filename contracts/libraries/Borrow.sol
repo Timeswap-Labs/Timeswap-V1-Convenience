@@ -15,18 +15,17 @@ import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
 
-
 library Borrow {
     using BorrowMath for IPair;
     using SafeTransfer for IERC20;
     using Deploy for IConvenience.Native;
 
-    
     function borrowGivenDebt(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenDebt calldata params) external returns (uint256 id, IPair.Due memory dueOut) {
+        IBorrow.BorrowGivenDebt calldata params
+    ) external returns (uint256 id, IPair.Due memory dueOut) {
         (id, dueOut) = _borrowGivenDebt(
             natives,
             factory,
@@ -47,14 +46,12 @@ library Borrow {
         );
     }
 
-      function borrowGivenDebtETHAsset(
-          mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+    function borrowGivenDebtETHAsset(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenDebtETHAsset calldata params)
-        external
-        returns (uint256 id, IPair.Due memory dueOut)
-    {
+        IBorrow.BorrowGivenDebtETHAsset calldata params
+    ) external returns (uint256 id, IPair.Due memory dueOut) {
         (id, dueOut) = _borrowGivenDebt(
             natives,
             factory,
@@ -75,19 +72,15 @@ library Borrow {
         );
         weth.withdraw(params.assetOut);
         ETH.transfer(payable(params.dueTo), params.assetOut);
-        
     }
 
     function borrowGivenDebtETHCollateral(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenDebtETHCollateral calldata params)
-        external
-        returns (uint256 id, IPair.Due memory dueOut)
-    {
+        IBorrow.BorrowGivenDebtETHCollateral calldata params
+    ) external returns (uint256 id, IPair.Due memory dueOut) {
         uint112 maxCollateral = MsgValue.getUint112();
-
 
         (id, dueOut) = _borrowGivenDebt(
             natives,
@@ -115,15 +108,19 @@ library Borrow {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBorrow._BorrowGivenDebt memory params) 
-        private returns (uint256 id, IPair.Due memory dueOut) {
+        IBorrow._BorrowGivenDebt memory params
+    ) private returns (uint256 id, IPair.Due memory dueOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(params.maturity, params.assetOut, params.debtIn);
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(
+            params.maturity,
+            params.assetOut,
+            params.debtIn
+        );
 
         uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
-        
+
         IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
 
         if (address(params.weth) != address(0)) weth.deposit{value: collateralIn}();
@@ -153,14 +150,12 @@ library Borrow {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenCollateral calldata params)
-        external
-        returns (uint256 id, IPair.Due memory dueOut)
-    {
+        IBorrow.BorrowGivenCollateral calldata params
+    ) external returns (uint256 id, IPair.Due memory dueOut) {
         (id, dueOut) = _borrowGivenCollateral(
             natives,
             factory,
-            weth,   
+            weth,
             IBorrow._BorrowGivenCollateral(
                 params.asset,
                 params.collateral,
@@ -177,14 +172,12 @@ library Borrow {
         );
     }
 
-  function borrowGivenCollateralETHAsset(
+    function borrowGivenCollateralETHAsset(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenCollateralETHAsset calldata params)
-        external
-        returns (uint256 id, IPair.Due memory dueOut)
-    {
+        IBorrow.BorrowGivenCollateralETHAsset calldata params
+    ) external returns (uint256 id, IPair.Due memory dueOut) {
         (id, dueOut) = _borrowGivenCollateral(
             natives,
             factory,
@@ -204,23 +197,19 @@ library Borrow {
             )
         );
 
-            weth.withdraw(params.assetOut);
-            ETH.transfer(payable(params.dueTo), params.assetOut);
-        
+        weth.withdraw(params.assetOut);
+        ETH.transfer(payable(params.dueTo), params.assetOut);
     }
 
     function borrowGivenCollateralETHCollateral(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenCollateralETHCollateral calldata params)
-        external
-        returns (uint256 id, IPair.Due memory dueOut)
-    {   
-
+        IBorrow.BorrowGivenCollateralETHCollateral calldata params
+    ) external returns (uint256 id, IPair.Due memory dueOut) {
         uint128 maxCollateral = MsgValue.getUint112();
 
-      (id, dueOut) = _borrowGivenCollateral(
+        (id, dueOut) = _borrowGivenCollateral(
             natives,
             factory,
             weth,
@@ -240,16 +229,14 @@ library Borrow {
         );
 
         if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
-
     }
 
-
-    function _borrowGivenCollateral( 
+    function _borrowGivenCollateral(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBorrow._BorrowGivenCollateral memory params) private returns (uint256 id, IPair.Due memory dueOut)
-    {
+        IBorrow._BorrowGivenCollateral memory params
+    ) private returns (uint256 id, IPair.Due memory dueOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
@@ -283,11 +270,10 @@ library Borrow {
         require(dueOut.collateral <= params.maxDebt, 'Safety');
     }
 
-    function _borrow(
-        IDue collateralizedDebt,
-        IBorrow._Borrow memory params
-    )private returns (uint256 id, IPair.Due memory dueOut){
-        
+    function _borrow(IDue collateralizedDebt, IBorrow._Borrow memory params)
+        private
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
         require(params.deadline >= block.timestamp, 'Expired');
 
         params.collateral.safeTransferFrom(params.from, params.pair, params.collateralIn);
@@ -304,6 +290,3 @@ library Borrow {
         collateralizedDebt.mint(params.dueTo, id);
     }
 }
-
-
-  

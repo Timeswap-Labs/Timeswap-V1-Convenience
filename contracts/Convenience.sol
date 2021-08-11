@@ -6,19 +6,11 @@ import {IFactory} from './interfaces/IFactory.sol';
 import {IWETH} from './interfaces/IWETH.sol';
 import {IPair} from './interfaces/IPair.sol';
 import {IERC20} from './interfaces/IERC20.sol';
-import {IClaim} from './interfaces/IClaim.sol';
-import {IDue} from './interfaces/IDue.sol';
-import {ILiquidity} from './interfaces/ILiquidity.sol';
-import {IDeploy} from './interfaces/IDeploy.sol';
 import {Mint} from './libraries/Mint.sol';
 import {Burn} from './libraries/Burn.sol';
 import {Lend} from './libraries/Lend.sol';
 import {Withdraw} from './libraries/Withdraw.sol';
-import {BorrowMath} from './libraries/BorrowMath.sol';
 import {Borrow} from './libraries/Borrow.sol';
-import {SafeTransfer} from './libraries/SafeTransfer.sol';
-import {MsgValue} from './libraries/MsgValue.sol';
-import {ETH} from './libraries/ETH.sol';
 import {Pay} from './libraries/Pay.sol';
 
 contract Convenience is IConvenience {
@@ -28,9 +20,6 @@ contract Convenience is IConvenience {
     using Withdraw for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Borrow for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Pay for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
-
-    using BorrowMath for IPair;
-    using SafeTransfer for IERC20;
 
     IFactory public immutable override factory;
     IWETH public immutable weth;
@@ -180,52 +169,53 @@ contract Convenience is IConvenience {
     }
 
     function borrowGivenDebt(BorrowGivenDebt calldata params) external returns (uint256 id, IPair.Due memory dueOut) {
-        (id, dueOut) = natives.borrowGivenDebt(factory, weth,params);
+        (id, dueOut) = natives.borrowGivenDebt(factory, weth, params);
     }
 
-    
-    function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params) external returns (uint256 id, IPair.Due memory dueOut) {
-        (id, dueOut) = natives.borrowGivenDebtETHAsset(factory, weth,params);
+    function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenDebtETHAsset(factory, weth, params);
     }
 
-
-    function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params) external returns (uint256 id, IPair.Due memory dueOut) {
-        (id, dueOut) = natives.borrowGivenDebtETHCollateral(factory, weth,params);
+    function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenDebtETHCollateral(factory, weth, params);
     }
 
     function borrowGivenCollateral(BorrowGivenCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateral( factory,  weth,params);
+        (id, dueOut) = natives.borrowGivenCollateral(factory, weth, params);
     }
 
-    
     function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHAsset( factory,  weth,params);
+        (id, dueOut) = natives.borrowGivenCollateralETHAsset(factory, weth, params);
     }
-    
+
     function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(factory,  weth,params);
+        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(factory, weth, params);
     }
 
     function repay(Repay memory params) external returns (uint128 collateralOut) {
-        collateralOut = natives.pay(factory,params);
+        collateralOut = natives.pay(factory, params);
     }
 
     function repayETHAsset(RepayETHAsset memory params) external returns (uint128 collateralOut) {
-        collateralOut = natives.payETHAsset(factory,weth,params);
+        collateralOut = natives.payETHAsset(factory, weth, params);
     }
 
     function repayETHCollateral(RepayETHCollateral memory params) external returns (uint128 collateralOut) {
-         collateralOut = natives.payETHCollateral(factory,weth,params);
-
+        collateralOut = natives.payETHCollateral(factory, weth, params);
     }
-
 }
