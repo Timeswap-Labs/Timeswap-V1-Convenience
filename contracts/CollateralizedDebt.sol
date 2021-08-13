@@ -5,8 +5,14 @@ import {IDue} from './interfaces/IDue.sol';
 import {IERC721Receiver} from './interfaces/IERC721Receiver.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IPair} from './interfaces/IPair.sol';
+import {IERC20} from './interfaces/IERC20.sol';
+import {SafeMetadata} from './libraries/SafeMetadata.sol';
+import {String} from './libraries/String.sol';
 
 contract CollateralizedDebt is IDue {
+    using SafeMetadata for IERC20;
+    using String for uint256;
+
     IConvenience public immutable override convenience;
     IPair public immutable override pair;
     uint256 public immutable override maturity;
@@ -16,8 +22,50 @@ contract CollateralizedDebt is IDue {
     mapping(uint256 => address) public override getApproved;
     mapping(address => mapping(address => bool)) public override isApprovedForAll;
 
+    function name() external view override returns (string memory) {
+        string memory assetName = pair.asset().safeName();
+        string memory collateralName = pair.collateral().safeName();
+        return
+            string(
+                abi.encodePacked(
+                    'Timeswap Collateralized Debt - ',
+                    assetName,
+                    ' - ',
+                    collateralName,
+                    ' - ',
+                    maturity.toString()
+                )
+            );
+    }
+
+    function symbol() external view override returns (string memory) {
+        string memory assetSymbol = pair.asset().safeSymbol();
+        string memory collateralSymbol = pair.collateral().safeSymbol();
+        return string(abi.encodePacked('TS-CLDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
+    }
+
+    function tokenURI(uint256 id) external view override returns (string memory) {}
+
+    function assetDecimals() external view override returns (uint8) {
+        return pair.asset().safeDecimals();
+    }
+
+    function collateralDecimals() external view override returns (uint8) {
+        return pair.collateral().safeDecimals();
+    }
+
     function dueOf(uint256 id) external view override returns (IPair.Due memory) {
         return pair.duesOf(maturity, address(this))[id];
+    }
+
+    constructor(
+        IConvenience _convenience,
+        IPair _pair,
+        uint256 _maturity
+    ) {
+        convenience = _convenience;
+        pair = _pair;
+        maturity = _maturity;
     }
 
     modifier onlyConvenience() {
@@ -31,16 +79,6 @@ contract CollateralizedDebt is IDue {
             'Forrbidden'
         );
         _;
-    }
-
-    constructor(
-        IConvenience _convenience,
-        IPair _pair,
-        uint256 _maturity
-    ) {
-        convenience = _convenience;
-        pair = _pair;
-        maturity = _maturity;
     }
 
     function mint(address to, uint256 id) external override onlyConvenience {

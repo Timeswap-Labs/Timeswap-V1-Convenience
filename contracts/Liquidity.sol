@@ -4,8 +4,16 @@ pragma solidity =0.8.1;
 import {ILiquidity} from './interfaces/ILiquidity.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IPair} from './interfaces/IPair.sol';
+import {IERC20} from './interfaces/IERC20.sol';
+import {SafeMetadata} from './libraries/SafeMetadata.sol';
+import {String} from './libraries/String.sol';
 
 contract Liquidity is ILiquidity {
+    using SafeMetadata for IERC20;
+    using String for uint256;
+
+    uint8 public constant override decimals = 18;
+
     IConvenience public immutable override convenience;
     IPair public immutable override pair;
     uint256 public immutable override maturity;
@@ -13,9 +21,23 @@ contract Liquidity is ILiquidity {
     mapping(address => uint256) public override balanceOf;
     mapping(address => mapping(address => uint256)) public override allowance;
 
-    modifier onlyConvenience() {
-        require(msg.sender == address(convenience), 'Forbidden');
-        _;
+    function name() external view override returns (string memory) {
+        string memory assetName = pair.asset().safeName();
+        string memory collateralName = pair.collateral().safeName();
+        return
+            string(
+                abi.encodePacked('Timeswap Liquidity - ', assetName, ' - ', collateralName, ' - ', maturity.toString())
+            );
+    }
+
+    function symbol() external view override returns (string memory) {
+        string memory assetSymbol = pair.asset().safeSymbol();
+        string memory collateralSymbol = pair.collateral().safeSymbol();
+        return string(abi.encodePacked('TS-LIQ-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
+    }
+
+    function totalSupply() external view override returns (uint256) {
+        return pair.liquidityOf(maturity, address(this));
     }
 
     constructor(
@@ -28,8 +50,9 @@ contract Liquidity is ILiquidity {
         maturity = _maturity;
     }
 
-    function totalSupply() external view override returns (uint256) {
-        return pair.liquidityOf(maturity, address(this));
+    modifier onlyConvenience() {
+        require(msg.sender == address(convenience), 'Forbidden');
+        _;
     }
 
     function mint(address to, uint256 amount) external override onlyConvenience {

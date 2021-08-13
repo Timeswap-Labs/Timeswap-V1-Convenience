@@ -13,7 +13,7 @@ import {Withdraw} from './libraries/Withdraw.sol';
 import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
 
-contract Convenience is IConvenience {
+contract TimeswapConvenience is IConvenience {
     using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Burn for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Lend for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));

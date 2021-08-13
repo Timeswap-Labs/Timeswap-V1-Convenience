@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
+import {IERC20} from './IERC20.sol';
+
 interface IPair {
     // STRUCT
 
@@ -27,6 +29,10 @@ interface IPair {
     }
 
     // VIEW
+
+    function asset() external view returns (IERC20);
+
+    function collateral() external view returns (IERC20);
 
     function fee() external view returns (uint16);
 

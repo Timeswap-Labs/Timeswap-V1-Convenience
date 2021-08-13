@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IERC20} from './IERC20.sol';
+import {IERC20Metadata} from './IERC20Metadata.sol';
 import {IConvenience} from './IConvenience.sol';
 import {IPair} from './IPair.sol';
 
 /// @author Ricsson W. Ngo
-interface ILiquidity is IERC20 {
+interface ILiquidity is IERC20Metadata {
     // VIEW
 
     function convenience() external returns (IConvenience);
