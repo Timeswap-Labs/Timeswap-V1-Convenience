@@ -16,15 +16,14 @@ import {ETH} from './ETH.sol';
 
 library Pay {
     using SafeTransfer for IERC20;
-    using Deploy for IConvenience.Native; // No need
 
     function pay(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IPay.Repay memory params
     ) external returns (uint128 collateralOut) {
-        uint112 debtToBePaid; // totalDebtIn ? // Should be uint128
-        for (uint256 i = 0; i < params.ids.length; i++) debtToBePaid += params.debtsIn[i]; // no need for i = 0
+        uint128 debtToBePaid; 
+        for (uint256 i; i < params.ids.length; i++) debtToBePaid += params.debtsIn[i];
         collateralOut = _pay(
             natives,
             factory,
@@ -33,7 +32,7 @@ library Pay {
                 params.collateral,
                 params.maturity,
                 params.owner,
-                params.assetFrom,
+                params.from,
                 params.collateralTo,
                 params.ids,
                 params.debtsIn,
@@ -49,11 +48,10 @@ library Pay {
         IWETH weth,
         IPay.RepayETHAsset memory params
     ) external returns (uint128 collateralOut) {
-        uint112 assetIn = MsgValue.getUint112(); // Should be uint128
-        uint112 debtToBePaid; // Should be uint128
+        uint128 assetIn = MsgValue.getUint112();
+        uint128 debtToBePaid;
         for (uint256 i = 0; i < params.ids.length; i++) debtToBePaid += params.debtsIn[i];
-        weth.deposit{value: debtToBePaid}(); // do we need the require?
-
+        weth.deposit{value: debtToBePaid}();
         collateralOut = _pay(
             natives,
             factory,
@@ -62,7 +60,7 @@ library Pay {
                 params.collateral,
                 params.maturity,
                 params.owner,
-                params.assetFrom,
+                params.from,
                 params.collateralTo,
                 params.ids,
                 params.debtsIn,
@@ -71,7 +69,7 @@ library Pay {
             )
         );
 
-        if (assetIn - collateralOut > 0) ETH.transfer(payable(msg.sender), assetIn - collateralOut); // assetIn - totalDebtsIn
+        if (assetIn - collateralOut > 0) ETH.transfer(payable(msg.sender), assetIn - debtToBePaid);
     }
 
     function payETHCollateral(
@@ -82,8 +80,8 @@ library Pay {
     ) external returns (uint128 collateralOut) {
         require(params.deadline >= block.timestamp, 'Expired');
 
-        uint112 debtToBePaid; // Should be uint128
-        for (uint256 i = 0; i < params.ids.length; i++) debtToBePaid += params.debtsIn[i]; // no n eed for i =0
+        uint128 debtToBePaid;
+        for (uint256 i; i < params.ids.length; i++) debtToBePaid += params.debtsIn[i];
 
         collateralOut = _pay(
             natives,
@@ -93,7 +91,7 @@ library Pay {
                 weth,
                 params.maturity,
                 params.owner,
-                params.assetFrom,
+                params.from,
                 params.collateralTo,
                 params.ids,
                 params.debtsIn,
@@ -104,7 +102,7 @@ library Pay {
 
         if (collateralOut > 0) {
             weth.withdraw(collateralOut);
-            ETH.transfer(payable(params.owner), collateralOut); // should be collateralTo no need to wrap payable
+            ETH.transfer(params.collateralTo, collateralOut);
         }
     }
 
@@ -113,13 +111,32 @@ library Pay {
         IFactory factory,
         IPay._Repay memory params
     ) private returns (uint128 collateralOut) {
-        IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt; // Need check for existence // move this after get pair for code consistency // third
-        // Safety check require(not zero address)
+        require(params.deadline >= block.timestamp, 'Expired');
 
-        IPair pair = factory.getPair(params.asset, params.collateral); // seoncd
+        IPair pair = factory.getPair(params.asset, params.collateral); 
         require(address(pair) != address(0), 'Zero');
-        require(params.deadline >= block.timestamp, 'Expired'); // first
-        IERC20(params.asset).safeTransferFrom(params.assetFrom, pair, params.assetIn);
-        collateralOut = collateralizedDebt.burn(params.owner, params.collateralTo, params.ids, params.debtsIn);
+
+        IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
+        require(address(collateralizedDebt)!=address(0),'Zero');
+
+        uint112[] memory collateralsOut = _getCollateral(collateralizedDebt,params.ids,params.debtsIn,params.owner,params.from);
+        
+        IERC20(params.asset).safeTransferFrom(params.from, pair, params.assetIn);
+        collateralOut = collateralizedDebt.burn(params.owner, params.collateralTo, params.ids, params.debtsIn, collateralsOut);
+    }
+
+    function _getCollateral(IDue collateralizedDebt, uint256[] memory ids,uint112[] memory debtsIn,address owner, address from)private returns(uint112[] memory collateralsOut){
+        for(uint256 i=0;i<ids.length;i++){
+            if(from==owner){
+                IPair.Due memory due = collateralizedDebt.dueOf(ids[i]);
+                if(debtsIn[i] > due.debt){
+                    collateralsOut[i]=due.collateral;
+                }
+                collateralsOut[i]=debtsIn[i]*due.collateral/due.debt;
+            }
+            else{
+                collateralsOut[i]=0;
+            }
+        }
     }
 }

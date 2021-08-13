@@ -10,8 +10,8 @@ interface IPay {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
-        address owner; // not necessary
-        address assetFrom; // change name to from?
+        address owner;
+        address from;
         address collateralTo;
         uint256[] ids;
         uint112[] debtsIn;
@@ -22,8 +22,8 @@ interface IPay {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
-        address owner; // necessary?
-        address assetFrom; // change name to from?
+        address owner;
+        address from;
         address collateralTo;
         uint256[] ids;
         uint112[] debtsIn;
@@ -35,7 +35,7 @@ interface IPay {
         IERC20 collateral;
         uint256 maturity;
         address owner; // necessary?
-        address assetFrom; // change name to from?
+        address from; // change name to from?
         address collateralTo;
         uint256[] ids;
         uint112[] debtsIn;
@@ -46,7 +46,7 @@ interface IPay {
         IERC20 asset;
         uint256 maturity;
         address owner; // necessary?
-        address assetFrom; // change name to from?
+        address from; // change name to from?
         address payable collateralTo;
         uint256[] ids;
         uint112[] debtsIn;
