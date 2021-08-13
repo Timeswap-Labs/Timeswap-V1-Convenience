@@ -3,8 +3,8 @@ pragma solidity =0.8.1;
 
 import {IERC20} from './IERC20.sol';
 import {IPair} from './IPair.sol';
-import {IWETH} from './IWETH.sol';
 
+import {IWETH} from './IWETH.sol';
 interface IBorrow {
     struct _Borrow {
         IPair pair;
@@ -21,7 +21,6 @@ interface IBorrow {
         uint256 deadline;
     }
 
-    // No need to IWETH weth anymore as we already know the amount to deposit
     struct _BorrowGivenCollateral {
         IERC20 asset;
         IERC20 collateral;
@@ -32,7 +31,6 @@ interface IBorrow {
         uint112 assetOut;
         uint112 collateralIn;
         uint112 maxDebt;
-        IWETH weth;
         uint256 deadline;
     }
 
@@ -51,7 +49,7 @@ interface IBorrow {
     struct BorrowGivenCollateralETHAsset {
         IERC20 collateral;
         uint256 maturity;
-        address assetTo; // make it payable
+        address payable assetTo;
         address dueTo;
         uint112 assetOut;
         uint112 collateralIn;
@@ -59,19 +57,16 @@ interface IBorrow {
         uint256 deadline;
     }
 
-    // Remove collateralIn as it is the msg.value = collateralIn
     struct BorrowGivenCollateralETHCollateral {
         IERC20 asset;
         uint256 maturity;
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 collateralIn;
         uint112 maxDebt;
         uint256 deadline;
     }
 
-    // Move the IWETH weth to in between debtIn and maxCollateral
     struct _BorrowGivenDebt {
         IERC20 asset;
         IERC20 collateral;
@@ -81,8 +76,8 @@ interface IBorrow {
         address dueTo;
         uint112 assetOut;
         uint112 debtIn;
-        uint112 maxCollateral;
         IWETH weth;
+        uint112 maxCollateral;
         uint256 deadline;
     }
 
@@ -101,7 +96,7 @@ interface IBorrow {
     struct BorrowGivenDebtETHAsset {
         IERC20 collateral;
         uint256 maturity;
-        address assetTo; // make it payable
+        address payable assetTo;
         address dueTo;
         uint112 assetOut;
         uint112 debtIn;

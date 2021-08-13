@@ -169,42 +169,42 @@ contract Convenience is IConvenience {
     }
 
     function borrowGivenDebt(BorrowGivenDebt calldata params) external returns (uint256 id, IPair.Due memory dueOut) {
-        (id, dueOut) = natives.borrowGivenDebt(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenDebt(factory, this, params);
     }
 
     function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenDebtETHAsset(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenDebtETHAsset(factory, this, weth, params);
     }
 
     function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenDebtETHCollateral(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenDebtETHCollateral(factory, this, weth, params);
     }
 
     function borrowGivenCollateral(BorrowGivenCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateral(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenCollateral(factory, this, params);
     }
 
     function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHAsset(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenCollateralETHAsset(factory, this, weth, params);
     }
 
     function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(factory, this,weth, params);
     }
 
     function repay(Repay memory params) external returns (uint128 collateralOut) {
