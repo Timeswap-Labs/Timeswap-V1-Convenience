@@ -23,7 +23,7 @@ library Pay {
         IPay.Repay memory params
     ) external returns (uint128 collateralOut) {
         uint128 debtToBePaid; 
-        for (uint256 i; i < params.ids.length; i++) debtToBePaid += params.debtsIn[i];
+        for (uint256 i; i < params.ids.length; i++) debtToBePaid += params.maxDebtsIn[i];
         collateralOut = _pay(
             natives,
             factory,
@@ -31,11 +31,10 @@ library Pay {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                params.owner,
-                params.from,
+                msg.sender,
                 params.collateralTo,
                 params.ids,
-                params.debtsIn,
+                params.maxDebtsIn,
                 debtToBePaid,
                 params.deadline
             )
@@ -50,7 +49,7 @@ library Pay {
     ) external returns (uint128 collateralOut) {
         uint128 assetIn = MsgValue.getUint112();
         uint128 debtToBePaid;
-        for (uint256 i = 0; i < params.ids.length; i++) debtToBePaid += params.debtsIn[i];
+        for (uint256 i = 0; i < params.ids.length; i++) debtToBePaid += params.maxDebtsIn[i];
         weth.deposit{value: debtToBePaid}();
         collateralOut = _pay(
             natives,
@@ -59,11 +58,10 @@ library Pay {
                 weth,
                 params.collateral,
                 params.maturity,
-                params.owner,
-                params.from,
+                address(this),
                 params.collateralTo,
                 params.ids,
-                params.debtsIn,
+                params.maxDebtsIn,
                 debtToBePaid,
                 params.deadline
             )
@@ -81,7 +79,7 @@ library Pay {
         require(params.deadline >= block.timestamp, 'Expired');
 
         uint128 debtToBePaid;
-        for (uint256 i; i < params.ids.length; i++) debtToBePaid += params.debtsIn[i];
+        for (uint256 i; i < params.ids.length; i++) debtToBePaid += params.maxDebtsIn[i];
 
         collateralOut = _pay(
             natives,
@@ -90,11 +88,10 @@ library Pay {
                 params.asset,
                 weth,
                 params.maturity,
-                params.owner,
-                params.from,
+                msg.sender,
                 params.collateralTo,
                 params.ids,
-                params.debtsIn,
+                params.maxDebtsIn,
                 debtToBePaid,
                 params.deadline
             )
@@ -119,24 +116,28 @@ library Pay {
         IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
         require(address(collateralizedDebt)!=address(0),'Zero');
 
-        uint112[] memory collateralsOut = _getCollateral(collateralizedDebt,params.ids,params.debtsIn,params.owner,params.from);
+        (uint112[] memory collateralsOut, uint112[] memory debtsIn) = _getCollateralAndDebt(collateralizedDebt,params.ids,params.maxDebtsIn,params.from);
         
+
         IERC20(params.asset).safeTransferFrom(params.from, pair, params.assetIn);
-        collateralOut = collateralizedDebt.burn(params.owner, params.collateralTo, params.ids, params.debtsIn, collateralsOut);
+        collateralOut = collateralizedDebt.burn(params.from, params.collateralTo, params.ids,debtsIn, collateralsOut);
     }
 
-    function _getCollateral(IDue collateralizedDebt, uint256[] memory ids,uint112[] memory debtsIn,address owner, address from)private returns(uint112[] memory collateralsOut){
-        for(uint256 i=0;i<ids.length;i++){
-            if(from==owner){
-                IPair.Due memory due = collateralizedDebt.dueOf(ids[i]);
-                if(debtsIn[i] > due.debt){
-                    collateralsOut[i]=due.collateral;
-                }
-                collateralsOut[i]=debtsIn[i]*due.collateral/due.debt;
+    function _getCollateralAndDebt( IDue collateralizedDebt,
+                                    uint256[] memory ids,
+                                    uint112[] memory maxDebtsIn,
+                                    address from
+    ) private returns(uint112[] memory collateralsOut, uint112[] memory debtsIn){
+        debtsIn = maxDebtsIn;
+        for(uint256 i;i<ids.length;i++){
+            IPair.Due memory due = collateralizedDebt.dueOf(ids[i]);
+            if(msg.sender==collateralizedDebt.ownerOf(ids[i])){
+                collateralsOut[i]=maxDebtsIn[i]*due.collateral/due.debt;
             }
-            else{
-                collateralsOut[i]=0;
+            if(maxDebtsIn[i]>=due.debt){
+                debtsIn[i] = due.debt;
             }
         }
     }
+
 }

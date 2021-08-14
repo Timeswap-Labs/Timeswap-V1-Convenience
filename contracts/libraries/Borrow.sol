@@ -73,7 +73,7 @@ library Borrow {
         );
 
         weth.withdraw(params.assetOut);
-        ETH.transfer(payable(params.assetTo), params.assetOut);
+        ETH.transfer(params.assetTo, params.assetOut);
     }
 
     function borrowGivenDebtETHCollateral(
@@ -125,7 +125,7 @@ library Borrow {
         uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
 
         
-        if (address(params.collateral) == address(params.weth)) params.weth.deposit{value: collateralIn}();
+        if (address(params.collateral) != address(0)) params.weth.deposit{value: collateralIn}();
 
         (id, dueOut) = _borrow(
             natives,

@@ -54,13 +54,13 @@ contract CollateralizedDebt is IDue {
         uint112[] memory debtsIn,
         uint112[] memory collateralsOut
     ) external override onlyConvenience returns (uint128 collateralOut) {
-        for (uint256 i; i < ids.length; i++) require(ownerOf[ids[i]] == from, 'Forbidden');
         collateralOut = pair.pay(maturity, to, address(this), ids, debtsIn,collateralsOut);
 
         IPair.Due[] memory dues = pair.duesOf(maturity, address(this));
         for (uint256 i; i < ids.length; i++) {
             uint256 id = ids[i];
-            if (dues[id].collateral == 0) _burn(from, id);
+
+            if (dues[id].collateral == 0 && ownerOf[id]==from) _burn(from, id);
         }
     }
 
