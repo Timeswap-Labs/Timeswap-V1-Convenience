@@ -10,7 +10,6 @@ import {IPair} from '../interfaces/IPair.sol';
 import {IPay} from '../interfaces/IPay.sol';
 import {IDue} from '../interfaces/IDue.sol';
 import {SafeTransfer} from './SafeTransfer.sol';
-import {Deploy} from './Deploy.sol'; // No need
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
 
@@ -31,7 +30,6 @@ library Pay {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                msg.sender,
                 params.collateralTo,
                 params.ids,
                 params.maxDebtsIn,
@@ -58,7 +56,6 @@ library Pay {
                 weth,
                 params.collateral,
                 params.maturity,
-                address(this),
                 params.collateralTo,
                 params.ids,
                 params.maxDebtsIn,
@@ -88,7 +85,6 @@ library Pay {
                 params.asset,
                 weth,
                 params.maturity,
-                msg.sender,
                 params.collateralTo,
                 params.ids,
                 params.maxDebtsIn,
@@ -116,17 +112,16 @@ library Pay {
         IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
         require(address(collateralizedDebt)!=address(0),'Zero');
 
-        (uint112[] memory collateralsOut, uint112[] memory debtsIn) = _getCollateralAndDebt(collateralizedDebt,params.ids,params.maxDebtsIn,params.from);
+        (uint112[] memory collateralsOut, uint112[] memory debtsIn) = _getCollateralAndDebt(collateralizedDebt,params.ids,params.maxDebtsIn);
         
 
-        IERC20(params.asset).safeTransferFrom(params.from, pair, params.assetIn);
-        collateralOut = collateralizedDebt.burn(params.from, params.collateralTo, params.ids,debtsIn, collateralsOut);
+        IERC20(params.asset).safeTransferFrom(msg.sender, pair, params.assetIn);
+        collateralOut = collateralizedDebt.burn(msg.sender, params.collateralTo, params.ids,debtsIn, collateralsOut);
     }
 
     function _getCollateralAndDebt( IDue collateralizedDebt,
                                     uint256[] memory ids,
-                                    uint112[] memory maxDebtsIn,
-                                    address from
+                                    uint112[] memory maxDebtsIn
     ) private returns(uint112[] memory collateralsOut, uint112[] memory debtsIn){
         debtsIn = maxDebtsIn;
         for(uint256 i;i<ids.length;i++){

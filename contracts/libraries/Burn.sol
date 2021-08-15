@@ -15,7 +15,7 @@ library Burn {
         IFactory factory,
         IBurn.RemoveLiquidity calldata params
     ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = removeLiquidityBothERC20(natives, factory, params);
+        tokensOut = _removeLiquidity(natives, factory, params);
     }
 
     function removeLiquidityETHAsset(
@@ -24,7 +24,7 @@ library Burn {
         IWETH weth,
         IBurn.RemoveLiquidityETHAsset calldata params
     ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = removeLiquidityBothERC20(
+        tokensOut = _removeLiquidity(
             natives,
             factory,
             IBurn.RemoveLiquidity(
@@ -49,7 +49,7 @@ library Burn {
         IWETH weth,
         IBurn.RemoveLiquidityETHCollateral calldata params
     ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = removeLiquidityBothERC20(
+        tokensOut = _removeLiquidity(
             natives,
             factory,
             IBurn.RemoveLiquidity(
@@ -68,7 +68,7 @@ library Burn {
         }
     }
 
-    function removeLiquidityBothERC20(
+    function _removeLiquidity(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IBurn.RemoveLiquidity memory params

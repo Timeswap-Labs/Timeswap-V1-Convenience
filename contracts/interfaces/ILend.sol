@@ -39,7 +39,7 @@ interface ILend {
         uint256 deadline;
     }
 
-    struct LendGivenBondBothERC20 {
+    struct _LendGivenBond {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -85,7 +85,7 @@ interface ILend {
         uint256 deadline;
     }
 
-    struct LendGivenInsuranceBothERC20 {
+    struct _LendGivenInsurance {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -98,7 +98,7 @@ interface ILend {
         uint256 deadline;
     }
 
-    struct LendBothERC20 {
+    struct _Lend {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;

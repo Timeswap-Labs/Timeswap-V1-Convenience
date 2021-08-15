@@ -15,7 +15,7 @@ library Withdraw {
         IFactory factory,
         IWithdraw.Collect calldata params
     ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = collectBothERC20(natives, factory, params);
+        tokensOut = _collect(natives, factory, params);
     }
 
     function collectETHAsset(
@@ -24,7 +24,7 @@ library Withdraw {
         IWETH weth,
         IWithdraw.CollectETHAsset calldata params
     ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = collectBothERC20(
+        tokensOut = _collect(
             natives,
             factory,
             IWithdraw.Collect(
@@ -49,7 +49,7 @@ library Withdraw {
         IWETH weth,
         IWithdraw.CollectETHCollateral calldata params
     ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = collectBothERC20(
+        tokensOut = _collect(
             natives,
             factory,
             IWithdraw.Collect(params.asset, weth, params.maturity, params.assetTo, address(this), params.claimsIn)
@@ -61,7 +61,7 @@ library Withdraw {
         }
     }
 
-    function collectBothERC20(
+    function _collect(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWithdraw.Collect memory params

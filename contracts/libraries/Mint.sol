@@ -31,11 +31,11 @@ library Mint {
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = newLiquidityBothERC20(
+        (liquidityOut, id, dueOut) = _newLiquidity(
             natives,
             convenience,
             factory,
-            IMint.NewLiquidityBothERC20(
+            IMint._NewLiquidity(
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -68,11 +68,11 @@ library Mint {
         uint112 assetIn = MsgValue.getUint112();
         weth.deposit{value: assetIn}();
 
-        (liquidityOut, id, dueOut) = newLiquidityBothERC20(
+        (liquidityOut, id, dueOut) = _newLiquidity(
             natives,
             convenience,
             factory,
-            IMint.NewLiquidityBothERC20(
+            IMint._NewLiquidity(
                 weth,
                 params.collateral,
                 params.maturity,
@@ -105,11 +105,11 @@ library Mint {
         uint112 collateralIn = MsgValue.getUint112();
         weth.deposit{value: collateralIn}();
 
-        (liquidityOut, id, dueOut) = newLiquidityBothERC20(
+        (liquidityOut, id, dueOut) = _newLiquidity(
             natives,
             convenience,
             factory,
-            IMint.NewLiquidityBothERC20(
+            IMint._NewLiquidity(
                 params.asset,
                 weth,
                 params.maturity,
@@ -125,11 +125,11 @@ library Mint {
         );
     }
 
-    function newLiquidityBothERC20(
+    function _newLiquidity(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IMint.NewLiquidityBothERC20 memory params
+        IMint._NewLiquidity memory params
     )
         private
         returns (
@@ -151,11 +151,11 @@ library Mint {
             params.collateralIn
         );
 
-        (liquidityOut, id, dueOut) = mintBothERC20(
+        (liquidityOut, id, dueOut) = _mint(
             natives,
             convenience,
             pair,
-            IMint.MintBothERC20(
+            IMint._Mint(
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -184,11 +184,11 @@ library Mint {
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = addLiquidityBothERC20(
+        (liquidityOut, id, dueOut) = _addLiquidity(
             natives,
             convenience,
             factory,
-            IMint.AddLiquidityBothERC20(
+            IMint._AddLiquidity(
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -223,11 +223,11 @@ library Mint {
         uint112 assetIn = MsgValue.getUint112();
         weth.deposit{value: assetIn}();
 
-        (liquidityOut, id, dueOut) = addLiquidityBothERC20(
+        (liquidityOut, id, dueOut) = _addLiquidity(
             natives,
             convenience,
             factory,
-            IMint.AddLiquidityBothERC20(
+            IMint._AddLiquidity(
                 weth,
                 params.collateral,
                 params.maturity,
@@ -261,11 +261,11 @@ library Mint {
     {
         uint112 maxCollateral = MsgValue.getUint112();
 
-        (liquidityOut, id, dueOut) = addLiquidityBothERC20(
+        (liquidityOut, id, dueOut) = _addLiquidity(
             natives,
             convenience,
             factory,
-            IMint.AddLiquidityBothERC20(
+            IMint._AddLiquidity(
                 params.asset,
                 weth,
                 params.maturity,
@@ -285,11 +285,11 @@ library Mint {
         if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
     }
 
-    function addLiquidityBothERC20(
+    function _addLiquidity(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IMint.AddLiquidityBothERC20 memory params
+        IMint._AddLiquidity memory params
     )
         private
         returns (
@@ -308,11 +308,11 @@ library Mint {
 
         if (address(params.weth) != address(0)) params.weth.deposit{value: dueOut.collateral}();
 
-        (liquidityOut, id, dueOut) = mintBothERC20(
+        (liquidityOut, id, dueOut) = _mint(
             natives,
             convenience,
             pair,
-            IMint.MintBothERC20(
+            IMint._Mint(
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -332,11 +332,11 @@ library Mint {
         require(dueOut.collateral <= params.maxCollateral, 'Safety');
     }
 
-    function mintBothERC20(
+    function _mint(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IPair pair,
-        IMint.MintBothERC20 memory params
+        IMint._Mint memory params
     )
         private
         returns (
