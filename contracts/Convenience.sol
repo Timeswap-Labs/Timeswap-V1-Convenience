@@ -12,6 +12,7 @@ import {Lend} from './libraries/Lend.sol';
 import {Withdraw} from './libraries/Withdraw.sol';
 import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
+import {DeployNatives} from './libraries/DeployNatives.sol';
 
 contract Convenience is IConvenience {
     using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
@@ -20,6 +21,8 @@ contract Convenience is IConvenience {
     using Withdraw for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Borrow for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Pay for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using DeployNatives for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+
 
     IFactory public immutable override factory;
     IWETH public immutable weth;
@@ -217,5 +220,9 @@ contract Convenience is IConvenience {
 
     function repayETHCollateral(RepayETHCollateral memory params) external returns (uint128 collateralOut) {
         collateralOut = natives.payETHCollateral(factory, weth, params);
+    }
+
+    function deployNatives(Deploy memory params) external {
+         natives.deployIfNoNatives(factory, this, params);
     }
 }
