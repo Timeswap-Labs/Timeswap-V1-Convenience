@@ -77,4 +77,44 @@ library LendMath {
         _interestDecrease /= feeBase;
         interestDecrease = _interestDecrease.toUint112();
     }
+
+    function givenPercent(
+        IPair pair,
+        uint256 maturity,
+        uint112 assetIn,
+        uint40 percent
+    ) internal view returns (uint112 interestDecrease, uint112 cdpDecrease) {
+        uint256 feeBase = 0x10000 + pair.fee();
+
+        IPair.State memory state = pair.state(maturity);
+
+        uint256 minimum = assetIn;
+        minimum *= state.interest;
+        minimum /= uint256(state.asset) << 4;
+
+        uint256 maximum = state.asset;
+        maximum *= state.interest;
+        maximum <<= 16;
+        maximum = ((uint256(state.interest) * (state.asset + assetIn)) << 16) - maximum;
+        maximum /= feeBase * (state.asset + assetIn);
+
+        uint256 _interestDecrease = maximum;
+        _interestDecrease -= minimum;
+        _interestDecrease *= percent;
+        _interestDecrease += minimum << 32;
+        _interestDecrease >>= 32;
+        interestDecrease = _interestDecrease.toUint112();
+
+        uint256 interestAdjust = state.interest;
+        interestAdjust <<= 16;
+        interestAdjust -= _interestDecrease * feeBase;
+
+        uint256 cdpAdjust = state.getConstantProduct(state.asset + assetIn, interestAdjust);
+
+        uint256 _cdpDecrease = state.cdp;
+        _cdpDecrease <<= 16;
+        _cdpDecrease -= cdpAdjust;
+        _cdpDecrease /= feeBase;
+        cdpDecrease = _cdpDecrease.toUint112();
+    }
 }

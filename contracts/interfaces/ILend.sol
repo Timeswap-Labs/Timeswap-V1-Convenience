@@ -98,6 +98,56 @@ interface ILend {
         uint256 deadline;
     }
 
+    struct LendGivenPercent {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address bondTo;
+        address insuranceTo;
+        uint112 assetIn;
+        uint40 percent;
+        uint128 minBond;
+        uint128 minInsurance;
+        uint256 deadline;
+    }
+
+    struct LendGivenPercentETHAsset {
+        IERC20 collateral;
+        uint256 maturity;
+        address bondTo;
+        address insuranceTo;
+        uint40 percent;
+        uint128 minBond;
+        uint128 minInsurance;
+        uint256 deadline;
+    }
+
+    struct LendGivenPercentETHCollateral {
+        IERC20 asset;
+        uint256 maturity;
+        address bondTo;
+        address insuranceTo;
+        uint112 assetIn;
+        uint40 percent;
+        uint128 minBond;
+        uint128 minInsurance;
+        uint256 deadline;
+    }
+
+    struct _LendGivenPercent {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address from;
+        address bondTo;
+        address insuranceTo;
+        uint112 assetIn;
+        uint40 percent;
+        uint128 minBond;
+        uint128 minInsurance;
+        uint256 deadline;
+    }
+
     struct _Lend {
         IERC20 asset;
         IERC20 collateral;

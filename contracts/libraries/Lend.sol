@@ -177,6 +177,128 @@ library Lend {
         );
     }
 
+    function lendGivenPercent(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        ILend.LendGivenPercent calldata params
+    ) external returns (IPair.Claims memory claimsOut) {
+        claimsOut = _lendGivenPercent(
+            natives,
+            convenience,
+            factory,
+            ILend._LendGivenPercent(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                params.percent,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function lendGivenPercentETHAsset(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IWETH weth,
+        ILend.LendGivenPercentETHAsset calldata params
+    ) external returns (IPair.Claims memory claimsOut) {
+        uint112 assetIn = MsgValue.getUint112();
+        weth.deposit{value: assetIn}();
+
+        claimsOut = _lendGivenPercent(
+            natives,
+            convenience,
+            factory,
+            ILend._LendGivenPercent(
+                weth,
+                params.collateral,
+                params.maturity,
+                address(this),
+                params.bondTo,
+                params.insuranceTo,
+                assetIn,
+                params.percent,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function lendGivenPercentETHCollateral(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IWETH weth,
+        ILend.LendGivenPercentETHCollateral calldata params
+    ) external returns (IPair.Claims memory claimsOut) {
+        claimsOut = _lendGivenPercent(
+            natives,
+            convenience,
+            factory,
+            ILend._LendGivenPercent(
+                params.asset,
+                weth,
+                params.maturity,
+                msg.sender,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                params.percent,
+                params.minBond,
+                params.minInsurance,
+                params.deadline
+            )
+        );
+    }
+
+    function _lendGivenPercent(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        ILend._LendGivenPercent memory params
+    ) private returns (IPair.Claims memory claimsOut) {
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'Zero');
+
+        require(params.percent <= 0x100000000, 'Invalid');
+
+        (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenPercent(
+            params.maturity,
+            params.assetIn,
+            params.percent
+        );
+
+        claimsOut = _lend(
+            natives,
+            convenience,
+            pair,
+            ILend._Lend(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.from,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                interestDecrease,
+                cdpDecrease,
+                params.deadline
+            )
+        );
+
+        require(claimsOut.bond >= params.minBond, 'Safety');
+        require(claimsOut.insurance >= params.minInsurance, 'Safety');
+    }
+
     function _lendGivenBond(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
