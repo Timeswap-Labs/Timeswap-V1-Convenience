@@ -38,7 +38,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct NewLiquidityBothERC20 {
+    struct _NewLiquidity {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -87,7 +87,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct AddLiquidityBothERC20 {
+    struct _AddLiquidity {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -103,7 +103,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct MintBothERC20 {
+    struct _Mint {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;

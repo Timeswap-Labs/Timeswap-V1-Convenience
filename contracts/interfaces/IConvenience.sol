@@ -15,9 +15,11 @@ import {IDue} from './IDue.sol';
 import {IBorrow} from './IBorrow.sol';
 import {IPay} from './IPay.sol';
 
+import {IDeployNatives} from './IDeployNatives.sol';
+
 /// @title Timeswap Convenience Interface
 /// @author Ricsson W. Ngo
-interface IConvenience is IMint, ILend, IWithdraw, IBorrow, IPay, IBurn {
+interface IConvenience is IMint, ILend, IWithdraw, IBorrow, IPay, IBurn, IDeployNatives {
     struct Native {
         ILiquidity liquidity;
         IClaim bond;

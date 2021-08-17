@@ -25,6 +25,7 @@ interface IDue is IERC721Metadata {
         address from,
         address to,
         uint256[] memory ids,
-        uint112[] memory assetsPay
+        uint112[] memory debtIn,
+        uint112[] memory collateralsOut
     ) external returns (uint128 collateralOut);
 }

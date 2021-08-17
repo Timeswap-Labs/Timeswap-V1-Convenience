@@ -12,6 +12,7 @@ import {Lend} from './libraries/Lend.sol';
 import {Withdraw} from './libraries/Withdraw.sol';
 import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
+import {DeployNatives} from './libraries/DeployNatives.sol';
 
 contract TimeswapConvenience is IConvenience {
     using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
@@ -20,6 +21,8 @@ contract TimeswapConvenience is IConvenience {
     using Withdraw for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Borrow for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Pay for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using DeployNatives for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+
 
     IFactory public immutable override factory;
     IWETH public immutable weth;
@@ -169,42 +172,42 @@ contract TimeswapConvenience is IConvenience {
     }
 
     function borrowGivenDebt(BorrowGivenDebt calldata params) external returns (uint256 id, IPair.Due memory dueOut) {
-        (id, dueOut) = natives.borrowGivenDebt(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenDebt(factory, this, params);
     }
 
     function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenDebtETHAsset(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenDebtETHAsset(factory, this, weth, params);
     }
 
     function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenDebtETHCollateral(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenDebtETHCollateral(factory, this, weth, params);
     }
 
     function borrowGivenCollateral(BorrowGivenCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateral(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenCollateral(factory, this, params);
     }
 
     function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHAsset(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenCollateralETHAsset(factory, this, weth, params);
     }
 
     function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(factory, weth, params);
+        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(factory, this,weth, params);
     }
 
     function repay(Repay memory params) external returns (uint128 collateralOut) {
@@ -217,5 +220,9 @@ contract TimeswapConvenience is IConvenience {
 
     function repayETHCollateral(RepayETHCollateral memory params) external returns (uint128 collateralOut) {
         collateralOut = natives.payETHCollateral(factory, weth, params);
+    }
+
+    function deployNatives(Deploy memory params) external {
+         natives.deployIfNoNatives(factory, this, params);
     }
 }

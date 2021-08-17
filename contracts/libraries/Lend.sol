@@ -23,11 +23,11 @@ library Lend {
         IFactory factory,
         ILend.LendGivenBond calldata params
     ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = lendGivenBondBothERC20(
+        claimsOut = _lendGivenBond(
             natives,
             convenience,
             factory,
-            ILend.LendGivenBondBothERC20(
+            ILend._LendGivenBond(
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -52,11 +52,11 @@ library Lend {
         uint112 assetIn = MsgValue.getUint112();
         weth.deposit{value: assetIn}();
 
-        claimsOut = lendGivenBondBothERC20(
+        claimsOut = _lendGivenBond(
             natives,
             convenience,
             factory,
-            ILend.LendGivenBondBothERC20(
+            ILend._LendGivenBond(
                 weth,
                 params.collateral,
                 params.maturity,
@@ -78,11 +78,11 @@ library Lend {
         IWETH weth,
         ILend.LendGivenBondETHCollateral calldata params
     ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = lendGivenBondBothERC20(
+        claimsOut = _lendGivenBond(
             natives,
             convenience,
             factory,
-            ILend.LendGivenBondBothERC20(
+            ILend._LendGivenBond(
                 params.asset,
                 weth,
                 params.maturity,
@@ -103,11 +103,11 @@ library Lend {
         IFactory factory,
         ILend.LendGivenInsurance calldata params
     ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = lendGivenInsuranceBothERC20(
+        claimsOut = _lendGivenInsurance(
             natives,
             convenience,
             factory,
-            ILend.LendGivenInsuranceBothERC20(
+            ILend._LendGivenInsurance(
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -132,11 +132,11 @@ library Lend {
         uint112 assetIn = MsgValue.getUint112();
         weth.deposit{value: assetIn}();
 
-        claimsOut = lendGivenInsuranceBothERC20(
+        claimsOut = _lendGivenInsurance(
             natives,
             convenience,
             factory,
-            ILend.LendGivenInsuranceBothERC20(
+            ILend._LendGivenInsurance(
                 weth,
                 params.collateral,
                 params.maturity,
@@ -158,11 +158,11 @@ library Lend {
         IWETH weth,
         ILend.LendGivenInsuranceETHCollateral calldata params
     ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = lendGivenInsuranceBothERC20(
+        claimsOut = _lendGivenInsurance(
             natives,
             convenience,
             factory,
-            ILend.LendGivenInsuranceBothERC20(
+            ILend._LendGivenInsurance(
                 params.asset,
                 weth,
                 params.maturity,
@@ -177,11 +177,11 @@ library Lend {
         );
     }
 
-    function lendGivenBondBothERC20(
+    function _lendGivenBond(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        ILend.LendGivenBondBothERC20 memory params
+        ILend._LendGivenBond memory params
     ) private returns (IPair.Claims memory claimsOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
@@ -192,11 +192,11 @@ library Lend {
             params.bondOut
         );
 
-        claimsOut = lendBothERC20(
+        claimsOut = _lend(
             natives,
             convenience,
             pair,
-            ILend.LendBothERC20(
+            ILend._Lend(
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -213,11 +213,11 @@ library Lend {
         require(claimsOut.insurance >= params.minInsurance, 'Safety');
     }
 
-    function lendGivenInsuranceBothERC20(
+    function _lendGivenInsurance(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        ILend.LendGivenInsuranceBothERC20 memory params
+        ILend._LendGivenInsurance memory params
     ) private returns (IPair.Claims memory claimsOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
@@ -228,11 +228,11 @@ library Lend {
             params.insuranceOut
         );
 
-        claimsOut = lendBothERC20(
+        claimsOut = _lend(
             natives,
             convenience,
             pair,
-            ILend.LendBothERC20(
+            ILend._Lend(
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -249,11 +249,11 @@ library Lend {
         require(claimsOut.bond >= params.minBond, 'Safety');
     }
 
-    function lendBothERC20(
+    function _lend(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IPair pair,
-        ILend.LendBothERC20 memory params
+        ILend._Lend memory params
     ) private returns (IPair.Claims memory claimsOut) {
         require(params.deadline >= block.timestamp, 'Expired');
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
+import {IFactory} from './IFactory.sol';
 import {IERC20} from './IERC20.sol';
 
 interface IPair {
@@ -24,11 +25,95 @@ interface IPair {
 
     struct State {
         uint112 asset;
-        uint128 interest;
-        uint128 cdp;
+        uint112 interest;
+        uint112 cdp;
     }
 
+    struct Pool {
+        State state;
+        Tokens lock;
+        uint256 totalLiquidity;
+        mapping(address => uint256) liquidities;
+        Claims totalClaims;
+        mapping(address => Claims) claims;
+        mapping(address => Due[]) dues;
+    }
+
+    // EVENT
+
+    event Sync(uint256 indexed maturity, State state);
+
+    event Mint(
+        uint256 maturity,
+        address indexed sender,
+        address indexed liquidityTo,
+        address indexed debtTo,
+        uint112 assetIn,
+        uint256 liquidityOut,
+        uint256 id,
+        Due dueOut
+    );
+
+    event Burn(
+        uint256 maturity,
+        address indexed sender,
+        address indexed assetTo,
+        address indexed debtTo,
+        uint256 liquidityIn,
+        Tokens tokensOut
+    );
+
+    event Lend(
+        uint256 maturity,
+        address indexed sender,
+        address indexed bondTo,
+        address indexed insuranceTo,
+        uint112 assetIn,
+        Claims claimsOut
+    );
+
+    event Withdraw(
+        uint256 maturity,
+        address indexed sender,
+        address indexed assetTo,
+        address indexed collateralTo,
+        Claims claimsIn,
+        Tokens tokensOut
+    );
+
+    event Borrow(
+        uint256 maturity,
+        address indexed sender,
+        address indexed assetTo,
+        address indexed debtTo,
+        uint112 assetOut,
+        uint256 id,
+        Due dueOut
+    );
+
+    event Pay(
+        uint256 maturity,
+        address indexed sender,
+        address indexed to,
+        address indexed owner,
+        uint128 assetIn,
+        uint128 collateralOut,
+        uint256[] ids,
+        uint112[] debtsIn,
+        uint112[] collateralsOut
+    );
+
+    event Skim(
+        address indexed sender,
+        address indexed assetTo,
+        address indexed collateralTo,
+        uint256 assetOut,
+        uint256 collateralOut
+    );
+
     // VIEW
+
+    function factory() external view returns (IFactory);
 
     function asset() external view returns (IERC20);
 
@@ -36,11 +121,19 @@ interface IPair {
 
     function fee() external view returns (uint16);
 
+    function protocolFee() external view returns (uint16);
+
+    function totalReserves() external view returns (Tokens memory);
+
     function state(uint256 maturity) external view returns (State memory);
+
+    function totalLocked(uint256 maturity) external view returns (Tokens memory);
 
     function totalLiquidity(uint256 maturity) external view returns (uint256);
 
     function liquidityOf(uint256 maturity, address owner) external view returns (uint256);
+
+    function totalClaims(uint256 maturity) external view returns (Claims memory);
 
     function claimsOf(uint256 maturity, address owner) external view returns (Claims memory);
 
@@ -98,6 +191,9 @@ interface IPair {
         address to,
         address owner,
         uint256[] memory ids,
-        uint112[] memory assetsPay
+        uint112[] memory debtsIn,
+        uint112[] memory collateralsOut
     ) external returns (uint128 collateralOut);
+
+    function skim(address assetTo, address collateralTo) external returns (uint256 assetOut, uint256 collateralOut);
 }
