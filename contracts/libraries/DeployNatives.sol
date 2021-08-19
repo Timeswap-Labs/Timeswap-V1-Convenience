@@ -17,8 +17,8 @@ library DeployNatives {
 
     function deployIfNoNatives(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IFactory factory,
         IConvenience convenience,
+        IFactory factory,
         IDeployNatives.Deploy calldata params
     ) public {
         require(params.deadline >= block.timestamp, 'Expired');

@@ -260,45 +260,6 @@ library Lend {
         );
     }
 
-    function _lendGivenPercent(
-        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
-        ILend._LendGivenPercent memory params
-    ) private returns (IPair.Claims memory claimsOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
-
-        require(params.percent <= 0x100000000, 'Invalid');
-
-        (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenPercent(
-            params.maturity,
-            params.assetIn,
-            params.percent
-        );
-
-        claimsOut = _lend(
-            natives,
-            convenience,
-            pair,
-            ILend._Lend(
-                params.asset,
-                params.collateral,
-                params.maturity,
-                params.from,
-                params.bondTo,
-                params.insuranceTo,
-                params.assetIn,
-                interestDecrease,
-                cdpDecrease,
-                params.deadline
-            )
-        );
-
-        require(claimsOut.bond >= params.minBond, 'Safety');
-        require(claimsOut.insurance >= params.minInsurance, 'Safety');
-    }
-
     function _lendGivenBond(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
@@ -369,6 +330,45 @@ library Lend {
         );
 
         require(claimsOut.bond >= params.minBond, 'Safety');
+    }
+
+    function _lendGivenPercent(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        ILend._LendGivenPercent memory params
+    ) private returns (IPair.Claims memory claimsOut) {
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'Zero');
+
+        require(params.percent <= 0x100000000, 'Invalid');
+
+        (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenPercent(
+            params.maturity,
+            params.assetIn,
+            params.percent
+        );
+
+        claimsOut = _lend(
+            natives,
+            convenience,
+            pair,
+            ILend._Lend(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.from,
+                params.bondTo,
+                params.insuranceTo,
+                params.assetIn,
+                interestDecrease,
+                cdpDecrease,
+                params.deadline
+            )
+        );
+
+        require(claimsOut.bond >= params.minBond, 'Safety');
+        require(claimsOut.insurance >= params.minInsurance, 'Safety');
     }
 
     function _lend(

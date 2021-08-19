@@ -5,8 +5,8 @@ import {IERC20} from './IERC20.sol';
 import {IPair} from './IPair.sol';
 
 import {IWETH} from './IWETH.sol';
-interface IBorrow {
 
+interface IBorrow {
     struct BorrowGivenDebt {
         IERC20 asset;
         IERC20 collateral;
@@ -53,7 +53,7 @@ interface IBorrow {
         uint112 maxCollateral;
         uint256 deadline;
     }
-        struct BorrowGivenCollateral {
+    struct BorrowGivenCollateral {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -86,7 +86,43 @@ interface IBorrow {
         uint256 deadline;
     }
 
-        struct _BorrowGivenCollateral {
+    struct BorrowGivenPercent {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address assetTo;
+        address dueTo;
+        uint112 assetOut;
+        uint40 percent;
+        uint112 maxDebt;
+        uint112 maxCollateral;
+        uint256 deadline;
+    }
+
+    struct BorrowGivenPercentETHAsset {
+        IERC20 collateral;
+        uint256 maturity;
+        address payable assetTo;
+        address dueTo;
+        uint112 assetOut;
+        uint40 percent;
+        uint112 maxDebt;
+        uint112 maxCollateral;
+        uint256 deadline;
+    }
+
+    struct BorrowGivenPercentETHCollateral {
+        IERC20 asset;
+        uint256 maturity;
+        address assetTo;
+        address dueTo;
+        uint112 assetOut;
+        uint40 percent;
+        uint112 maxDebt;
+        uint256 deadline;
+    }
+
+    struct _BorrowGivenCollateral {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -98,8 +134,23 @@ interface IBorrow {
         uint112 maxDebt;
         uint256 deadline;
     }
+
+    struct _BorrowGivenPercent {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address from;
+        address assetTo;
+        address dueTo;
+        uint112 assetOut;
+        uint40 percent;
+        IWETH weth;
+        uint112 maxDebt;
+        uint112 maxCollateral;
+        uint256 deadline;
+    }
+
     struct _Borrow {
-        IPair pair;
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -112,6 +163,4 @@ interface IBorrow {
         uint112 cdpIncrease;
         uint256 deadline;
     }
-
-
 }

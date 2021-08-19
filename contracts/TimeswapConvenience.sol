@@ -14,6 +14,10 @@ import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
 import {DeployNatives} from './libraries/DeployNatives.sol';
 
+/// @title Timeswap Convenience
+/// @author Timeswap Labs
+/// @notice It is recommnded to use this contract to interact with Timeswap Core contract.
+/// @notice All error messages are abbreviated and can be found in the documentation.
 contract TimeswapConvenience is IConvenience {
     using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Burn for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
@@ -23,17 +27,34 @@ contract TimeswapConvenience is IConvenience {
     using Pay for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using DeployNatives for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
 
+    /* ===== MODEL ===== */
 
+    /// @dev The address of the factory contract used by this contract.
     IFactory public immutable override factory;
+    /// @dev The address of the Wrapped ETH contract.
     IWETH public immutable weth;
 
+    /// @dev Stores the addresses of the Liquiidty, Bond, Insurance, Collateralized Debt token contract.
     mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native))) public natives;
 
+    /* ===== INIT ===== */
+
+    /// @dev Initializes the Convenience contract.
+    /// @param _factory The address of factory contract used by this contract.
+    /// @param _weth The address of the Wrapped ETH contract.
     constructor(IFactory _factory, IWETH _weth) {
         factory = _factory;
         weth = _weth;
     }
 
+    /// @dev Calls the mint function and creates a new pool.
+    /// @dev If the pair does not exist, creates a new pair first.
+    /// @dev Must have the asset ERC20 approve this contract before calling this function.
+    /// @dev Must have the collateral ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
     function newLiquidity(NewLiquidity calldata params)
         external
         returns (
@@ -45,8 +66,18 @@ contract TimeswapConvenience is IConvenience {
         (liquidityOut, id, dueOut) = natives.newLiquidity(this, factory, params);
     }
 
+    /// @dev Calls the mint function and creates a new pool.
+    /// @dev If the pair does not exist, creates a new pair first.
+    /// @dev The asset deposited is ETH which is wrapped as WETH.
+    /// @dev Msg.value is the assetIn amount.
+    /// @dev Must have the collateral ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
     function newLiquidityETHAsset(NewLiquidityETHAsset calldata params)
         external
+        payable
         returns (
             uint256 liquidityOut,
             uint256 id,
@@ -56,8 +87,18 @@ contract TimeswapConvenience is IConvenience {
         (liquidityOut, id, dueOut) = natives.newLiquidityETHAsset(this, factory, weth, params);
     }
 
+    /// @dev Calls the mint function and creates a new pool.
+    /// @dev If the pair does not exist, creates a new pair first.
+    /// @dev The collateral locked is ETH which is wrapped as WETH.
+    /// @dev Msg.value is the collateralIn amount.
+    /// @dev Must have the asset ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
     function newLiquidityETHCollateral(NewLiquidityETHCollateral calldata params)
         external
+        payable
         returns (
             uint256 liquidityOut,
             uint256 id,
@@ -67,6 +108,13 @@ contract TimeswapConvenience is IConvenience {
         (liquidityOut, id, dueOut) = natives.newLiquidityETHCollateral(this, factory, weth, params);
     }
 
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev Must have the asset ERC20 approve this contract before calling this function.
+    /// @dev Must have the collateral ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
     function addLiquidity(AddLiquidity calldata params)
         external
         returns (
@@ -78,8 +126,17 @@ contract TimeswapConvenience is IConvenience {
         (liquidityOut, id, dueOut) = natives.addLiquidity(this, factory, params);
     }
 
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev The asset deposited is ETH which is wrapped as WETH.
+    /// @dev Msg.value is the assetIn amount.
+    /// @dev Must have the collateral ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
     function addLiquidityETHAsset(AddLiquidityETHAsset calldata params)
         external
+        payable
         returns (
             uint256 liquidityOut,
             uint256 id,
@@ -89,8 +146,18 @@ contract TimeswapConvenience is IConvenience {
         (liquidityOut, id, dueOut) = natives.addLiquidityETHAsset(this, factory, weth, params);
     }
 
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev The collateral ERC20 is the WETH contract.
+    /// @dev The collateral locked is ETH which is wrapped as WETH.
+    /// @dev Msg.value is the maxCollateral amount. Any excess ETH will be returned to Msg.sender.
+    /// @dev Must have the asset ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
     function addLiquidityETHCollateral(AddLiquidityETHCollateral calldata params)
         external
+        payable
         returns (
             uint256 liquidityOut,
             uint256 id,
@@ -100,6 +167,8 @@ contract TimeswapConvenience is IConvenience {
         (liquidityOut, id, dueOut) = natives.addLiquidityETHCollateral(this, factory, weth, params);
     }
 
+    /// @dev Calls the burn funtion and withdraw liquiidty from a pool.
+    /// @param params The parameters for this function found in IBurn interface.
     function removeLiquidity(RemoveLiquidity calldata params) external returns (IPair.Tokens memory tokensOut) {
         tokensOut = natives.removeLiquidity(factory, params);
     }
@@ -172,42 +241,63 @@ contract TimeswapConvenience is IConvenience {
     }
 
     function borrowGivenDebt(BorrowGivenDebt calldata params) external returns (uint256 id, IPair.Due memory dueOut) {
-        (id, dueOut) = natives.borrowGivenDebt(factory, this, params);
+        (id, dueOut) = natives.borrowGivenDebt(this, factory, params);
     }
 
     function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenDebtETHAsset(factory, this, weth, params);
+        (id, dueOut) = natives.borrowGivenDebtETHAsset(this, factory, weth, params);
     }
 
     function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenDebtETHCollateral(factory, this, weth, params);
+        (id, dueOut) = natives.borrowGivenDebtETHCollateral(this, factory, weth, params);
     }
 
     function borrowGivenCollateral(BorrowGivenCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateral(factory, this, params);
+        (id, dueOut) = natives.borrowGivenCollateral(this, factory, params);
     }
 
     function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHAsset(factory, this, weth, params);
+        (id, dueOut) = natives.borrowGivenCollateralETHAsset(this, factory, weth, params);
     }
 
     function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
         external
         returns (uint256 id, IPair.Due memory dueOut)
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(factory, this,weth, params);
+        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(this, factory, weth, params);
+    }
+
+    function borrowGivenPercent(BorrowGivenPercent calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenPercent(this, factory, params);
+    }
+
+    function borrowGivenPercentETHAsset(BorrowGivenPercentETHAsset calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenPercentETHAsset(this, factory, weth, params);
+    }
+
+    function borrowGivenPercentETHCollateral(BorrowGivenPercentETHCollateral calldata params)
+        external
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenPercentETHCollateral(this, factory, weth, params);
     }
 
     function repay(Repay memory params) external returns (uint128 collateralOut) {
@@ -223,6 +313,6 @@ contract TimeswapConvenience is IConvenience {
     }
 
     function deployNatives(Deploy memory params) external {
-         natives.deployIfNoNatives(factory, this, params);
+        natives.deployIfNoNatives(this, factory, params);
     }
 }

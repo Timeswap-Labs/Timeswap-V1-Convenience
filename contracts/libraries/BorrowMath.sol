@@ -36,7 +36,7 @@ library BorrowMath {
         uint256 cdpAdjust = state.getConstantProduct(state.asset - assetOut, interestAdjust);
 
         uint256 _cdpIncrease = cdpAdjust;
-        _cdpIncrease -= uint256(state.cdp) << 32;
+        _cdpIncrease -= uint256(state.cdp) << 16;
         _cdpIncrease = _cdpIncrease.divUp(feeBase);
         cdpIncrease = _cdpIncrease.toUint112();
     }
@@ -71,9 +71,51 @@ library BorrowMath {
         uint256 interestAdjust = state.getConstantProduct(state.asset - assetOut, cdpAdjust);
 
         uint256 _interestIncrease = interestAdjust;
-        _interestIncrease -= uint256(state.interest) << 32;
+        _interestIncrease -= uint256(state.interest) << 16;
         _interestIncrease = _interestIncrease.divUp(feeBase);
         interestIncrease = _interestIncrease.toUint112();
+    }
+
+    function givenPercent(
+        IPair pair,
+        uint256 maturity,
+        uint112 assetOut,
+        uint40 percent
+    ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
+        uint256 feeBase = 0x10000 - pair.fee();
+
+        IPair.State memory state = pair.state(maturity);
+
+        uint256 minimum = assetOut;
+        minimum *= state.interest;
+        minimum /= (uint256(state.asset) - assetOut) << 4;
+
+        uint256 interestAdjust = state.asset;
+        interestAdjust *= state.interest;
+        interestAdjust <<= 16;
+        interestAdjust /= state.asset - assetOut;
+
+        uint256 maximum = interestAdjust;
+        maximum -= uint256(state.interest) << 16;
+        maximum = maximum.divUp(feeBase);
+
+        uint256 _interestIncrease = maximum;
+        _interestIncrease -= minimum;
+        _interestIncrease *= percent;
+        _interestIncrease += minimum << 32;
+        _interestIncrease >>= 32;
+        interestIncrease = _interestIncrease.toUint112();
+
+        interestAdjust = state.interest;
+        interestAdjust <<= 16;
+        interestAdjust += _interestIncrease * feeBase;
+
+        uint256 cdpAdjust = state.getConstantProduct(state.asset - assetOut, interestAdjust);
+
+        uint256 _cdpIncrease = cdpAdjust;
+        _cdpIncrease -= uint256(state.cdp) << 16;
+        _cdpIncrease = _cdpIncrease.divUp(feeBase);
+        cdpIncrease = _cdpIncrease.toUint112();
     }
 
     function getCollateral(

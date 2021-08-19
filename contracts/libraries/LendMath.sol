@@ -90,13 +90,17 @@ library LendMath {
 
         uint256 minimum = assetIn;
         minimum *= state.interest;
-        minimum /= uint256(state.asset) << 4;
+        minimum /= (uint256(state.asset) + assetIn) << 4;
 
-        uint256 maximum = state.asset;
-        maximum *= state.interest;
+        uint256 interestAdjust = state.asset;
+        interestAdjust *= state.interest;
+        interestAdjust <<= 16;
+        interestAdjust /= state.asset + assetIn;
+
+        uint256 maximum = state.interest;
         maximum <<= 16;
-        maximum = ((uint256(state.interest) * (state.asset + assetIn)) << 16) - maximum;
-        maximum /= feeBase * (state.asset + assetIn);
+        maximum -= interestAdjust;
+        maximum /= feeBase;
 
         uint256 _interestDecrease = maximum;
         _interestDecrease -= minimum;
@@ -105,7 +109,7 @@ library LendMath {
         _interestDecrease >>= 32;
         interestDecrease = _interestDecrease.toUint112();
 
-        uint256 interestAdjust = state.interest;
+        interestAdjust = state.interest;
         interestAdjust <<= 16;
         interestAdjust -= _interestDecrease * feeBase;
 
