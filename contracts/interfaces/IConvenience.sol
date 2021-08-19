@@ -14,12 +14,13 @@ import {IClaim} from './IClaim.sol';
 import {IDue} from './IDue.sol';
 import {IBorrow} from './IBorrow.sol';
 import {IPay} from './IPay.sol';
+import { ITimeswapLendCallback } from './callback/ITimeswapLendCallback.sol';
 
 import {IDeployNatives} from './IDeployNatives.sol';
 
 /// @title Timeswap Convenience Interface
 /// @author Ricsson W. Ngo
-interface IConvenience is IMint, ILend, IWithdraw, IBorrow, IPay, IBurn, IDeployNatives {
+interface IConvenience is IMint, ILend, IWithdraw, IBorrow, IPay, IBurn, ITimeswapLendCallback, IDeployNatives {
     struct Native {
         ILiquidity liquidity;
         IClaim bond;

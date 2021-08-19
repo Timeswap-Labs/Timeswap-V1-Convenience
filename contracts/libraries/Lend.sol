@@ -379,7 +379,6 @@ library Lend {
     ) private returns (IPair.Claims memory claimsOut) {
         require(params.deadline >= block.timestamp, 'Expired');
 
-        params.asset.safeTransferFrom(params.from, pair, params.assetIn);
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
@@ -389,8 +388,10 @@ library Lend {
             params.maturity,
             address(native.bond),
             address(native.insurance),
+            params.assetIn,
             params.interestDecrease,
-            params.cdpDecrease
+            params.cdpDecrease,
+            bytes(abi.encodePacked(pair.asset(), pair.collateral(), params.from))
         );
 
         native.bond.mint(params.bondTo, claimsOut.bond);
