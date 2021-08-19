@@ -12,9 +12,11 @@ import {Lend} from './libraries/Lend.sol';
 import {Withdraw} from './libraries/Withdraw.sol';
 import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
+import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {DeployNatives} from './libraries/DeployNatives.sol';
 
 contract TimeswapConvenience is IConvenience {
+    using SafeTransfer for IERC20;
     using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Burn for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Lend for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
@@ -224,5 +226,17 @@ contract TimeswapConvenience is IConvenience {
 
     function deployNatives(Deploy memory params) external {
          natives.deployIfNoNatives(factory, this, params);
+    }
+
+    function timeswapLendCallback(
+        uint256 amountOwed,
+        bytes calldata data
+    ) external override {
+        // validate msg.sender
+        (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
+        IPair pair = factory.getPair(asset, collateral);
+        require (address(pair) != address(0), 'Invalid pair');
+        require (msg.sender == address(pair), 'Invalid sender');
+        asset.safeTransferFrom(from, pair, amountOwed);
     }
 }
