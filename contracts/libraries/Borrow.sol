@@ -10,14 +10,12 @@ import {IPair} from '../interfaces/IPair.sol';
 import {IBorrow} from '../interfaces/IBorrow.sol';
 import {IDue} from '../interfaces/IDue.sol';
 import {BorrowMath} from './BorrowMath.sol';
-import {SafeTransfer} from './SafeTransfer.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
 
 library Borrow {
     using BorrowMath for IPair;
-    using SafeTransfer for IERC20;
     using Deploy for IConvenience.Native;
 
     function borrowGivenDebt(
@@ -39,7 +37,6 @@ library Borrow {
                 params.dueTo,
                 params.assetOut,
                 params.debtIn,
-                IWETH(address(0)),
                 params.maxCollateral,
                 params.deadline
             )
@@ -66,7 +63,6 @@ library Borrow {
                 params.dueTo,
                 params.assetOut,
                 params.debtIn,
-                IWETH(address(0)),
                 params.maxCollateral,
                 params.deadline
             )
@@ -98,54 +94,12 @@ library Borrow {
                 params.dueTo,
                 params.assetOut,
                 params.debtIn,
-                weth,
                 maxCollateral,
                 params.deadline
             )
         );
 
         if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
-    }
-
-    function _borrowGivenDebt(
-        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
-        IBorrow._BorrowGivenDebt memory params
-    ) private returns (uint256 id, IPair.Due memory dueOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
-
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(
-            params.maturity,
-            params.assetOut,
-            params.debtIn
-        );
-
-        uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
-
-        if (address(params.collateral) != address(0)) params.weth.deposit{value: collateralIn}();
-
-        (id, dueOut) = _borrow(
-            natives,
-            convenience,
-            pair,
-            IBorrow._Borrow(
-                params.asset,
-                params.collateral,
-                params.maturity,
-                params.from,
-                params.assetTo,
-                params.dueTo,
-                params.assetOut,
-                collateralIn,
-                interestIncrease,
-                cdpIncrease,
-                params.deadline
-            )
-        );
-
-        require(dueOut.collateral <= params.maxCollateral, 'Safety');
     }
 
     function borrowGivenCollateral(
@@ -199,7 +153,7 @@ library Borrow {
         );
 
         weth.withdraw(params.assetOut);
-        ETH.transfer(payable(msg.sender), params.assetOut);
+        ETH.transfer(payable(params.assetTo), params.assetOut);
     }
 
     function borrowGivenCollateralETHCollateral(
@@ -210,7 +164,6 @@ library Borrow {
         IBorrow.BorrowGivenCollateralETHCollateral calldata params
     ) external returns (uint256 id, IPair.Due memory dueOut) {
         uint112 collateralIn = MsgValue.getUint112();
-        weth.deposit{value: collateralIn}();
 
         (id, dueOut) = _borrowGivenCollateral(
             natives,
@@ -220,7 +173,7 @@ library Borrow {
                 params.asset,
                 weth,
                 params.maturity,
-                msg.sender,
+                address(this),
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
@@ -229,43 +182,8 @@ library Borrow {
                 params.deadline
             )
         );
-    }
 
-    function _borrowGivenCollateral(
-        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
-        IBorrow._BorrowGivenCollateral memory params
-    ) private returns (uint256 id, IPair.Due memory dueOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
-
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenCollateral(
-            params.maturity,
-            params.assetOut,
-            params.collateralIn
-        );
-
-        (id, dueOut) = _borrow(
-            natives,
-            convenience,
-            pair,
-            IBorrow._Borrow(
-                params.asset,
-                params.collateral,
-                params.maturity,
-                params.from,
-                params.assetTo,
-                params.dueTo,
-                params.assetOut,
-                params.collateralIn,
-                interestIncrease,
-                cdpIncrease,
-                params.deadline
-            )
-        );
-
-        require(dueOut.debt <= params.maxDebt);
+        if (collateralIn - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), collateralIn - dueOut.collateral);
     }
 
     function borrowGivenPercent(
@@ -287,7 +205,6 @@ library Borrow {
                 params.dueTo,
                 params.assetOut,
                 params.percent,
-                IWETH(address(0)),
                 params.maxDebt,
                 params.maxCollateral,
                 params.deadline
@@ -315,7 +232,6 @@ library Borrow {
                 params.dueTo,
                 params.assetOut,
                 params.percent,
-                IWETH(address(0)),
                 params.maxDebt,
                 params.maxCollateral,
                 params.deadline
@@ -348,7 +264,6 @@ library Borrow {
                 params.dueTo,
                 params.assetOut,
                 params.percent,
-                weth,
                 params.maxDebt,
                 maxCollateral,
                 params.deadline
@@ -358,26 +273,20 @@ library Borrow {
         if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
     }
 
-    function _borrowGivenPercent(
+    function _borrowGivenDebt(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IBorrow._BorrowGivenPercent memory params
+        IBorrow._BorrowGivenDebt memory params
     ) private returns (uint256 id, IPair.Due memory dueOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        require(params.percent <= 0x100000000, 'Invalid');
-
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenPercent(
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(
             params.maturity,
             params.assetOut,
-            params.percent
+            params.debtIn
         );
-
-        uint112 collateralIn = pair.getCollateral(params.maturity, params.assetOut, cdpIncrease);
-
-        if (address(params.collateral) != address(0)) params.weth.deposit{value: collateralIn}();
 
         (id, dueOut) = _borrow(
             natives,
@@ -391,7 +300,80 @@ library Borrow {
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
-                collateralIn,
+                interestIncrease,
+                cdpIncrease,
+                params.deadline
+            )
+        );
+
+        require(dueOut.collateral <= params.maxCollateral, 'Safety');
+    }
+
+    function _borrowGivenCollateral(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IBorrow._BorrowGivenCollateral memory params
+    ) private returns (uint256 id, IPair.Due memory dueOut) {
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'Zero');
+
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenCollateral(
+            params.maturity,
+            params.assetOut,
+            params.collateralIn
+        );
+
+        (id, dueOut) = _borrow(
+            natives,
+            convenience,
+            pair,
+            IBorrow._Borrow(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.from,
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
+                interestIncrease,
+                cdpIncrease,
+                params.deadline
+            )
+        );
+
+        require(dueOut.debt <= params.maxDebt, 'Safety');
+    }
+
+    function _borrowGivenPercent(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IBorrow._BorrowGivenPercent memory params
+    ) private returns (uint256 id, IPair.Due memory dueOut) {
+        require(params.percent <= 0x100000000, 'Invalid');
+
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'Zero');
+
+        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenPercent(
+            params.maturity,
+            params.assetOut,
+            params.percent
+        );
+
+        (id, dueOut) = _borrow(
+            natives,
+            convenience,
+            pair,
+            IBorrow._Borrow(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.from,
+                params.assetTo,
+                params.dueTo,
+                params.assetOut,
                 interestIncrease,
                 cdpIncrease,
                 params.deadline
@@ -414,15 +396,14 @@ library Borrow {
         if (address(native.liquidity) == address(0))
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
 
-        params.collateral.safeTransferFrom(params.from, pair, params.collateralIn);
-
         (id, dueOut) = pair.borrow(
             params.maturity,
             params.assetTo,
             address(native.collateralizedDebt),
             params.assetOut,
             params.interestIncrease,
-            params.cdpIncrease
+            params.cdpIncrease,
+            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
         );
 
         native.collateralizedDebt.mint(params.dueTo, id);

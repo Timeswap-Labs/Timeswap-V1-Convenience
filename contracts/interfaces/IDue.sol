@@ -4,9 +4,10 @@ pragma solidity =0.8.1;
 import {IERC721Metadata} from './IERC721Metadata.sol';
 import {IConvenience} from './IConvenience.sol';
 import {IPair} from './IPair.sol';
+import {ITimeswapPayCallback} from './callback/ITimeswapPayCallback.sol';
 
 /// @author Ricsson W. Ngo
-interface IDue is IERC721Metadata {
+interface IDue is IERC721Metadata, ITimeswapPayCallback {
     // VIEW
 
     function convenience() external returns (IConvenience);
@@ -26,6 +27,7 @@ interface IDue is IERC721Metadata {
         address to,
         uint256[] memory ids,
         uint112[] memory debtIn,
-        uint112[] memory collateralsOut
-    ) external returns (uint128 collateralOut);
+        uint112[] memory collateralsOut,
+        bytes calldata data
+    ) external returns (uint128 assetIn, uint128 collateralOut);
 }
