@@ -49,7 +49,6 @@ interface IBorrow {
         address dueTo;
         uint112 assetOut;
         uint112 debtIn;
-        IWETH weth;
         uint112 maxCollateral;
         uint256 deadline;
     }
@@ -82,6 +81,19 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
+        uint112 maxDebt;
+        uint256 deadline;
+    }
+
+    struct _BorrowGivenCollateral {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address from;
+        address assetTo;
+        address dueTo;
+        uint112 assetOut;
+        uint112 collateralIn;
         uint112 maxDebt;
         uint256 deadline;
     }
@@ -122,19 +134,6 @@ interface IBorrow {
         uint256 deadline;
     }
 
-    struct _BorrowGivenCollateral {
-        IERC20 asset;
-        IERC20 collateral;
-        uint256 maturity;
-        address from;
-        address assetTo;
-        address dueTo;
-        uint112 assetOut;
-        uint112 collateralIn;
-        uint112 maxDebt;
-        uint256 deadline;
-    }
-
     struct _BorrowGivenPercent {
         IERC20 asset;
         IERC20 collateral;
@@ -144,7 +143,6 @@ interface IBorrow {
         address dueTo;
         uint112 assetOut;
         uint40 percent;
-        IWETH weth;
         uint112 maxDebt;
         uint112 maxCollateral;
         uint256 deadline;
@@ -158,7 +156,6 @@ interface IBorrow {
         address assetTo;
         address dueTo;
         uint112 assetOut;
-        uint112 collateralIn;
         uint112 interestIncrease;
         uint112 cdpIncrease;
         uint256 deadline;

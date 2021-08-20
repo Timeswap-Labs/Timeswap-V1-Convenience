@@ -145,8 +145,10 @@ interface IPair {
         uint256 maturity,
         address liquidityTo,
         address dueTo,
+        uint112 assetIn,
         uint112 interestIncrease,
-        uint112 cdpIncrease
+        uint112 cdpIncrease,
+        bytes calldata data
     )
         external
         returns (
@@ -185,7 +187,8 @@ interface IPair {
         address dueTo,
         uint112 assetOut,
         uint112 interestIncrease,
-        uint112 cdpIncrease
+        uint112 cdpIncrease,
+        bytes calldata data
     ) external returns (uint256 id, Due memory dueOut);
 
     function pay(
@@ -193,9 +196,8 @@ interface IPair {
         address to,
         address owner,
         uint256[] memory ids,
-        uint112[] memory debtsIn,
-        uint112[] memory collateralsOut
-    ) external returns (uint128 collateralOut);
-
-    function skim(address assetTo, address collateralTo) external returns (uint256 assetOut, uint256 collateralOut);
+        uint112[] memory assetsIn,
+        uint112[] memory collateralsOut,
+        bytes calldata data
+    ) external returns (uint128 assetIn, uint128 collateralOut);
 }

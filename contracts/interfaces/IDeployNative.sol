@@ -7,7 +7,7 @@ import {IPair} from '../interfaces/IPair.sol';
 import {IERC20} from '../interfaces/IERC20.sol';
 import {CollateralizedDebt} from '../CollateralizedDebt.sol';
 
-interface IDeployNatives {
+interface IDeployNative {
     struct Deploy {
         IERC20 asset;
         IERC20 collateral;

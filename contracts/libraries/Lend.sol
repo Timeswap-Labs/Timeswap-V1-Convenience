@@ -8,13 +8,11 @@ import {IERC20} from '../interfaces/IERC20.sol';
 import {IPair} from '../interfaces/IPair.sol';
 import {ILend} from '../interfaces/ILend.sol';
 import {LendMath} from './LendMath.sol';
-import {SafeTransfer} from './SafeTransfer.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 
 library Lend {
     using LendMath for IPair;
-    using SafeTransfer for IERC20;
     using Deploy for IConvenience.Native;
 
     function lendGivenBond(
@@ -50,7 +48,6 @@ library Lend {
         ILend.LendGivenBondETHAsset calldata params
     ) external returns (IPair.Claims memory claimsOut) {
         uint112 assetIn = MsgValue.getUint112();
-        weth.deposit{value: assetIn}();
 
         claimsOut = _lendGivenBond(
             natives,
@@ -130,7 +127,6 @@ library Lend {
         ILend.LendGivenInsuranceETHAsset calldata params
     ) external returns (IPair.Claims memory claimsOut) {
         uint112 assetIn = MsgValue.getUint112();
-        weth.deposit{value: assetIn}();
 
         claimsOut = _lendGivenInsurance(
             natives,
@@ -211,7 +207,6 @@ library Lend {
         ILend.LendGivenPercentETHAsset calldata params
     ) external returns (IPair.Claims memory claimsOut) {
         uint112 assetIn = MsgValue.getUint112();
-        weth.deposit{value: assetIn}();
 
         claimsOut = _lendGivenPercent(
             natives,
@@ -338,10 +333,10 @@ library Lend {
         IFactory factory,
         ILend._LendGivenPercent memory params
     ) private returns (IPair.Claims memory claimsOut) {
+        require(params.percent <= 0x100000000, 'Invalid');
+
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
-
-        require(params.percent <= 0x100000000, 'Invalid');
 
         (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenPercent(
             params.maturity,
@@ -379,7 +374,6 @@ library Lend {
     ) private returns (IPair.Claims memory claimsOut) {
         require(params.deadline >= block.timestamp, 'Expired');
 
-
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
@@ -391,7 +385,7 @@ library Lend {
             params.assetIn,
             params.interestDecrease,
             params.cdpDecrease,
-            bytes(abi.encodePacked(pair.asset(), pair.collateral(), params.from))
+            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
         );
 
         native.bond.mint(params.bondTo, claimsOut.bond);

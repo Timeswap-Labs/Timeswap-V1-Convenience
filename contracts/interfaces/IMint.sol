@@ -96,7 +96,6 @@ interface IMint {
         address liquidityTo;
         address dueTo;
         uint112 assetIn;
-        IWETH weth;
         uint256 minLiquidity;
         uint112 maxDebt;
         uint112 maxCollateral;

@@ -11,18 +11,7 @@ interface IPay {
         uint256 maturity;
         address collateralTo;
         uint256[] ids;
-        uint112[] maxDebtsIn;
-        uint256 deadline;
-    }
-
-    struct _Repay {
-        IERC20 asset;
-        IERC20 collateral;
-        uint256 maturity;
-        address collateralTo;
-        uint256[] ids;
-        uint112[] maxDebtsIn;
-        uint256 assetIn;
+        uint112[] maxAssetsIn;
         uint256 deadline;
     }
 
@@ -31,7 +20,7 @@ interface IPay {
         uint256 maturity;
         address collateralTo;
         uint256[] ids;
-        uint112[] maxDebtsIn;
+        uint112[] maxAssetsIn;
         uint256 deadline;
     }
 
@@ -40,7 +29,18 @@ interface IPay {
         uint256 maturity;
         address payable collateralTo;
         uint256[] ids;
-        uint112[] maxDebtsIn;
+        uint112[] maxAssetsIn;
+        uint256 deadline;
+    }
+
+    struct _Repay {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address from;
+        address collateralTo;
+        uint256[] ids;
+        uint112[] maxAssetsIn;
         uint256 deadline;
     }
 }

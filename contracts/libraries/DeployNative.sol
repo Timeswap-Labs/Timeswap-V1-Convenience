@@ -10,16 +10,16 @@ import {Bond} from '../Bond.sol';
 import {Insurance} from '../Insurance.sol';
 import {CollateralizedDebt} from '../CollateralizedDebt.sol';
 import {Deploy} from './Deploy.sol';
-import {IDeployNatives} from '../interfaces/IDeployNatives.sol';
+import {IDeployNative} from '../interfaces/IDeployNative.sol';
 
-library DeployNatives {
+library DeployNative {
     using Deploy for IConvenience.Native;
 
-    function deployIfNoNatives(
+    function deploy(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IDeployNatives.Deploy calldata params
+        IDeployNative.Deploy calldata params
     ) public {
         require(params.deadline >= block.timestamp, 'Expired');
 

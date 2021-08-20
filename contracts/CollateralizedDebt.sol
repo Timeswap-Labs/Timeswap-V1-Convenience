@@ -90,16 +90,23 @@ contract CollateralizedDebt is IDue {
         address to,
         uint256[] memory ids,
         uint112[] memory debtsIn,
-        uint112[] memory collateralsOut
-    ) external override onlyConvenience returns (uint128 collateralOut) {
-        collateralOut = pair.pay(maturity, to, address(this), ids, debtsIn,collateralsOut);
+        uint112[] memory collateralsOut,
+        bytes calldata data
+    ) external override onlyConvenience returns (uint128 assetIn, uint128 collateralOut) {
+        (assetIn, collateralOut) = pair.pay(maturity, to, address(this), ids, debtsIn, collateralsOut, data);
 
         IPair.Due[] memory dues = pair.duesOf(maturity, address(this));
         for (uint256 i; i < ids.length; i++) {
             uint256 id = ids[i];
 
-            if (dues[id].collateral == 0 && ownerOf[id]==from) _burn(from, id);
+            if (dues[id].collateral == 0 && ownerOf[id] == from) _burn(from, id);
         }
+    }
+
+    function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
+        require(msg.sender == address(pair), 'Invalid sender');
+
+        convenience.collateralizedDebtCallback(pair, maturity, assetIn, data);
     }
 
     function safeTransferFrom(
