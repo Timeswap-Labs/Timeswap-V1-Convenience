@@ -8,6 +8,7 @@ import {IPair} from './interfaces/IPair.sol';
 import {IERC20} from './interfaces/IERC20.sol';
 import {SafeMetadata} from './libraries/SafeMetadata.sol';
 import {String} from './libraries/String.sol';
+import {NFTTokenURIScaffold} from './libraries/NFTTokenURIScaffold.sol';
 
 contract CollateralizedDebt is IDue {
     using SafeMetadata for IERC20;
@@ -44,7 +45,15 @@ contract CollateralizedDebt is IDue {
         return string(abi.encodePacked('TS-CLDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
     }
 
-    function tokenURI(uint256 id) external view override returns (string memory) {}
+    function tokenURI(uint256 id) external view override returns (string memory) {
+        /// Token SVG takes - 
+        /// - asset symbol, asset address, asset amount
+        /// - collateral symbol, collateral address, collateral amount
+        /// - maturity
+        /// - id
+        require(ownerOf[id] != address(0), 'ERC721 :: tokenURI : Doesnt exist');
+        return NFTTokenURIScaffold.tokenURI(id, pair, convenience, dueOf(id), maturity);
+    }
 
     function assetDecimals() external view override returns (uint8) {
         return pair.asset().safeDecimals();
