@@ -2,6 +2,7 @@ import '@typechain/hardhat'
 import '@nomiclabs/hardhat-waffle'
 import { HardhatUserConfig } from 'hardhat/types'
 import * as dotenv from 'dotenv'
+import 'hardhat-deploy'
 import "hardhat-contract-sizer"
 
 dotenv.config()
@@ -18,6 +19,11 @@ const config: HardhatUserConfig = {
         runs: 200,
       },
     },
+  },
+  namedAccounts: {
+    convenienceDeployer:0,
+    wethAddress:1,
+    factoryAddress:2
   },
   networks: {
     rinkeby: {

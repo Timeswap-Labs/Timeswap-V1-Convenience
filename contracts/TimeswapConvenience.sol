@@ -2,21 +2,21 @@
 pragma solidity =0.8.1;
 
 import {IConvenience} from './interfaces/IConvenience.sol';
-import {IFactory} from './interfaces/IFactory.sol';
+import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from './interfaces/IWETH.sol';
-import {IPair} from './interfaces/IPair.sol';
 import {IDue} from './interfaces/IDue.sol';
-import {IERC20} from './interfaces/IERC20.sol';
 import {ITimeswapMintCallback} from './interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapLendCallback} from './interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapBorrowCallback} from './interfaces/callback/ITimeswapBorrowCallback.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Mint} from './libraries/Mint.sol';
 import {Burn} from './libraries/Burn.sol';
 import {Lend} from './libraries/Lend.sol';
 import {Withdraw} from './libraries/Withdraw.sol';
 import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
-import {SafeTransfer} from './libraries/SafeTransfer.sol';
+import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {DeployNative} from './libraries/DeployNative.sol';
 
 /// @title Timeswap Convenience
@@ -24,7 +24,7 @@ import {DeployNative} from './libraries/DeployNative.sol';
 /// @notice It is recommnded to use this contract to interact with Timeswap Core contract.
 /// @notice All error messages are abbreviated and can be found in the documentation.
 contract TimeswapConvenience is IConvenience {
-    using SafeTransfer for IERC20;
+    using SafeERC20 for IERC20;
     using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Burn for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Lend for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
@@ -409,16 +409,16 @@ contract TimeswapConvenience is IConvenience {
 
         if (assetFrom == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(pair, assetIn);
+            asset.safeTransfer(address(pair), assetIn);
         } else {
-            asset.safeTransferFrom(assetFrom, pair, assetIn);
+            asset.safeTransferFrom(assetFrom, address(pair), assetIn);
         }
 
         if (collateralFrom == address(this)) {
             weth.deposit{value: collateralIn}();
-            collateral.safeTransfer(pair, collateralIn);
+            collateral.safeTransfer(address(pair), collateralIn);
         } else {
-            collateral.safeTransferFrom(collateralFrom, pair, collateralIn);
+            collateral.safeTransferFrom(collateralFrom, address(pair), collateralIn);
         }
     }
 
@@ -432,9 +432,9 @@ contract TimeswapConvenience is IConvenience {
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(pair, assetIn);
+            asset.safeTransfer(address(pair), assetIn);
         } else {
-            asset.safeTransferFrom(from, pair, assetIn);
+            asset.safeTransferFrom(from, address(pair), assetIn);
         }
     }
 
@@ -448,9 +448,9 @@ contract TimeswapConvenience is IConvenience {
 
         if (from == address(this)) {
             weth.deposit{value: collateralIn}();
-            collateral.safeTransfer(pair, collateralIn);
+            collateral.safeTransfer(address(pair), collateralIn);
         } else {
-            collateral.safeTransferFrom(from, pair, collateralIn);
+            collateral.safeTransferFrom(from, address(pair), collateralIn);
         }
     }
 
@@ -470,9 +470,9 @@ contract TimeswapConvenience is IConvenience {
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(pair, assetIn);
+            asset.safeTransfer(address(pair), assetIn);
         } else {
-            asset.safeTransferFrom(from, pair, assetIn);
+            asset.safeTransferFrom(from, address(pair), assetIn);
         }
     }
 }

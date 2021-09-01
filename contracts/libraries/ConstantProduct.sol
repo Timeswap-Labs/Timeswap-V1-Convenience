@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from '../interfaces/IPair.sol';
-import {Math} from './Math.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol';
 import {FullMath} from './FullMath.sol';
 
 library ConstantProduct {

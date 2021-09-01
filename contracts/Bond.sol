@@ -3,14 +3,14 @@ pragma solidity =0.8.1;
 
 import {IClaim} from './interfaces/IClaim.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
-import {IPair} from './interfaces/IPair.sol';
-import {IERC20} from './interfaces/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {SafeMetadata} from './libraries/SafeMetadata.sol';
-import {String} from './libraries/String.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
 contract Bond is IClaim {
     using SafeMetadata for IERC20;
-    using String for uint256;
+    using Strings for uint256;
 
     IConvenience public immutable override convenience;
     IPair public immutable override pair;
