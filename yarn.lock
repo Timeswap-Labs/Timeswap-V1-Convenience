@@ -753,7 +753,7 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@timeswap-labs/timeswap-v1-core@^1.0.1":
+"@timeswap-labs/timeswap-v1-core@1.0.1":
   version "1.0.1"
   resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.1/0ad6d02cb98966d0d8b7a7ac9c2271cf65a2880721269c2620aaaa18d39233e5#5c3041adffaa11f7dd365d6e03e6a5fcd4a93947"
   integrity sha512-PqDaafq4rPxNMvKKDUwIR9NTcus5DuryciT0vliQV1Z6XN8YkkG0iZ6r7VtQ0mfccrZEfPRIwW3Qeoj8PtTkFg==

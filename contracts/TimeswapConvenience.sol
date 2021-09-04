@@ -16,7 +16,7 @@ import {Lend} from './libraries/Lend.sol';
 import {Withdraw} from './libraries/Withdraw.sol';
 import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
-import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {DeployNative} from './libraries/DeployNative.sol';
 
 /// @title Timeswap Convenience
@@ -24,7 +24,7 @@ import {DeployNative} from './libraries/DeployNative.sol';
 /// @notice It is recommnded to use this contract to interact with Timeswap Core contract.
 /// @notice All error messages are abbreviated and can be found in the documentation.
 contract TimeswapConvenience is IConvenience {
-    using SafeERC20 for IERC20;
+    using SafeTransfer for IERC20;
     using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Burn for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Lend for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
@@ -409,16 +409,16 @@ contract TimeswapConvenience is IConvenience {
 
         if (assetFrom == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(address(pair), assetIn);
+            asset.safeTransfer(pair, assetIn);
         } else {
-            asset.safeTransferFrom(assetFrom, address(pair), assetIn);
+            asset.safeTransferFrom(assetFrom,pair, assetIn);
         }
 
         if (collateralFrom == address(this)) {
             weth.deposit{value: collateralIn}();
-            collateral.safeTransfer(address(pair), collateralIn);
+            collateral.safeTransfer(pair, collateralIn);
         } else {
-            collateral.safeTransferFrom(collateralFrom, address(pair), collateralIn);
+            collateral.safeTransferFrom(collateralFrom, pair, collateralIn);
         }
     }
 
@@ -432,9 +432,9 @@ contract TimeswapConvenience is IConvenience {
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(address(pair), assetIn);
+            asset.safeTransfer(pair, assetIn);
         } else {
-            asset.safeTransferFrom(from, address(pair), assetIn);
+            asset.safeTransferFrom(from, pair, assetIn);
         }
     }
 
@@ -448,9 +448,9 @@ contract TimeswapConvenience is IConvenience {
 
         if (from == address(this)) {
             weth.deposit{value: collateralIn}();
-            collateral.safeTransfer(address(pair), collateralIn);
+            collateral.safeTransfer(pair, collateralIn);
         } else {
-            collateral.safeTransferFrom(from, address(pair), collateralIn);
+            collateral.safeTransferFrom(from,pair, collateralIn);
         }
     }
 
@@ -470,9 +470,9 @@ contract TimeswapConvenience is IConvenience {
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(address(pair), assetIn);
+            asset.safeTransfer(pair, assetIn);
         } else {
-            asset.safeTransferFrom(from, address(pair), assetIn);
+            asset.safeTransferFrom(from, pair, assetIn);
         }
     }
 }
