@@ -3,7 +3,8 @@ pragma solidity =0.8.1;
 
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';import {IMint} from './IMint.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IMint} from './IMint.sol';
 import {IBurn} from './IBurn.sol';
 import {ILend} from './ILend.sol';
 import {IWithdraw} from './IWithdraw.sol';

@@ -9,8 +9,5 @@ interface ITimeswapBorrowCallback {
     /// The caller of this method must be checked to be a TimeswapPair deployed by the canonical TimeswapFactory.
     /// @param collateralIn The amount of asset tokens owed due to the pool for the borrow transaction
     /// @param data Any data passed through by the caller via the ITimeswapPair#borrow call
-    function timeswapBorrowCallback(
-        uint112 collateralIn,
-        bytes calldata data
-    ) external;
+    function timeswapBorrowCallback(uint112 collateralIn, bytes calldata data) external;
 }

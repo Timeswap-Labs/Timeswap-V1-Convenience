@@ -9,8 +9,5 @@ interface ITimeswapLendCallback {
     /// The caller of this method must be checked to be a TimeswapPair deployed by the canonical TimeswapFactory.
     /// @param assetIn The amount of asset tokens owed due to the pool for the lend transaction
     /// @param data Any data passed through by the caller via the ITimeswapPair#lend call
-    function timeswapLendCallback(
-        uint112 assetIn,
-        bytes calldata data
-    ) external;
+    function timeswapLendCallback(uint112 assetIn, bytes calldata data) external;
 }
