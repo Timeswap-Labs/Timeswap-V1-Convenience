@@ -2,16 +2,19 @@
 pragma solidity =0.8.1;
 
 import {IDue} from './interfaces/IDue.sol';
-import {IERC721Receiver} from './interfaces/IERC721Receiver.sol';
+import {IERC721Receiver} from '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
-import {IPair} from './interfaces/IPair.sol';
-import {IERC20} from './interfaces/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {SafeMetadata} from './libraries/SafeMetadata.sol';
-import {String} from './libraries/String.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
 contract CollateralizedDebt is IDue {
+    using Strings for uint256;
     using SafeMetadata for IERC20;
-    using String for uint256;
+
+    bytes4 private constant _INTERFACE_ID_ERC165 = 0x01ffc9a7;
+    bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
 
     IConvenience public immutable override convenience;
     IPair public immutable override pair;
@@ -56,6 +59,10 @@ contract CollateralizedDebt is IDue {
 
     function dueOf(uint256 id) external view override returns (IPair.Due memory) {
         return pair.duesOf(maturity, address(this))[id];
+    }
+
+    function supportsInterface(bytes4 interfaceID) external pure override returns (bool) {
+        return interfaceID == _INTERFACE_ID_ERC165 || interfaceID == _INTERFACE_ID_ERC721;
     }
 
     constructor(

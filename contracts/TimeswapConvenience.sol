@@ -2,14 +2,14 @@
 pragma solidity =0.8.1;
 
 import {IConvenience} from './interfaces/IConvenience.sol';
-import {IFactory} from './interfaces/IFactory.sol';
+import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from './interfaces/IWETH.sol';
-import {IPair} from './interfaces/IPair.sol';
 import {IDue} from './interfaces/IDue.sol';
-import {IERC20} from './interfaces/IERC20.sol';
 import {ITimeswapMintCallback} from './interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapLendCallback} from './interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapBorrowCallback} from './interfaces/callback/ITimeswapBorrowCallback.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Mint} from './libraries/Mint.sol';
 import {Burn} from './libraries/Burn.sol';
 import {Lend} from './libraries/Lend.sol';
@@ -411,7 +411,7 @@ contract TimeswapConvenience is IConvenience {
             weth.deposit{value: assetIn}();
             asset.safeTransfer(pair, assetIn);
         } else {
-            asset.safeTransferFrom(assetFrom, pair, assetIn);
+            asset.safeTransferFrom(assetFrom,pair, assetIn);
         }
 
         if (collateralFrom == address(this)) {
@@ -450,7 +450,7 @@ contract TimeswapConvenience is IConvenience {
             weth.deposit{value: collateralIn}();
             collateral.safeTransfer(pair, collateralIn);
         } else {
-            collateral.safeTransferFrom(from, pair, collateralIn);
+            collateral.safeTransferFrom(from,pair, collateralIn);
         }
     }
 

@@ -1,5 +1,27 @@
 {
-  "name": "timeswap-v1-convenience",
+  "version": "1.0.0",
+  "name": "@timeswap-labs/timeswap-v1-convenience",
+  "files": [
+    "contracts/interfaces",
+    "contracts/libraries",
+    "contracts/Bond.sol",
+    "contracts/CollateralizedDebt.sol",
+    "contracts/Insurance.sol",
+    "contracts/Liquidity.sol",
+    "contracts/TimeswapConvenience.sol",
+    "artifacts/contracts/Bond.sol/Bond.json",
+    "artifacts/contracts/CollateralizedDebt.sol/CollateralizedDebt.json",
+    "artifacts/contracts/Insurance.sol/Insurance.json",
+    "artifacts/contracts/Liquidity.sol/Liquidity.json",
+    "artifacts/contracts/TimeswapConvenience.sol/TimeswapConvenience.json",
+    "artifacts/contracts/interfaces/**/*.json",
+    "artifacts/contracts/libraries/**/*.json",
+    "!artifacts/contracts/interfaces/**/*.dbg.json",
+    "!artifacts/contracts/libraries/**/*.dbg.json"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
@@ -22,15 +44,24 @@
     "mocha": "^9.0.3",
     "ts-node": "^10.0.0",
     "typechain": "^5.0.0",
-    "typescript": "^4.3.4"
+    "typescript": "^4.3.4",
+    "@timeswap-labs/timeswap-v1-core": "1.0.1"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
     "dotenv": "^10.0.0",
     "eslint": "^7.29.0",
+    "hardhat-deploy": "^0.8.11",
     "prettier": "^2.0.5",
     "prettier-plugin-solidity": "^1.0.0-alpha.59",
     "solhint": "^3.2.1",
     "solhint-plugin-prettier": "^0.0.5"
+  },
+  "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Convenience.git",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "volta": {
+    "node": "14.17.6"
   }
 }
