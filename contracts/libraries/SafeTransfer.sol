@@ -21,6 +21,6 @@ library SafeTransfer {
         IPair to,
         uint256 amount
     ) internal {
-        token.safeTransferFrom(from,address(to), amount);
+        token.safeTransferFrom(from, address(to), amount);
     }
 }

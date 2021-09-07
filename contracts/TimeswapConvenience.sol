@@ -411,7 +411,7 @@ contract TimeswapConvenience is IConvenience {
             weth.deposit{value: assetIn}();
             asset.safeTransfer(pair, assetIn);
         } else {
-            asset.safeTransferFrom(assetFrom,pair, assetIn);
+            asset.safeTransferFrom(assetFrom, pair, assetIn);
         }
 
         if (collateralFrom == address(this)) {
@@ -450,7 +450,7 @@ contract TimeswapConvenience is IConvenience {
             weth.deposit{value: collateralIn}();
             collateral.safeTransfer(pair, collateralIn);
         } else {
-            collateral.safeTransferFrom(from,pair, collateralIn);
+            collateral.safeTransferFrom(from, pair, collateralIn);
         }
     }
 
