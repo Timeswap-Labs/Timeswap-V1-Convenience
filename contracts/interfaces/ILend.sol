@@ -155,9 +155,9 @@ interface ILend {
         address from;
         address bondTo;
         address insuranceTo;
-        uint112 assetIn;
-        uint112 interestDecrease;
-        uint112 cdpDecrease;
+        uint112 xIncrease;
+        uint112 yDecrease;
+        uint112 zDecrease;
         uint256 deadline;
     }
 }

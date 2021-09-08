@@ -5,11 +5,11 @@ import {IConvenience} from './interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from './interfaces/IWETH.sol';
 import {IDue} from './interfaces/IDue.sol';
-import {ITimeswapMintCallback} from './interfaces/callback/ITimeswapMintCallback.sol';
-import {ITimeswapLendCallback} from './interfaces/callback/ITimeswapLendCallback.sol';
-import {ITimeswapBorrowCallback} from './interfaces/callback/ITimeswapBorrowCallback.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {ITimeswapMintCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapMintCallback.sol';
+import {ITimeswapLendCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapLendCallback.sol';
+import {ITimeswapBorrowCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapBorrowCallback.sol';
 import {Mint} from './libraries/Mint.sol';
 import {Burn} from './libraries/Burn.sol';
 import {Lend} from './libraries/Lend.sol';
@@ -404,7 +404,6 @@ contract TimeswapConvenience is IConvenience {
         );
         IPair pair = factory.getPair(asset, collateral);
 
-        require(address(pair) != address(0), 'Invalid pair');
         require(msg.sender == address(pair), 'Invalid sender');
 
         if (assetFrom == address(this)) {
@@ -427,7 +426,6 @@ contract TimeswapConvenience is IConvenience {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 
-        require(address(pair) != address(0), 'Invalid pair');
         require(msg.sender == address(pair), 'Invalid sender');
 
         if (from == address(this)) {
@@ -443,7 +441,6 @@ contract TimeswapConvenience is IConvenience {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 
-        require(address(pair) != address(0), 'Invalid pair');
         require(msg.sender == address(pair), 'Invalid sender');
 
         if (from == address(this)) {
@@ -465,7 +462,6 @@ contract TimeswapConvenience is IConvenience {
 
         IDue collateralizedDebt = natives[asset][collateral][maturity].collateralizedDebt;
 
-        require(address(collateralizedDebt) != address(0), 'Invalid cd');
         require(msg.sender == address(collateralizedDebt), 'Invalid sender');
 
         if (from == address(this)) {

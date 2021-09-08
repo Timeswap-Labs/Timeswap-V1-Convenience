@@ -282,11 +282,7 @@ library Borrow {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(
-            params.maturity,
-            params.assetOut,
-            params.debtIn
-        );
+        (uint112 yIncrease, uint112 zIncrease) = pair.givenDebt(params.maturity, params.assetOut, params.debtIn);
 
         (id, dueOut) = _borrow(
             natives,
@@ -300,8 +296,8 @@ library Borrow {
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
-                interestIncrease,
-                cdpIncrease,
+                yIncrease,
+                zIncrease,
                 params.deadline
             )
         );
@@ -318,7 +314,7 @@ library Borrow {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenCollateral(
+        (uint112 yIncrease, uint112 zIncrease) = pair.givenCollateral(
             params.maturity,
             params.assetOut,
             params.collateralIn
@@ -336,8 +332,8 @@ library Borrow {
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
-                interestIncrease,
-                cdpIncrease,
+                yIncrease,
+                zIncrease,
                 params.deadline
             )
         );
@@ -356,11 +352,7 @@ library Borrow {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenPercent(
-            params.maturity,
-            params.assetOut,
-            params.percent
-        );
+        (uint112 yIncrease, uint112 zIncrease) = pair.givenPercent(params.maturity, params.assetOut, params.percent);
 
         (id, dueOut) = _borrow(
             natives,
@@ -374,8 +366,8 @@ library Borrow {
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
-                interestIncrease,
-                cdpIncrease,
+                yIncrease,
+                zIncrease,
                 params.deadline
             )
         );
@@ -400,9 +392,9 @@ library Borrow {
             params.maturity,
             params.assetTo,
             address(native.collateralizedDebt),
-            params.assetOut,
-            params.interestIncrease,
-            params.cdpIncrease,
+            params.xDecrease,
+            params.yIncrease,
+            params.zIncrease,
             bytes(abi.encodePacked(params.asset, params.collateral, params.from))
         );
 

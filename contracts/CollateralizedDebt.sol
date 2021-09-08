@@ -44,7 +44,7 @@ contract CollateralizedDebt is IDue {
     function symbol() external view override returns (string memory) {
         string memory assetSymbol = pair.asset().safeSymbol();
         string memory collateralSymbol = pair.collateral().safeSymbol();
-        return string(abi.encodePacked('TS-CLDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
+        return string(abi.encodePacked('TS-CDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
     }
 
     function tokenURI(uint256 id) external view override returns (string memory) {}

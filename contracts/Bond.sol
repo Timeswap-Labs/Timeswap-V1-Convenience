@@ -29,7 +29,7 @@ contract Bond is IClaim {
     function symbol() external view override returns (string memory) {
         string memory assetSymbol = pair.asset().safeSymbol();
         string memory collateralSymbol = pair.collateral().safeSymbol();
-        return string(abi.encodePacked('TS-BOND-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
+        return string(abi.encodePacked('TS-BND-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
     }
 
     function decimals() external view override returns (uint8) {

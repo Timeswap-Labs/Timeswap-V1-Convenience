@@ -110,9 +110,9 @@ interface IMint {
         address collateralFrom;
         address liquidityTo;
         address dueTo;
-        uint112 assetIn;
-        uint112 interestIncrease;
-        uint112 cdpIncrease;
+        uint112 xIncrease;
+        uint112 yIncrease;
+        uint112 zIncrease;
         uint256 deadline;
     }
 }

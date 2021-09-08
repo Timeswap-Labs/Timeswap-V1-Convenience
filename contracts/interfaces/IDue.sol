@@ -4,7 +4,7 @@ pragma solidity =0.8.1;
 import {IERC721Extended} from './IERC721Extended.sol';
 import {IConvenience} from './IConvenience.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
-import {ITimeswapPayCallback} from './callback/ITimeswapPayCallback.sol';
+import {ITimeswapPayCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapPayCallback.sol';
 
 /// @author Ricsson W. Ngo
 interface IDue is IERC721Extended, ITimeswapPayCallback {

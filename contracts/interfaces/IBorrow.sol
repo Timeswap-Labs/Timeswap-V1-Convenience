@@ -155,9 +155,9 @@ interface IBorrow {
         address from;
         address assetTo;
         address dueTo;
-        uint112 assetOut;
-        uint112 interestIncrease;
-        uint112 cdpIncrease;
+        uint112 xDecrease;
+        uint112 yIncrease;
+        uint112 zIncrease;
         uint256 deadline;
     }
 }
