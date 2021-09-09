@@ -4,7 +4,8 @@ pragma solidity =0.8.1;
 import {IConvenience} from '../interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from '../interfaces/IWETH.sol';
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {ILend} from '../interfaces/ILend.sol';
 import {LendMath} from './LendMath.sol';
 import {Deploy} from './Deploy.sol';
@@ -263,11 +264,7 @@ library Lend {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenBond(
-            params.maturity,
-            params.assetIn,
-            params.bondOut
-        );
+        (uint112 yDecrease, uint112 zDecrease) = pair.givenBond(params.maturity, params.assetIn, params.bondOut);
 
         claimsOut = _lend(
             natives,
@@ -281,8 +278,8 @@ library Lend {
                 params.bondTo,
                 params.insuranceTo,
                 params.assetIn,
-                interestDecrease,
-                cdpDecrease,
+                yDecrease,
+                zDecrease,
                 params.deadline
             )
         );
@@ -299,7 +296,7 @@ library Lend {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenInsurance(
+        (uint112 yDecrease, uint112 zDecrease) = pair.givenInsurance(
             params.maturity,
             params.assetIn,
             params.insuranceOut
@@ -317,8 +314,8 @@ library Lend {
                 params.bondTo,
                 params.insuranceTo,
                 params.assetIn,
-                interestDecrease,
-                cdpDecrease,
+                yDecrease,
+                zDecrease,
                 params.deadline
             )
         );
@@ -337,11 +334,7 @@ library Lend {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestDecrease, uint112 cdpDecrease) = pair.givenPercent(
-            params.maturity,
-            params.assetIn,
-            params.percent
-        );
+        (uint112 yDecrease, uint112 zDecrease) = pair.givenPercent(params.maturity, params.assetIn, params.percent);
 
         claimsOut = _lend(
             natives,
@@ -355,8 +348,8 @@ library Lend {
                 params.bondTo,
                 params.insuranceTo,
                 params.assetIn,
-                interestDecrease,
-                cdpDecrease,
+                yDecrease,
+                zDecrease,
                 params.deadline
             )
         );
@@ -384,8 +377,8 @@ library Lend {
             params.assetIn,
             params.interestDecrease,
             params.cdpDecrease,
-            bytes(abi.encode(params.asset, params.collateral, params.from))
-        );
+            bytes(abi.encode(params.asset, params.collateral, params.from)));
+
 
         native.bond.mint(params.bondTo, claimsOut.bond);
         native.insurance.mint(params.insuranceTo, claimsOut.insurance);

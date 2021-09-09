@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 
 import {IWETH} from './IWETH.sol';
 
@@ -154,9 +155,9 @@ interface IBorrow {
         address from;
         address assetTo;
         address dueTo;
-        uint112 assetOut;
-        uint112 interestIncrease;
-        uint112 cdpIncrease;
+        uint112 xDecrease;
+        uint112 yIncrease;
+        uint112 zIncrease;
         uint256 deadline;
     }
 }

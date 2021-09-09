@@ -3,7 +3,8 @@ pragma solidity =0.8.1;
 
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';import {IMint} from './IMint.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IMint} from './IMint.sol';
 import {IBurn} from './IBurn.sol';
 import {ILend} from './ILend.sol';
 import {IWithdraw} from './IWithdraw.sol';
@@ -14,9 +15,9 @@ import {IDue} from './IDue.sol';
 import {IBorrow} from './IBorrow.sol';
 import {IPay} from './IPay.sol';
 import {IWETH} from './IWETH.sol';
-import {ITimeswapMintCallback} from './callback/ITimeswapMintCallback.sol';
-import {ITimeswapLendCallback} from './callback/ITimeswapLendCallback.sol';
-import {ITimeswapBorrowCallback} from './callback/ITimeswapBorrowCallback.sol';
+import {ITimeswapMintCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapMintCallback.sol';
+import {ITimeswapLendCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapLendCallback.sol';
+import {ITimeswapBorrowCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapBorrowCallback.sol';
 import {IDeployNative} from './IDeployNative.sol';
 
 /// @title Timeswap Convenience Interface

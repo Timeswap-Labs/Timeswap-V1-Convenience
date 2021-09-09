@@ -5,18 +5,18 @@ import {IConvenience} from './interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from './interfaces/IWETH.sol';
 import {IDue} from './interfaces/IDue.sol';
-import {ITimeswapMintCallback} from './interfaces/callback/ITimeswapMintCallback.sol';
-import {ITimeswapLendCallback} from './interfaces/callback/ITimeswapLendCallback.sol';
-import {ITimeswapBorrowCallback} from './interfaces/callback/ITimeswapBorrowCallback.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {ITimeswapMintCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapMintCallback.sol';
+import {ITimeswapLendCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapLendCallback.sol';
+import {ITimeswapBorrowCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapBorrowCallback.sol';
 import {Mint} from './libraries/Mint.sol';
 import {Burn} from './libraries/Burn.sol';
 import {Lend} from './libraries/Lend.sol';
 import {Withdraw} from './libraries/Withdraw.sol';
 import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
-import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {DeployNative} from './libraries/DeployNative.sol';
 
 /// @title Timeswap Convenience
@@ -24,7 +24,7 @@ import {DeployNative} from './libraries/DeployNative.sol';
 /// @notice It is recommnded to use this contract to interact with Timeswap Core contract.
 /// @notice All error messages are abbreviated and can be found in the documentation.
 contract TimeswapConvenience is IConvenience {
-    using SafeERC20 for IERC20;
+    using SafeTransfer for IERC20;
     using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Burn for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
     using Lend for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
@@ -404,21 +404,20 @@ contract TimeswapConvenience is IConvenience {
         );
         IPair pair = factory.getPair(asset, collateral);
 
-        require(address(pair) != address(0), 'Invalid pair');
         require(msg.sender == address(pair), 'Invalid sender');
 
         if (assetFrom == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(address(pair), assetIn);
+            asset.safeTransfer(pair, assetIn);
         } else {
-            asset.safeTransferFrom(assetFrom, address(pair), assetIn);
+            asset.safeTransferFrom(assetFrom, pair, assetIn);
         }
 
         if (collateralFrom == address(this)) {
             weth.deposit{value: collateralIn}();
-            collateral.safeTransfer(address(pair), collateralIn);
+            collateral.safeTransfer(pair, collateralIn);
         } else {
-            collateral.safeTransferFrom(collateralFrom, address(pair), collateralIn);
+            collateral.safeTransferFrom(collateralFrom, pair, collateralIn);
         }
     }
 
@@ -427,14 +426,13 @@ contract TimeswapConvenience is IConvenience {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 
-        require(address(pair) != address(0), 'Invalid pair');
         require(msg.sender == address(pair), 'Invalid sender');
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(address(pair), assetIn);
+            asset.safeTransfer(pair, assetIn);
         } else {
-            asset.safeTransferFrom(from, address(pair), assetIn);
+            asset.safeTransferFrom(from, pair, assetIn);
         }
     }
 
@@ -443,14 +441,13 @@ contract TimeswapConvenience is IConvenience {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 
-        require(address(pair) != address(0), 'Invalid pair');
         require(msg.sender == address(pair), 'Invalid sender');
 
         if (from == address(this)) {
             weth.deposit{value: collateralIn}();
-            collateral.safeTransfer(address(pair), collateralIn);
+            collateral.safeTransfer(pair, collateralIn);
         } else {
-            collateral.safeTransferFrom(from, address(pair), collateralIn);
+            collateral.safeTransferFrom(from, pair, collateralIn);
         }
     }
 
@@ -465,14 +462,13 @@ contract TimeswapConvenience is IConvenience {
 
         IDue collateralizedDebt = natives[asset][collateral][maturity].collateralizedDebt;
 
-        require(address(collateralizedDebt) != address(0), 'Invalid cd');
         require(msg.sender == address(collateralizedDebt), 'Invalid sender');
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();
-            asset.safeTransfer(address(pair), assetIn);
+            asset.safeTransfer(pair, assetIn);
         } else {
-            asset.safeTransferFrom(from, address(pair), assetIn);
+            asset.safeTransferFrom(from, pair, assetIn);
         }
     }
 }

@@ -10,8 +10,8 @@ import {SafeMetadata} from './libraries/SafeMetadata.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
 contract CollateralizedDebt is IDue {
-    using SafeMetadata for IERC20;
     using Strings for uint256;
+    using SafeMetadata for IERC20;
 
     bytes4 private constant _INTERFACE_ID_ERC165 = 0x01ffc9a7;
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
@@ -44,7 +44,7 @@ contract CollateralizedDebt is IDue {
     function symbol() external view override returns (string memory) {
         string memory assetSymbol = pair.asset().safeSymbol();
         string memory collateralSymbol = pair.collateral().safeSymbol();
-        return string(abi.encodePacked('TS-CLDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
+        return string(abi.encodePacked('TS-CDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
     }
 
     function tokenURI(uint256 id) external view override returns (string memory) {}

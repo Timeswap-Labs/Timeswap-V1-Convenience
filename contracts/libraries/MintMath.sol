@@ -2,8 +2,13 @@
 pragma solidity =0.8.1;
 
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
-import {SafeCast} from './SafeCast.sol';
+import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol';
+import {ConstantProduct} from './ConstantProduct.sol';
+import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
+
 library MintMath {
+    using Math for uint256;
+    using ConstantProduct for IPair;
     using SafeCast for uint256;
 
     function givenNew(
@@ -11,34 +16,39 @@ library MintMath {
         uint112 assetIn,
         uint112 debtOut,
         uint112 collateralIn
-    ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
-        uint256 _interestIncrease = debtOut;
-        _interestIncrease -= assetIn;
-        _interestIncrease <<= 32;
-        _interestIncrease /= maturity - block.timestamp; // div Up?
-        interestIncrease = _interestIncrease.toUint112();
+    ) internal view returns (uint112 yIncrease, uint112 zIncrease) {
+        uint256 _yIncrease = debtOut;
+        _yIncrease -= assetIn;
+        _yIncrease <<= 32;
+        _yIncrease /= maturity - block.timestamp;
+        yIncrease = _yIncrease.toUint112();
 
-        uint256 _cdpIncrease = collateralIn;
+        uint256 _zIncrease = collateralIn;
         uint256 denominator = maturity;
         denominator -= block.timestamp;
-        denominator *= interestIncrease;
+        denominator *= yIncrease;
         denominator += uint256(assetIn) << 32;
-        _cdpIncrease *= assetIn;
-        _cdpIncrease <<= 32;
-        _cdpIncrease /= denominator; // shift Up?
-        cdpIncrease = _cdpIncrease.toUint112();
+        _zIncrease *= assetIn;
+        _zIncrease <<= 32;
+        _zIncrease = _zIncrease.divUp(denominator);
+        zIncrease = _zIncrease.toUint112();
     }
 
     function givenAdd(
         IPair pair,
         uint256 maturity,
         uint112 assetIn
-    ) internal returns (uint112 interestIncrease, uint112 cdpIncrease) {}
+    ) internal view returns (uint112 yIncrease, uint112 zIncrease) {
+        ConstantProduct.CP memory cp = pair.get(maturity);
 
-    function getCollateral(
-        uint256 maturity,
-        uint112 assetIn,
-        uint112 interestIncrease,
-        uint112 cdpIncrease
-    ) internal view returns (uint112 collateralIn) {}
+        uint256 _yIncrease = cp.y;
+        _yIncrease *= assetIn;
+        _yIncrease = _yIncrease.divUp(cp.x);
+        yIncrease = _yIncrease.toUint112();
+
+        uint256 _zIncrease = cp.z;
+        _zIncrease *= assetIn;
+        _zIncrease = _zIncrease.divUp(cp.x);
+        zIncrease = _zIncrease.toUint112();
+    }
 }
