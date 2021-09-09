@@ -346,7 +346,7 @@ library Mint {
             params.xIncrease,
             params.yIncrease,
             params.zIncrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.assetFrom, params.collateralFrom))
+            bytes(abi.encode(params.asset, params.collateral, params.assetFrom, params.collateralFrom))
         );
 
         native.liquidity.mint(params.liquidityTo, liquidityOut);

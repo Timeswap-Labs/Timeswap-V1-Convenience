@@ -377,7 +377,7 @@ library Lend {
             params.xIncrease,
             params.yDecrease,
             params.zDecrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
+            bytes(abi.encode(params.asset, params.collateral, params.from))
         );
 
         native.bond.mint(params.bondTo, claimsOut.bond);
