@@ -10,7 +10,6 @@ import {ILend} from './ILend.sol';
 import {IWithdraw} from './IWithdraw.sol';
 import {IBorrow} from './IBorrow.sol';
 import {IPay} from './IPay.sol';
-import {IERC721Receiver} from '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 import {ILiquidity} from './ILiquidity.sol';
 import {IClaim} from './IClaim.sol';
 import {IDue} from './IDue.sol';

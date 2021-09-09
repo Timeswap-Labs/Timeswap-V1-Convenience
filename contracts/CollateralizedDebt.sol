@@ -7,13 +7,16 @@ import {IConvenience} from './interfaces/IConvenience.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {ERC721Permit} from './base/ERC721Permit.sol';
-import {Native} from './base/Native.sol';
 import {SafeMetadata} from './libraries/SafeMetadata.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
-contract CollateralizedDebt is IDue, ERC721Permit, Native {
+contract CollateralizedDebt is IDue, ERC721Permit {
     using Strings for uint256;
     using SafeMetadata for IERC20;
+
+    IConvenience public immutable override convenience;
+    IPair public immutable override pair;
+    uint256 public immutable override maturity;
 
     function name() external view override returns (string memory) {
         string memory assetName = pair.asset().safeName();
@@ -55,7 +58,16 @@ contract CollateralizedDebt is IDue, ERC721Permit, Native {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) Native(_convenience, _pair, _maturity) {}
+    ) {
+        convenience = _convenience;
+        pair = _pair;
+        maturity = _maturity;
+    }
+
+    modifier onlyConvenience() {
+        require(msg.sender == address(convenience), 'Forbidden');
+        _;
+    }
 
     function mint(address to, uint256 id) external override onlyConvenience {
         _safeMint(to, id);

@@ -5,7 +5,6 @@ import {IConvenience} from '../interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from '../interfaces/IWETH.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {IERC721} from '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IPay} from '../interfaces/IPay.sol';
 import {IDue} from '../interfaces/IDue.sol';

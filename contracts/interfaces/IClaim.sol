@@ -2,10 +2,19 @@
 pragma solidity =0.8.1;
 
 import {IERC20Permit} from './IERC20Permit.sol';
-import {INative} from './INative.sol';
+import {IConvenience} from './IConvenience.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 
 /// @author Ricsson W. Ngo
-interface IClaim is IERC20Permit, INative {
+interface IClaim is IERC20Permit {
+    // VIEW
+
+    function convenience() external returns (IConvenience);
+
+    function pair() external returns (IPair);
+
+    function maturity() external returns (uint256);
+
     // UPDATE
 
     function mint(address to, uint128 amount) external;
