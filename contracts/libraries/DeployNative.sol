@@ -15,8 +15,8 @@ library DeployNative {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IDeployNative.Deploy calldata params
-    ) public {
+        IDeployNative.Deploy memory params
+    ) internal {
         require(params.deadline >= block.timestamp, 'Expired');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
