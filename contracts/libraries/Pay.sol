@@ -113,7 +113,7 @@ library Pay {
             params.ids,
             assetsIn,
             collateralsOut,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
+            bytes(abi.encode(params.asset, params.collateral, params.from))
         );
     }
 }

@@ -384,7 +384,7 @@ library Lend {
             params.assetIn,
             params.interestDecrease,
             params.cdpDecrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
+            bytes(abi.encode(params.asset, params.collateral, params.from))
         );
 
         native.bond.mint(params.bondTo, claimsOut.bond);

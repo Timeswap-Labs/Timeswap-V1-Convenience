@@ -402,7 +402,7 @@ library Borrow {
             params.assetOut,
             params.interestIncrease,
             params.cdpIncrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
+            bytes(abi.encode(params.asset, params.collateral, params.from))
         );
 
         native.collateralizedDebt.mint(params.dueTo, id);
