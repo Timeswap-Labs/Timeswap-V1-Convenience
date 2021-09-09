@@ -42,7 +42,7 @@ library Mint {
                 params.liquidityTo,
                 params.dueTo,
                 params.assetIn,
-                params.debtOut,
+                params.debtIn,
                 params.collateralIn,
                 params.deadline
             )
@@ -78,7 +78,7 @@ library Mint {
                 params.liquidityTo,
                 params.dueTo,
                 assetIn,
-                params.debtOut,
+                params.debtIn,
                 params.collateralIn,
                 params.deadline
             )
@@ -114,7 +114,7 @@ library Mint {
                 params.liquidityTo,
                 params.dueTo,
                 params.assetIn,
-                params.debtOut,
+                params.debtIn,
                 collateralIn,
                 params.deadline
             )

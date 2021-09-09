@@ -3,7 +3,7 @@ pragma solidity =0.8.1;
 
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol';
-import {FullMath} from './FullMath.sol';
+import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
 
@@ -34,12 +34,19 @@ library LendMath {
         yAdjust <<= 16;
         yAdjust -= _yDecrease * feeBase;
 
-        uint256 zAdjust = cp.calculate(cp.x + assetIn, yAdjust);
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
 
-        uint256 _zDecrease = cp.z;
-        _zDecrease <<= 16;
-        _zDecrease -= zAdjust;
-        _zDecrease /= feeBase;
+        uint256 _zDecrease = xAdjust;
+        _zDecrease *= yAdjust;
+        uint256 subtrahend = cp.x;
+        subtrahend *= cp.y;
+        subtrahend <<= 16;
+        _zDecrease -= subtrahend;
+        uint256 denominator = xAdjust;
+        denominator *= yAdjust;
+        denominator *= feeBase;
+        _zDecrease = _zDecrease.mulDiv(uint256(cp.z) << 16, denominator);
         zDecrease = _zDecrease.toUint112();
     }
 
@@ -53,6 +60,7 @@ library LendMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 _zDecrease = insuranceOut;
         uint256 subtrahend = maturity;
         subtrahend -= block.timestamp;
         subtrahend *= cp.y;
@@ -60,9 +68,7 @@ library LendMath {
         uint256 denominator = cp.x;
         denominator += assetIn;
         denominator *= uint256(cp.x) << 32;
-        subtrahend = subtrahend.mulDiv(assetIn * cp.z, denominator);
-
-        uint256 _zDecrease = insuranceOut;
+        subtrahend = subtrahend.mulDivUp(assetIn * cp.z, denominator);
         _zDecrease -= subtrahend;
         zDecrease = _zDecrease.toUint112();
 
@@ -70,12 +76,19 @@ library LendMath {
         zAdjust <<= 16;
         zAdjust -= zDecrease * feeBase;
 
-        uint256 interestAdjust = cp.calculate(cp.x + assetIn, zAdjust);
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
 
-        uint256 _yDecrease = cp.y;
-        _yDecrease <<= 16;
-        _yDecrease -= interestAdjust;
-        _yDecrease /= feeBase;
+        uint256 _yDecrease = xAdjust;
+        _yDecrease *= zAdjust;
+        subtrahend = cp.x;
+        subtrahend *= cp.z;
+        subtrahend <<= 16;
+        _zDecrease -= subtrahend;
+        denominator = xAdjust;
+        denominator *= zAdjust;
+        denominator *= feeBase;
+        _yDecrease = _yDecrease.mulDiv(uint256(cp.y) << 16, denominator);
         yDecrease = _yDecrease.toUint112();
     }
 
@@ -91,35 +104,40 @@ library LendMath {
 
         uint256 minimum = assetIn;
         minimum *= cp.y;
-        minimum /= (uint256(cp.x) + assetIn) << 4;
-
-        uint256 yAdjust = cp.x;
-        yAdjust *= cp.y;
-        yAdjust <<= 16;
-        yAdjust /= cp.x + assetIn;
+        minimum /= uint256(cp.x) << 4;
 
         uint256 maximum = cp.y;
         maximum <<= 16;
-        maximum -= yAdjust;
-        maximum /= feeBase;
+        maximum *= assetIn;
+        uint256 denominator = cp.x;
+        denominator += assetIn;
+        denominator *= feeBase;
+        maximum /= denominator;
 
         uint256 _yDecrease = maximum;
         _yDecrease -= minimum;
         _yDecrease *= percent;
-        _yDecrease += minimum << 32;
         _yDecrease >>= 32;
+        _yDecrease += minimum;
         yDecrease = _yDecrease.toUint112();
 
-        yAdjust = cp.y;
+        uint256 yAdjust = cp.y;
         yAdjust <<= 16;
         yAdjust -= _yDecrease * feeBase;
 
-        uint256 cdpAdjust = cp.calculate(cp.x + assetIn, yAdjust);
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
 
-        uint256 _zDecrease = cp.z;
-        _zDecrease <<= 16;
-        _zDecrease -= cdpAdjust;
-        _zDecrease /= feeBase;
+        uint256 _zDecrease = xAdjust;
+        _zDecrease *= yAdjust;
+        uint256 subtrahend = cp.x;
+        subtrahend *= cp.y;
+        subtrahend <<= 16;
+        _zDecrease -= subtrahend;
+        denominator = xAdjust;
+        denominator *= yAdjust;
+        denominator *= feeBase;
+        _zDecrease = _zDecrease.mulDiv(uint256(cp.z) << 16, denominator);
         zDecrease = _zDecrease.toUint112();
     }
 }

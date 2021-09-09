@@ -1,21 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IERC721Extended} from './IERC721Extended.sol';
-import {IConvenience} from './IConvenience.sol';
+import {IERC721Permit} from './IERC721Permit.sol';
+import {INative} from './INative.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {ITimeswapPayCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapPayCallback.sol';
 
 /// @author Ricsson W. Ngo
-interface IDue is IERC721Extended, ITimeswapPayCallback {
-    // VIEW
-
-    function convenience() external returns (IConvenience);
-
-    function pair() external returns (IPair);
-
-    function maturity() external returns (uint256);
-
+interface IDue is IERC721Permit, ITimeswapPayCallback {
     function dueOf(uint256 id) external returns (IPair.Due memory);
 
     // UPDATE

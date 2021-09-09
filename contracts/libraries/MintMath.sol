@@ -14,23 +14,23 @@ library MintMath {
     function givenNew(
         uint256 maturity,
         uint112 assetIn,
-        uint112 debtOut,
+        uint112 debtIn,
         uint112 collateralIn
     ) internal view returns (uint112 yIncrease, uint112 zIncrease) {
-        uint256 _yIncrease = debtOut;
+        uint256 _yIncrease = debtIn;
         _yIncrease -= assetIn;
         _yIncrease <<= 32;
         _yIncrease /= maturity - block.timestamp;
         yIncrease = _yIncrease.toUint112();
 
-        uint256 _zIncrease = collateralIn;
         uint256 denominator = maturity;
         denominator -= block.timestamp;
         denominator *= yIncrease;
-        denominator += uint256(assetIn) << 32;
+        denominator += uint256(assetIn) << 33;
+        uint256 _zIncrease = collateralIn;
         _zIncrease *= assetIn;
         _zIncrease <<= 32;
-        _zIncrease = _zIncrease.divUp(denominator);
+        _zIncrease /= denominator;
         zIncrease = _zIncrease.toUint112();
     }
 
@@ -43,12 +43,12 @@ library MintMath {
 
         uint256 _yIncrease = cp.y;
         _yIncrease *= assetIn;
-        _yIncrease = _yIncrease.divUp(cp.x);
+        _yIncrease /= cp.x;
         yIncrease = _yIncrease.toUint112();
 
         uint256 _zIncrease = cp.z;
         _zIncrease *= assetIn;
-        _zIncrease = _zIncrease.divUp(cp.x);
+        _zIncrease /= cp.x;
         zIncrease = _zIncrease.toUint112();
     }
 }
