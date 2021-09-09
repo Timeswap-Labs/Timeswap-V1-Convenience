@@ -374,11 +374,11 @@ library Lend {
             params.maturity,
             address(native.bond),
             address(native.insurance),
-            params.xIncrease,
-            params.yDecrease,
-            params.zDecrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
-        );
+            params.assetIn,
+            params.interestDecrease,
+            params.cdpDecrease,
+            bytes(abi.encode(params.asset, params.collateral, params.from)));
+
 
         native.bond.mint(params.bondTo, claimsOut.bond);
         native.insurance.mint(params.insuranceTo, claimsOut.insurance);

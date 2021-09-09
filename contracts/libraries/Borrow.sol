@@ -392,10 +392,11 @@ library Borrow {
             params.maturity,
             params.assetTo,
             address(native.collateralizedDebt),
-            params.xDecrease,
-            params.yIncrease,
-            params.zIncrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
+
+            params.assetOut,
+            params.interestIncrease,
+            params.cdpIncrease,
+            bytes(abi.encode(params.asset, params.collateral, params.from))
         );
 
         native.collateralizedDebt.mint(params.dueTo, id);

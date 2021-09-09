@@ -343,12 +343,10 @@ library Mint {
             params.maturity,
             params.liquidityTo,
             params.dueTo,
-            params.xIncrease,
-            params.yIncrease,
-            params.zIncrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.assetFrom, params.collateralFrom))
-        );
-
+            params.assetIn,
+            params.interestIncrease,
+            params.cdpIncrease,
+            bytes(abi.encode(params.asset, params.collateral, params.assetFrom, params.collateralFrom)));
         native.liquidity.mint(params.liquidityTo, liquidityOut);
         native.collateralizedDebt.mint(params.dueTo, id);
     }
