@@ -4,7 +4,7 @@ pragma solidity =0.8.1;
 import {IClaim} from './interfaces/IClaim.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IPair} from 'node_modules/@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {ERC20Permit} from './base/ERC20Permit.sol';
 import {SafeMetadata} from './libraries/SafeMetadata.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
