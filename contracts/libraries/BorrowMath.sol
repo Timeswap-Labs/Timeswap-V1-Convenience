@@ -140,25 +140,4 @@ library BorrowMath {
         _zIncrease = _zIncrease.mulDivUp(uint256(cp.z) << 16, denominator);
         zIncrease = _zIncrease.toUint112();
     }
-
-    function getCollateral(
-        IPair pair,
-        uint256 maturity,
-        uint112 assetOut,
-        uint112 zIncrease
-    ) internal view returns (uint112 collateralIn) {
-        ConstantProduct.CP memory cp = pair.get(maturity);
-
-        uint256 _collateralIn = maturity;
-        _collateralIn -= block.timestamp;
-        _collateralIn *= cp.y;
-        _collateralIn += uint256(cp.x) << 32;
-        uint256 denominator = cp.x;
-        denominator -= assetOut;
-        denominator *= uint256(cp.x);
-        denominator <<= 32;
-        _collateralIn = _collateralIn.mulDivUp(uint256(assetOut) * cp.z, denominator);
-        _collateralIn += zIncrease;
-        collateralIn = _collateralIn.toUint112();
-    }
 }
