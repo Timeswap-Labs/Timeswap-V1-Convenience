@@ -27,7 +27,7 @@ library LendMath {
         uint256 _yDecrease = bondOut;
         _yDecrease -= assetIn;
         _yDecrease <<= 32;
-        _yDecrease.divUp(maturity - block.timestamp);
+        _yDecrease = _yDecrease.divUp(maturity - block.timestamp);
         yDecrease = _yDecrease.toUint112();
 
         uint256 yAdjust = cp.y;
