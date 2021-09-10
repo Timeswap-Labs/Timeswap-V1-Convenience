@@ -14,10 +14,10 @@ contract Insurance is IClaim, ERC20Permit {
     using Strings for uint256;
 
     IConvenience public immutable override convenience;
-    IPair public immutable override pair;
-    uint256 public immutable override maturity;
+    IPair public override pair;
+    uint256 public override maturity;
 
-    function name() external view override returns (string memory) {
+    function name() public view override returns (string memory) {
         string memory assetName = pair.asset().safeName();
         string memory collateralName = pair.collateral().safeName();
         return
@@ -44,10 +44,11 @@ contract Insurance is IClaim, ERC20Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) {
+    )  {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
+        run_initiate();
     }
 
     modifier onlyConvenience() {
@@ -55,6 +56,9 @@ contract Insurance is IClaim, ERC20Permit {
         _;
     }
 
+    function run_initiate() internal {
+        initiate(name(), "1");
+    }
     function mint(address to, uint128 amount) external override onlyConvenience {
         _mint(to, amount);
     }
