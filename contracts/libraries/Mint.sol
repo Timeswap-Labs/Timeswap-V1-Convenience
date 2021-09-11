@@ -253,7 +253,7 @@ library Mint {
         (uint112 yIncrease, uint112 zIncrease) = MintMath.givenNew(
             params.maturity,
             params.assetIn,
-            params.debtOut,
+            params.debtIn,
             params.collateralIn
         );
 

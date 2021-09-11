@@ -45,7 +45,7 @@ interface IMint {
         address liquidityTo;
         address dueTo;
         uint112 assetIn;
-        uint112 debtOut;
+        uint112 debtIn;
         uint112 collateralIn;
         uint256 deadline;
     }
