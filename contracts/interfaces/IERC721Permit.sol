@@ -3,7 +3,7 @@ pragma solidity =0.8.1;
 
 import {IERC721Extended} from './IERC721Extended.sol';
 
-interface IERC721Permit is IERC721 {
+interface IERC721Permit is IERC721Extended {
     /// @notice The permit typehash used in the permit signature
     /// @return The typehash for the permit
     function PERMIT_TYPEHASH() external pure returns (bytes32);
