@@ -14,11 +14,11 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     using Strings for uint256;
     using SafeMetadata for IERC20;
 
-    IConvenience public immutable override convenience;
-    IPair public immutable override pair;
-    uint256 public immutable override maturity;
+    IConvenience public override convenience;
+    IPair public override pair;
+    uint256 public override maturity;
 
-    function name() external view override returns (string memory) {
+    function name() public view override returns (string memory) {
         string memory assetName = pair.asset().safeName();
         string memory collateralName = pair.collateral().safeName();
         return
@@ -34,7 +34,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
             );
     }
 
-    function symbol() external view override returns (string memory) {
+    function symbol() public view override returns (string memory) {
         string memory assetSymbol = pair.asset().safeSymbol();
         string memory collateralSymbol = pair.collateral().safeSymbol();
         return string(abi.encodePacked('TS-CDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
@@ -58,7 +58,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) {
+    ) ERC721Permit(name(), symbol(), "1"){
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
@@ -95,5 +95,9 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         require(msg.sender == address(pair), 'Invalid sender');
 
         convenience.collateralizedDebtCallback(pair, maturity, assetIn, data);
+    }
+
+    function _getAndIncrementNonce(uint256 tokenId) internal override returns (uint256) {
+        return uint256(_positions[tokenId].nonce++);
     }
 }
