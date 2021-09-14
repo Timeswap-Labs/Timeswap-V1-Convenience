@@ -16,20 +16,10 @@ abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit, EIP712 
     
     mapping(uint256 => Counters.Counter) private _nonces;
 
-    /// @dev The hash of the name used in the permit signature verification
-    bytes32 private immutable nameHash;
-
-    /// @dev The hash of the version string used in the permit signature verification
-    bytes32 private immutable versionHash;
-
     /// @notice Computes the nameHash and versionHash
     constructor(
-        string memory name_,
-        string memory version_
-    ) EIP712(name_, "1"){
-        nameHash = keccak256(bytes(name_));
-        versionHash = keccak256(bytes(version_));
-    }
+        string memory name_
+    ) EIP712(name_, "1"){}
 
     /// @inheritdoc IERC721Permit
     function DOMAIN_SEPARATOR() public view override returns (bytes32) {
