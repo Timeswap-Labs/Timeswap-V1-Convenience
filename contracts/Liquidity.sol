@@ -14,12 +14,12 @@ contract Liquidity is ILiquidity, ERC20Permit {
     using Strings for uint256;
 
     IConvenience public immutable override convenience;
-    IPair public override pair;
-    uint256 public override maturity;
+    IPair public immutable override pair;
+    uint256 public immutable override maturity;
 
     uint8 public constant override decimals = 18;
 
-    function name() public view override returns (string memory) {
+    function name() external view override returns (string memory) {
         string memory assetName = pair.asset().safeName();
         string memory collateralName = pair.collateral().safeName();
         return
@@ -42,11 +42,10 @@ contract Liquidity is ILiquidity, ERC20Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) {
+    ) ERC20Permit("Timeswap Liquidity") {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
-        run_initiate();
     }
 
     modifier onlyConvenience() {
@@ -54,9 +53,6 @@ contract Liquidity is ILiquidity, ERC20Permit {
         _;
     }
 
-    function run_initiate() internal {
-        initiate(name(), "1");
-    }
     function mint(address to, uint256 amount) external override onlyConvenience {
         _mint(to, amount);
     }
