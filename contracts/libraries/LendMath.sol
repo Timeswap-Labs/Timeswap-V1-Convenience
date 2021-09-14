@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from '../interfaces/IPair.sol';
-import {Math} from './Math.sol';
-import {FullMath} from './FullMath.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol';
+import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
-import {SafeCast} from './SafeCast.sol';
+import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
 
 library LendMath {
     using Math for uint256;
     using FullMath for uint256;
-    using ConstantProduct for IPair.State;
+    using ConstantProduct for IPair;
+    using ConstantProduct for ConstantProduct.CP;
     using SafeCast for uint256;
 
     function givenBond(
@@ -18,28 +19,35 @@ library LendMath {
         uint256 maturity,
         uint112 assetIn,
         uint128 bondOut
-    ) internal view returns (uint112 interestDecrease, uint112 cdpDecrease) {
+    ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
 
-        IPair.State memory state = pair.state(maturity);
+        ConstantProduct.CP memory cp = pair.get(maturity);
 
-        uint256 _interestDecrease = bondOut;
-        _interestDecrease -= assetIn;
-        _interestDecrease <<= 32;
-        _interestDecrease.divUp(maturity - block.timestamp);
-        interestDecrease = _interestDecrease.toUint112();
+        uint256 _yDecrease = bondOut;
+        _yDecrease -= assetIn;
+        _yDecrease <<= 32;
+        _yDecrease = _yDecrease.divUp(maturity - block.timestamp);
+        yDecrease = _yDecrease.toUint112();
 
-        uint256 interestAdjust = state.interest;
-        interestAdjust <<= 16;
-        interestAdjust -= _interestDecrease * feeBase;
+        uint256 yAdjust = cp.y;
+        yAdjust <<= 16;
+        yAdjust -= _yDecrease * feeBase;
 
-        uint256 cdpAdjust = state.getConstantProduct(state.asset + assetIn, interestAdjust);
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
 
-        uint256 _cdpDecrease = state.cdp;
-        _cdpDecrease <<= 16;
-        _cdpDecrease -= cdpAdjust;
-        _cdpDecrease /= feeBase;
-        cdpDecrease = _cdpDecrease.toUint112();
+        uint256 _zDecrease = xAdjust;
+        _zDecrease *= yAdjust;
+        uint256 subtrahend = cp.x;
+        subtrahend *= cp.y;
+        subtrahend <<= 16;
+        _zDecrease -= subtrahend;
+        uint256 denominator = xAdjust;
+        denominator *= yAdjust;
+        denominator *= feeBase;
+        _zDecrease = _zDecrease.mulDiv(uint256(cp.z) << 16, denominator);
+        zDecrease = _zDecrease.toUint112();
     }
 
     function givenInsurance(
@@ -47,35 +55,41 @@ library LendMath {
         uint256 maturity,
         uint112 assetIn,
         uint128 insuranceOut
-    ) internal view returns (uint112 interestDecrease, uint112 cdpDecrease) {
+    ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
 
-        IPair.State memory state = pair.state(maturity);
+        ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 _zDecrease = insuranceOut;
         uint256 subtrahend = maturity;
         subtrahend -= block.timestamp;
-        subtrahend *= state.interest;
-        subtrahend += uint256(state.asset) << 32;
-        uint256 denominator = state.asset;
+        subtrahend *= cp.y;
+        subtrahend += uint256(cp.x) << 32;
+        uint256 denominator = cp.x;
         denominator += assetIn;
-        denominator *= uint256(state.asset) << 32;
-        subtrahend = subtrahend.mulDiv(assetIn * state.cdp, denominator);
+        denominator *= uint256(cp.x) << 32;
+        subtrahend = subtrahend.mulDivUp(assetIn * cp.z, denominator);
+        _zDecrease -= subtrahend;
+        zDecrease = _zDecrease.toUint112();
 
-        uint256 _cdpDecrease = insuranceOut;
-        _cdpDecrease -= subtrahend;
-        cdpDecrease = _cdpDecrease.toUint112();
+        uint256 zAdjust = cp.z;
+        zAdjust <<= 16;
+        zAdjust -= zDecrease * feeBase;
 
-        uint256 cdpAdjust = state.cdp;
-        cdpAdjust <<= 16;
-        cdpAdjust -= cdpDecrease * feeBase;
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
 
-        uint256 interestAdjust = state.getConstantProduct(state.asset + assetIn, cdpAdjust);
-
-        uint256 _interestDecrease = state.interest;
-        _interestDecrease <<= 16;
-        _interestDecrease -= interestAdjust;
-        _interestDecrease /= feeBase;
-        interestDecrease = _interestDecrease.toUint112();
+        uint256 _yDecrease = xAdjust;
+        _yDecrease *= zAdjust;
+        subtrahend = cp.x;
+        subtrahend *= cp.z;
+        subtrahend <<= 16;
+        _zDecrease -= subtrahend;
+        denominator = xAdjust;
+        denominator *= zAdjust;
+        denominator *= feeBase;
+        _yDecrease = _yDecrease.mulDiv(uint256(cp.y) << 16, denominator);
+        yDecrease = _yDecrease.toUint112();
     }
 
     function givenPercent(
@@ -83,42 +97,47 @@ library LendMath {
         uint256 maturity,
         uint112 assetIn,
         uint40 percent
-    ) internal view returns (uint112 interestDecrease, uint112 cdpDecrease) {
+    ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
 
-        IPair.State memory state = pair.state(maturity);
+        ConstantProduct.CP memory cp = pair.get(maturity);
 
         uint256 minimum = assetIn;
-        minimum *= state.interest;
-        minimum /= (uint256(state.asset) + assetIn) << 4;
+        minimum *= cp.y;
+        minimum /= uint256(cp.x) << 4;
 
-        uint256 interestAdjust = state.asset;
-        interestAdjust *= state.interest;
-        interestAdjust <<= 16;
-        interestAdjust /= state.asset + assetIn;
-
-        uint256 maximum = state.interest;
+        uint256 maximum = cp.y;
         maximum <<= 16;
-        maximum -= interestAdjust;
-        maximum /= feeBase;
+        maximum *= assetIn;
+        uint256 denominator = cp.x;
+        denominator += assetIn;
+        denominator *= feeBase;
+        maximum /= denominator;
 
-        uint256 _interestDecrease = maximum;
-        _interestDecrease -= minimum;
-        _interestDecrease *= percent;
-        _interestDecrease += minimum << 32;
-        _interestDecrease >>= 32;
-        interestDecrease = _interestDecrease.toUint112();
+        uint256 _yDecrease = maximum;
+        _yDecrease -= minimum;
+        _yDecrease *= percent;
+        _yDecrease >>= 32;
+        _yDecrease += minimum;
+        yDecrease = _yDecrease.toUint112();
 
-        interestAdjust = state.interest;
-        interestAdjust <<= 16;
-        interestAdjust -= _interestDecrease * feeBase;
+        uint256 yAdjust = cp.y;
+        yAdjust <<= 16;
+        yAdjust -= _yDecrease * feeBase;
 
-        uint256 cdpAdjust = state.getConstantProduct(state.asset + assetIn, interestAdjust);
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
 
-        uint256 _cdpDecrease = state.cdp;
-        _cdpDecrease <<= 16;
-        _cdpDecrease -= cdpAdjust;
-        _cdpDecrease /= feeBase;
-        cdpDecrease = _cdpDecrease.toUint112();
+        uint256 _zDecrease = xAdjust;
+        _zDecrease *= yAdjust;
+        uint256 subtrahend = cp.x;
+        subtrahend *= cp.y;
+        subtrahend <<= 16;
+        _zDecrease -= subtrahend;
+        denominator = xAdjust;
+        denominator *= yAdjust;
+        denominator *= feeBase;
+        _zDecrease = _zDecrease.mulDiv(uint256(cp.z) << 16, denominator);
+        zDecrease = _zDecrease.toUint112();
     }
 }

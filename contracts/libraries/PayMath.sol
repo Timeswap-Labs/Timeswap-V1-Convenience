@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from '../interfaces/IPair.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IDue} from '../interfaces/IDue.sol';
 
 library PayMath {
@@ -16,7 +16,7 @@ library PayMath {
 
             if (assetsIn[i] > due.debt) assetsIn[i] = due.debt;
             if (msg.sender == collateralizedDebt.ownerOf(ids[i]))
-                collateralsOut[i] = (maxAssetsIn[i] * due.collateral) / due.debt;
+                collateralsOut[i] = (assetsIn[i] * due.collateral) / due.debt;
         }
     }
 }

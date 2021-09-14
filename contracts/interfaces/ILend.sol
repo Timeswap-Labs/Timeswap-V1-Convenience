@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IERC20} from './IERC20.sol';
-import {IPair} from './IPair.sol';
-import {IClaim} from './IClaim.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 interface ILend {
     struct LendGivenBond {
@@ -155,9 +153,9 @@ interface ILend {
         address from;
         address bondTo;
         address insuranceTo;
-        uint112 assetIn;
-        uint112 interestDecrease;
-        uint112 cdpDecrease;
+        uint112 xIncrease;
+        uint112 yDecrease;
+        uint112 zDecrease;
         uint256 deadline;
     }
 }

@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IERC20} from './IERC20.sol';
-import {IWETH} from './IWETH.sol';
-import {IPair} from './IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 interface IMint {
     struct NewLiquidity {
@@ -13,7 +11,7 @@ interface IMint {
         address liquidityTo;
         address dueTo;
         uint112 assetIn;
-        uint112 debtOut;
+        uint112 debtIn;
         uint112 collateralIn;
         uint256 deadline;
     }
@@ -23,7 +21,7 @@ interface IMint {
         uint256 maturity;
         address liquidityTo;
         address dueTo;
-        uint112 debtOut;
+        uint112 debtIn;
         uint112 collateralIn;
         uint256 deadline;
     }
@@ -34,7 +32,7 @@ interface IMint {
         address liquidityTo;
         address dueTo;
         uint112 assetIn;
-        uint112 debtOut;
+        uint112 debtIn;
         uint256 deadline;
     }
 
@@ -47,7 +45,7 @@ interface IMint {
         address liquidityTo;
         address dueTo;
         uint112 assetIn;
-        uint112 debtOut;
+        uint112 debtIn;
         uint112 collateralIn;
         uint256 deadline;
     }
@@ -110,9 +108,9 @@ interface IMint {
         address collateralFrom;
         address liquidityTo;
         address dueTo;
-        uint112 assetIn;
-        uint112 interestIncrease;
-        uint112 cdpIncrease;
+        uint112 xIncrease;
+        uint112 yIncrease;
+        uint112 zIncrease;
         uint256 deadline;
     }
 }

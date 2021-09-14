@@ -2,13 +2,9 @@
 pragma solidity =0.8.1;
 
 import {IConvenience} from '../interfaces/IConvenience.sol';
-import {IFactory} from '../interfaces/IFactory.sol';
-import {IPair} from '../interfaces/IPair.sol';
-import {IERC20} from '../interfaces/IERC20.sol';
-import {Liquidity} from '../Liquidity.sol';
-import {Bond} from '../Bond.sol';
-import {Insurance} from '../Insurance.sol';
-import {CollateralizedDebt} from '../CollateralizedDebt.sol';
+import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Deploy} from './Deploy.sol';
 import {IDeployNative} from '../interfaces/IDeployNative.sol';
 
@@ -19,8 +15,8 @@ library DeployNative {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IDeployNative.Deploy calldata params
-    ) public {
+        IDeployNative.Deploy memory params
+    ) internal {
         require(params.deadline >= block.timestamp, 'Expired');
 
         IPair pair = factory.getPair(params.asset, params.collateral);

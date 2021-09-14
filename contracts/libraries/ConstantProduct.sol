@@ -1,27 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from '../interfaces/IPair.sol';
-import {Math} from './Math.sol';
-import {FullMath} from './FullMath.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 
 library ConstantProduct {
-    using Math for uint256;
-    using FullMath for uint256;
-
-    function calculate(
-        IPair.State memory state,
-        uint256 denominator1,
-        uint256 denominator2
-    ) internal pure returns (uint256 result) {
-        result = (uint256(state.interest) * state.cdp).mulDivUp(state.asset, denominator1 * denominator2);
+    struct CP {
+        uint112 x;
+        uint112 y;
+        uint112 z;
     }
 
-    function getConstantProduct(
-        IPair.State memory state,
-        uint256 denominator1,
-        uint256 denominator2
-    ) internal pure returns (uint256 result) {
-        result = ((uint256(state.interest) * state.cdp) << 32).mulDivUp(state.asset, denominator1 * denominator2);
+    function get(IPair pair, uint256 maturity) internal view returns (CP memory cp) {
+        (uint112 x, uint112 y, uint112 z) = pair.constantProduct(maturity);
+        cp = CP(x, y, z);
     }
 }

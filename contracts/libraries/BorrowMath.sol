@@ -1,44 +1,53 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import {IPair} from '../interfaces/IPair.sol';
-import {Math} from './Math.sol';
-import {FullMath} from './FullMath.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol';
+import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
-import {SafeCast} from './SafeCast.sol';
+import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
 
 library BorrowMath {
     using Math for uint256;
     using FullMath for uint256;
-    using ConstantProduct for IPair.State;
+    using ConstantProduct for IPair;
+    using ConstantProduct for ConstantProduct.CP;
     using SafeCast for uint256;
 
     function givenDebt(
         IPair pair,
         uint256 maturity,
         uint112 assetOut,
-        uint112 debtOut
-    ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
+        uint112 debtIn
+    ) internal view returns (uint112 yIncrease, uint112 zIncrease) {
         uint256 feeBase = 0x10000 - pair.fee();
 
-        IPair.State memory state = pair.state(maturity);
+        ConstantProduct.CP memory cp = pair.get(maturity);
 
-        uint256 _interestIncrease = debtOut;
-        _interestIncrease -= assetOut;
-        _interestIncrease <<= 32;
-        _interestIncrease /= maturity - block.timestamp;
-        interestIncrease = _interestIncrease.toUint112();
+        uint256 _yIncrease = debtIn;
+        _yIncrease -= assetOut;
+        _yIncrease <<= 32;
+        _yIncrease /= maturity - block.timestamp;
+        yIncrease = _yIncrease.toUint112();
 
-        uint256 interestAdjust = state.interest;
-        interestAdjust <<= 16;
-        interestAdjust += _interestIncrease * feeBase;
+        uint256 yAdjust = cp.y;
+        yAdjust <<= 16;
+        yAdjust += _yIncrease * feeBase;
 
-        uint256 cdpAdjust = state.getConstantProduct(state.asset - assetOut, interestAdjust);
+        uint256 xAdjust = cp.x;
+        xAdjust -= assetOut;
 
-        uint256 _cdpIncrease = cdpAdjust;
-        _cdpIncrease -= uint256(state.cdp) << 16;
-        _cdpIncrease = _cdpIncrease.divUp(feeBase);
-        cdpIncrease = _cdpIncrease.toUint112();
+        uint256 _zIncrease = cp.x;
+        _zIncrease *= cp.y;
+        _zIncrease <<= 16;
+        uint256 subtrahend = xAdjust;
+        subtrahend *= yAdjust;
+        _zIncrease -= subtrahend;
+        uint256 denominator = xAdjust;
+        denominator *= yAdjust;
+        denominator *= feeBase;
+        _zIncrease = _zIncrease.mulDivUp(uint256(cp.z) << 16, denominator);
+        zIncrease = _zIncrease.toUint112();
     }
 
     function givenCollateral(
@@ -46,34 +55,41 @@ library BorrowMath {
         uint256 maturity,
         uint112 assetOut,
         uint112 collateralIn
-    ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
+    ) internal view returns (uint112 yIncrease, uint112 zIncrease) {
         uint256 feeBase = 0x10000 - pair.fee();
 
-        IPair.State memory state = pair.state(maturity);
+        ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 _zIncrease = collateralIn;
         uint256 subtrahend = maturity;
         subtrahend -= block.timestamp;
-        subtrahend *= state.interest;
-        subtrahend += uint256(state.asset) << 32;
-        uint256 denominator = state.asset;
+        subtrahend *= cp.y;
+        subtrahend += uint256(cp.x) << 32;
+        uint256 denominator = cp.x;
         denominator -= assetOut;
-        denominator *= uint256(state.asset) << 32;
-        subtrahend = subtrahend.mulDivUp(assetOut * state.cdp, denominator);
+        denominator *= uint256(cp.x) << 32;
+        subtrahend = subtrahend.mulDiv(assetOut * cp.z, denominator);
+        _zIncrease -= subtrahend;
+        zIncrease = _zIncrease.toUint112();
 
-        uint256 _cdpIncrease = collateralIn;
-        _cdpIncrease -= subtrahend;
-        cdpIncrease = _cdpIncrease.toUint112();
+        uint256 zAdjust = cp.z;
+        zAdjust <<= 16;
+        zAdjust += _zIncrease * feeBase;
 
-        uint256 cdpAdjust = state.cdp;
-        cdpAdjust <<= 16;
-        cdpAdjust += _cdpIncrease * feeBase;
+        uint256 xAdjust = cp.x;
+        xAdjust -= assetOut;
 
-        uint256 interestAdjust = state.getConstantProduct(state.asset - assetOut, cdpAdjust);
-
-        uint256 _interestIncrease = interestAdjust;
-        _interestIncrease -= uint256(state.interest) << 16;
-        _interestIncrease = _interestIncrease.divUp(feeBase);
-        interestIncrease = _interestIncrease.toUint112();
+        uint256 _yIncrease = cp.x;
+        _yIncrease *= cp.z;
+        _yIncrease <<= 16;
+        subtrahend = xAdjust;
+        subtrahend *= zAdjust;
+        _yIncrease -= subtrahend;
+        denominator = xAdjust;
+        denominator *= zAdjust;
+        denominator *= feeBase;
+        _yIncrease = _yIncrease.mulDivUp(uint256(cp.y) << 16, denominator);
+        yIncrease = _yIncrease.toUint112();
     }
 
     function givenPercent(
@@ -81,60 +97,47 @@ library BorrowMath {
         uint256 maturity,
         uint112 assetOut,
         uint40 percent
-    ) internal view returns (uint112 interestIncrease, uint112 cdpIncrease) {
+    ) internal view returns (uint112 yIncrease, uint112 zIncrease) {
         uint256 feeBase = 0x10000 - pair.fee();
 
-        IPair.State memory state = pair.state(maturity);
+        ConstantProduct.CP memory cp = pair.get(maturity);
 
         uint256 minimum = assetOut;
-        minimum *= state.interest;
-        minimum /= (uint256(state.asset) - assetOut) << 4;
+        minimum *= cp.y;
+        minimum = minimum.divUp(uint256(cp.x) << 4);
 
-        uint256 interestAdjust = state.asset;
-        interestAdjust *= state.interest;
-        interestAdjust <<= 16;
-        interestAdjust /= state.asset - assetOut;
-
-        uint256 maximum = interestAdjust;
-        maximum -= uint256(state.interest) << 16;
-        maximum = maximum.divUp(feeBase);
-
-        uint256 _interestIncrease = maximum;
-        _interestIncrease -= minimum;
-        _interestIncrease *= percent;
-        _interestIncrease += minimum << 32;
-        _interestIncrease >>= 32;
-        interestIncrease = _interestIncrease.toUint112();
-
-        interestAdjust = state.interest;
-        interestAdjust <<= 16;
-        interestAdjust += _interestIncrease * feeBase;
-
-        uint256 cdpAdjust = state.getConstantProduct(state.asset - assetOut, interestAdjust);
-
-        uint256 _cdpIncrease = cdpAdjust;
-        _cdpIncrease -= uint256(state.cdp) << 16;
-        _cdpIncrease = _cdpIncrease.divUp(feeBase);
-        cdpIncrease = _cdpIncrease.toUint112();
-    }
-
-    function getCollateral(
-        IPair pair,
-        uint256 maturity,
-        uint112 assetOut,
-        uint112 cdpIncrease
-    ) internal view returns (uint112 collateralIn) {
-        IPair.State memory state = pair.state(maturity);
-
-        uint256 _collateralIn = maturity;
-        _collateralIn -= block.timestamp;
-        _collateralIn *= state.interest;
-        _collateralIn += uint256(state.asset) << 32;
-        uint256 denominator = state.asset;
+        uint256 maximum = cp.y;
+        maximum <<= 16;
+        maximum *= assetOut;
+        uint256 denominator = cp.x;
         denominator -= assetOut;
-        denominator *= uint256(state.asset) << 32;
-        _collateralIn = _collateralIn.mulDivUp(uint256(assetOut) * state.cdp, denominator);
-        _collateralIn += cdpIncrease;
-        collateralIn = _collateralIn.toUint112();
+        denominator *= feeBase;
+        maximum /= denominator;
+
+        uint256 _yIncrease = maximum;
+        _yIncrease -= minimum;
+        _yIncrease *= percent;
+        _yIncrease >>= 32;
+        _yIncrease += minimum;
+        yIncrease = _yIncrease.toUint112();
+
+        uint256 yAdjust = cp.y;
+        yAdjust <<= 16;
+        yAdjust += _yIncrease * feeBase;
+
+        uint256 xAdjust = cp.x;
+        xAdjust -= assetOut;
+
+        uint256 _zIncrease = cp.x;
+        _zIncrease *= cp.y;
+        _zIncrease <<= 16;
+        uint256 subtrahend = xAdjust;
+        subtrahend *= yAdjust;
+        _zIncrease -= subtrahend;
+        denominator = xAdjust;
+        denominator *= yAdjust;
+        denominator *= feeBase;
+        _zIncrease = _zIncrease.mulDivUp(uint256(cp.z) << 16, denominator);
+        zIncrease = _zIncrease.toUint112();
     }
 }

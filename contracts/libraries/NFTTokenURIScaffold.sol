@@ -2,18 +2,18 @@
 pragma solidity =0.8.1;
 
 import 'base64-sol/base64.sol';
-import {IPair} from '../interfaces/IPair.sol';
-import {IERC20} from '../interfaces/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {IConvenience} from '../interfaces/IConvenience.sol';
 import {SafeMetadata} from './SafeMetadata.sol';
-import {String} from './String.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {NFTSVG} from './NFTSVG.sol';
 
 
 library NFTTokenURIScaffold {
 
     using SafeMetadata for IERC20;
-    using String for uint256;
+    using Strings for uint256;
 
     function tokenURI (
         uint256 id, 
@@ -45,7 +45,7 @@ library NFTTokenURIScaffold {
     
     }
 
-    function constructTokenURI (string memory name, string memory description, string memory imageSVG) internal view returns (string memory) {
+    function constructTokenURI (string memory name, string memory description, string memory imageSVG) internal pure returns (string memory) {
 
         return
             string(
