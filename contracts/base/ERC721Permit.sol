@@ -14,7 +14,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit, EIP712 {
     using Counters for Counters.Counter;
     
-    /// @notice creating nonces for TokenID
     mapping(uint256 => Counters.Counter) private _nonces;
 
     /// @dev The hash of the name used in the permit signature verification
@@ -26,9 +25,8 @@ abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit, EIP712 
     /// @notice Computes the nameHash and versionHash
     constructor(
         string memory name_,
-        string memory symbol_,
         string memory version_
-    ) ERC721(name_, symbol_) {
+    ) EIP712(name_, "1"){
         nameHash = keccak256(bytes(name_));
         versionHash = keccak256(bytes(version_));
     }
@@ -70,10 +68,10 @@ abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit, EIP712 
                 abi.encodePacked(
                     '\x19\x01',
                     DOMAIN_SEPARATOR(),
-                    keccak256(abi.encode(PERMIT_TYPEHASH, spender, tokenId, _usenonce(tokenId), deadline))
+                    keccak256(abi.encode(PERMIT_TYPEHASH, spender, tokenId, _useNonce(tokenId), deadline))
                 )
             );
-        address owner = ownerOf(tokenId);
+        address owner = ownerOf[tokenId];
         require(spender != owner, 'ERC721Permit: approval to current owner');
 
         if (Address.isContract(owner)) {
@@ -87,8 +85,8 @@ abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit, EIP712 
         _approve(spender, tokenId);
     }
 
-    function nonces(address owner) public view virtual override returns (uint256) {
-        return _nonces[owner].current();
+    function nonces(uint256 tokenId) public view virtual returns (uint256) {
+        return _nonces[tokenId].current();
     }
 
     function _useNonce(uint256 tokenId) internal virtual returns (uint256 current) {

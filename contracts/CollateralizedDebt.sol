@@ -19,7 +19,6 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     IPair public override pair;
     uint256 public override maturity;
 
-    //TODO: to check if this fx has to be external
     function name() external view override returns (string memory) {
         string memory assetName = pair.asset().safeName();
         string memory collateralName = pair.collateral().safeName();
@@ -36,8 +35,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
             );
     }
 
-    //TODO: to check if this fx has to be external
-    function symbol() public view override returns (string memory) {
+    function symbol() external view override returns (string memory) {
         string memory assetSymbol = pair.asset().safeSymbol();
         string memory collateralSymbol = pair.collateral().safeSymbol();
         return string(abi.encodePacked('TS-CDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
@@ -62,7 +60,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) ERC721Permit(name(), symbol(), "1"){
+    ) ERC721Permit("Timeswap Collateralised Debt", "1"){
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
@@ -101,7 +99,4 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         convenience.collateralizedDebtCallback(pair, maturity, assetIn, data);
     }
 
-    function _getAndIncrementNonce(uint256 tokenId) internal override returns (uint256) {
-        return uint256(_positions[tokenId].nonce++);
-    }
 }

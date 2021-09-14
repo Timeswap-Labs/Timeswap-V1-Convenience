@@ -5,9 +5,7 @@ pragma solidity >=0.7.0;
 library ChainId {
     /// @dev Gets the current chain ID
     /// @return chainId The current chain ID
-    function get() internal pure returns (uint256 chainId) {
-        assembly {
-            chainId := chainid()
-        }
+    function get() internal view returns (uint256 chainId) {
+        return block.chainid;
     }
 }
