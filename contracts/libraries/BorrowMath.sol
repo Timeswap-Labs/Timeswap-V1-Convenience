@@ -102,16 +102,15 @@ library BorrowMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
-        uint256 maximum = cp.y;
-        maximum <<= 16;
-        maximum *= assetOut;
+        uint256 minimum = assetOut;
+        minimum *= cp.y;
+        minimum <<= 12;
+        uint256 maximum = minimum;
+        maximum <<= 4;
         uint256 denominator = cp.x;
         denominator -= assetOut;
         denominator *= feeBase;
-
-        uint256 minimum = maximum;
-        minimum = minimum.divUp(denominator << 4);
-
+        minimum = minimum.divUp(denominator);
         maximum /= denominator;
 
         uint256 _yIncrease = maximum;
