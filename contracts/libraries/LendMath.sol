@@ -102,13 +102,15 @@ library LendMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
+
         uint256 minimum = assetIn;
         minimum *= cp.y;
         minimum <<= 12;
         uint256 maximum = minimum;
         maximum <<= 4;
-        uint256 denominator = cp.x;
-        denominator += assetIn;
+        uint256 denominator = xAdjust;
         denominator *= feeBase;
         minimum /= denominator;
         maximum /= denominator;
@@ -123,9 +125,6 @@ library LendMath {
         uint256 yAdjust = cp.y;
         yAdjust <<= 16;
         yAdjust -= _yDecrease * feeBase;
-
-        uint256 xAdjust = cp.x;
-        xAdjust += assetIn;
 
         uint256 _zDecrease = xAdjust;
         _zDecrease *= yAdjust;
