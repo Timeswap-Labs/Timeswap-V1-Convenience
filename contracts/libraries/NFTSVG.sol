@@ -30,7 +30,7 @@ library NFTSVG {
         string memory colorScheme = isMatured ? "luminosity" : "normal";
 
         string memory svg = string(abi.encodePacked('<svg width="290" height="500" style="mix-blend-mode:', colorScheme, '" xmlns="http://www.w3.org/2000/svg" xmlns:xlink=\'http://www.w3.org/1999/xlink\'><style type="text/css" ><![CDATA[.B{fill-rule:evenodd}.C{fill:#7951EC}.D{fill:#CABAF7}.E{fill:#5160EC}.F{fill:#BAC0F7}]]></style><g clip-path="url(#mainclip)"><rect width="290" height="500" fill="url(\'#background\')"/><rect y="409" width="290" height="90" fill="#141330" fill-opacity="0.4"/><rect y="408" width="290" height="2" fill="url(#divider)"/></g><text y="70px" x="145" fill="white" font-family="arial" font-weight="500" font-size="24px" text-anchor="middle">'));
-        svg = string(abi.encodePacked(svg, svgTitle, '</text><text y="95px" x="145" fill="white" font-family="arial" font-weight="400" font-size="12px" text-anchor="middle">', params.maturityDate, '</text>'));
+        svg = string(abi.encodePacked(svg, svgTitle, '</text><text y="95px" x="145" fill="white" font-family="arial" font-weight="400" font-size="12px" text-anchor="middle">', svgReadableMaturity, '</text>'));
 
         if (!isMatured) {
             svg = string(abi.encodePacked(svg, '<text y="115px" x="145" fill="white" font-family="arial" font-weight="300" font-size="10px" text-anchor="middle" opacity="50%">', maturityInfo, '</text>'));
