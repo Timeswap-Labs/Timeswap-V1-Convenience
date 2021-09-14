@@ -753,10 +753,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@timeswap-labs/timeswap-v1-core@1.0.5":
-  version "1.0.5"
-  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.5/236260515cb785efca02ac00b101c7d5081c416f6d303dd132c02e46f24158c0#9a3b418719ccab11470295b9815346408d996f87"
-  integrity sha512-A+0hwLEClww0V17/9H25Dzalr5jr5qEJV0/aqKVcYkzrf6Wf4mEQSOxoPE/LPP6ejZUD6EvT9Qzwx7vjnv0Xdw==
+"@timeswap-labs/timeswap-v1-core@1.0.6":
+  version "1.0.6"
+  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.6/682607446f08fc5783ce6b8aa9d90d08b450dc5e62f8739e433f0de3bf8a5b87#6d97d1a942fcc1506e3301aa65abbf3fa1834af7"
+  integrity sha512-yUKMlDsGOdCrVPbAEsqI5fk6I5KSilmPEwbSPs9Fx6k+xJnZX5zctoioto1xRlTtCT4zzkcKmJYt6dpbZjx4KA==
   dependencies:
     "@openzeppelin/contracts" "^4.1.0"
     dotenv "^10.0.0"
@@ -1851,6 +1851,11 @@ base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
+
+base64-sol@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/base64-sol/-/base64-sol-1.0.1.tgz#91317aa341f0bc763811783c5729f1c2574600f6"
+  integrity sha512-ld3cCNMeXt4uJXmLZBHFGMvVpK9KsLVEhPpFRXnvSVAqABKbuNZg/+dsq3NuM+wxFLb/UrVkz7m1ciWmkMfTbg==
 
 base@^0.11.1:
   version "0.11.2"

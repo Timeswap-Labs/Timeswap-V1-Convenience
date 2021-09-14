@@ -9,6 +9,7 @@ import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {ERC721Permit} from './base/ERC721Permit.sol';
 import {SafeMetadata} from './libraries/SafeMetadata.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
+import {NFTTokenURIScaffold} from './libraries/NFTTokenURIScaffold.sol';
 
 contract CollateralizedDebt is IDue, ERC721Permit {
     using Strings for uint256;
@@ -40,7 +41,15 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         return string(abi.encodePacked('TS-CDT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
     }
 
-    function tokenURI(uint256 id) external view override returns (string memory) {}
+    function tokenURI(uint256 id) external view override returns (string memory) {
+        /// Token SVG takes - 
+        /// - asset symbol, asset address, asset amount
+        /// - collateral symbol, collateral address, collateral amount
+        /// - maturity
+        /// - id
+        require(ownerOf[id] != address(0), 'ERC721 :: tokenURI : Doesnt exist');
+        return NFTTokenURIScaffold.tokenURI(id, pair, convenience, dueOf(id), maturity);
+    }
 
     function assetDecimals() external view override returns (uint8) {
         return pair.asset().safeDecimals();
@@ -50,7 +59,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         return pair.collateral().safeDecimals();
     }
 
-    function dueOf(uint256 id) external view override returns (IPair.Due memory) {
+    function dueOf(uint256 id) public view override returns (IPair.Due memory) {
         return pair.duesOf(maturity, address(this))[id];
     }
 
