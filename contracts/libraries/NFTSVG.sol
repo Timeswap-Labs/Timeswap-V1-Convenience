@@ -21,7 +21,7 @@ library NFTSVG {
         string memory svgReadableMaturity = '21 Oct 2021, 12:00:00 UTC';
         string memory assetInfo = string(abi.encodePacked(params.assetSymbol, ': ', params.assetAddress));
         string memory collateralInfo = string(abi.encodePacked(params.collateralSymbol, ': ', params.collateralAddress));
-        string memory maturityInfo = string(abi.encodePacked('MATURITY: ', params.maturityTimestamp));
+        string memory maturityInfo = string(abi.encodePacked('MATURITY: ', params.maturityDate));
         string memory debtRequired = string(abi.encodePacked(params.assetAmount, ' ', params.assetSymbol));
         string memory collateralLocked = string(abi.encodePacked(params.collateralAmount, ' ', params.collateralSymbol));
 

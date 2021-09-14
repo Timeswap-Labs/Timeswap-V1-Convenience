@@ -29,10 +29,10 @@ library NFTTokenURIScaffold {
             id.toString(),
             pair.asset().safeSymbol(),
             weiToPrecisionString(due.debt, pair.asset().safeDecimals()),
-            string(abi.encodePacked(address(pair.asset()))),
+            addressToString(address(pair.asset())),
             pair.collateral().safeSymbol(),
             weiToPrecisionString(due.collateral, pair.collateral().safeDecimals()),
-            string(abi.encodePacked(address(pair.collateral()))),
+            addressToString(address(pair.collateral())),
             maturity.toString(),
             maturity
         );
@@ -108,5 +108,19 @@ library NFTTokenURIScaffold {
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
         precisionDigits = precisionDigits/(10 ** (decimal - 2));
         return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigits.toString()));
+    }
+
+    function addressToString(address _addr) public pure returns(string memory) {
+        bytes32 value = bytes32(uint256(uint160(_addr)));
+        bytes memory alphabet = "0123456789abcdef";
+
+        bytes memory str = new bytes(51);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint i = 0; i < 20; i++) {
+            str[2+i*2] = alphabet[uint(uint8(value[i + 12] >> 4))];
+            str[3+i*2] = alphabet[uint(uint8(value[i + 12] & 0x0f))];
+        }
+        return string(str);
     }
 }
