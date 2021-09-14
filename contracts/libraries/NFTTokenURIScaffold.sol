@@ -60,7 +60,7 @@ library NFTTokenURIScaffold {
                                 description,
                                 '", "image": "',
                                 'data:image/svg+xml;base64,',
-                                imageSVG,
+                                Base64.encode(bytes(imageSVG)),
                                 '"}'
                             )
                         )
