@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
+    "base64-sol": "1.0.1",
     "dotenv": "^10.0.0",
     "eslint": "^7.29.0",
     "prettier": "^2.0.5",

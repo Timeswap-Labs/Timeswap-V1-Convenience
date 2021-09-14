@@ -63,7 +63,7 @@ contract CollateralizedDebt is IDue {
         return pair.collateral().safeDecimals();
     }
 
-    function dueOf(uint256 id) external view override returns (IPair.Due memory) {
+    function dueOf(uint256 id) public view override returns (IPair.Due memory) {
         return pair.duesOf(maturity, address(this))[id];
     }
 

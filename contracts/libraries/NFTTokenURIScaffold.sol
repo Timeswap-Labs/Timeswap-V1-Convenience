@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
+import 'base64-sol/base64.sol';
 import {IPair} from '../interfaces/IPair.sol';
+import {IERC20} from '../interfaces/IERC20.sol';
 import {IConvenience} from '../interfaces/IConvenience.sol';
-
-import {SafeMetadata} from './libraries/SafeMetadata.sol';
-import {String} from './libraries/String.sol';
+import {SafeMetadata} from './SafeMetadata.sol';
+import {String} from './String.sol';
+import {NFTSVG} from './NFTSVG.sol';
 
 
 library NFTTokenURIScaffold {
@@ -13,33 +15,37 @@ library NFTTokenURIScaffold {
     using SafeMetadata for IERC20;
     using String for uint256;
 
-    function tokensUri (
+    function tokenURI (
         uint256 id, 
         IPair pair, 
         IConvenience convenience,
-        IPair.Due due
-    ) public view returns (string) {
+        IPair.Due memory due,
+        uint maturity
+    ) public view returns (string memory) {
 
-        string name = "Timeswap Collateralized Debt NFT";
-        
-        /// TODO - add more details, paraphrase this description
-        string description = "Timelord has blessed us with this holy NFT";
 
-        string uri = constructTokenSVG(
+
+        string memory uri = constructTokenSVG(
             id.toString(),
             pair.asset().safeSymbol(),
-            due.debt.toString(),
-            address(pair.asset),
+            weiToPrecisionString(due.debt, pair.asset().safeDecimals()),
+            string(abi.encodePacked(address(pair.asset()))),
             pair.collateral().safeSymbol(),
-            due.collateral.toString(),
-            address(pair.collateral),
-            maturity,
-            maturity.toDate()
+            weiToPrecisionString(due.collateral, pair.collateral().safeDecimals()),
+            string(abi.encodePacked(address(pair.collateral()))),
+            maturity.toString(),
+            maturity
         );
+
+        string memory name = "Timeswap Collateralized Debt NFT";
+        
+        string memory description = "Timelord has blessed us with this holy NFT";
+
+        return (constructTokenURI(name, description, uri));
     
     }
 
-    function constructTokenUri (string name, string description, string imageSVG) internal pure returns (string) {
+    function constructTokenURI (string memory name, string memory description, string memory imageSVG) internal view returns (string memory) {
 
         return
             string(
@@ -51,11 +57,10 @@ library NFTTokenURIScaffold {
                                 '{"name":"',
                                 name,
                                 '", "description":"',
-                                descriptionPartOne,
-                                descriptionPartTwo,
+                                description,
                                 '", "image": "',
                                 'data:image/svg+xml;base64,',
-                                image,
+                                imageSVG,
                                 '"}'
                             )
                         )
@@ -65,18 +70,43 @@ library NFTTokenURIScaffold {
     }
 
 
+
+
     function constructTokenSVG (
-        string tokenId,
-        string assetSymbol, 
-        string assetAmount, 
-        string assetAddress, 
-        string collatteralSymbol, 
-        string collatteralAmount, 
-        string collatteralAddress,
-        string maturityDate,
-        string maturityTimestamp,
-    ) internal pure returns (string) {
+        string memory tokenId,
+        string memory assetSymbol, 
+        string memory assetAmount, 
+        string memory assetAddress, 
+        string memory collateralSymbol, 
+        string memory collateralAmount, 
+        string memory collateralAddress,
+        string memory maturityDate,
+        uint256 maturityTimestamp
+    ) internal view returns (string memory) {
 
         /// TODO - finalize SVG
+        NFTSVG.SVGParams memory params = NFTSVG.SVGParams({
+            tokenId: tokenId,
+            assetSymbol: assetSymbol,
+            assetAmount: assetAmount,
+            assetAddress: assetAddress,
+            collateralSymbol: collateralSymbol,
+            collateralAmount: collateralAmount,
+            collateralAddress: collateralAddress,
+            maturityDate: maturityDate,
+            maturityTimestamp: maturityTimestamp
+        });
+
+        return NFTSVG.constructSVG(params);
+    }
+
+    function weiToPrecisionString (uint256 weiAmt, uint256 decimal) public pure returns (string memory) {
+        if (decimal == 0) {
+            return string(abi.encodePacked(weiAmt.toString(), '.00'));
+        }
+        uint256 significantDigits = weiAmt/(10 ** decimal);
+        uint256 precisionDigits = weiAmt % (10 ** (decimal));
+        precisionDigits = precisionDigits/(10 ** (decimal - 2));
+        return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigits.toString()));
     }
 }
