@@ -2,16 +2,20 @@
 pragma solidity =0.8.1;
 
 import '@openzeppelin/contracts/utils/Address.sol';
+import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import '../libraries/ChainId.sol';
 import {IERC721Permit} from '../interfaces/IERC721Permit.sol';
 import {ERC721} from './ERC721.sol';
 import '../interfaces/IERC1271.sol';
 import '../interfaces/IERC721Permit.sol';
 import './BlockTimestamp.sol';
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit {
-    /// @dev Gets the current nonce for a token ID and then increments it, returning the original value
-    function _getAndIncrementNonce(uint256 tokenId) internal virtual returns (uint256);
+abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit, EIP712 {
+    using Counters for Counters.Counter;
+    
+    /// @notice creating nonces for TokenID
+    mapping(uint256 => Counters.Counter) private _nonces;
 
     /// @dev The hash of the name used in the permit signature verification
     bytes32 private immutable nameHash;
@@ -46,6 +50,7 @@ abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit {
 
     /// @inheritdoc IERC721Permit
     /// @dev Value is equal to keccak256("Permit(address spender,uint256 tokenId,uint256 nonce,uint256 deadline)");
+    /// @dev Since tokenId is there, the specific field of owner is not required;
     bytes32 public constant override PERMIT_TYPEHASH =
         0x49ecf333e5b8c95c40fdafc95c1ad136e8914a8fb55e9dc8bb01eaa83a2df9ad;
 
@@ -65,7 +70,7 @@ abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit {
                 abi.encodePacked(
                     '\x19\x01',
                     DOMAIN_SEPARATOR(),
-                    keccak256(abi.encode(PERMIT_TYPEHASH, spender, tokenId, _getAndIncrementNonce(tokenId), deadline))
+                    keccak256(abi.encode(PERMIT_TYPEHASH, spender, tokenId, _usenonce(tokenId), deadline))
                 )
             );
         address owner = ownerOf(tokenId);
@@ -80,6 +85,16 @@ abstract contract ERC721Permit is BlockTimestamp, ERC721, IERC721Permit {
         }
 
         _approve(spender, tokenId);
+    }
+
+    function nonces(address owner) public view virtual override returns (uint256) {
+        return _nonces[owner].current();
+    }
+
+    function _useNonce(uint256 tokenId) internal virtual returns (uint256 current) {
+        Counters.Counter storage nonce = _nonces[tokenId];
+        current = nonce.current();
+        nonce.increment();
     }
 
 
