@@ -5,10 +5,10 @@ import {Address} from '@openzeppelin/contracts/utils/Address.sol';
 import {EIP712} from"@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import {IERC721Permit} from '../interfaces/IERC721Permit.sol';
 import {ERC721} from './ERC721.sol';
-import '../interfaces/IERC1271.sol';
-import '../interfaces/IERC721Permit.sol';
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {IERC1271} from '../interfaces/IERC1271.sol';
+import {IERC721Permit} from '../interfaces/IERC721Permit.sol';
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 abstract contract ERC721Permit is ERC721, IERC721Permit, EIP712 {
     using Counters for Counters.Counter;

@@ -3,9 +3,9 @@ pragma solidity =0.8.1;
 
 import {IERC20Permit} from '../interfaces/IERC20Permit.sol';
 import {ERC20} from './ERC20.sol';
-import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
 abstract contract ERC20Permit is IERC20Permit, ERC20, EIP712 {
     using Counters for Counters.Counter;
