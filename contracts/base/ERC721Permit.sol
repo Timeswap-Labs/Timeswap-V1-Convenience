@@ -15,7 +15,7 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, EIP712 {
     
     mapping(uint256 => Counters.Counter) private _nonces;
 
-    bytes32 public immutable override _PERMIT_TYPEHASH =
+    bytes32 public immutable _PERMIT_TYPEHASH =
         keccak256("Permit(address spender,uint256 tokenId,uint256 nonce,uint256 deadline)");
 
 
@@ -62,7 +62,5 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, EIP712 {
         current = nonce.current();
         nonce.increment();
     }
-
-
 
 }
