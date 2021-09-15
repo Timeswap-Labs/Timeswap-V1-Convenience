@@ -15,9 +15,9 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     using SafeMetadata for IERC20;
 
     //TODO: to check if these can be immutable
-    IConvenience public override convenience;
-    IPair public override pair;
-    uint256 public override maturity;
+    IConvenience public immutable override convenience;
+    IPair public immutable override pair;
+    uint256 public immutable override maturity;
 
     function name() external view override returns (string memory) {
         string memory assetName = pair.asset().safeName();
@@ -55,7 +55,6 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         return pair.duesOf(maturity, address(this))[id];
     }
 
-    // TODO: to check on the construction of the ERC721Permit
     constructor(
         IConvenience _convenience,
         IPair _pair,
