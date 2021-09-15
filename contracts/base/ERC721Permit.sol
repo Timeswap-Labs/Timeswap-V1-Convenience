@@ -33,6 +33,8 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, EIP712 {
         bytes32 r,
         bytes32 s
     ) external payable override {
+        address owner = ownerOf[tokenId];
+
         require(block.timestamp <= deadline, 'Permit expired');
 
         bytes32 structHash = keccak256(abi.encode(_PERMIT_TYPEHASH, spender, tokenId, _useNonce(tokenId), deadline));
@@ -41,14 +43,8 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, EIP712 {
 
         address signer = ECDSA.recover(hash, v, r, s);
         require(signer != address(0), 'ERC721Permit: Invalid signature');
-        address owner = ownerOf[tokenId];
         require(signer == owner, "ERC721Permit: invalid signature");
         require(spender != owner, 'ERC721Permit: approval to current owner');
-
-        // TODO: to work on verifying signature if the owner is a contract
-        if (Address.isContract(owner)) {
-            require(IERC1271(owner).isValidSignature(digest, abi.encodePacked(r, s, v)) == 0x1626ba7e, 'Unauthorized');
-        } 
 
         _approve(spender, tokenId);
     }
