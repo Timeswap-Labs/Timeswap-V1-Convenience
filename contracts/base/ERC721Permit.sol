@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import '@openzeppelin/contracts/utils/Address.sol';
-import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import '../libraries/ChainId.sol';
+import {Address} from '@openzeppelin/contracts/utils/Address.sol';
+import {EIP712} from"@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import {IERC721Permit} from '../interfaces/IERC721Permit.sol';
 import {ERC721} from './ERC721.sol';
 import '../interfaces/IERC1271.sol';
@@ -41,19 +40,15 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, EIP712 {
         bytes32 hash = _hashTypedDataV4(structHash);
 
         address signer = ECDSA.recover(hash, v, r, s);
-        require(signer == owner, "ERC20Permit: invalid signature");
-        
+        require(signer != address(0), 'ERC721Permit: Invalid signature');
         address owner = ownerOf[tokenId];
+        require(signer == owner, "ERC721Permit: invalid signature");
         require(spender != owner, 'ERC721Permit: approval to current owner');
 
-        //TODO: to check on isValidSignature
+        // TODO: to work on verifying signature if the owner is a contract
         if (Address.isContract(owner)) {
             require(IERC1271(owner).isValidSignature(digest, abi.encodePacked(r, s, v)) == 0x1626ba7e, 'Unauthorized');
-        } else {
-            address recoveredAddress = ecrecover(digest, v, r, s);
-            require(recoveredAddress != address(0), 'Invalid signature');
-            require(recoveredAddress == owner, 'Unauthorized');
-        }
+        } 
 
         _approve(spender, tokenId);
     }
