@@ -20,8 +20,8 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, EIP712 {
 
 
     constructor(
-        string memory name_
-    ) EIP712(name_, "1"){}
+        string memory name
+    ) EIP712(name, "1"){}
 
     
     /// @inheritdoc IERC721Permit
