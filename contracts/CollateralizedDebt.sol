@@ -14,7 +14,6 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     using Strings for uint256;
     using SafeMetadata for IERC20;
 
-    //TODO: to check if these can be immutable
     IConvenience public immutable override convenience;
     IPair public immutable override pair;
     uint256 public immutable override maturity;
