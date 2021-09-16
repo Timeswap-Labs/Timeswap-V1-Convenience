@@ -60,24 +60,23 @@ library BorrowMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 xAdjust = cp.x;
+        xAdjust -= assetOut;
+
         uint256 _zIncrease = collateralIn;
         uint256 subtrahend = maturity;
         subtrahend -= block.timestamp;
         subtrahend *= cp.y;
         subtrahend += uint256(cp.x) << 32;
-        uint256 denominator = cp.x;
-        denominator -= assetOut;
+        uint256 denominator = xAdjust;
         denominator *= uint256(cp.x) << 32;
-        subtrahend = subtrahend.mulDiv(assetOut * cp.z, denominator);
+        subtrahend = subtrahend.mulDivUp(assetOut * cp.z, denominator);
         _zIncrease -= subtrahend;
         zIncrease = _zIncrease.toUint112();
 
         uint256 zAdjust = cp.z;
         zAdjust <<= 16;
         zAdjust += _zIncrease * feeBase;
-
-        uint256 xAdjust = cp.x;
-        xAdjust -= assetOut;
 
         uint256 _yIncrease = cp.x;
         _yIncrease *= cp.z;

@@ -60,15 +60,17 @@ library LendMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
+
         uint256 _zDecrease = insuranceOut;
         uint256 subtrahend = maturity;
         subtrahend -= block.timestamp;
         subtrahend *= cp.y;
         subtrahend += uint256(cp.x) << 32;
-        uint256 denominator = cp.x;
-        denominator += assetIn;
+        uint256 denominator = xAdjust;
         denominator *= uint256(cp.x) << 32;
-        subtrahend = subtrahend.mulDivUp(assetIn * cp.z, denominator);
+        subtrahend = subtrahend.mulDiv(assetIn * cp.z, denominator);
         _zDecrease -= subtrahend;
         zDecrease = _zDecrease.toUint112();
 
@@ -76,15 +78,12 @@ library LendMath {
         zAdjust <<= 16;
         zAdjust -= zDecrease * feeBase;
 
-        uint256 xAdjust = cp.x;
-        xAdjust += assetIn;
-
         uint256 _yDecrease = xAdjust;
         _yDecrease *= zAdjust;
         subtrahend = cp.x;
         subtrahend *= cp.z;
         subtrahend <<= 16;
-        _zDecrease -= subtrahend;
+        _yDecrease -= subtrahend;
         denominator = xAdjust;
         denominator *= zAdjust;
         denominator *= feeBase;
