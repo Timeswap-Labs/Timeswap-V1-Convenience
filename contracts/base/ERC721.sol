@@ -109,16 +109,6 @@ abstract contract ERC721 is IERC721Extended {
         emit Transfer(address(0), to, id);
     }
 
-    function _burn(address from, uint256 id) internal {
-        require(from != address(0), 'ERC721 :: _burn : Zero address');
-        require(ownerOf[id] == from, 'ERC721 :: _burn : Not owner of token');
-
-        balanceOf[from]--;
-        ownerOf[id] = address(0);
-
-        emit Transfer(from, address(0), id);
-    }
-
     function _transfer(
         address from,
         address to,

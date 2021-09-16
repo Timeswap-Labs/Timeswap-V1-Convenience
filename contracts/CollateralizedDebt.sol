@@ -42,7 +42,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function tokenURI(uint256 id) external view override returns (string memory) {
-        /// Token SVG takes - 
+        /// Token SVG takes -
         /// - asset symbol, asset address, asset amount
         /// - collateral symbol, collateral address, collateral amount
         /// - maturity
@@ -83,7 +83,6 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function burn(
-        address from,
         address to,
         uint256[] memory ids,
         uint112[] memory debtsIn,
@@ -91,13 +90,6 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         bytes calldata data
     ) external override onlyConvenience returns (uint128 assetIn, uint128 collateralOut) {
         (assetIn, collateralOut) = pair.pay(maturity, to, address(this), ids, debtsIn, collateralsOut, data);
-
-        IPair.Due[] memory dues = pair.duesOf(maturity, address(this));
-        for (uint256 i; i < ids.length; i++) {
-            uint256 id = ids[i];
-
-            if (dues[id].collateral == 0 && ownerOf[id] == from) _burn(from, id);
-        }
     }
 
     function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {

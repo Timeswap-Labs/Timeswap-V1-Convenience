@@ -108,7 +108,6 @@ library Pay {
         );
 
         (assetIn, collateralOut) = collateralizedDebt.burn(
-            msg.sender,
             params.collateralTo,
             params.ids,
             assetsIn,
