@@ -27,7 +27,7 @@ library LendMath {
         uint256 _yDecrease = bondOut;
         _yDecrease -= assetIn;
         _yDecrease <<= 32;
-        _yDecrease.divUp(maturity - block.timestamp);
+        _yDecrease = _yDecrease.divUp(maturity - block.timestamp);
         yDecrease = _yDecrease.toUint112();
 
         uint256 yAdjust = cp.y;
@@ -60,15 +60,17 @@ library LendMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
+
         uint256 _zDecrease = insuranceOut;
         uint256 subtrahend = maturity;
         subtrahend -= block.timestamp;
         subtrahend *= cp.y;
         subtrahend += uint256(cp.x) << 32;
-        uint256 denominator = cp.x;
-        denominator += assetIn;
+        uint256 denominator = xAdjust;
         denominator *= uint256(cp.x) << 32;
-        subtrahend = subtrahend.mulDivUp(assetIn * cp.z, denominator);
+        subtrahend = subtrahend.mulDiv(assetIn * cp.z, denominator);
         _zDecrease -= subtrahend;
         zDecrease = _zDecrease.toUint112();
 
@@ -76,15 +78,12 @@ library LendMath {
         zAdjust <<= 16;
         zAdjust -= zDecrease * feeBase;
 
-        uint256 xAdjust = cp.x;
-        xAdjust += assetIn;
-
         uint256 _yDecrease = xAdjust;
         _yDecrease *= zAdjust;
         subtrahend = cp.x;
         subtrahend *= cp.z;
         subtrahend <<= 16;
-        _zDecrease -= subtrahend;
+        _yDecrease -= subtrahend;
         denominator = xAdjust;
         denominator *= zAdjust;
         denominator *= feeBase;
@@ -102,16 +101,17 @@ library LendMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 xAdjust = cp.x;
+        xAdjust += assetIn;
+
         uint256 minimum = assetIn;
         minimum *= cp.y;
-        minimum /= uint256(cp.x) << 4;
-
-        uint256 maximum = cp.y;
-        maximum <<= 16;
-        maximum *= assetIn;
-        uint256 denominator = cp.x;
-        denominator += assetIn;
+        minimum <<= 12;
+        uint256 maximum = minimum;
+        maximum <<= 4;
+        uint256 denominator = xAdjust;
         denominator *= feeBase;
+        minimum /= denominator;
         maximum /= denominator;
 
         uint256 _yDecrease = maximum;
@@ -124,9 +124,6 @@ library LendMath {
         uint256 yAdjust = cp.y;
         yAdjust <<= 16;
         yAdjust -= _yDecrease * feeBase;
-
-        uint256 xAdjust = cp.x;
-        xAdjust += assetIn;
 
         uint256 _zDecrease = xAdjust;
         _zDecrease *= yAdjust;

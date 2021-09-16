@@ -23,7 +23,6 @@ interface IDue is IERC721Permit, ITimeswapPayCallback {
     function mint(address to, uint256 id) external;
 
     function burn(
-        address from,
         address to,
         uint256[] memory ids,
         uint112[] memory debtIn,

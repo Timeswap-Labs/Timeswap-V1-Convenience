@@ -60,24 +60,23 @@ library BorrowMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 xAdjust = cp.x;
+        xAdjust -= assetOut;
+
         uint256 _zIncrease = collateralIn;
         uint256 subtrahend = maturity;
         subtrahend -= block.timestamp;
         subtrahend *= cp.y;
         subtrahend += uint256(cp.x) << 32;
-        uint256 denominator = cp.x;
-        denominator -= assetOut;
+        uint256 denominator = xAdjust;
         denominator *= uint256(cp.x) << 32;
-        subtrahend = subtrahend.mulDiv(assetOut * cp.z, denominator);
+        subtrahend = subtrahend.mulDivUp(assetOut * cp.z, denominator);
         _zIncrease -= subtrahend;
         zIncrease = _zIncrease.toUint112();
 
         uint256 zAdjust = cp.z;
         zAdjust <<= 16;
         zAdjust += _zIncrease * feeBase;
-
-        uint256 xAdjust = cp.x;
-        xAdjust -= assetOut;
 
         uint256 _yIncrease = cp.x;
         _yIncrease *= cp.z;
@@ -102,16 +101,17 @@ library BorrowMath {
 
         ConstantProduct.CP memory cp = pair.get(maturity);
 
+        uint256 xAdjust = cp.x;
+        xAdjust -= assetOut;
+
         uint256 minimum = assetOut;
         minimum *= cp.y;
-        minimum = minimum.divUp(uint256(cp.x) << 4);
-
-        uint256 maximum = cp.y;
-        maximum <<= 16;
-        maximum *= assetOut;
-        uint256 denominator = cp.x;
-        denominator -= assetOut;
+        minimum <<= 12;
+        uint256 maximum = minimum;
+        maximum <<= 4;
+        uint256 denominator = xAdjust;
         denominator *= feeBase;
+        minimum = minimum.divUp(denominator);
         maximum /= denominator;
 
         uint256 _yIncrease = maximum;
@@ -125,9 +125,6 @@ library BorrowMath {
         yAdjust <<= 16;
         yAdjust += _yIncrease * feeBase;
 
-        uint256 xAdjust = cp.x;
-        xAdjust -= assetOut;
-
         uint256 _zIncrease = cp.x;
         _zIncrease *= cp.y;
         _zIncrease <<= 16;
@@ -139,26 +136,5 @@ library BorrowMath {
         denominator *= feeBase;
         _zIncrease = _zIncrease.mulDivUp(uint256(cp.z) << 16, denominator);
         zIncrease = _zIncrease.toUint112();
-    }
-
-    function getCollateral(
-        IPair pair,
-        uint256 maturity,
-        uint112 assetOut,
-        uint112 zIncrease
-    ) internal view returns (uint112 collateralIn) {
-        ConstantProduct.CP memory cp = pair.get(maturity);
-
-        uint256 _collateralIn = maturity;
-        _collateralIn -= block.timestamp;
-        _collateralIn *= cp.y;
-        _collateralIn += uint256(cp.x) << 32;
-        uint256 denominator = cp.x;
-        denominator -= assetOut;
-        denominator *= uint256(cp.x);
-        denominator <<= 32;
-        _collateralIn = _collateralIn.mulDivUp(uint256(assetOut) * cp.z, denominator);
-        _collateralIn += zIncrease;
-        collateralIn = _collateralIn.toUint112();
     }
 }

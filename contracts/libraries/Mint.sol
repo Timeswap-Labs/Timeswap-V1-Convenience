@@ -253,7 +253,7 @@ library Mint {
         (uint112 yIncrease, uint112 zIncrease) = MintMath.givenNew(
             params.maturity,
             params.assetIn,
-            params.debtOut,
+            params.debtIn,
             params.collateralIn
         );
 
@@ -341,8 +341,8 @@ library Mint {
 
         (liquidityOut, id, dueOut) = pair.mint(
             params.maturity,
-            params.liquidityTo,
-            params.dueTo,
+            address(native.liquidity),
+            address(native.collateralizedDebt),
             params.xIncrease,
             params.yIncrease,
             params.zIncrease,
