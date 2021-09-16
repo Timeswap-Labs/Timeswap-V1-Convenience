@@ -1,5 +1,5 @@
 {
-  "version": "1.0.14",
+  "version": "1.0.15",
   "name": "@timeswap-labs/timeswap-v1-convenience",
   "files": [
     "contracts/interfaces",
@@ -45,8 +45,7 @@
     "mocha": "^9.0.3",
     "ts-node": "^10.0.0",
     "typechain": "^5.0.0",
-    "typescript": "^4.3.4",
-    "@timeswap-labs/timeswap-v1-core": "1.0.9"
+    "typescript": "^4.3.4"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
