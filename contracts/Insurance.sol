@@ -44,7 +44,7 @@ contract Insurance is IClaim, ERC20Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) {
+    ) ERC20Permit("Timeswap Insurance") {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;

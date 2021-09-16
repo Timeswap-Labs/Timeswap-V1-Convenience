@@ -67,7 +67,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) {
+    ) ERC721Permit("Timeswap Collateralized Debt"){
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
@@ -97,4 +97,5 @@ contract CollateralizedDebt is IDue, ERC721Permit {
 
         convenience.collateralizedDebtCallback(pair, maturity, assetIn, data);
     }
+
 }

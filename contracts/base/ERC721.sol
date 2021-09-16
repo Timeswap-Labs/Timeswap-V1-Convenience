@@ -78,7 +78,7 @@ abstract contract ERC721 is IERC721Extended {
         require(_checkOnERC721Received(from, to, id, data), 'ERC721 :: _safeTransfer : Not Safe Transfer');
     }
 
-    function _approve(address to, uint256 id) private {
+    function _approve(address to, uint256 id) internal {
         getApproved[id] = to;
 
         emit Approval(ownerOf[id], to, id);
