@@ -10,7 +10,7 @@ import {IERC721Permit} from '../interfaces/IERC721Permit.sol';
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-abstract contract ERC721Permit is ERC721, IERC721Permit, EIP712 {
+abstract contract ERC721Permit is  IERC721Permit, ERC721, EIP712 {
     using Counters for Counters.Counter;
     
     mapping(uint256 => Counters.Counter) private _nonces;
