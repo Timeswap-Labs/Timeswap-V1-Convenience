@@ -43,7 +43,7 @@ library NFTTokenURIScaffold {
         return (constructTokenURI(name, description, uri));
     }
 
-    function constructTokenURI (string memory name, string memory description, string memory imageSVG) internal view returns (string memory) {
+    function constructTokenURI (string memory name, string memory description, string memory imageSVG) internal pure returns (string memory) {
 
         return
             string(
@@ -82,21 +82,23 @@ library NFTTokenURIScaffold {
         /// TODO - finalize SVG
         NFTSVG.SVGParams memory params = NFTSVG.SVGParams({
             tokenId: tokenId,
-            assetSymbol: parseSymbol(IERC20(asset).safeSymbol()),
-            assetAmount: assetAmount,
-            assetAddress: addressToString(asset),
-            collateralSymbol: parseSymbol(IERC20(collateral).safeSymbol()),
-            collateralAmount: collateralAmount,
-            collateralAddress: addressToString(collateral),
+            svgTitle: string(abi.encodePacked(parseSymbol(IERC20(asset).safeSymbol()), '/', parseSymbol(IERC20(collateral).safeSymbol()))),
+            assetInfo: string(abi.encodePacked(parseSymbol(IERC20(asset).safeSymbol()), ': ', addressToString(asset))),
+            collateralInfo: string(abi.encodePacked(parseSymbol(IERC20(collateral).safeSymbol()), ': ', addressToString(collateral))),
+            debtRequired: string(abi.encodePacked(assetAmount, ' ', parseSymbol(IERC20(asset).safeSymbol()))),
+            collateralLocked: string(abi.encodePacked(collateralAmount, ' ', parseSymbol(IERC20(collateral).safeSymbol()))),
             maturityDate: maturityDate,
             isMatured: block.timestamp > maturityTimestamp,
             maturityTimestampString: maturityTimestamp.toString(),
-            tokenColors: 'rando'
-            // token0LightColor: string(abi.encodePacked('.C{fill:#', getLightColor(asset), '}')),
-            // token0DarkColor: string(abi.encodePacked('.D{fill:#', getDarkColor(asset), '}')),
-            // token1LightColor: string(abi.encodePacked('.E{fill:#', getLightColor(collateral), '}')),
-            // token1DarkColor: string(abi.encodePacked('.F{fill:#', getDarkColor(collateral), '}'))
+            tokenColors: getSVGCData(asset, collateral)
+
         });
+
+        // string memory svgTitle = string(abi.encodePacked(parseSymbol(IERC20(asset).safeSymbol()), '/', parseSymbol(IERC20(collateral).safeSymbol())));
+        // string memory assetInfo = string(abi.encodePacked(parseSymbol(IERC20(asset).safeSymbol()), ': ', addressToString(asset)));
+        // string memory collateralInfo = string(abi.encodePacked(parseSymbol(IERC20(collateral).safeSymbol()), ': ', addressToString(collateral)));
+        // string memory debtRequired = string(abi.encodePacked(assetAmount, ' ', parseSymbol(IERC20(asset).safeSymbol())));
+        // string memory collateralLocked = string(abi.encodePacked(collateralAmount, ' ', parseSymbol(IERC20(collateral).safeSymbol())));
 
         return NFTSVG.constructSVG(params);
     }
@@ -144,12 +146,12 @@ library NFTTokenURIScaffold {
         return symbol;
     }
 
-    function getMonthString(uint256 _month) public view returns (string memory) {
+    function getMonthString(uint256 _month) public pure returns (string memory) {
         string[12] memory months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         return months[_month];
     }
 
-    function getReadableDateString(uint256 timestamp) public view returns (string memory) {
+    function getReadableDateString(uint256 timestamp) public pure returns (string memory) {
         
         (uint year, uint month, uint day, uint hour, uint minute, uint second) = DateTime.timestampToDateTime(timestamp);
         
@@ -172,7 +174,7 @@ library NFTTokenURIScaffold {
 
 
 
-    function getLightColor(address token) public view returns (string memory) {
+    function getLightColor(address token) public pure returns (string memory) {
         string[15] memory lightColors = [
             'F7BAF7',
             'F7C8BA',
@@ -194,7 +196,7 @@ library NFTTokenURIScaffold {
         return(lightColors[tokenValue]);
     }
 
-    function getDarkColor(address token) public view returns (string memory) {
+    function getDarkColor(address token) public pure returns (string memory) {
 
         string[15] memory darkColors = [
             'DF51EC',
@@ -215,6 +217,15 @@ library NFTTokenURIScaffold {
         ];
         uint160 tokenValue = uint160(token) % 15;
         return(darkColors[tokenValue]);
+    }
+
+    function getSVGCData(address asset, address collateral) public pure returns (string memory) {
+            string memory token0LightColor = string(abi.encodePacked('.C{fill:#', getLightColor(asset), '}'));
+            string memory token0DarkColor = string(abi.encodePacked('.D{fill:#', getDarkColor(asset), '}'));
+            string memory token1LightColor = string(abi.encodePacked('.E{fill:#', getLightColor(collateral), '}'));
+            string memory token1DarkColor = string(abi.encodePacked('.F{fill:#', getDarkColor(collateral), '}'));
+
+            return string(abi.encodePacked(token0LightColor, token0DarkColor, token1LightColor, token1DarkColor));
     }
 
 
