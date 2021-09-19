@@ -46,11 +46,6 @@ contract CollateralizedDebt is IDue {
     }
 
     function tokenURI(uint256 id) external view override returns (string memory) {
-        /// Token SVG takes - 
-        /// - asset symbol, asset address, asset amount
-        /// - collateral symbol, collateral address, collateral amount
-        /// - maturity
-        /// - id
         require(ownerOf[id] != address(0), 'ERC721 :: tokenURI : Doesnt exist');
         return NFTTokenURIScaffold.tokenURI(id, pair, convenience, dueOf(id), maturity);
     }
