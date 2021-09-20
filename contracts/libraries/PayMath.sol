@@ -14,7 +14,7 @@ library PayMath {
         for (uint256 i; i < ids.length; i++) {
             IPair.Due memory due = collateralizedDebt.dueOf(ids[i]);
 
-            if (assetsIn[i] > due.debt) assetsIn[i] = due.debt;
+            if (assetsIn[i] >= due.debt) assetsIn[i] = due.debt;
             if (msg.sender == collateralizedDebt.ownerOf(ids[i]))
                 collateralsOut[i] = (assetsIn[i] * due.collateral) / due.debt;
         }
