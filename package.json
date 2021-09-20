@@ -1,5 +1,5 @@
 {
-  "version": "1.0.16",
+  "version": "1.0.17",
   "name": "@timeswap-labs/timeswap-v1-convenience",
   "files": [
     "contracts/interfaces",
@@ -63,6 +63,6 @@
     "registry": "https://npm.pkg.github.com"
   },
   "volta": {
-    "node": "14.17.6"
+    "node": "16.9.1"
   }
 }
