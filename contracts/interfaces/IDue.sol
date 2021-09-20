@@ -25,7 +25,7 @@ interface IDue is IERC721Permit, ITimeswapPayCallback {
     function burn(
         address to,
         uint256[] memory ids,
-        uint112[] memory debtIn,
+        uint112[] memory assetsIn,
         uint112[] memory collateralsOut,
         bytes calldata data
     ) external returns (uint128 assetIn, uint128 collateralOut);

@@ -80,11 +80,11 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     function burn(
         address to,
         uint256[] memory ids,
-        uint112[] memory debtsIn,
+        uint112[] memory assetsIn,
         uint112[] memory collateralsOut,
         bytes calldata data
     ) external override onlyConvenience returns (uint128 assetIn, uint128 collateralOut) {
-        (assetIn, collateralOut) = pair.pay(maturity, to, address(this), ids, debtsIn, collateralsOut, data);
+        (assetIn, collateralOut) = pair.pay(maturity, to, address(this), ids, assetsIn, collateralsOut, data);
     }
 
     function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
