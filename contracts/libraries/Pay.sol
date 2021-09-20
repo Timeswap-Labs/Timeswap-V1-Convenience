@@ -2,11 +2,10 @@
 pragma solidity =0.8.1;
 
 import {IConvenience} from '../interfaces/IConvenience.sol';
-import {IFactory} from '../interfaces/IFactory.sol';
+import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from '../interfaces/IWETH.sol';
-import {IERC20} from '../interfaces/IERC20.sol';
-import {IERC721} from '../interfaces/IERC721.sol';
-import {IPair} from '../interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IPay} from '../interfaces/IPay.sol';
 import {IDue} from '../interfaces/IDue.sol';
 import {PayMath} from './PayMath.sol';
@@ -109,12 +108,11 @@ library Pay {
         );
 
         (assetIn, collateralOut) = collateralizedDebt.burn(
-            msg.sender,
             params.collateralTo,
             params.ids,
             assetsIn,
             collateralsOut,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
+            bytes(abi.encode(params.asset, params.collateral, params.from))
         );
     }
 }

@@ -2,29 +2,25 @@
 pragma solidity =0.8.1;
 
 import 'base64-sol/base64.sol';
-import {IPair} from '../interfaces/IPair.sol';
-import {IERC20} from '../interfaces/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {IConvenience} from '../interfaces/IConvenience.sol';
 import {SafeMetadata} from './SafeMetadata.sol';
-import {String} from './String.sol';
+import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 import {NFTSVG} from './NFTSVG.sol';
 import {DateTime} from './DateTime.sol';
 
-
 library NFTTokenURIScaffold {
-
     using SafeMetadata for IERC20;
-    using String for uint256;
+    using Strings for uint256;
 
-    function tokenURI (
-        uint256 id, 
-        IPair pair, 
+    function tokenURI(
+        uint256 id,
+        IPair pair,
         IConvenience convenience,
         IPair.Due memory due,
-        uint maturity
+        uint256 maturity
     ) public view returns (string memory) {
-
-        
 
         string memory uri = constructTokenSVG(
             address(pair.asset()),
@@ -35,15 +31,22 @@ library NFTTokenURIScaffold {
             getReadableDateString(maturity),
             maturity
         );
-        
-        string memory description = "Timelord has blessed us with this holy NFT";
+
+
+        string memory description = 'Timelord has blessed us with this holy NFT';
+
 
         string memory name = "Timeswap Collateralized Debt NFT";
 
         return (constructTokenURI(name, description, uri));
     }
 
-    function constructTokenURI (string memory name, string memory description, string memory imageSVG) internal pure returns (string memory) {
+
+    function constructTokenURI(
+        string memory name,
+        string memory description,
+        string memory imageSVG
+    ) internal pure returns (string memory) {
 
         return
             string(
@@ -68,6 +71,7 @@ library NFTTokenURIScaffold {
     }
 
 
+
     function constructTokenSVG (
         address asset,
         address collateral,
@@ -79,6 +83,7 @@ library NFTTokenURIScaffold {
     ) internal view returns (string memory) {
 
        
+
         /// TODO - finalize SVG
         NFTSVG.SVGParams memory params = NFTSVG.SVGParams({
             tokenId: tokenId,
@@ -103,10 +108,11 @@ library NFTTokenURIScaffold {
         return NFTSVG.constructSVG(params);
     }
 
-    function weiToPrecisionString (uint256 weiAmt, uint256 decimal) public pure returns (string memory) {
+    function weiToPrecisionString(uint256 weiAmt, uint256 decimal) public pure returns (string memory) {
         if (decimal == 0) {
             return string(abi.encodePacked(weiAmt.toString(), '.00'));
         }
+
         uint256 significantDigits = weiAmt/(10 ** decimal);
         if (significantDigits > 10 ** 13) {
             /// 13 is the max significant digits able to fit on SVG
@@ -114,22 +120,24 @@ library NFTTokenURIScaffold {
         }
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
         precisionDigits = precisionDigits/(10 ** (decimal - 2));
+
         return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigits.toString()));
     }
 
-    function addressToString(address _addr) public pure returns(string memory) {
+    function addressToString(address _addr) public pure returns (string memory) {
         bytes memory data = abi.encodePacked(_addr);
-        bytes memory alphabet = "0123456789abcdef";
+        bytes memory alphabet = '0123456789abcdef';
 
         bytes memory str = new bytes(2 + data.length * 2);
-        str[0] = "0";
-        str[1] = "x";
-        for (uint i = 0; i < data.length; i++) {
-            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
-            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+        str[0] = '0';
+        str[1] = 'x';
+        for (uint256 i = 0; i < data.length; i++) {
+            str[2 + i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
+            str[3 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
         }
         return string(str);
     }
+
 
     function getSlice(uint256 begin, uint256 end, string memory text) public pure returns (string memory) {
         bytes memory a = new bytes(end-begin+1);
@@ -230,3 +238,4 @@ library NFTTokenURIScaffold {
 
 
 }
+

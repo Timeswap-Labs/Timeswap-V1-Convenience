@@ -2,7 +2,7 @@
 pragma solidity =0.8.1;
 
 import {IConvenience} from '../interfaces/IConvenience.sol';
-import {IPair} from '../interfaces/IPair.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {Liquidity} from '../Liquidity.sol';
 import {Bond} from '../Bond.sol';
 import {Insurance} from '../Insurance.sol';

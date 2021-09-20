@@ -2,10 +2,10 @@
 pragma solidity =0.8.1;
 
 import {IConvenience} from '../interfaces/IConvenience.sol';
-import {IFactory} from '../interfaces/IFactory.sol';
+import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from '../interfaces/IWETH.sol';
-import {IERC20} from '../interfaces/IERC20.sol';
-import {IPair} from '../interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IMint} from '../interfaces/IMint.sol';
 import {MintMath} from './MintMath.sol';
 import {Deploy} from './Deploy.sol';
@@ -42,7 +42,7 @@ library Mint {
                 params.liquidityTo,
                 params.dueTo,
                 params.assetIn,
-                params.debtOut,
+                params.debtIn,
                 params.collateralIn,
                 params.deadline
             )
@@ -78,7 +78,7 @@ library Mint {
                 params.liquidityTo,
                 params.dueTo,
                 assetIn,
-                params.debtOut,
+                params.debtIn,
                 params.collateralIn,
                 params.deadline
             )
@@ -114,7 +114,7 @@ library Mint {
                 params.liquidityTo,
                 params.dueTo,
                 params.assetIn,
-                params.debtOut,
+                params.debtIn,
                 collateralIn,
                 params.deadline
             )
@@ -250,10 +250,10 @@ library Mint {
 
         require(pair.totalLiquidity(params.maturity) == 0, 'Forbidden');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = MintMath.givenNew(
+        (uint112 yIncrease, uint112 zIncrease) = MintMath.givenNew(
             params.maturity,
             params.assetIn,
-            params.debtOut,
+            params.debtIn,
             params.collateralIn
         );
 
@@ -270,8 +270,8 @@ library Mint {
                 params.liquidityTo,
                 params.dueTo,
                 params.assetIn,
-                interestIncrease,
-                cdpIncrease,
+                yIncrease,
+                zIncrease,
                 params.deadline
             )
         );
@@ -294,7 +294,7 @@ library Mint {
         require(address(pair) != address(0), 'Zero');
         require(pair.totalLiquidity(params.maturity) > 0, 'Forbidden');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenAdd(params.maturity, params.assetIn);
+        (uint112 yIncrease, uint112 zIncrease) = pair.givenAdd(params.maturity, params.assetIn);
 
         (liquidityOut, id, dueOut) = _mint(
             natives,
@@ -309,8 +309,8 @@ library Mint {
                 params.liquidityTo,
                 params.dueTo,
                 params.assetIn,
-                interestIncrease,
-                cdpIncrease,
+                yIncrease,
+                zIncrease,
                 params.deadline
             )
         );
@@ -341,12 +341,12 @@ library Mint {
 
         (liquidityOut, id, dueOut) = pair.mint(
             params.maturity,
-            params.liquidityTo,
-            params.dueTo,
-            params.assetIn,
-            params.interestIncrease,
-            params.cdpIncrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.assetFrom, params.collateralFrom))
+            address(native.liquidity),
+            address(native.collateralizedDebt),
+            params.xIncrease,
+            params.yIncrease,
+            params.zIncrease,
+            bytes(abi.encode(params.asset, params.collateral, params.assetFrom, params.collateralFrom))
         );
 
         native.liquidity.mint(params.liquidityTo, liquidityOut);

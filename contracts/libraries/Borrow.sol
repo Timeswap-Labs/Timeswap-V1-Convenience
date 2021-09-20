@@ -2,13 +2,11 @@
 pragma solidity =0.8.1;
 
 import {IConvenience} from '../interfaces/IConvenience.sol';
-import {IFactory} from '../interfaces/IFactory.sol';
+import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IWETH} from '../interfaces/IWETH.sol';
-import {IERC20} from '../interfaces/IERC20.sol';
-import {IERC721} from '../interfaces/IERC721.sol';
-import {IPair} from '../interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IBorrow} from '../interfaces/IBorrow.sol';
-import {IDue} from '../interfaces/IDue.sol';
 import {BorrowMath} from './BorrowMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
@@ -282,11 +280,7 @@ library Borrow {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenDebt(
-            params.maturity,
-            params.assetOut,
-            params.debtIn
-        );
+        (uint112 yIncrease, uint112 zIncrease) = pair.givenDebt(params.maturity, params.assetOut, params.debtIn);
 
         (id, dueOut) = _borrow(
             natives,
@@ -300,8 +294,8 @@ library Borrow {
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
-                interestIncrease,
-                cdpIncrease,
+                yIncrease,
+                zIncrease,
                 params.deadline
             )
         );
@@ -318,7 +312,7 @@ library Borrow {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenCollateral(
+        (uint112 yIncrease, uint112 zIncrease) = pair.givenCollateral(
             params.maturity,
             params.assetOut,
             params.collateralIn
@@ -336,8 +330,8 @@ library Borrow {
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
-                interestIncrease,
-                cdpIncrease,
+                yIncrease,
+                zIncrease,
                 params.deadline
             )
         );
@@ -356,11 +350,7 @@ library Borrow {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
 
-        (uint112 interestIncrease, uint112 cdpIncrease) = pair.givenPercent(
-            params.maturity,
-            params.assetOut,
-            params.percent
-        );
+        (uint112 yIncrease, uint112 zIncrease) = pair.givenPercent(params.maturity, params.assetOut, params.percent);
 
         (id, dueOut) = _borrow(
             natives,
@@ -374,8 +364,8 @@ library Borrow {
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
-                interestIncrease,
-                cdpIncrease,
+                yIncrease,
+                zIncrease,
                 params.deadline
             )
         );
@@ -400,10 +390,10 @@ library Borrow {
             params.maturity,
             params.assetTo,
             address(native.collateralizedDebt),
-            params.assetOut,
-            params.interestIncrease,
-            params.cdpIncrease,
-            bytes(abi.encodePacked(params.asset, params.collateral, params.from))
+            params.xDecrease,
+            params.yIncrease,
+            params.zIncrease,
+            bytes(abi.encode(params.asset, params.collateral, params.from))
         );
 
         native.collateralizedDebt.mint(params.dueTo, id);
