@@ -70,7 +70,7 @@ library Withdraw {
         require(address(pair) != address(0), 'Zero');
 
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
-        require(address(native.liquidity) == address(0), 'Forbidden');
+        require(address(native.liquidity) != address(0), 'Forbidden');
 
         if (params.claimsIn.bond > 0)
             tokensOut.asset = native.bond.burn(msg.sender, params.assetTo, params.claimsIn.bond);

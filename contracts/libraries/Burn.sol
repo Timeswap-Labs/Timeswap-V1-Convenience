@@ -77,7 +77,7 @@ library Burn {
         require(address(pair) != address(0), 'Zero');
 
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
-        require(address(native.liquidity) == address(0), 'Forbidden');
+        require(address(native.liquidity) != address(0), 'Forbidden');
 
         tokensOut = native.liquidity.burn(msg.sender, params.assetTo, params.collateralTo, params.liquidityIn);
     }
