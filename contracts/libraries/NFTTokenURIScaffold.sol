@@ -33,7 +33,7 @@ library NFTTokenURIScaffold {
         );
 
 
-        string memory description = 'Timelord has blessed us with this holy NFT';
+        string memory description = string(abi.encodePacked('This collateralized debt NFT represents a debt with ', weiToPrecisionString(due.debt, pair.asset().safeDecimals()), ' ', pair.asset().safeSymbol(), ' borrowed against ', weiToPrecisionString(due.collateral, pair.collateral().safeDecimals()), ' ', pair.collateral().safeSymbol(), '. This position will expire on ', maturity.toString(), ' unix epoch time'));
 
 
         string memory name = "Timeswap Collateralized Debt NFT";
