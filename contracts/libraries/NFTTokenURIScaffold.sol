@@ -33,7 +33,7 @@ library NFTTokenURIScaffold {
         );
 
 
-        string memory description = string(abi.encodePacked('This collateralized debt NFT represents a debt with ', weiToPrecisionString(due.debt, pair.asset().safeDecimals()), ' ', pair.asset().safeSymbol(), ' borrowed against ', weiToPrecisionString(due.collateral, pair.collateral().safeDecimals()), ' ', pair.collateral().safeSymbol(), '. This position will expire on ', maturity.toString(), ' unix epoch time'));
+        string memory description = string(abi.encodePacked('This collateralized debt NFT represents a debt with ', weiToPrecisionLongString(due.debt, pair.asset().safeDecimals()), ' ', pair.asset().safeSymbol(), ' borrowed against ', weiToPrecisionLongString(due.collateral, pair.collateral().safeDecimals()), ' ', pair.collateral().safeSymbol(), '. This position will expire on ', maturity.toString(), ' unix epoch time'));
 
 
         string memory name = "Timeswap Collateralized Debt NFT";
@@ -108,6 +108,18 @@ library NFTTokenURIScaffold {
         return NFTSVG.constructSVG(params);
     }
 
+    function weiToPrecisionLongString(uint256 weiAmt, uint256 decimal) public pure returns (string memory) {
+        if (decimal == 0) {
+            return string(abi.encodePacked(weiAmt.toString(), '.00'));
+        }
+
+        uint256 significantDigits = weiAmt/(10 ** decimal);
+        uint256 precisionDigits = weiAmt % (10 ** (decimal));
+        precisionDigits = precisionDigits/(10 ** (decimal - 2));
+
+        return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigits.toString()));
+    }
+
     function weiToPrecisionString(uint256 weiAmt, uint256 decimal) public pure returns (string memory) {
         if (decimal == 0) {
             return string(abi.encodePacked(weiAmt.toString(), '.00'));
@@ -115,8 +127,10 @@ library NFTTokenURIScaffold {
 
         uint256 significantDigits = weiAmt/(10 ** decimal);
         if (significantDigits > 10 ** 13) {
-            /// 13 is the max significant digits able to fit on SVG
-            /// TODO implement ... logic
+            string memory weiAmtString = weiAmt.toString();
+            uint len = bytes(weiAmtString).length - 9;
+            weiAmt = weiAmt / (10 ** len);
+            return string(abi.encodePacked(weiAmt.toString(), '...'));
         }
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
         precisionDigits = precisionDigits/(10 ** (decimal - 2));
