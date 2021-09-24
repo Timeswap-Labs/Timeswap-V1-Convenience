@@ -43,7 +43,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
 
     function tokenURI(uint256 id) external view override returns (string memory) {
         require(ownerOf[id] != address(0), 'ERC721 :: tokenURI : Doesnt exist');
-        return NFTTokenURIScaffold.tokenURI(id, pair, convenience, dueOf(id), maturity);
+        return NFTTokenURIScaffold.tokenURI(id, pair, dueOf(id), maturity);
     }
 
     function assetDecimals() external view override returns (uint8) {

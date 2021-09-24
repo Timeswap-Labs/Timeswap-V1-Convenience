@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.8.1;
 
-import 'base64-sol/base64.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {IConvenience} from '../interfaces/IConvenience.sol';
 import {SafeMetadata} from './SafeMetadata.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
-import {NFTSVG} from './NFTSVG.sol';
 import {DateTime} from './DateTime.sol';
+import './Base64.sol';
+import {NFTSVG} from './NFTSVG.sol';
+
 
 library NFTTokenURIScaffold {
     using SafeMetadata for IERC20;
@@ -17,7 +17,6 @@ library NFTTokenURIScaffold {
     function tokenURI(
         uint256 id,
         IPair pair,
-        IConvenience convenience,
         IPair.Due memory due,
         uint256 maturity
     ) public view returns (string memory) {
@@ -33,10 +32,11 @@ library NFTTokenURIScaffold {
         );
 
 
-        string memory description = string(abi.encodePacked('This collateralized debt NFT represents a debt with ', weiToPrecisionLongString(due.debt, pair.asset().safeDecimals()), ' ', pair.asset().safeSymbol(), ' borrowed against ', weiToPrecisionLongString(due.collateral, pair.collateral().safeDecimals()), ' ', pair.collateral().safeSymbol(), '. This position will expire on ', maturity.toString(), ' unix epoch time'));
+        string memory description = string(abi.encodePacked('This collateralized debt position represents a debt of ', weiToPrecisionString(due.debt, pair.asset().safeDecimals()), ' ', pair.asset().safeSymbol(), ' borrowed against a collateral of ', weiToPrecisionString(due.collateral, pair.collateral().safeDecimals()), ' ', pair.collateral().safeSymbol(), '. This position will expire on ', maturity.toString(), ' unix epoch time.\\nThe owner of this NFT has the option to pay the debt before maturity time to claim the locked collateral. In case the owner choose to default on the debt payment, the collateral will be forfeited'));
+        description = string(abi.encodePacked(description, '\\n\\nAsset Address: ', addressToString(address(pair.asset())), '\\nCollateral Address: ', addressToString(address(pair.collateral())), '\\nDebt Required: ', weiToPrecisionLongString(due.debt, pair.asset().safeDecimals()), ' ', IERC20(pair.asset()).safeSymbol(), '\\nCollateral Locked: ', weiToPrecisionLongString(due.collateral, pair.collateral().safeDecimals()), ' ', IERC20(pair.collateral()).safeSymbol()));
 
 
-        string memory name = "Timeswap Collateralized Debt NFT";
+        string memory name = "Timeswap Collateralized Debt";
 
         return (constructTokenURI(name, description, uri));
     }
@@ -99,12 +99,6 @@ library NFTTokenURIScaffold {
 
         });
 
-        // string memory svgTitle = string(abi.encodePacked(parseSymbol(IERC20(asset).safeSymbol()), '/', parseSymbol(IERC20(collateral).safeSymbol())));
-        // string memory assetInfo = string(abi.encodePacked(parseSymbol(IERC20(asset).safeSymbol()), ': ', addressToString(asset)));
-        // string memory collateralInfo = string(abi.encodePacked(parseSymbol(IERC20(collateral).safeSymbol()), ': ', addressToString(collateral)));
-        // string memory debtRequired = string(abi.encodePacked(assetAmount, ' ', parseSymbol(IERC20(asset).safeSymbol())));
-        // string memory collateralLocked = string(abi.encodePacked(collateralAmount, ' ', parseSymbol(IERC20(collateral).safeSymbol())));
-
         return NFTSVG.constructSVG(params);
     }
 
@@ -115,7 +109,7 @@ library NFTTokenURIScaffold {
 
         uint256 significantDigits = weiAmt/(10 ** decimal);
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
-        precisionDigits = precisionDigits/(10 ** (decimal - 2));
+        // precisionDigits = precisionDigits/(10 ** (decimal - 2));
 
         return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigits.toString()));
     }
@@ -126,14 +120,14 @@ library NFTTokenURIScaffold {
         }
 
         uint256 significantDigits = weiAmt/(10 ** decimal);
-        if (significantDigits > 10 ** 13) {
+        if (significantDigits > 10 ** 9) {
             string memory weiAmtString = weiAmt.toString();
             uint len = bytes(weiAmtString).length - 9;
             weiAmt = weiAmt / (10 ** len);
             return string(abi.encodePacked(weiAmt.toString(), '...'));
         }
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
-        precisionDigits = precisionDigits/(10 ** (decimal - 2));
+        precisionDigits = precisionDigits/(10 ** (decimal - 4));
 
         return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigits.toString()));
     }
@@ -184,17 +178,22 @@ library NFTTokenURIScaffold {
             ' ',
             year.toString(),
             ', ',
-            hour.toString(),
+            padWithZero(hour),
             ':',
-            minute.toString(),
+            padWithZero(minute),
             ':',
-            second.toString(),
+            padWithZero(second),
             ' UTC'
         ));
         return result;
     }
 
-
+    function padWithZero(uint value) public pure returns (string memory) {
+        if (value < 10) {
+            return string(abi.encodePacked('0', value.toString()));
+        }
+        return value.toString();
+    }
 
     function getLightColor(address token) public pure returns (string memory) {
         string[15] memory lightColors = [
