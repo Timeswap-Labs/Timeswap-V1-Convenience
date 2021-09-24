@@ -1,5 +1,5 @@
 {
-  "version": "1.0.23",
+  "version": "1.0.25",
   "name": "@timeswap-labs/timeswap-v1-convenience",
   "files": [
     "contracts/interfaces",
