@@ -2,6 +2,7 @@
 import { run, ethers } from "hardhat";
 import type { TestToken } from "../../typechain/TestToken";
 import type {TimeswapConvenience as ConvenienceContract} from "../../typechain/TimeswapConvenience"
+import type {TimeswapFactory as FactoryContract} from '../../typechain/TimeswapFactory'
 import { Convenience } from "./Convenience";
 // import { experimentalAddHardhatNetworkMessageTraceHook } from "hardhat/config";
 
@@ -21,7 +22,6 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
   const nftTokenURIContract = await nftTokenURI.deploy();
   await nftTokenURIContract.deployTransaction.wait();
 
-  console.log("NFT Token URI Contract : ", nftTokenURIContract.address);
 
   const deployLibraryContractAddresses: string[] = [];
 
@@ -78,7 +78,7 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
     },
   });
   const WETH9 = await ethers.getContractFactory("WETH9");
-  const factoryContract = await Factory.deploy(accounts[0].address, 100, 50);
+  const factoryContract = (await Factory.deploy(accounts[0].address, 100, 50)) as FactoryContract;
 
   await factoryContract.deployTransaction.wait();
   const wethContract = WETH9.attach(
@@ -90,14 +90,12 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
     wethContract.address
   )) as ConvenienceContract
   await convenienceContract.deployTransaction.wait();
-  console.log("Convenience deployed");
   const deployedContracts = {
-    Factory: factoryContract.address,
-    Convenience : convenienceContract.address
+    factory: factoryContract,
+    convenience : convenienceContract
   }
 
-  console.log(deployedContracts);
-  return convenienceContract
+  return deployedContracts
 
 }
 

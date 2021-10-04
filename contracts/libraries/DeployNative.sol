@@ -7,6 +7,7 @@ import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Deploy} from './Deploy.sol';
 import {IDeployNative} from '../interfaces/IDeployNative.sol';
+import 'hardhat/console.sol';
 
 library DeployNative {
     using Deploy for IConvenience.Native;

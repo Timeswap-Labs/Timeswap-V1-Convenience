@@ -10,6 +10,7 @@ import {ILend} from '../interfaces/ILend.sol';
 import {LendMath} from './LendMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
+import 'hardhat/console.sol';
 
 library Lend {
     using LendMath for IPair;
@@ -263,9 +264,9 @@ library Lend {
     ) private returns (IPair.Claims memory claimsOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'Zero');
-
+        console.log(11);
         (uint112 yDecrease, uint112 zDecrease) = pair.givenBond(params.maturity, params.assetIn, params.bondOut);
-
+        console.log(112);
         claimsOut = _lend(
             natives,
             convenience,
@@ -365,11 +366,11 @@ library Lend {
         ILend._Lend memory params
     ) private returns (IPair.Claims memory claimsOut) {
         require(params.deadline >= block.timestamp, 'Expired');
-
+        console.log('1');
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
-
+        console.log('hey');
         claimsOut = pair.lend(
             params.maturity,
             address(native.bond),

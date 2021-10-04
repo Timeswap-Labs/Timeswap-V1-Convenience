@@ -11,6 +11,7 @@ import {MintMath} from './MintMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
+import 'hardhat/console.sol';
 
 library Mint {
     using MintMath for IPair;
@@ -249,14 +250,12 @@ library Mint {
         if (address(pair) == address(0)) pair = factory.createPair(params.asset, params.collateral);
 
         require(pair.totalLiquidity(params.maturity) == 0, 'Forbidden');
-
         (uint112 yIncrease, uint112 zIncrease) = MintMath.givenNew(
             params.maturity,
             params.assetIn,
             params.debtIn,
             params.collateralIn
         );
-
         (liquidityOut, id, dueOut) = _mint(
             natives,
             convenience,
@@ -332,13 +331,12 @@ library Mint {
             uint256 id,
             IPair.Due memory dueOut
         )
-    {
+    {   
         require(params.deadline >= block.timestamp, 'Expired');
-
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
-        if (address(native.liquidity) == address(0))
+        if (address(native.liquidity) == address(0)){
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
-
+        }
         (liquidityOut, id, dueOut) = pair.mint(
             params.maturity,
             address(native.liquidity),
@@ -348,7 +346,6 @@ library Mint {
             params.zIncrease,
             bytes(abi.encode(params.asset, params.collateral, params.assetFrom, params.collateralFrom))
         );
-
         native.liquidity.mint(params.liquidityTo, liquidityOut);
         native.collateralizedDebt.mint(params.dueTo, id);
     }
