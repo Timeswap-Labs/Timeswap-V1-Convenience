@@ -32,6 +32,36 @@ export async function getTimestamp(blockHash: string): Promise<bigint> {
   const block = await getBlock(blockHash)
   return BigInt(block.timestamp)
 }
+export function mulDiv(
+  a: bigint,
+  b: bigint,
+  denominator: bigint
+): bigint {
+  let z = a * b;
+  z = z / denominator;
+  return z;
+}
+
+export function mulDivUp(
+  a: bigint,
+  b: bigint,
+  denominator: bigint
+) : bigint {
+  let z = mulDiv(a, b, denominator);
+  let mulmod = (a * b) % denominator;
+  if (mulmod > 0) z++;
+  return z;
+}
+export function min(x: bigint, y: bigint, z: bigint): bigint {
+  if (x <= y && x <= z) {
+    return x;
+  } else if (y <= x && y <= z) {
+    return y;
+  } else {
+    return z;
+  }
+}
+
 
 export default {
   now,
@@ -39,4 +69,7 @@ export default {
   getBlock,
   getTimestamp,
   setTime,
+  mulDiv,
+  min,
+  mulDivUp
 }
