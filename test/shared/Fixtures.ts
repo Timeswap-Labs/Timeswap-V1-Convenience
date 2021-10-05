@@ -39,6 +39,7 @@ export async function newLiquidityFixture(fixture: Fixture, signer: SignerWithAd
     newLiquidityParams.debtIn,
     newLiquidityParams.collateralIn,
   )
+  await txn.wait()
 
   
   return {convenience, assetToken, collateralToken, maturity}
