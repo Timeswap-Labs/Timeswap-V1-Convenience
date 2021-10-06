@@ -46,20 +46,25 @@ describe('New Liquidity', () => {
     delState: { x: bigint; y: bigint; z: bigint },
     currentTime: bigint
   ) => {
-    console.log('Time from js ', currentTime)
+    // console.log('ts state',state);
     const initialTotalLiquidity = state.x << 56n
-    console.log('ts total liquidity :', initialTotalLiquidity)
-    console.log('ts muldiv 1 :', mulDiv(initialTotalLiquidity, delState.x, state.x))
-    console.log('ts muldiv 2 :', mulDiv(initialTotalLiquidity, delState.y, state.y))
-    console.log('ts muldiv :', delState.y, state.y)
-    console.log('ts muldiv 3 :', mulDiv(initialTotalLiquidity, delState.z, state.z))
+    // console.log('ts total liquidity :', initialTotalLiquidity)
+    // console.log('ts muldiv 1 :', mulDiv(initialTotalLiquidity, delState.x, state.x))
+    // console.log('ts muldiv 2 :', mulDiv(initialTotalLiquidity, delState.y, state.y))
+    // console.log('ts muldiv :', delState.y, state.y)
+    // console.log('ts muldiv 3 :', mulDiv(initialTotalLiquidity, delState.z, state.z))
+    // console.log('state 1',state)
+    // console.log(currentTime)
     const totalLiquidity = min(
       mulDiv(initialTotalLiquidity, delState.x, state.x),
       mulDiv(initialTotalLiquidity, delState.y, state.y),
       mulDiv(initialTotalLiquidity, delState.z, state.z)
     )
-    console.log('ts liquidity total :', totalLiquidity)
-    return (totalLiquidity * 0x10000000000n) / ((maturity - currentTime) * 50n + 0x10000000000n)
+    // console.log('ts liquidity total  2:', totalLiquidity)
+    const liquidityOut =  (totalLiquidity * 0x10000000000n) / ((maturity - currentTime) * 50n + 0x10000000000n)
+    // console.log('ts liquidityOut:', liquidityOut)
+    return liquidityOut
+
   }
 
   const getDebtAddLiquidity = (
@@ -74,20 +79,21 @@ describe('New Liquidity', () => {
     maturity: bigint,
     currentTime: bigint
   ) => {
-    console.log('delState', delState)
+    // console.log('delState', delState)
     return mulDivUp((maturity - currentTime) * delState.y + (delState.x << 33n), delState.z, delState.x << 32n)
   }
 
   function filterSuccessNewLiquidity(newLiquidityParams: NewLiquidityParams, currentTime: bigint) {
+    if (newLiquidityParams.assetIn < 0 && (newLiquidityParams.debtIn -newLiquidityParams.assetIn) <=0) {
+      return false
+    }
     const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = getYandZIncreaseNewLiquidity(
       newLiquidityParams.assetIn,
       newLiquidityParams.debtIn,
       newLiquidityParams.collateralIn,
       currentTime
     )
-    if (newLiquidityParams.assetIn <= 0) {
-      return false
-    }
+
 
     if (
       !(
@@ -116,7 +122,9 @@ describe('New Liquidity', () => {
     ) {
       return false
     }
-
+    if (newLiquidityParams.assetIn < 0 && (newLiquidityParams.debtIn -newLiquidityParams.assetIn) <=0) {
+      return false
+    }
     const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = getYandZIncreaseNewLiquidity(
       newLiquidityParams.assetIn,
       newLiquidityParams.debtIn,
@@ -145,7 +153,7 @@ describe('New Liquidity', () => {
     const debt = getDebtAddLiquidity(delState, maturity, currentTimeAL)
     const collateral = getCollateralAddLiquidity(delState, maturity, currentTimeAL)
     const liquidity = liquidityCalculateAddLiquidity(state, delState, currentTimeAL)
-    console.log('ts liquidity out : ', liquidity)
+    // console.log('ts liquidity out : ', liquidity)
 
     if (
       addLiquidityParams.maxDebt < debt ||
@@ -183,15 +191,12 @@ describe('New Liquidity', () => {
           .noShrink(),
         async (data) => {
           console.log(data)
-          console.log('Inside the check ', currentTime, await now())
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
-            console.log('new time', (await now()) - currentTime)
             await setTime(Number(currentTime + 10000n))
             const addLiquidity = await addLiquidityFixture(newLiquidity, signers[0], data.addLiquidityParams)
-            console.log('add time', (await now()) - currentTime)
             return addLiquidity
           }
 
@@ -206,7 +211,7 @@ describe('New Liquidity', () => {
             data.newLiquidityParams.assetIn,
             data.newLiquidityParams.debtIn,
             data.newLiquidityParams.collateralIn,
-            currentTime
+            currentTime + 5_000n
           )
 
           const state = {
@@ -229,8 +234,8 @@ describe('New Liquidity', () => {
           }
           const liquidityBalanceAdd = liquidityCalculateAddLiquidity(state, delState, currentTime + 10_000n)
           const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
-          console.log(data)
-          console.log(liquidityBalance)
+          // console.log(data)
+          // console.log(liquidityBalance)
           // console.log((maturity - currentTime))
 
           // expect((await result.assetToken.balanceOf(signers[0].address)).toBigInt()).equalBigInt(
@@ -245,7 +250,7 @@ describe('New Liquidity', () => {
             ethers.provider
           )
           const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-          console.log(liquidityBalanceContract)
+          // console.log(liquidityBalanceContract)
           expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
         }
       )
