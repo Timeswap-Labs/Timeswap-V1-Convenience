@@ -1,11 +1,10 @@
 import { ethers, waffle } from 'hardhat'
 import { mulDivUp, now, shiftUp } from '../shared/Helper'
 import { expect } from '../shared/Expect'
-import { newLiquidityTests } from '../test-cases'
 import { newLiquidityFixture, constructorFixture, Fixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
-import { NewLiquidityParams } from '../test-cases/types'
+import { NewLiquidityParams, NewLiquidityParamsUint } from '../types'
 import { ERC20__factory, CollateralizedDebt__factory } from '../../typechain'
 import { Uint112, Uint256 } from '@timeswap-labs/timeswap-v1-sdk-core'
 import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
@@ -19,11 +18,7 @@ function check(num: Uint, bit: bigint) {
   return num.toBigInt() < 1n << bit
 }
 
-interface NLParams {
-  assetIn: Uint112
-  debtIn: Uint112
-  collateralIn: Uint112
-}
+
 
 const MAXUINT112: bigint = 2n ** 112n
 
@@ -37,7 +32,7 @@ describe('New Liquidity', () => {
     return constructor
   }
 
-  const verifyYAndZIncrease = ({ assetIn, debtIn, collateralIn }: NLParams, currentTime: bigint) => {
+  const verifyYAndZIncrease = ({ assetIn, debtIn, collateralIn }: NewLiquidityParamsUint, currentTime: bigint) => {
     // const ct = BigInt(Math.floor(Date.now() / 1000))
 
     const yIncrease = new Uint256(debtIn)
@@ -51,7 +46,7 @@ describe('New Liquidity', () => {
     return { yIncrease, zIncrease }
   }
 
-  function filterSuccessNewLiquidity(newLiquidityParams: NLParams, currentTime: bigint) {
+  function filterSuccessNewLiquidity(newLiquidityParams: NewLiquidityParamsUint, currentTime: bigint) {
     if (
       newLiquidityParams.assetIn.toBigInt() >= newLiquidityParams.debtIn.toBigInt() ||
       newLiquidityParams.assetIn.toBigInt() === 0n ||
@@ -83,7 +78,7 @@ describe('New Liquidity', () => {
       return ((assetIn << 56n) * 0x10000000000n) / ((maturity - newCurrentTime) * 50n + 0x10000000000n)
     }
 
-    const debtCollateralCalculate = ({ assetIn, debtIn, collateralIn }: NLParams, currentTime: bigint) => {
+    const debtCollateralCalculate = ({ assetIn, debtIn, collateralIn }: NewLiquidityParamsUint, currentTime: bigint) => {
       const yIncrease = new Uint112(
         new Uint256(debtIn)
           .sub(assetIn)

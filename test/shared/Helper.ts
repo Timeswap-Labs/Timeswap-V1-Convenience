@@ -32,52 +32,38 @@ export async function getTimestamp(blockHash: string): Promise<bigint> {
   const block = await getBlock(blockHash)
   return BigInt(block.timestamp)
 }
-export function mulDiv(
-  a: bigint,
-  b: bigint,
-  denominator: bigint
-): bigint {
-  let z = a * b;
-  z = z / denominator;
-  return z;
+export function mulDiv(a: bigint, b: bigint, denominator: bigint): bigint {
+  let z = a * b
+  z = z / denominator
+  return z
 }
 
-export function mulDivUp(
-  a: bigint,
-  b: bigint,
-  denominator: bigint
-) : bigint {
-  let z = mulDiv(a, b, denominator);
-  let mulmod = (a * b) % denominator;
-  if (mulmod > 0) z++;
-  return z;
+export function mulDivUp(a: bigint, b: bigint, denominator: bigint): bigint {
+  let z = mulDiv(a, b, denominator)
+  let mulmod = (a * b) % denominator
+  if (mulmod > 0) z++
+  return z
 }
 export function min(x: bigint, y: bigint, z: bigint): bigint {
   if (x <= y && x <= z) {
-    return x;
+    return x
   } else if (y <= x && y <= z) {
-    return y;
+    return y
   } else {
-    return z;
+    return z
   }
 }
 
-export function divUp(
-  x: bigint,
-  y: bigint,
-): bigint {
-  let z = x / y;
-  if (x % y > 0) z++;
-  return z;
+export function divUp(x: bigint, y: bigint): bigint {
+  let z = x / y
+  if (x % y > 0) z++
+  return z
 }
 
-export function shiftUp(
-  x: bigint,
-  y: bigint,
-): bigint {
-  let z = x >> y;
-  if (x != z << y) z++;
-  return z;
+export function shiftUp(x: bigint, y: bigint): bigint {
+  let z = x >> y
+  if (x != z << y) z++
+  return z
 }
 
 export default {
@@ -90,5 +76,5 @@ export default {
   min,
   mulDivUp,
   divUp,
-  shiftUp
+  shiftUp,
 }
