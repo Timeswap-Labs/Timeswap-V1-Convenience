@@ -187,10 +187,8 @@ describe('New Liquidity', () => {
               maxCollateral: fc.bigUintN(50),
             }),
           })
-          .filter((x) => filterSuccessAddLiquidity(x, currentTime + 5_000n, currentTime + 10_000n))
-          .noShrink(),
+          .filter((x) => filterSuccessAddLiquidity(x, currentTime + 5_000n, currentTime + 10_000n)),
         async (data) => {
-          console.log(data)
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
