@@ -13,12 +13,9 @@ const { loadFixture } = waffle
 let maturity = 0n
 let signers: SignerWithAddress[] = []
 
-const MAXUINT112:bigint = 2n**112n
+const MAXUINT112: bigint = 2n ** 112n
 
 describe('New Liquidity', () => {
-
-
-  
   async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 31536000n
     signers = await ethers.getSigners()
@@ -28,8 +25,6 @@ describe('New Liquidity', () => {
     return constructor
   }
 
-
-  
   const checkYAndZIncrease = (assetIn: bigint, debtIn: bigint, collateralIn: bigint, currentTime: bigint) => {
     // const ct = BigInt(Math.floor(Date.now() / 1000))
 
@@ -37,35 +32,39 @@ describe('New Liquidity', () => {
     const denominator = (maturity - currentTime) * yIncrease + (assetIn << 33n)
     const zIncrease = ((collateralIn * assetIn) << 32n) / denominator
 
-    return yIncrease > 0n && zIncrease > 0n && yIncrease <  MAXUINT112 && zIncrease < MAXUINT112
+    return yIncrease > 0n && zIncrease > 0n && yIncrease < MAXUINT112 && zIncrease < MAXUINT112
   }
-  function filterSucessNewLiquidity(newLiquidityParams: NewLiquidityParams, currentTime: bigint){
-    if(newLiquidityParams.assetIn <= 0){
+  function filterSuccessNewLiquidity(newLiquidityParams: NewLiquidityParams, currentTime: bigint) {
+    if (newLiquidityParams.assetIn <= 0) {
       return false
     }
-    if(!checkYAndZIncrease(newLiquidityParams.assetIn,newLiquidityParams.debtIn,newLiquidityParams.collateralIn,currentTime)){
+    if (
+      !checkYAndZIncrease(
+        newLiquidityParams.assetIn,
+        newLiquidityParams.debtIn,
+        newLiquidityParams.collateralIn,
+        currentTime
+      )
+    ) {
       return false
     }
     return true
   }
-  
 
   it('Succeeded', async () => {
     const { maturity } = await loadFixture(fixture)
     let currentTime = await now()
 
-
-    const liquidityCalculate = async (assetIn: bigint) => {
-      return ((assetIn << 56n) * 0x10000000000n) / ((maturity - (await now())) * 50n + 0x10000000000n)
+    const liquidityCalculate = (assetIn: bigint, newCurrentTime: bigint) => {
+      return ((assetIn << 56n) * 0x10000000000n) / ((maturity - newCurrentTime) * 50n + 0x10000000000n)
     }
 
     await fc.assert(
       fc.asyncProperty(
         fc
           .record({ assetIn: fc.bigUintN(112), debtIn: fc.bigUintN(112), collateralIn: fc.bigUintN(112) })
-          .filter((x) => filterSucessNewLiquidity(x,currentTime)),
+          .filter((x) => filterSuccessNewLiquidity(x, currentTime)),
         async (data) => {
-
           const success = async () => {
             const constructor = await loadFixture(fixture)
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data)
@@ -73,9 +72,9 @@ describe('New Liquidity', () => {
           }
 
           const result = await loadFixture(success)
-          // currentTime = await now()
-          const liquidityBalance = await liquidityCalculate(data.assetIn)
-          // console.log(data);
+          const newCurrentTime = await now()
+          const liquidityBalance = liquidityCalculate(data.assetIn, newCurrentTime)
+          console.log(data)
           // console.log(liquidityBalance)
           // console.log((maturity - currentTime))
 
@@ -86,12 +85,13 @@ describe('New Liquidity', () => {
           //   (1n << 150n) - data.collateralIn
           // )
           const liquidityToken = ERC20__factory.connect(
-            (await result.convenience.getNatives(result.assetToken.address,result.collateralToken.address,maturity)).liquidity,
+            (await result.convenience.getNatives(result.assetToken.address, result.collateralToken.address, maturity))
+              .liquidity,
             ethers.provider
           )
-            const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
+          const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
           // console.log(liquidityBalanceContract)
-            expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
+          expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
         }
       )
     )

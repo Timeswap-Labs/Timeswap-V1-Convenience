@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat'
 
-async function advanceTime(time: number) {
+export async function advanceTime(time: number) {
   await ethers.provider.send('evm_increaseTime', [time])
 }
 
