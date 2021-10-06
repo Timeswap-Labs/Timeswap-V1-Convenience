@@ -62,6 +62,23 @@ export function min(x: bigint, y: bigint, z: bigint): bigint {
   }
 }
 
+export function divUp(
+  x: bigint,
+  y: bigint,
+): bigint {
+  let z = x / y;
+  if (x % y > 0) z++;
+  return z;
+}
+
+export function shiftUp(
+  x: bigint,
+  y: bigint,
+): bigint {
+  let z = x >> y;
+  if (x != z << y) z++;
+  return z;
+}
 
 export default {
   now,
@@ -71,5 +88,7 @@ export default {
   setTime,
   mulDiv,
   min,
-  mulDivUp
+  mulDivUp,
+  divUp,
+  shiftUp
 }

@@ -1,5 +1,5 @@
 import { ethers, waffle } from 'hardhat'
-import { mulDiv, now, min } from '../shared/Helper'
+import { mulDiv, now, min, shiftUp, mulDivUp } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import { newLiquidityTests } from '../test-cases'
 import { newLiquidityFixture, constructorFixture, Fixture, addLiquidityFixture } from '../shared/Fixtures'
@@ -43,7 +43,24 @@ describe('New Liquidity', () => {
 
     return {yIncreaseAddLiquidity: yIncrease, zIncreaseAddLiquidity: zIncrease}
   }
-  
+  const liquidityCalculateNewLiquidty = async (assetIn: bigint) => {
+    return ((assetIn << 56n) * 0x10000000000n) / ((maturity - (await now())) * 50n + 0x10000000000n)
+  }
+  const liquidityCalculateAddLiquidty = async (state:{x:bigint, y:bigint,z:bigint},delState:{x:bigint, y:bigint,z:bigint}) => {
+      const initialTotalLiquidity = state.x << 256n
+      const totalLiquidity = min(
+                  mulDiv(initialTotalLiquidity,delState.x,state.x),
+                  mulDiv(initialTotalLiquidity,delState.y,state.y),
+                  mulDiv(initialTotalLiquidity,delState.z,state.z))
+      return (totalLiquidity * 0x10000000000n) / ((maturity - (await now())) * 50n + 0x10000000000n)
+    }
+
+  const getDebtAddLiquidity =(delState:{x:bigint, y:bigint,z:bigint},maturity:bigint,currentTime:bigint){
+    return shiftUp((maturity-currentTime)*delState.y,32n)+ delState.x
+  }
+  const getCollateralAddLiquidity =(delState:{x:bigint, y:bigint,z:bigint},maturity:bigint,currentTime:bigint){
+    return mulDivUp(((maturity-currentTime)*delState.y )+ (delState.x << 33n),delState.z,(delState.x<<32n))
+  }
   
   function filterSucessNewLiquidity(newLiquidityParams: NewLiquidityParams, currentTime: bigint){
     const {yIncreaseNewLiquidity,zIncreaseNewLiquidity} = getYandZIncreaseNewLiquidity(newLiquidityParams.assetIn,newLiquidityParams.debtIn,newLiquidityParams.collateralIn,currentTime)
@@ -61,7 +78,12 @@ describe('New Liquidity', () => {
 function filterSuccessAddLiquidity(liquidityParams: {newLiquidityParams: NewLiquidityParams, addLiquidityParams: AddLiquidityParams},currentTime:bigint){
     const {newLiquidityParams, addLiquidityParams} = liquidityParams
     const {yIncreaseNewLiquidity,zIncreaseNewLiquidity} = getYandZIncreaseNewLiquidity(newLiquidityParams.assetIn,newLiquidityParams.debtIn,newLiquidityParams.collateralIn,currentTime)
-    const {yIncreaseAddLiquidity,zIncreaseAddLiquidity} = getYandZIncreaseAddLiquidity({x: newLiquidityParams.assetIn,y:yIncreaseNewLiquidity,z:zIncreaseNewLiquidity},addLiquidityParams.assetIn)
+    const delState ={x: newLiquidityParams.assetIn,y:yIncreaseNewLiquidity,z:zIncreaseNewLiquidity}
+    const {yIncreaseAddLiquidity,zIncreaseAddLiquidity} = getYandZIncreaseAddLiquidity(delState,addLiquidityParams.assetIn)
+    const debt = getDebtAddLiquidity(delState,maturity,currentTime)
+    const collateral = getCollateralAddLiquidity(delState,maturity,currentTime)
+    const liquidity = liquidityCalculateAddLiquidty({})
+
     if(addLiquidityParams.assetIn <= 0&& addLiquidityParams.maxDebt <= 0,addLiquidityParams.maxCollateral <= 0,addLiquidityParams.minLiquidity <= 0){
         return false
       }
@@ -70,6 +92,7 @@ function filterSuccessAddLiquidity(liquidityParams: {newLiquidityParams: NewLiqu
           )){
         return false
       }
+      if(addLiquidityParams.maxDebt < debt || addLiquidityParams.maxCollateral <collateral)
     return true
   }
   
@@ -78,18 +101,7 @@ function filterSuccessAddLiquidity(liquidityParams: {newLiquidityParams: NewLiqu
     const { maturity } = await loadFixture(fixture)
     let currentTime = await now()
 
-
-    const liquidityCalculateNewLiquidty = async (assetIn: bigint) => {
-      return ((assetIn << 56n) * 0x10000000000n) / ((maturity - (await now())) * 50n + 0x10000000000n)
-    }
-    const liquidityCalculateAddLiquidty = async (state:{x:bigint, y:bigint,z:bigint},delState:{x:bigint, y:bigint,z:bigint}) => {
-        const initialTotalLiquidity = state.x << 256n
-        const totalLiquidity = min(
-                    mulDiv(initialTotalLiquidity,delState.x,state.x),
-                    mulDiv(initialTotalLiquidity,delState.y,state.y),
-                    mulDiv(initialTotalLiquidity,delState.z,state.z))
-        return (totalLiquidity * 0x10000000000n) / ((maturity - (await now())) * 50n + 0x10000000000n)
-      }
+    
 
     await fc.assert(
       fc.asyncProperty(
