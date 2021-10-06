@@ -827,6 +827,14 @@
     "@openzeppelin/contracts" "^4.1.0"
     dotenv "^10.0.0"
 
+"@timeswap-labs/timeswap-v1-sdk-core@^0.1.15":
+  version "0.1.15"
+  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-sdk-core/0.1.15/91c44fbe590135f017bb3afbfea33d49d5811d40a0eaa281027d5131a598f9e9#c086ef4f0daad07e9aabbc03c9579abfff2c57ab"
+  integrity sha512-L8H6TWGHRC3xv4pq10GOII92Aj7yRhSN6UMuNSt+3+cUwVRPCMadeX4jIlCeztSr49qu8dDErsiQw3NialNSYA==
+  dependencies:
+    "@ethersproject/address" "^5.4.0"
+    tiny-invariant "^1.1.0"
+
 "@truffle/error@^0.0.14":
   version "0.0.14"
   resolved "https://registry.yarnpkg.com/@truffle/error/-/error-0.0.14.tgz#59683b5407bede7bddf16d80dc5592f9c5e5fa05"
@@ -8708,6 +8716,11 @@ timed-out@^4.0.0, timed-out@^4.0.1:
   version "4.0.1"
   resolved "https://registry.npmjs.org/timed-out/-/timed-out-4.0.1.tgz"
   integrity sha1-8y6srFoXW+ol1/q1Zas+2HQe9W8=
+
+tiny-invariant@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.1.0.tgz#634c5f8efdc27714b7f386c35e6760991d230875"
+  integrity sha512-ytxQvrb1cPc9WBEI/HSeYYoGD0kWnGEOR8RY6KomWLBVhqz0RgTwVO9dLrGz7dC+nN9llyI7OKAgRq8Vq4ZBSw==
 
 tmp@0.0.33, tmp@^0.0.33:
   version "0.0.33"
