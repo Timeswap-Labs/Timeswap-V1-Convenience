@@ -77,14 +77,20 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParamsUint, 
     const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
     const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
     const liquidity = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL,maturity)
-    // console.log('ts liquidity out : ', liquidity)
-
+    console.log('ts liquidity out : ', liquidity)
+    console.log('ts liquidity out param:',addLiquidityParams.minLiquidity)
+    console.log('ts debt  : ', debt)
+    console.log('ts max debt out param:',addLiquidityParams.maxDebt)
+    console.log('ts collateral : ', collateral)
+    console.log('ts max collateral out param:',addLiquidityParams.maxCollateral)
     if (
-      addLiquidityParams.maxDebt < debt ||
-      addLiquidityParams.maxCollateral < collateral ||
-      addLiquidityParams.minLiquidity > liquidity
-    )
+      addLiquidityParams.maxDebt.toBigInt() < debt.toBigInt() ||
+      addLiquidityParams.maxCollateral.toBigInt() < collateral.toBigInt() ||
+      addLiquidityParams.minLiquidity.toBigInt() >= liquidity.toBigInt()
+    ){
+      console.log('hey');
       return false
+    }
 
     return true
   }

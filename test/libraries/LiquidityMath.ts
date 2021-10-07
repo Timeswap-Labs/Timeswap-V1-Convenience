@@ -16,8 +16,8 @@ import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
   }
 
   export  const getYandZIncreaseAddLiquidity = (state: { x: Uint112; y: Uint112; z: Uint112 }, assetIn: Uint112) => {
-    const yIncrease = (state.y).mul(assetIn).div(state.x)
-    const zIncrease = (state.z).mul(assetIn).div( state.x)
+    const yIncrease = new Uint112(new Uint256(state.y).mul(assetIn).div(state.x))
+    const zIncrease = new Uint112(new Uint256(state.z).mul(assetIn).div( state.x))
 
     return { yIncreaseAddLiquidity: yIncrease, zIncreaseAddLiquidity: zIncrease }
   }

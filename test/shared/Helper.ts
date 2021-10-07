@@ -87,7 +87,7 @@ export function shiftUp(x: bigint, y: bigint): bigint {
 }
 export function shiftUpUint(x: Uint, y: Uint): Uint {
   let z = x.shiftRight( y)
-  if (x != z.shiftLeft(y)) z.add(1n)
+  if (x != z.shiftLeft(y)) {z.add(1n), console.log('hi')}
   return z
 }
 
