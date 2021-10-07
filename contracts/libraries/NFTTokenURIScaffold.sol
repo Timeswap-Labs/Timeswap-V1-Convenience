@@ -109,9 +109,14 @@ library NFTTokenURIScaffold {
 
         uint256 significantDigits = weiAmt/(10 ** decimal);
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
-        // precisionDigits = precisionDigits/(10 ** (decimal - 2));
 
-        return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigits.toString()));
+        string memory precisionDigitsString = precisionDigits.toString();
+        uint lengthDiff = decimal - bytes(precisionDigitsString).length;
+        for(uint i = 0; i < lengthDiff; i++) {
+            precisionDigitsString = string(abi.encodePacked('0', precisionDigitsString));
+        }
+
+        return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigitsString));
     }
 
     function weiToPrecisionString(uint256 weiAmt, uint256 decimal) public pure returns (string memory) {
@@ -129,7 +134,13 @@ library NFTTokenURIScaffold {
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
         precisionDigits = precisionDigits/(10 ** (decimal - 4));
 
-        return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigits.toString()));
+        string memory precisionDigitsString = precisionDigits.toString();
+        uint lengthDiff = 4 - bytes(precisionDigitsString).length;
+        for(uint i = 0; i < lengthDiff; i++) {
+            precisionDigitsString = string(abi.encodePacked('0', precisionDigitsString));
+        }
+
+        return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigitsString));
     }
 
     function addressToString(address _addr) public pure returns (string memory) {
