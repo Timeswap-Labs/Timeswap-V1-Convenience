@@ -5,9 +5,10 @@ import { newLiquidityFixture, constructorFixture, Fixture } from '../shared/Fixt
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { NewLiquidityParams, NewLiquidityParamsUint } from '../types'
-import { ERC20__factory, CollateralizedDebt__factory } from '../../typechain'
+import { ERC20__factory, CollateralizedDebt__factory, TimeswapPair__factory } from '../../typechain'
 import { Uint112, Uint256 } from '@timeswap-labs/timeswap-v1-sdk-core'
 import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
+import * as LiquidityMath from '../libraries/LiquidityMath'
 
 const { loadFixture } = waffle
 
@@ -74,32 +75,6 @@ describe('New Liquidity', () => {
     const { maturity } = await loadFixture(fixture)
     let currentTime = await now()
 
-    const liquidityCalculate = (assetIn: bigint, newCurrentTime: bigint) => {
-      return ((assetIn << 56n) * 0x10000000000n) / ((maturity - newCurrentTime) * 50n + 0x10000000000n)
-    }
-
-    const debtCollateralCalculate = ({ assetIn, debtIn, collateralIn }: NewLiquidityParamsUint, currentTime: bigint) => {
-      const yIncrease = new Uint112(
-        new Uint256(debtIn)
-          .sub(assetIn)
-          .shiftLeft(32)
-          .div(maturity - currentTime)
-      )
-      const denominator = new Uint256(maturity - currentTime).mul(yIncrease).add(new Uint256(assetIn).shiftLeft(33))
-      const zIncrease = new Uint112(new Uint256(collateralIn).mul(assetIn).shiftLeft(32).div(denominator))
-
-      const debt = shiftUp(new Uint256(yIncrease).mul(maturity - currentTime).toBigInt(), 32n) + assetIn.toBigInt()
-      const collateral = mulDivUp(
-        new Uint256(yIncrease)
-          .mul(maturity - currentTime)
-          .add(new Uint256(assetIn).shiftLeft(33))
-          .toBigInt(),
-        zIncrease.toBigInt(),
-        new Uint256(assetIn).shiftLeft(32).toBigInt()
-      )
-
-      return { debt, collateral }
-    }
 
     await fc.assert(
       fc.asyncProperty(
@@ -126,8 +101,8 @@ describe('New Liquidity', () => {
 
           const result = await loadFixture(success)
           const newCurrentTime = await now()
-          const liquidityBalance = liquidityCalculate(data.assetIn.toBigInt(), newCurrentTime)
-          const { debt, collateral } = debtCollateralCalculate(data, newCurrentTime)
+          const liquidityBalance = LiquidityMath.liquidityCalculate(data.assetIn.toBigInt(), newCurrentTime,maturity)
+          const { debt, collateral } = LiquidityMath.debtCollateralCalculate(data, newCurrentTime,maturity)
           // console.log(data)
           // console.log(liquidityBalance)
           // console.log((maturity - currentTime))
@@ -157,7 +132,24 @@ describe('New Liquidity', () => {
 
           const collateralBalanceContract = collateralizedDebtToken.collateral.toBigInt()
           const debtBalanceContract = collateralizedDebtToken.debt.toBigInt()
+          const pairContract = TimeswapPair__factory.connect(
+            await result.convenience.factoryContract.getPair(result.assetToken.address, result.collateralToken.address),
+            ethers.provider
+          )
+          const reserves = await pairContract.totalReserves(result.maturity)
+          const reservesAsset = reserves.asset.toBigInt()
+          const reservesCollateral = reserves.collateral.toBigInt()
 
+          expect(reservesAsset).equalBigInt(data.assetIn.toBigInt())
+          expect(reservesCollateral).equalBigInt(collateral)
+          expect((await pairContract.totalDebtCreated(result.maturity)).toBigInt()).equalBigInt(debt)
+
+          const constantProduct = await pairContract.constantProduct(result.maturity)
+          const { yIncrease, zIncrease } = verifyYAndZIncrease(data, newCurrentTime)
+
+          expect(constantProduct.x.toBigInt()).equalBigInt(data.assetIn.toBigInt())
+          expect(constantProduct.y.toBigInt()).equalBigInt(yIncrease.toBigInt())
+          expect(constantProduct.z.toBigInt()).equalBigInt(zIncrease.toBigInt())
           expect(collateralBalanceContract).equalBigInt(collateral)
           expect(debtBalanceContract).equalBigInt(debt)
         }

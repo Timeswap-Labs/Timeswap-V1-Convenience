@@ -1,5 +1,6 @@
 import { ethers } from 'hardhat'
-
+import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
+import { uint16Array } from 'fast-check'
 export async function advanceTime(time: number) {
   await ethers.provider.send('evm_increaseTime', [time])
 }
@@ -37,14 +38,33 @@ export function mulDiv(a: bigint, b: bigint, denominator: bigint): bigint {
   z = z / denominator
   return z
 }
-
+export function mulDivUint(a: Uint, b: Uint, denominator: Uint): Uint {
+  let z = a.mul(b)
+  z = z.div( denominator)
+  return z
+}
 export function mulDivUp(a: bigint, b: bigint, denominator: bigint): bigint {
   let z = mulDiv(a, b, denominator)
   let mulmod = (a * b) % denominator
   if (mulmod > 0) z++
   return z
 }
+export function mulDivUpUint(a: Uint, b: Uint, denominator: Uint): Uint {
+  let z = mulDivUint(a, b, denominator)
+  let mulmod = (a.mul( b)).mod(denominator)
+  if (mulmod.toBigInt() > 0) z.add(1)
+  return z
+}
 export function min(x: bigint, y: bigint, z: bigint): bigint {
+  if (x <= y && x <= z) {
+    return x
+  } else if (y <= x && y <= z) {
+    return y
+  } else {
+    return z
+  }
+}
+export function minUint(x: Uint, y: Uint, z: Uint): Uint {
   if (x <= y && x <= z) {
     return x
   } else if (y <= x && y <= z) {
@@ -65,6 +85,20 @@ export function shiftUp(x: bigint, y: bigint): bigint {
   if (x != z << y) z++
   return z
 }
+export function shiftUpUint(x: Uint, y: Uint): Uint {
+  let z = x.shiftRight( y)
+  if (x != z.shiftLeft(y)) z.add(1n)
+  return z
+}
+
+export const objectMap = (obj: {[key:string]:Uint}, fn:any) =>
+  Object.fromEntries(
+    Object.entries(obj).map(
+      ([k, v], i) => [k, fn(v, k, i)]
+    )
+  )
+export const UToBObj = (obj: {[key:string]:Uint}): {[key:string]:bigint} =>
+      objectMap(obj,(v:Uint)=>v.toBigInt())
 
 export default {
   now,
@@ -77,4 +111,6 @@ export default {
   mulDivUp,
   divUp,
   shiftUp,
+  objectMap,
+  UToBObj
 }

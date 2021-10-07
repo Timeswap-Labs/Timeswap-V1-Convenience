@@ -1,19 +1,21 @@
 import * as LiquidityMath from '../libraries/LiquidityMath'
-import { AddLiquidityParams, NewLiquidityParams } from '../types'
+import { AddLiquidityParams, AddLiquidityParamsUint, NewLiquidityParams, NewLiquidityParamsUint } from '../types'
+import {objectMap, UToBObj} from '../shared/Helper'
+import { Uint112 } from '@timeswap-labs/timeswap-v1-sdk-core'
 const MAXUINT112: bigint = 2n ** 112n
 
 
-export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, currentTime: bigint,maturity:bigint) {
-    if (newLiquidityParams.assetIn < 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
+export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParamsUint, currentTime: bigint,maturity:bigint) {
+    if (newLiquidityParams.assetIn.toBigInt() < 0 || newLiquidityParams.debtIn.toBigInt() - newLiquidityParams.assetIn.toBigInt() <= 0) {
       return false
     }
-    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = UToBObj(LiquidityMath.getYandZIncreaseNewLiquidity(
       newLiquidityParams.assetIn,
       newLiquidityParams.debtIn,
       newLiquidityParams.collateralIn,
       currentTime,
       maturity
-    )
+    ))
 
     if (
       !(
@@ -29,7 +31,7 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
   }
 
   export function addLiquiditySuccess(
-    liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityParams },
+    liquidityParams: { newLiquidityParams: NewLiquidityParamsUint; addLiquidityParams: AddLiquidityParamsUint },
     currentTimeNL: bigint,
     currentTimeAL: bigint,
     maturity:bigint
@@ -37,27 +39,27 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
     const { newLiquidityParams, addLiquidityParams } = liquidityParams
 
     if (
-      (addLiquidityParams.assetIn <= 0 || addLiquidityParams.maxDebt <= 0 ||
-      addLiquidityParams.maxCollateral <= 0 ||
-      addLiquidityParams.minLiquidity <= 0)
+      (addLiquidityParams.assetIn.toBigInt() <= 0 || addLiquidityParams.maxDebt.toBigInt() <= 0 ||
+      addLiquidityParams.maxCollateral.toBigInt() <= 0 ||
+      addLiquidityParams.minLiquidity.toBigInt() <= 0)
     ) {
       return false
     }
-    if (newLiquidityParams.assetIn < 0 || (newLiquidityParams.debtIn - newLiquidityParams.assetIn) <=0) {
+    if (newLiquidityParams.assetIn.toBigInt() < 0 || (newLiquidityParams.debtIn.toBigInt() - newLiquidityParams.assetIn.toBigInt()) <=0) {
       return false
     }
-    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = UToBObj(LiquidityMath.getYandZIncreaseNewLiquidity(
       newLiquidityParams.assetIn,
       newLiquidityParams.debtIn,
       newLiquidityParams.collateralIn,
       currentTimeNL,
       maturity
-    )
-    const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-    const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
+    ))
+    const state = { x: newLiquidityParams.assetIn, y: new Uint112(yIncreaseNewLiquidity), z: new Uint112(zIncreaseNewLiquidity) }
+    const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = UToBObj(LiquidityMath.getYandZIncreaseAddLiquidity(
       state,
       addLiquidityParams.assetIn
-    )
+    ))
 
     if (
       !(
@@ -70,7 +72,7 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
       return false
     }
 
-    const delState = { x: addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity }
+    const delState = { x: addLiquidityParams.assetIn, y: new Uint112(yIncreaseAddLiquidity), z: new Uint112(zIncreaseAddLiquidity) }
 
     const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
     const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)

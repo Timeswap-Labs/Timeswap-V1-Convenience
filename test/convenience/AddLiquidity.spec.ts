@@ -1,5 +1,5 @@
 import { ethers, waffle } from 'hardhat'
-import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
+import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime, objectMap, UToBObj } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import * as LiquidityMath from '../libraries/LiquidityMath'
 import { newLiquidityFixture, constructorFixture, Fixture, addLiquidityFixture } from '../shared/Fixtures'
@@ -8,6 +8,8 @@ import * as fc from 'fast-check'
 import { AddLiquidityParams, NewLiquidityParams } from '../types'
 import { ERC20__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
+import { Uint112, Uint256 } from '@timeswap-labs/timeswap-v1-sdk-core'
+import { addLiquidityParamsUToB, newLiquidityParamsUToB } from '../types/transformers/Liquidity'
 
 const { loadFixture } = waffle
 
@@ -15,6 +17,8 @@ let maturity = 0n
 let signers: SignerWithAddress[] = []
 
 const MAXUINT112: bigint = 2n ** 112n
+
+
 
 describe('New Liquidity', () => {
   async function fixture(): Promise<Fixture> {
@@ -25,9 +29,6 @@ describe('New Liquidity', () => {
 
     return constructor
   }
-
-
-
 
   it('Succeeded', async () => {
     const { maturity } = await loadFixture(fixture)
@@ -42,26 +43,38 @@ describe('New Liquidity', () => {
                 assetIn: fc.bigUintN(50),
                 debtIn: fc.bigUintN(50),
                 collateralIn: fc.bigUintN(50),
-              })
+              }).map(({ assetIn, debtIn, collateralIn }) => {
+                return {
+                  assetIn: new Uint112(assetIn),
+                  debtIn: new Uint112(debtIn),
+                  collateralIn: new Uint112(collateralIn),
+                }})
               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n,maturity)),
             addLiquidityParams: fc.record({
               assetIn: fc.bigUintN(50),
               minLiquidity: fc.bigUintN(100),
               maxDebt: fc.bigUintN(50),
               maxCollateral: fc.bigUintN(50),
-            }),
+            }).map(({ assetIn, minLiquidity, maxDebt,maxCollateral }) => {
+              return {
+                assetIn: new Uint112(assetIn),
+                minLiquidity: new Uint256(minLiquidity),
+                maxDebt: new Uint112(maxDebt),
+                maxCollateral: new Uint112(maxCollateral),
+              }}
+              )
           })
-          .filter((x) => LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n,maturity)),
+          .filter((x) => LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n,maturity)).noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+            const newLiquidity = await newLiquidityFixture(constructor, signers[0], newLiquidityParamsUToB(data.newLiquidityParams))
             await setTime(Number(currentTime + 10000n))
-            const addLiquidity = await addLiquidityFixture(newLiquidity, signers[0], data.addLiquidityParams)
+            const addLiquidity = await addLiquidityFixture(newLiquidity, signers[0], addLiquidityParamsUToB(data.addLiquidityParams))
             return addLiquidity
           }
-
+          console.log(data);
           // Trying things
           const neededTime = (await now()) + 100n
           // providers.
@@ -97,7 +110,7 @@ describe('New Liquidity', () => {
             z: zIncreaseAddLiquidity,
           }
           const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTime + 10_000n,maturity)
-          const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
+          const liquidityBalance = liquidityBalanceNew.add(liquidityBalanceAdd).toBigInt()
           const liquidityToken = ERC20__factory.connect(
             (await result.convenience.getNatives(result.assetToken.address, result.collateralToken.address, maturity))
               .liquidity,
