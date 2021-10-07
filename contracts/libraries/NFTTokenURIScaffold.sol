@@ -109,16 +109,20 @@ library NFTTokenURIScaffold {
 
         uint256 significantDigits = weiAmt/(10 ** decimal);
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
+        
+        if (precisionDigits == 0) {
+            return string(abi.encodePacked(significantDigits.toString(), '.00'));
+        }
 
-        string memory precisionDigitsString = precisionDigits.toString();
-        uint lengthDiff = decimal - bytes(precisionDigitsString).length;
+        string memory precisionDigitsString = toStringTrimmed(precisionDigits);
+        uint lengthDiff = decimal - bytes(precisionDigits.toString()).length;
         for(uint i = 0; i < lengthDiff; i++) {
             precisionDigitsString = string(abi.encodePacked('0', precisionDigitsString));
         }
 
         return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigitsString));
     }
-
+    
     function weiToPrecisionString(uint256 weiAmt, uint256 decimal) public pure returns (string memory) {
         if (decimal == 0) {
             return string(abi.encodePacked(weiAmt.toString(), '.00'));
@@ -133,14 +137,58 @@ library NFTTokenURIScaffold {
         }
         uint256 precisionDigits = weiAmt % (10 ** (decimal));
         precisionDigits = precisionDigits/(10 ** (decimal - 4));
+        
+        if (precisionDigits == 0) {
+            return string(abi.encodePacked(significantDigits.toString(), '.00'));
+        }
 
-        string memory precisionDigitsString = precisionDigits.toString();
-        uint lengthDiff = 4 - bytes(precisionDigitsString).length;
+        string memory precisionDigitsString = toStringTrimmed(precisionDigits);
+        uint lengthDiff = 4 - bytes(precisionDigits.toString()).length;
         for(uint i = 0; i < lengthDiff; i++) {
             precisionDigitsString = string(abi.encodePacked('0', precisionDigitsString));
         }
 
         return string(abi.encodePacked(significantDigits.toString(), '.', precisionDigitsString));
+    }
+    
+    function toStringTrimmed(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        uint256 flag;
+        while (temp != 0) {
+            if (temp % 10 == 0 && flag == 0) {
+                temp /= 10;
+                continue;
+            } else if (temp % 10 != 0 && flag == 0) {
+                flag++;
+                digits++;
+            } else {
+                digits++;
+            }
+            
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        flag = 0;
+        while (value != 0) {
+            if (value % 10 == 0 && flag == 0) {
+                value /= 10;
+                continue;
+            } else if (value % 10 != 0 && flag == 0) {
+                flag++;
+                digits -= 1;
+                buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            } else {
+                digits -= 1;
+                buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            }
+            
+            value /= 10;
+        }
+        return string(buffer);
     }
 
     function addressToString(address _addr) public pure returns (string memory) {
