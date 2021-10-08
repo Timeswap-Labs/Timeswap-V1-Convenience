@@ -1,21 +1,19 @@
 import * as LiquidityMath from '../libraries/LiquidityMath'
-import { AddLiquidityParams, AddLiquidityParamsUint, NewLiquidityParams, NewLiquidityParamsUint } from '../types'
-import {objectMap, UToBObj} from '../shared/Helper'
-import { Uint112 } from '@timeswap-labs/timeswap-v1-sdk-core'
+import { AddLiquidityParams, NewLiquidityParams, RemoveLiquidityParams } from '../types'
 const MAXUINT112: bigint = 2n ** 112n
 
 
-export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParamsUint, currentTime: bigint,maturity:bigint) {
-    if (newLiquidityParams.assetIn.toBigInt() < 0 || newLiquidityParams.debtIn.toBigInt() - newLiquidityParams.assetIn.toBigInt() <= 0) {
+export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, currentTime: bigint,maturity:bigint) {
+    if (newLiquidityParams.assetIn < 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
       return false
     }
-    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = UToBObj(LiquidityMath.getYandZIncreaseNewLiquidity(
+    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
       newLiquidityParams.assetIn,
       newLiquidityParams.debtIn,
       newLiquidityParams.collateralIn,
       currentTime,
       maturity
-    ))
+    )
 
     if (
       !(
@@ -31,7 +29,7 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParamsUint, 
   }
 
   export function addLiquiditySuccess(
-    liquidityParams: { newLiquidityParams: NewLiquidityParamsUint; addLiquidityParams: AddLiquidityParamsUint },
+    liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityParams },
     currentTimeNL: bigint,
     currentTimeAL: bigint,
     maturity:bigint
@@ -39,27 +37,24 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParamsUint, 
     const { newLiquidityParams, addLiquidityParams } = liquidityParams
 
     if (
-      (addLiquidityParams.assetIn.toBigInt() <= 0 || addLiquidityParams.maxDebt.toBigInt() <= 0 ||
-      addLiquidityParams.maxCollateral.toBigInt() <= 0 ||
-      addLiquidityParams.minLiquidity.toBigInt() <= 0)
+      (addLiquidityParams.assetIn <= 0 || addLiquidityParams.maxDebt <= 0 ||
+      addLiquidityParams.maxCollateral <= 0 ||
+      addLiquidityParams.minLiquidity <= 0)
     ) {
       return false
     }
-    if (newLiquidityParams.assetIn.toBigInt() < 0 || (newLiquidityParams.debtIn.toBigInt() - newLiquidityParams.assetIn.toBigInt()) <=0) {
-      return false
-    }
-    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = UToBObj(LiquidityMath.getYandZIncreaseNewLiquidity(
+    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
       newLiquidityParams.assetIn,
       newLiquidityParams.debtIn,
       newLiquidityParams.collateralIn,
       currentTimeNL,
       maturity
-    ))
-    const state = { x: newLiquidityParams.assetIn, y: new Uint112(yIncreaseNewLiquidity), z: new Uint112(zIncreaseNewLiquidity) }
-    const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = UToBObj(LiquidityMath.getYandZIncreaseAddLiquidity(
+    )
+    const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+    const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
       state,
       addLiquidityParams.assetIn
-    ))
+    )
 
     if (
       !(
@@ -72,29 +67,33 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParamsUint, 
       return false
     }
 
-    const delState = { x: addLiquidityParams.assetIn, y: new Uint112(yIncreaseAddLiquidity), z: new Uint112(zIncreaseAddLiquidity) }
-
+    const delState = { x: addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity }
+    const liquidityNew = LiquidityMath.liquidityCalculateNewLiquidity(newLiquidityParams.assetIn,currentTimeNL,maturity)
     const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
     const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
-    const liquidity = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL,maturity)
-    console.log('ts liquidity out : ', liquidity)
-    console.log('ts liquidity out param:',addLiquidityParams.minLiquidity)
-    console.log('ts debt  : ', debt)
-    console.log('ts max debt out param:',addLiquidityParams.maxDebt)
-    console.log('ts collateral : ', collateral)
-    console.log('ts max collateral out param:',addLiquidityParams.maxCollateral)
+    const liquidityAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL,maturity)
+    // console.log('ts liquidity out : ', liquidity)
+
     if (
-      addLiquidityParams.maxDebt.toBigInt() < debt.toBigInt() ||
-      addLiquidityParams.maxCollateral.toBigInt() < collateral.toBigInt() ||
-      addLiquidityParams.minLiquidity.toBigInt() >= liquidity.toBigInt()
-    ){
-      console.log('hey');
+      addLiquidityParams.maxDebt < debt ||
+      addLiquidityParams.maxCollateral < collateral ||
+      addLiquidityParams.minLiquidity > liquidityAdd 
+    )
       return false
-    }
 
     return true
   }
+
+  export function removeLiquiditySuccess(liquidityParams: {newLiquidityParams: NewLiquidityParams,removeLiquidityParams:RemoveLiquidityParams},currentTime:bigint, maturity:bigint){
+    const {newLiquidityParams, removeLiquidityParams} = liquidityParams
+    if(removeLiquidityParams.liquidityIn <= 0) return false
+    const liquidity = LiquidityMath.liquidityCalculateNewLiquidity(newLiquidityParams.assetIn,currentTime,maturity)
+    if(removeLiquidityParams.liquidityIn > liquidity) return false
+    return true
+
+  }
   export default {
       addLiquiditySuccess,
-      newLiquiditySuccess
+      newLiquiditySuccess,
+      removeLiquiditySuccess
   }

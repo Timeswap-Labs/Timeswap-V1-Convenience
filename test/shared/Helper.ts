@@ -41,7 +41,7 @@ export function mulDiv(a: bigint, b: bigint, denominator: bigint): bigint {
 }
 export function mulDivUint(a: Uint, b: Uint, denominator: Uint): Uint {
   let z = a.mul(b)
-  z = z.div( denominator)
+  z = z.div(denominator)
   return z
 }
 export function mulDivUp(a: bigint, b: bigint, denominator: bigint): bigint {
@@ -51,8 +51,7 @@ export function mulDivUp(a: bigint, b: bigint, denominator: bigint): bigint {
   return z
 }
 export function mulDivUpUint(a: Uint256, b: Uint256, denominator: Uint256): Uint256 {
-
-  return    new Uint256(mulDiv(a.toBigInt(), b.toBigInt(), denominator.toBigInt()))
+  return new Uint256(mulDivUp(a.toBigInt(), b.toBigInt(), denominator.toBigInt()))
 }
 export function min(x: bigint, y: bigint, z: bigint): bigint {
   if (x <= y && x <= z) {
@@ -85,18 +84,13 @@ export function shiftUp(x: bigint, y: bigint): bigint {
   return z
 }
 export function shiftUpUint(x: Uint, y: Uint): Uint {
-
-  return new Uint256(shiftUp(x.toBigInt(),y.toBigInt()))
+  return new Uint256(shiftUp(x.toBigInt(), y.toBigInt()))
 }
 
-export const objectMap = (obj: {[key:string]:Uint}, fn:any) =>
-  Object.fromEntries(
-    Object.entries(obj).map(
-      ([k, v], i) => [k, fn(v, k, i)]
-    )
-  )
-export const UToBObj = (obj: {[key:string]:Uint}): {[key:string]:bigint} =>
-      objectMap(obj,(v:Uint)=>v.toBigInt())
+export const objectMap = (obj: { [key: string]: Uint }, fn: any) =>
+  Object.fromEntries(Object.entries(obj).map(([k, v], i) => [k, fn(v, k, i)]))
+export const UToBObj = (obj: { [key: string]: Uint }): { [key: string]: bigint } =>
+  objectMap(obj, (v: Uint) => v.toBigInt())
 
 export default {
   now,
@@ -110,5 +104,5 @@ export default {
   divUp,
   shiftUp,
   objectMap,
-  UToBObj
+  UToBObj,
 }

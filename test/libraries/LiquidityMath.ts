@@ -1,101 +1,55 @@
-import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime, mulDivUint, minUint, shiftUpUint, mulDivUpUint } from '../shared/Helper'
-import { Uint112, Uint256 } from '@timeswap-labs/timeswap-v1-sdk-core'
-import { NewLiquidityParamsUint } from '../types'
-import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
-import { RSA_X931_PADDING } from 'constants'
+import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
 
-  export const getYandZIncreaseNewLiquidity = (assetIn: Uint112, debtIn: Uint112, collateralIn: Uint112, currentTime: bigint,maturity:bigint) => {
+
+  export const getYandZIncreaseNewLiquidity = (assetIn: bigint, debtIn: bigint, collateralIn: bigint, currentTime: bigint,maturity:bigint) => {
     
-    const yIncrease = new Uint256(debtIn)
-    .sub(assetIn)
-    .shiftLeft(32)
-    .div(maturity - currentTime)
-    const denominator = new Uint256(maturity - currentTime).mul(yIncrease).add(new Uint256(assetIn).shiftLeft(33))
-    const zIncrease = new Uint256(collateralIn).mul(assetIn).shiftLeft(32).div(denominator)
+    const yIncrease = ((debtIn - assetIn) << 32n) / (maturity - currentTime)
+    const denominator = (maturity - currentTime) * yIncrease + (assetIn << 33n)
+    const zIncrease = ((collateralIn * assetIn) << 32n) / denominator
 
-    return { yIncreaseNewLiquidity: new Uint112(yIncrease), zIncreaseNewLiquidity: new Uint112(zIncrease) }
+    return { yIncreaseNewLiquidity: yIncrease, zIncreaseNewLiquidity: zIncrease }
   }
 
-  export  const getYandZIncreaseAddLiquidity = (state: { x: Uint112; y: Uint112; z: Uint112 }, assetIn: Uint112) => {
-    const yIncrease = new Uint112(new Uint256(state.y).mul(assetIn).div(state.x))
-    const zIncrease = new Uint112(new Uint256(state.z).mul(assetIn).div( state.x))
+  export  const getYandZIncreaseAddLiquidity = (state: { x: bigint; y: bigint; z: bigint }, assetIn: bigint) => {
+    const yIncrease = (state.y * assetIn) / state.x
+    const zIncrease = (state.z * assetIn) / state.x
 
     return { yIncreaseAddLiquidity: yIncrease, zIncreaseAddLiquidity: zIncrease }
   }
 
-  export const liquidityCalculateNewLiquidity = (assetIn: Uint112, currentTime: bigint,maturity:bigint) => {
-    const maturityUint = new Uint256(maturity)
-    const currentTimeUint = new Uint256(currentTime)
-    return new Uint256((new Uint256(assetIn)).shiftLeft(56n).mul(0x10000000000n).div((maturityUint.sub(currentTimeUint).mul(50n).add(0x10000000000n))))
-
+  export const liquidityCalculateNewLiquidity = (assetIn: bigint, currentTime: bigint,maturity:bigint) => {
+    return ((assetIn << 56n) * 0x10000000000n) / ((maturity - currentTime) * 50n + 0x10000000000n)
   }
   
   export const liquidityCalculateAddLiquidity = (
-    state: { x: Uint112; y: Uint112; z: Uint112 },
-    delState: { x: Uint112; y: Uint112; z: Uint112 },
+    state: { x: bigint; y: bigint; z: bigint },
+    delState: { x: bigint; y: bigint; z: bigint },
     currentTime: bigint,
     maturity:bigint
   ) => {
-    let maturityUint = new Uint256(maturity)
-    let currentTimeUint = new Uint256(currentTime)
-    const initialTotalLiquidity = new Uint256(state.x.shiftLeft(56))
-    const totalLiquidity = minUint(
-      mulDivUint(initialTotalLiquidity, delState.x, state.x),
-      mulDivUint(initialTotalLiquidity, delState.y, state.y),
-      mulDivUint(initialTotalLiquidity, delState.z, state.z)
+    const initialTotalLiquidity = state.x << 56n
+    const totalLiquidity = min(
+      mulDiv(initialTotalLiquidity, delState.x, state.x),
+      mulDiv(initialTotalLiquidity, delState.y, state.y),
+      mulDiv(initialTotalLiquidity, delState.z, state.z)
     )
-    const liquidityOut = new Uint256(totalLiquidity.mul(0x10000000000n).div((maturityUint).sub( currentTimeUint).mul( 50n).add( 0x10000000000)))
+    const liquidityOut = (totalLiquidity * 0x10000000000n) / ((maturity - currentTime) * 50n + 0x10000000000n)
     return liquidityOut
   }
 
   
   export const getDebtAddLiquidity = (
-    delState: { x: Uint112; y: Uint112; z: Uint112 },
+    delState: { x: bigint; y: bigint; z: bigint },
     maturity: bigint,
     currentTime: bigint
   ) => {
-    const maturityUint = new Uint256(maturity)
-    const currentTimeUint = new Uint256(currentTime)
-    return new Uint112(shiftUpUint((maturityUint).sub(currentTimeUint).mul(delState.y), new Uint256(32n)).add( delState.x))
+    return shiftUp((maturity - currentTime) * delState.y, 32n) + delState.x
   }
   
   export const getCollateralAddLiquidity = (
-    delState: { x: Uint112; y: Uint112; z: Uint112 },
+    delState: { x: bigint; y: bigint; z: bigint },
     maturity: bigint,
     currentTime: bigint
   ) => {
-    const maturityUint = new Uint256(maturity)
-    const currentTimeUint = new Uint256(currentTime)
-    console.log(maturityUint);
-    console.log(currentTimeUint);
-    console.log(delState);
-
-    return new Uint112(mulDivUpUint((maturityUint).sub(currentTimeUint).mul(delState.y).add(new Uint256(delState.x).shiftLeft( 33n)), new Uint256(delState.z), (new Uint256(delState.x)).shiftLeft(32n)))
-  }
-  
-  export const liquidityCalculate = (assetIn: bigint, newCurrentTime: bigint,maturity:bigint) => {
-    return ((assetIn << 56n) * 0x10000000000n) / ((maturity - newCurrentTime) * 50n + 0x10000000000n)
-  }
-
-  export const debtCollateralCalculate = ({ assetIn, debtIn, collateralIn }: NewLiquidityParamsUint, currentTime: bigint,maturity:bigint) => {
-    const yIncrease = new Uint112(
-      new Uint256(debtIn)
-        .sub(assetIn)
-        .shiftLeft(32)
-        .div(maturity - currentTime)
-    )
-    const denominator = new Uint256(maturity - currentTime).mul(yIncrease).add(new Uint256(assetIn).shiftLeft(33))
-    const zIncrease = new Uint112(new Uint256(collateralIn).mul(assetIn).shiftLeft(32).div(denominator))
-
-    const debt = shiftUp(new Uint256(yIncrease).mul(maturity - currentTime).toBigInt(), 32n) + assetIn.toBigInt()
-    const collateral = mulDivUp(
-      new Uint256(yIncrease)
-        .mul(maturity - currentTime)
-        .add(new Uint256(assetIn).shiftLeft(33))
-        .toBigInt(),
-      zIncrease.toBigInt(),
-      new Uint256(assetIn).shiftLeft(32).toBigInt()
-    )
-
-    return { debt, collateral }
+    return mulDivUp((maturity - currentTime) * delState.y + (delState.x << 33n), delState.z, delState.x << 32n)
   }
