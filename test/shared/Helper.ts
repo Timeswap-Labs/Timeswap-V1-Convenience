@@ -1,6 +1,7 @@
 import { ethers } from 'hardhat'
 import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
 import { uint16Array } from 'fast-check'
+import { Uint256 } from '@timeswap-labs/timeswap-v1-sdk-core'
 export async function advanceTime(time: number) {
   await ethers.provider.send('evm_increaseTime', [time])
 }
@@ -49,11 +50,9 @@ export function mulDivUp(a: bigint, b: bigint, denominator: bigint): bigint {
   if (mulmod > 0) z++
   return z
 }
-export function mulDivUpUint(a: Uint, b: Uint, denominator: Uint): Uint {
-  let z = mulDivUint(a, b, denominator)
-  let mulmod = (a.mul( b)).mod(denominator)
-  if (mulmod.toBigInt() > 0) z.add(1)
-  return z
+export function mulDivUpUint(a: Uint256, b: Uint256, denominator: Uint256): Uint256 {
+
+  return    new Uint256(mulDiv(a.toBigInt(), b.toBigInt(), denominator.toBigInt()))
 }
 export function min(x: bigint, y: bigint, z: bigint): bigint {
   if (x <= y && x <= z) {
@@ -86,9 +85,8 @@ export function shiftUp(x: bigint, y: bigint): bigint {
   return z
 }
 export function shiftUpUint(x: Uint, y: Uint): Uint {
-  let z = x.shiftRight( y)
-  if (x != z.shiftLeft(y)) {z.add(1n), console.log('hi')}
-  return z
+
+  return new Uint256(shiftUp(x.toBigInt(),y.toBigInt()))
 }
 
 export const objectMap = (obj: {[key:string]:Uint}, fn:any) =>

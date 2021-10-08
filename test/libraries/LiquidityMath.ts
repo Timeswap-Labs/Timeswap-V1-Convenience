@@ -2,6 +2,7 @@ import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime, mulD
 import { Uint112, Uint256 } from '@timeswap-labs/timeswap-v1-sdk-core'
 import { NewLiquidityParamsUint } from '../types'
 import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
+import { RSA_X931_PADDING } from 'constants'
 
   export const getYandZIncreaseNewLiquidity = (assetIn: Uint112, debtIn: Uint112, collateralIn: Uint112, currentTime: bigint,maturity:bigint) => {
     
@@ -25,7 +26,7 @@ import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
   export const liquidityCalculateNewLiquidity = (assetIn: Uint112, currentTime: bigint,maturity:bigint) => {
     const maturityUint = new Uint256(maturity)
     const currentTimeUint = new Uint256(currentTime)
-    return new Uint256(assetIn.shiftLeft(56n).mul(0x10000000000n).div((maturityUint.sub(currentTimeUint).mul(50n).add(0x10000000000n))))
+    return new Uint256((new Uint256(assetIn)).shiftLeft(56n).mul(0x10000000000n).div((maturityUint.sub(currentTimeUint).mul(50n).add(0x10000000000n))))
 
   }
   
@@ -43,7 +44,7 @@ import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
       mulDivUint(initialTotalLiquidity, delState.y, state.y),
       mulDivUint(initialTotalLiquidity, delState.z, state.z)
     )
-    const liquidityOut = new Uint256(totalLiquidity.mul(0x10000000000n).div((maturityUint).sub( currentTimeUint).mul( 50n).add( 0x10000000000n)))
+    const liquidityOut = new Uint256(totalLiquidity.mul(0x10000000000n).div((maturityUint).sub( currentTimeUint).mul( 50n).add( 0x10000000000)))
     return liquidityOut
   }
 
@@ -55,7 +56,7 @@ import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
   ) => {
     const maturityUint = new Uint256(maturity)
     const currentTimeUint = new Uint256(currentTime)
-    return new Uint112(shiftUpUint((maturityUint).sub(currentTimeUint).mul(delState.y), new Uint112(32n)).add( delState.x))
+    return new Uint112(shiftUpUint((maturityUint).sub(currentTimeUint).mul(delState.y), new Uint256(32n)).add( delState.x))
   }
   
   export const getCollateralAddLiquidity = (
@@ -65,7 +66,11 @@ import { Uint } from '@timeswap-labs/timeswap-v1-sdk-core/dist/uint/uint'
   ) => {
     const maturityUint = new Uint256(maturity)
     const currentTimeUint = new Uint256(currentTime)
-    return mulDivUpUint((maturityUint).sub(currentTimeUint).mul(delState.y).add(delState.x.shiftLeft( 33n)), delState.z, delState.x.shiftLeft(32n))
+    console.log(maturityUint);
+    console.log(currentTimeUint);
+    console.log(delState);
+
+    return new Uint112(mulDivUpUint((maturityUint).sub(currentTimeUint).mul(delState.y).add(new Uint256(delState.x).shiftLeft( 33n)), new Uint256(delState.z), (new Uint256(delState.x)).shiftLeft(32n)))
   }
   
   export const liquidityCalculate = (assetIn: bigint, newCurrentTime: bigint,maturity:bigint) => {
