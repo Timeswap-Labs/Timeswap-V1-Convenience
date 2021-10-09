@@ -60,8 +60,9 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
       !(
         yIncreaseAddLiquidity > 0n &&
         zIncreaseAddLiquidity > 0n &&
-        yIncreaseAddLiquidity < MAXUINT112 &&
-        zIncreaseAddLiquidity < MAXUINT112
+        yIncreaseAddLiquidity + state.y< MAXUINT112 &&
+        zIncreaseAddLiquidity +state.z < MAXUINT112 &&
+        addLiquidityParams.assetIn + state.x < MAXUINT112
       )
     ) {
       return false
@@ -77,7 +78,9 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
     if (
       addLiquidityParams.maxDebt < debt ||
       addLiquidityParams.maxCollateral < collateral ||
-      addLiquidityParams.minLiquidity > liquidityAdd 
+      addLiquidityParams.minLiquidity > liquidityAdd ||
+      debt > MAXUINT112 ||
+      collateral > MAXUINT112 
     )
       return false
 
