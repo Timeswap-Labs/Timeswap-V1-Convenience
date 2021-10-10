@@ -6,7 +6,7 @@ import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
-
+import 'hardhat/console.sol';
 library LendMath {
     using Math for uint256;
     using FullMath for uint256;
@@ -19,23 +19,26 @@ library LendMath {
         uint256 maturity,
         uint112 assetIn,
         uint128 bondOut
-    ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
+    ) internal  returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
 
         ConstantProduct.CP memory cp = pair.get(maturity);
-
+        console.log(1);
         uint256 _yDecrease = bondOut;
         _yDecrease -= assetIn;
         _yDecrease <<= 32;
         _yDecrease = _yDecrease.divUp(maturity - block.timestamp);
         yDecrease = _yDecrease.toUint112();
+        console.log(2);
 
         uint256 yAdjust = cp.y;
         yAdjust <<= 16;
         yAdjust -= _yDecrease * feeBase;
+        console.log(3);
 
         uint256 xAdjust = cp.x;
         xAdjust += assetIn;
+        console.log(4);
 
         uint256 _zDecrease = xAdjust;
         _zDecrease *= yAdjust;
@@ -48,6 +51,8 @@ library LendMath {
         denominator *= feeBase;
         _zDecrease = _zDecrease.mulDiv(uint256(cp.z) << 16, denominator);
         zDecrease = _zDecrease.toUint112();
+                console.log(5);
+
     }
 
     function givenInsurance(
