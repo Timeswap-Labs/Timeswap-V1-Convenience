@@ -70,21 +70,35 @@ library LendMath {
     ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
 
+        console.log("Contract 1");
+
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         uint256 xAdjust = cp.x;
         xAdjust += assetIn;
 
+        console.log("Contract 2");
+
         uint256 _zDecrease = insuranceOut;
         uint256 subtrahend = maturity;
+        console.log("21");
         subtrahend -= block.timestamp;
+        console.log("22");
         subtrahend *= cp.y;
+        console.log("23");
         subtrahend += uint256(cp.x) << 32;
+        console.log("24");
         uint256 denominator = xAdjust;
+        console.log("25");
         denominator *= uint256(cp.x) << 32;
-        subtrahend = subtrahend.mulDiv(assetIn * cp.z, denominator);
+        console.log("26");
+        subtrahend = subtrahend.mulDiv(uint256(assetIn) * cp.z, denominator);
+        console.log("27");
         _zDecrease -= subtrahend;
+        console.log("28");
         zDecrease = _zDecrease.toUint112();
+
+        console.log("Contract 3");
 
         uint256 zAdjust = cp.z;
         zAdjust <<= 16;
@@ -101,6 +115,7 @@ library LendMath {
         denominator *= feeBase;
         _yDecrease = _yDecrease.mulDiv(uint256(cp.y) << 16, denominator);
         yDecrease = _yDecrease.toUint112();
+        console.log("End");
     }
 
     function givenPercent(

@@ -2,6 +2,7 @@ import { bigInt } from '../../node_modules/fast-check/lib/types/fast-check-defau
 import { divUp, mulDiv } from '../shared/Helper'
 
 const MAXUINT112: bigint = 2n ** 112n
+const MAXUINT256 = 1n << 256n
 
 export const verifyYAndZDecreaseLendGivenBond = (
   state: { x: bigint; y: bigint; z: bigint },
@@ -12,17 +13,17 @@ export const verifyYAndZDecreaseLendGivenBond = (
 ) => {
   const feeBase = BigInt(0x10000 + 50)
   const yDecrease = divUp((bondOut - assetIn) << 32n, maturity - currentTime)
-  if (yDecrease <= 0 || yDecrease > MAXUINT112) {
+  if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
     // console.log('yDecrease out of bounds',yDecrease)
     return false
   }
   const yAdjust = (state.y << 16n) - yDecrease * feeBase
-  if (yAdjust <= 0 || yAdjust > MAXUINT112) {
+  if (yAdjust <= 0 || yAdjust >= MAXUINT112) {
     // console.log('yAdjust out of bounds',yAdjust)
     return false
   }
   const xAdjust = state.x + assetIn
-  if (xAdjust <= 0 || xAdjust > MAXUINT112) {
+  if (xAdjust <= 0 || xAdjust >= MAXUINT112) {
     // console.log('yDecrease out of bounds',yDecrease)
     return false
   }
@@ -31,7 +32,7 @@ export const verifyYAndZDecreaseLendGivenBond = (
     state.z << 16n,
     xAdjust * yAdjust * feeBase
   )
-  if (zDecrease <= 0 || zDecrease > MAXUINT112) {
+  if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
     // console.log({
     //     yDecrease: yDecrease,
     //     yAdjust: yAdjust,
@@ -67,21 +68,35 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
   ) => {
     const feeBase = BigInt(0x10000 + 50)
     const xAdjust = state.x + assetIn
-    if (xAdjust <= 0 || xAdjust > MAXUINT112) {
+    if (xAdjust <= 0 || xAdjust >= MAXUINT112) {
         // console.log('yDecrease out of bounds',yDecrease)
         return false
       }
+
+    if (((maturity - currentTime) * state.y) + (state.x << 32n) >= MAXUINT256 ||
+    assetIn * state.z >= MAXUINT256 ||
+    xAdjust * (state.x << 32n) >= MAXUINT256 ) {
+        return false
+    }
+
+    if (mulDiv(
+        ((maturity - currentTime) * state.y) + (state.x << 32n),
+        assetIn * state.z,
+        xAdjust * (state.x << 32n)
+      ) >= MAXUINT256) {
+        return false
+      }  
     const zDecrease =insuranceOut -  mulDiv(
       ((maturity - currentTime) * state.y) + (state.x << 32n),
       assetIn * state.z,
       xAdjust * (state.x << 32n)
     )
-    if (zDecrease <= 0 || zDecrease > MAXUINT112) {
+    if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
         // console.log('yAdjust out of bounds',yAdjust)
         return false
       }
     const zAdjust = (state.z << 16n) - (zDecrease * feeBase)
-    if (zAdjust <= 0 || zAdjust > MAXUINT112) {
+    if (zAdjust <= 0 || zAdjust >= MAXUINT112) {
         // console.log('yAdjust out of bounds',yAdjust)
         return false
       }
@@ -90,7 +105,7 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
       state.y << 16n,
       xAdjust * zAdjust * feeBase
     )
-    if (yDecrease <= 0 || yDecrease > MAXUINT112) {
+    if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
         // console.log('yAdjust out of bounds',yAdjust)
         return false
       }
@@ -105,27 +120,27 @@ export const verifyYAndZDecreaseLendGivenPercent = (
   ) => {
     const feeBase = BigInt(0x10000 + 50)
     const xAdjust = state.x + assetIn
-    if (xAdjust <= 0 || xAdjust > MAXUINT112) {
+    if (xAdjust <= 0 || xAdjust >= MAXUINT112) {
         // console.log('yDecrease out of bounds',yDecrease)
         return false
       }
     const minimum = (assetIn * state.y) << 12n
-    if (minimum <= 0 || minimum > MAXUINT112) {
+    if (minimum <= 0 || minimum >= MAXUINT112) {
         // console.log('yAdjust out of bounds',yAdjust)
         return false
       }
     const maximum = minimum << 4n
-    if (maximum <= 0 || maximum > MAXUINT112) {
+    if (maximum <= 0 || maximum >= MAXUINT112) {
         // console.log('yAdjust out of bounds',yAdjust)
         return false
       }
     const yDecrease = (((maximum - minimum) * percent) >> 32n) + minimum
-    if (yDecrease <= 0 || yDecrease > MAXUINT112) {
+    if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
         // console.log('yAdjust out of bounds',yAdjust)
         return false
       }
     const yAdjust = (state.y << 16n) - yDecrease * feeBase
-    if (yAdjust <= 0 || yAdjust > MAXUINT112) {
+    if (yAdjust <= 0 || yAdjust >= MAXUINT112) {
         // console.log('yAdjust out of bounds',yAdjust)
         return false
       }
@@ -134,7 +149,7 @@ export const verifyYAndZDecreaseLendGivenPercent = (
       state.z << 16n,
       xAdjust * yAdjust * feeBase
     )
-    if (zDecrease <= 0 || zDecrease > MAXUINT112) {
+    if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
         // console.log('yAdjust out of bounds',yAdjust)
         return false
       }
