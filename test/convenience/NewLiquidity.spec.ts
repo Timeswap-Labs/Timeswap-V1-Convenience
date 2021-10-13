@@ -18,8 +18,6 @@ function check(num: Uint, bit: bigint) {
   return num.toBigInt() < 1n << bit
 }
 
-
-
 const MAXUINT112: bigint = 2n ** 112n
 
 describe('New Liquidity', () => {
@@ -78,7 +76,10 @@ describe('New Liquidity', () => {
       return ((assetIn << 56n) * 0x10000000000n) / ((maturity - newCurrentTime) * 50n + 0x10000000000n)
     }
 
-    const debtCollateralCalculate = ({ assetIn, debtIn, collateralIn }: NewLiquidityParamsUint, currentTime: bigint) => {
+    const debtCollateralCalculate = (
+      { assetIn, debtIn, collateralIn }: NewLiquidityParamsUint,
+      currentTime: bigint
+    ) => {
       const yIncrease = new Uint112(
         new Uint256(debtIn)
           .sub(assetIn)

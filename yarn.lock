@@ -676,6 +676,11 @@
   resolved "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-4.2.0.tgz"
   integrity sha512-LD4NnkKpHHSMo5z9MvFsG4g1xxZUDqV3A3Futu3nvyfs4wPwXxqOgMaxOoa2PeyGL2VNeSlbxT54enbQzGcgJQ==
 
+"@openzeppelin/contracts@^4.2.0":
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.3.2.tgz#ff80affd6d352dbe1bbc5b4e1833c41afd6283b6"
+  integrity sha512-AybF1cesONZStg5kWf6ao9OlqTZuPqddvprc0ky7lrUVOjXeKpmQ2Y9FK+6ygxasb+4aic4O5pneFBfwVsRRRg==
+
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"
   resolved "https://registry.npmjs.org/@resolver-engine/core/-/core-0.3.3.tgz"
@@ -819,12 +824,12 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@timeswap-labs/timeswap-v1-core@1.0.10":
-  version "1.0.10"
-  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.10/3024a9b14eb8f42f31b4ed0d57d2ea2bd8b8667fdb61885f08a76c1673ab9a0c#d049b3e138f3b5070d3f901a4cc11c4a0b2d1519"
-  integrity sha512-O7aBAaZnKTmMkMVR1zSCxXtRXvZgESR1X+V1pcbCYzesjbIjMGXE8sQwzLMBzTuam+LeFPM4OofywoifC6zRiA==
+"@timeswap-labs/timeswap-v1-core@1.0.12":
+  version "1.0.12"
+  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.12/21ee72ca1335298d1c3919cac141f5cea77b294970cca6e28ade2d6df8832e18#3938cd9168973f2aca2eddc4cc39af81e741ba9b"
+  integrity sha512-XjY8uKNea3Y1EAR587cdFjzFAFex1MX14QZl0jBInHfnhd1ku1i04HEb6w2cCSDb/Kna4z2601aahKrfdM4c6w==
   dependencies:
-    "@openzeppelin/contracts" "^4.1.0"
+    "@openzeppelin/contracts" "^4.2.0"
     dotenv "^10.0.0"
 
 "@timeswap-labs/timeswap-v1-sdk-core@^0.1.16":

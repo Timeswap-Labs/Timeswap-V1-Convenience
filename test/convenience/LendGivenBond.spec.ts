@@ -2,12 +2,14 @@ import { ethers, waffle } from 'hardhat'
 import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import * as LiquidityMath from '../libraries/LiquidityMath'
-import { newLiquidityFixture, constructorFixture, Fixture, addLiquidityFixture } from '../shared/Fixtures'
+import * as LendMath from '../libraries/LendMath'
+import { newLiquidityFixture, constructorFixture, Fixture, lendGivenBondFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
-import { AddLiquidityParams, NewLiquidityParams } from '../types'
+import { LendGivenBondParams, NewLiquidityParams } from '../types'
 import { ERC20__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
+import * as LendFilter from '../filters/Lend'
 
 const { loadFixture } = waffle
 
@@ -16,7 +18,7 @@ let signers: SignerWithAddress[] = []
 
 const MAXUINT112: bigint = 2n ** 112n
 
-describe('Add Liquidity', () => {
+describe('Lend Given Bond', () => {
   async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 31536000n
     signers = await ethers.getSigners()
@@ -41,32 +43,33 @@ describe('Add Liquidity', () => {
                 collateralIn: fc.bigUintN(112),
               })
               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-            addLiquidityParams: fc
-              .record({
-                assetIn: fc.bigUintN(112),
-                minLiquidity: fc.bigUintN(256),
-                maxDebt: fc.bigUintN(112),
-                maxCollateral: fc.bigUintN(112),
-              }),
+            lendGivenBondParams: fc.record({
+              assetIn: fc.bigUintN(112),
+              bondOut: fc.bigUintN(112),
+              minInsurance: fc.bigUintN(112),
+            }),
           })
-          .filter((x) => LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
+          .filter((x) => LendFilter.lendGivenBondSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .noShrink(),
         async (data) => {
           const success = async () => {
+            console.log(112)
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
-            const addLiquidity = await addLiquidityFixture(newLiquidity, signers[0], data.addLiquidityParams)
-            return addLiquidity
-          }
+            const lendGivenBond = await lendGivenBondFixture(newLiquidity, signers[0], data.lendGivenBondParams)
+            // console.log(lendGivenBond)
+            return lendGivenBond
 
+          }
+          console.log(data)
           // Trying things
           const neededTime = (await now()) + 100n
           // providers.
 
           const result = await loadFixture(success)
           // currentTime = await now()
-          console.log(data)
           const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
             data.newLiquidityParams.assetIn,
             data.newLiquidityParams.debtIn,
@@ -74,44 +77,32 @@ describe('Add Liquidity', () => {
             currentTime + 5_000n,
             maturity
           )
-
+            console.log(3)
           const state = {
             x: data.newLiquidityParams.assetIn,
             y: yIncreaseNewLiquidity,
             z: zIncreaseNewLiquidity,
           }
-          const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
+          const { yDecreaseLendGivenBond, zDecreaseLendGivenBond } = LendMath.calcYAndZDecreaseLendGivenBond(
             state,
-            data.addLiquidityParams.assetIn
-          )
-          const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
-            data.newLiquidityParams.assetIn,
-            currentTime + 5_000n,
-            maturity
-          )
-          const delState = {
-            x: data.addLiquidityParams.assetIn,
-            y: yIncreaseAddLiquidity,
-            z: zIncreaseAddLiquidity,
-          }
-          const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(
-            state,
-            delState,
+            maturity,
             currentTime + 10_000n,
-            maturity
+            data.lendGivenBondParams.assetIn,
+            data.lendGivenBondParams.bondOut
           )
-          const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
-          const liquidityToken = ERC20__factory.connect(
-            (await result.convenience.getNatives(result.assetToken.address, result.collateralToken.address, maturity))
-              .liquidity,
-            ethers.provider
-          )
-          const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-          // console.log(liquidityBalanceContract)
-          expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
+            console.log(1)
+          const delState = { x: data.lendGivenBondParams.assetIn, y: yDecreaseLendGivenBond, z: zDecreaseLendGivenBond }
+          const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
+          console.log('start')
+          console.log(data)
+          console.log(state)
+          console.log(bond)
+          console.log(data.lendGivenBondParams.bondOut)
+          console.log('end')
+          expect(bond).equalBigInt(data.lendGivenBondParams.bondOut)
         }
       ),
-      { skipAllAfterTimeLimit: 50000, numRuns:2 }
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(100000)
 })
