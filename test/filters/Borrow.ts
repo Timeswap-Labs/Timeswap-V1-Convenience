@@ -131,7 +131,9 @@ export function borrowGivenDebtSuccess(
   }
   const debt = BorrowMath.getDebt(delState, maturity, currentTimeB)
   const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTimeB)
-
+  if (!BorrowMath.check(state, delState)) {
+    return false
+  }
   if (debt <= 0 || borrowGivenDebtParams.maxCollateral < collateral || debt > MAXUINT112 || collateral > MAXUINT112)
     return false
 

@@ -47,15 +47,15 @@ describe('Borrow Given Percent', () => {
           .record({
             newLiquidityParams: fc
               .record({
-                assetIn: fc.bigUintN(112),
-                debtIn: fc.bigUintN(112),
-                collateralIn: fc.bigUintN(112),
+                assetIn: fc.bigUintN(50),
+                debtIn: fc.bigUintN(50),
+                collateralIn: fc.bigUintN(50),
               })
               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
             borrowGivenCollateralParams: fc.record({
-              assetOut: fc.bigUintN(112),
-              collateralIn: fc.bigUintN(112),
-              maxDebt: fc.bigUintN(112),
+              assetOut: fc.bigUintN(50),
+              collateralIn: fc.bigUintN(50),
+              maxDebt: fc.bigUintN(50),
             }),
           })
           .filter((x) =>

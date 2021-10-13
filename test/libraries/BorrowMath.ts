@@ -1,4 +1,38 @@
+import { FEE } from '../shared/Constants'
 import { divUp, mulDivUp, shiftUp } from '../shared/Helper'
+const adjust = (reserve: bigint, increase: bigint) => {
+  return (reserve << 16n) + (0x10000n - 50n) * increase
+}
+const constantProduct = (state: { x: bigint; y: bigint; z: bigint }, delState: { x: bigint; y: bigint; z: bigint }) => {
+  if (delState.y * delState.z * delState.x > state.x * state.y * state.z) {
+    return true
+  }
+  return false
+}
+export const check = (state: { x: bigint; y: bigint; z: bigint }, delState: { x: bigint; y: bigint; z: bigint }) => {
+  const feeBase = 0x10000n - 50n
+  const xReserve = state.x - delState.x
+  const yAdjust = adjust(state.y, delState.y)
+  const zAdjust = adjust(state.z, delState.z)
+  if (!constantProduct(state, { x: xReserve, y: yAdjust, z: zAdjust })) {
+    return false
+  }
+  const minimum = divUp((delState.x * state.y) << 12n, xReserve * feeBase)
+  if (delState.y < minimum) {
+    return false
+  }
+  console.log(`ts start`)
+  console.log({
+    minimum: minimum,
+    delState: delState,
+    state: state,
+    xReserve: xReserve,
+    yAdjust: yAdjust,
+    zAdjust: zAdjust,
+  })
+  console.log(`ts end`)
+  return true
+}
 
 export const getYandZIncreaseBorrowGivenPercent = (
   state: { x: bigint; y: bigint; z: bigint },
