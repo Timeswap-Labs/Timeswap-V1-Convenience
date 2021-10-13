@@ -1,52 +1,186 @@
-import { LendGivenBondParams, NewLiquidityParams, NewLiquidityParamsUint } from "../types";
+import { LendGivenBondParams, LendGivenInsuranceParams, NewLiquidityParams, NewLiquidityParamsUint, LendGivenPercentParams } from '../types'
 import * as LiquidityMath from '../libraries/LiquidityMath'
 import * as LendMath from '../libraries/LendMath'
 const MAXUINT112: bigint = 2n ** 112n
 
-export function lendGivenBondSuccess(params: {newLiquidityParams: NewLiquidityParams,lendGivenBondParams:LendGivenBondParams},currentTimeNL:bigint,currentTimeLGB:bigint, maturity:bigint){
-    const {newLiquidityParams, lendGivenBondParams} = params
+export function lendGivenBondSuccess(
+  params: { newLiquidityParams: NewLiquidityParams; lendGivenBondParams: LendGivenBondParams },
+  currentTimeNL: bigint,
+  currentTimeLGB: bigint,
+  maturity: bigint
+) {
+  const { newLiquidityParams, lendGivenBondParams } = params
+  if (
+    lendGivenBondParams.assetIn <= 0 ||
+    lendGivenBondParams.bondOut <= 0 ||
+    lendGivenBondParams.minInsurance <= 0 ||
+    lendGivenBondParams.bondOut - lendGivenBondParams.assetIn <= 0
+  ) {
+    return false
+  }
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    newLiquidityParams.assetIn,
+    newLiquidityParams.debtIn,
+    newLiquidityParams.collateralIn,
+    currentTimeNL,
+    maturity
+  )
+  if (
+    !(
+      yIncreaseNewLiquidity > 0n &&
+      zIncreaseNewLiquidity > 0n &&
+      yIncreaseNewLiquidity < MAXUINT112 &&
+      zIncreaseNewLiquidity < MAXUINT112
+    )
+  ) {
+    return false
+  }
+  const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+  // console.log(state)
+  if (
+    !LendMath.verifyYAndZDecreaseLendGivenBond(
+      state,
+      maturity,
+      currentTimeLGB,
+      lendGivenBondParams.assetIn,
+      lendGivenBondParams.bondOut
+    )
+  ) {
+    // console.log('hey')
+    return false
+  }
+  const { yDecreaseLendGivenBond, zDecreaseLendGivenBond } = LendMath.calcYAndZDecreaseLendGivenBond(
+    state,
+    maturity,
+    currentTimeLGB,
+    lendGivenBondParams.assetIn,
+    lendGivenBondParams.bondOut
+  )
+  if (
+    !(
+      yDecreaseLendGivenBond > 0n &&
+      zDecreaseLendGivenBond > 0n &&
+      lendGivenBondParams.assetIn + state.x < MAXUINT112
+    )
+  ) {
+    return false
+  }
+  const delState = { x: lendGivenBondParams.assetIn, y: yDecreaseLendGivenBond, z: zDecreaseLendGivenBond }
+  if (!LendMath.check(state, delState)) {
+    return false
+  }
+  if(LendMath.getInsurance(state,delState,maturity,currentTimeLGB)<lendGivenBondParams.minInsurance){
+    return false
+  }
+  console.log('hey 1')
+  return true
+}
+export function lendGivenInsuranceSuccess(params: {newLiquidityParams: NewLiquidityParams,lendGivenInsuranceParams:LendGivenInsuranceParams},currentTimeNL:bigint,currentTimeLGI:bigint, maturity:bigint){
+  const {newLiquidityParams, lendGivenInsuranceParams} = params
+  if (
+      (lendGivenInsuranceParams.assetIn <= 0 || lendGivenInsuranceParams.insuranceOut<=0 ||
+      lendGivenInsuranceParams.minBond <= 0 )
+    ) {
+      return false
+    }
+    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+      newLiquidityParams.assetIn,
+      newLiquidityParams.debtIn,
+      newLiquidityParams.collateralIn,
+      currentTimeNL,
+      maturity
+    )
     if (
-        (lendGivenBondParams.assetIn <= 0 || lendGivenBondParams.bondOut <=0 ||
-        lendGivenBondParams.minInsurance <= 0 || lendGivenBondParams.bondOut - lendGivenBondParams.assetIn <= 0)
-      ) {
-        return false
-      }
-      const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
-        newLiquidityParams.assetIn,
-        newLiquidityParams.debtIn,
-        newLiquidityParams.collateralIn,
-        currentTimeNL,
-        maturity
+      !(
+        yIncreaseNewLiquidity > 0n &&
+        zIncreaseNewLiquidity > 0n &&
+        yIncreaseNewLiquidity < MAXUINT112 &&
+        zIncreaseNewLiquidity < MAXUINT112
       )
-      if (
-        !(
-          yIncreaseNewLiquidity > 0n &&
-          zIncreaseNewLiquidity > 0n &&
-          yIncreaseNewLiquidity < MAXUINT112 &&
-          zIncreaseNewLiquidity < MAXUINT112
-        )
-      ) {
+    ) {
+      return false
+    }
+    const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+    if (
+      !LendMath.verifyYAndZDecreaseLendGivenInsurance(
+        state,
+        maturity,
+        currentTimeLGI,
+        lendGivenInsuranceParams.assetIn,
+        lendGivenInsuranceParams.insuranceOut
+      )
+    ) {
+      // console.log('hey')
+      return false
+    }
+    const {yDecreaseLendGivenInsurance, zDecreaseLendGivenInsurance} = LendMath.calcYAndZDecreaseLendGivenInsurance(state,maturity,currentTimeLGI,lendGivenInsuranceParams.assetIn,lendGivenInsuranceParams.insuranceOut)
+    if (
+      !(
+        yDecreaseLendGivenInsurance > 0n &&
+        zDecreaseLendGivenInsurance > 0n &&
+        lendGivenInsuranceParams.assetIn + state.x < MAXUINT112 &&
+        state.y - yDecreaseLendGivenInsurance > 0n &&
+        state.z - zDecreaseLendGivenInsurance >0n
+      )
+    ) {
+      return false
+    }
+    const delState = {x:lendGivenInsuranceParams.assetIn,y:yDecreaseLendGivenInsurance,z:zDecreaseLendGivenInsurance}
+    if(!LendMath.check(state,delState)){
         return false
-      }
-      const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-      console.log(state)
-      const {yDecreaseLendGivenBond, zDecreaseLendGivenBond} = LendMath.calcYAndZDecreaseLendGivenBond(state,maturity,currentTimeLGB,lendGivenBondParams.assetIn,lendGivenBondParams.bondOut)
-      if (
-        !(
-          yDecreaseLendGivenBond > 0n &&
-          zDecreaseLendGivenBond > 0n &&
-          lendGivenBondParams.assetIn + state.x < MAXUINT112
-        )
-      ) {
+    }
+    if(LendMath.getBond(delState,maturity,currentTimeLGI)<lendGivenInsuranceParams.minBond){
+      return false
+    }
+    return true
+
+}
+
+export function lendGivenPercentSuccess(params: {newLiquidityParams: NewLiquidityParams,lendGivenPercentParams:LendGivenPercentParams},currentTimeNL:bigint,currentTimeLGP:bigint, maturity:bigint){
+  const {newLiquidityParams, lendGivenPercentParams} = params
+  if (
+      (lendGivenPercentParams.assetIn <= 0 || lendGivenPercentParams.percent<=0 ||
+      lendGivenPercentParams.minBond <= 0 || lendGivenPercentParams.minInsurance <=0)
+    ) {
+      return false
+    }
+    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+      newLiquidityParams.assetIn,
+      newLiquidityParams.debtIn,
+      newLiquidityParams.collateralIn,
+      currentTimeNL,
+      maturity
+    )
+    if (
+      !(
+        yIncreaseNewLiquidity > 0n &&
+        zIncreaseNewLiquidity > 0n &&
+        yIncreaseNewLiquidity < MAXUINT112 &&
+        zIncreaseNewLiquidity < MAXUINT112
+      )
+    ) {
+      return false
+    }
+    const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+    const {yDecreaseLendGivenPercent, zDecreaseLendGivenPercent} = LendMath.calcYAndZDecreaseLendGivenPercent(state,maturity,currentTimeLGP,lendGivenPercentParams.assetIn,lendGivenPercentParams.percent)
+    if (
+      !(
+        yDecreaseLendGivenPercent > 0n &&
+        zDecreaseLendGivenPercent > 0n &&
+        lendGivenPercentParams.assetIn + state.x < MAXUINT112 &&
+        state.y - yDecreaseLendGivenPercent > 0n &&
+        state.z - zDecreaseLendGivenPercent >0n
+      )
+    ) {
+      return false
+    }
+    const delState = {x:lendGivenPercentParams.assetIn,y:yDecreaseLendGivenPercent,z:zDecreaseLendGivenPercent}
+    if(!LendMath.check(state,delState)){
         return false
-      }
-      const delState = {x:lendGivenBondParams.assetIn,y:yDecreaseLendGivenBond,z:zDecreaseLendGivenBond}
-      if(!LendMath.check(state,delState)){
-          return false
-      }
-      if(LendMath.getInsurance(state,delState,maturity,currentTimeLGB)<lendGivenBondParams.minInsurance){
-        return false
-      }
-      return true
+    }
+    if(LendMath.getBond(delState,maturity,currentTimeLGP)<lendGivenPercentParams.minBond){
+      return false
+    }
+    return true
 
 }

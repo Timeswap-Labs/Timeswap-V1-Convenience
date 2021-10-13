@@ -21,25 +21,31 @@ library LendMath {
         uint128 bondOut
     ) internal  returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
-
+        console.log('maturity,timestamp',maturity,block.timestamp);
+        console.log('boundout,assetin',bondOut,assetIn);
         ConstantProduct.CP memory cp = pair.get(maturity);
+        console.log('state x', cp.x);
+        console.log('state y', cp.y);
+        console.log('state z', cp.z);
         console.log(1);
         uint256 _yDecrease = bondOut;
         _yDecrease -= assetIn;
         _yDecrease <<= 32;
         _yDecrease = _yDecrease.divUp(maturity - block.timestamp);
         yDecrease = _yDecrease.toUint112();
+        console.log('yDecrease',_yDecrease);
         console.log(2);
-
+        console.log(cp.y);
         uint256 yAdjust = cp.y;
         yAdjust <<= 16;
         yAdjust -= _yDecrease * feeBase;
+        console.log('yAdjust',yAdjust);
         console.log(3);
 
         uint256 xAdjust = cp.x;
         xAdjust += assetIn;
         console.log(4);
-
+        console.log('xAdjust',xAdjust);
         uint256 _zDecrease = xAdjust;
         _zDecrease *= yAdjust;
         uint256 subtrahend = cp.x;
@@ -50,6 +56,7 @@ library LendMath {
         denominator *= yAdjust;
         denominator *= feeBase;
         _zDecrease = _zDecrease.mulDiv(uint256(cp.z) << 16, denominator);
+        console.log('zDecrease',_zDecrease);
         zDecrease = _zDecrease.toUint112();
                 console.log(5);
 
