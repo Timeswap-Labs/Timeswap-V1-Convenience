@@ -2,6 +2,7 @@ import { run, ethers } from 'hardhat'
 import type { TestToken } from '../../typechain/TestToken'
 import type { TimeswapConvenience as ConvenienceContract } from '../../typechain/TimeswapConvenience'
 import type { TimeswapFactory as FactoryContract } from '../../typechain/TimeswapFactory'
+import type { WETH9 as WethContract } from '../../typechain/WETH9'
 import { Convenience } from './Convenience'
 // import { experimentalAddHardhatNetworkMessageTraceHook } from "hardhat/config";
 
@@ -78,7 +79,8 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
   const factoryContract = (await Factory.deploy(accounts[0].address, 100, 50)) as FactoryContract
 
   await factoryContract.deployTransaction.wait()
-  const wethContract = WETH9.attach('0x51ede3ed3921a8152a3401163ba0996cfa8193f9')
+  const wethContract = (await WETH9.deploy()) as WethContract
+  await wethContract.deployTransaction.wait()
 
   const convenienceContract = (await Convenience.deploy(
     factoryContract.address,
@@ -88,6 +90,7 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
   const deployedContracts = {
     factory: factoryContract,
     convenience: convenienceContract,
+    weth: wethContract,
   }
 
   return deployedContracts

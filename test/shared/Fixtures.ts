@@ -58,6 +58,43 @@ export async function newLiquidityFixture(
 
   return { convenience, assetToken, collateralToken, maturity }
 }
+
+export async function newLiquidityETHAssetFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  newLiquidityParams: NewLiquidityParams
+) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.newLiquidityETHAsset(
+    fixture.maturity,
+    fixture.collateralToken.address,
+    newLiquidityParams.assetIn,
+    newLiquidityParams.debtIn,
+    newLiquidityParams.collateralIn
+  )
+  await txn.wait()
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+
+export async function newLiquidityETHCollateralFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  newLiquidityParams: NewLiquidityParams
+) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.newLiquidityETHCollateral(
+    fixture.maturity,
+    fixture.assetToken.address,
+    newLiquidityParams.assetIn,
+    newLiquidityParams.debtIn,
+    newLiquidityParams.collateralIn
+  )
+  await txn.wait()
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+
 export async function addLiquidityFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
@@ -77,6 +114,45 @@ export async function addLiquidityFixture(
 
   return { convenience, assetToken, collateralToken, maturity }
 }
+
+export async function addLiquidityETHAssetFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  addLiquidityParams: AddLiquidityParams
+) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.addLiquidityETHAsset(
+    fixture.maturity,
+    fixture.collateralToken.address,
+    addLiquidityParams.assetIn,
+    addLiquidityParams.minLiquidity,
+    addLiquidityParams.maxDebt,
+    addLiquidityParams.maxCollateral
+  )
+  await txn.wait()
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+
+export async function addLiquidityETHCollateralFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  addLiquidityParams: AddLiquidityParams
+) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.addLiquidityETHCollateral(
+    fixture.maturity,
+    fixture.assetToken.address,
+    addLiquidityParams.assetIn,
+    addLiquidityParams.minLiquidity,
+    addLiquidityParams.maxDebt,
+    addLiquidityParams.maxCollateral
+  )
+  await txn.wait()
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+
 export async function removeLiquidityFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
@@ -89,6 +165,39 @@ export async function removeLiquidityFixture(
     fixture.collateralToken.address,
     removeLiquidityParams.liquidityIn
   )
+  await txn.wait()
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+
+export async function removeLiquidityETHAssetFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  removeLiquidityParams: RemoveLiquidityParams
+) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.removeLiquidityETHAsset(
+    fixture.maturity,
+    fixture.collateralToken.address,
+    removeLiquidityParams.liquidityIn
+  )
+  await txn.wait()
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+
+export async function removeLiquidityETHCollateralFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  removeLiquidityParams: RemoveLiquidityParams
+) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.removeLiquidityETHCollateral(
+    fixture.maturity,
+    fixture.assetToken.address,
+    removeLiquidityParams.liquidityIn
+  )
+  await txn.wait()
 
   return { convenience, assetToken, collateralToken, maturity }
 }
