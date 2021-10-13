@@ -2,9 +2,8 @@ import '@typechain/hardhat'
 import '@nomiclabs/hardhat-waffle'
 import { HardhatUserConfig } from 'hardhat/types'
 import * as dotenv from 'dotenv'
-import "hardhat-contract-sizer"
-import "solidity-coverage"
-
+import 'hardhat-contract-sizer'
+import 'solidity-coverage'
 
 dotenv.config()
 
@@ -22,6 +21,9 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
+    hardhat: {
+      accounts: { accountsBalance: (1n << 150n).toString() },
+    },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [`0x${RINKEBY_PRIVATE_KEY}`],

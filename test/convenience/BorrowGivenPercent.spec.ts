@@ -16,7 +16,6 @@ import { AddLiquidityParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as BorrowFilter from '../filters/Borrow'
-import { Uint112, Uint256, Uint40 } from '@timeswap-labs/timeswap-v1-sdk-core'
 import { addLiquidityParamsUToB, newLiquidityParamsUToB } from '../types/transformers/Liquidity'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 

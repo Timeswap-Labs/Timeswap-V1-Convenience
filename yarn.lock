@@ -824,21 +824,13 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@timeswap-labs/timeswap-v1-core@1.0.12":
-  version "1.0.12"
-  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.12/21ee72ca1335298d1c3919cac141f5cea77b294970cca6e28ade2d6df8832e18#3938cd9168973f2aca2eddc4cc39af81e741ba9b"
-  integrity sha512-XjY8uKNea3Y1EAR587cdFjzFAFex1MX14QZl0jBInHfnhd1ku1i04HEb6w2cCSDb/Kna4z2601aahKrfdM4c6w==
+"@timeswap-labs/timeswap-v1-core@1.0.11":
+  version "1.0.11"
+  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.11/5f47bfe0ee722d55e844c8cbee930e83d9503541782950cd399cae485eb89628#e39143b2daaba7a983d05471ace0a7e8135e4638"
+  integrity sha512-AxcDl3VMX8VinVSWsnjczHWxTJUupO+eJ0p6f8yRMG0nrHRaJYytxPCsIoT4JAwUKlrqureoi7V9Ftcp/Rjvfg==
   dependencies:
     "@openzeppelin/contracts" "^4.2.0"
     dotenv "^10.0.0"
-
-"@timeswap-labs/timeswap-v1-sdk-core@^0.1.16":
-  version "0.1.16"
-  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-sdk-core/0.1.16/179764045f21621d24d6ef40a8526f0ac373420c774e86f8f8ab776877624db8#794672592f61793a289e838abb122ea471fad18e"
-  integrity sha512-OexunmAXJHaM//NFsp7X6ilB6U/esnCqGuKy2oIN4XpQNyM6S/c9b1ykjiP6zHyikxaNsYE5xI/cNg9XItrPsw==
-  dependencies:
-    "@ethersproject/address" "^5.4.0"
-    tiny-invariant "^1.1.0"
 
 "@truffle/error@^0.0.14":
   version "0.0.14"
@@ -1996,11 +1988,6 @@ base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
-
-base64-sol@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/base64-sol/-/base64-sol-1.0.1.tgz#91317aa341f0bc763811783c5729f1c2574600f6"
-  integrity sha512-ld3cCNMeXt4uJXmLZBHFGMvVpK9KsLVEhPpFRXnvSVAqABKbuNZg/+dsq3NuM+wxFLb/UrVkz7m1ciWmkMfTbg==
 
 base@^0.11.1:
   version "0.11.2"
@@ -8721,11 +8708,6 @@ timed-out@^4.0.0, timed-out@^4.0.1:
   version "4.0.1"
   resolved "https://registry.npmjs.org/timed-out/-/timed-out-4.0.1.tgz"
   integrity sha1-8y6srFoXW+ol1/q1Zas+2HQe9W8=
-
-tiny-invariant@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.1.0.tgz#634c5f8efdc27714b7f386c35e6760991d230875"
-  integrity sha512-ytxQvrb1cPc9WBEI/HSeYYoGD0kWnGEOR8RY6KomWLBVhqz0RgTwVO9dLrGz7dC+nN9llyI7OKAgRq8Vq4ZBSw==
 
 tmp@0.0.33, tmp@^0.0.33:
   version "0.0.33"

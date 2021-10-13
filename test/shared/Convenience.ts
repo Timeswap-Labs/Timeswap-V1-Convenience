@@ -6,6 +6,7 @@ import { PerformanceNodeTiming } from 'perf_hooks'
 import { TestToken } from '../../typechain/TestToken'
 import type { TimeswapConvenience as ConvenienceContract } from '../../typechain/TimeswapConvenience'
 import type { TimeswapFactory as FactoryContract } from '../../typechain/TimeswapFactory'
+import type { WETH9 as WethContract } from '../../typechain/WETH9'
 import type { TimeswapPair as PairContract } from '../../typechain/TimeswapPair'
 import { Claims, CollectParams } from '../types'
 import { deploy } from './DeployConvenience'
@@ -18,10 +19,17 @@ interface Native {
 export class Convenience {
   public convenienceContract: ConvenienceContract
   public factoryContract: FactoryContract
+  public wethContract: WethContract
   public signer: SignerWithAddress
-  constructor(convenienceContract: ConvenienceContract, factoryContract: FactoryContract, signer: SignerWithAddress) {
+  constructor(
+    convenienceContract: ConvenienceContract,
+    factoryContract: FactoryContract,
+    wethContract: WethContract,
+    signer: SignerWithAddress
+  ) {
     this.convenienceContract = convenienceContract
     this.factoryContract = factoryContract
+    this.wethContract = wethContract
     this.signer = signer
   }
   async updateSigner(signer: SignerWithAddress) {
@@ -51,6 +59,46 @@ export class Convenience {
       deadline: maturity,
     })
   }
+  async newLiquidityETHAsset(
+    maturity: bigint,
+    collateral: string,
+    assetIn: bigint,
+    debtIn: bigint,
+    collateralIn: bigint
+  ) {
+    return await this.convenienceContract.newLiquidityETHAsset(
+      {
+        maturity: maturity,
+        collateral: collateral,
+        debtIn: debtIn,
+        collateralIn: collateralIn,
+        dueTo: this.signer.address,
+        liquidityTo: this.signer.address,
+        deadline: maturity,
+      },
+      { value: assetIn }
+    )
+  }
+  async newLiquidityETHCollateral(
+    maturity: bigint,
+    asset: string,
+    assetIn: bigint,
+    debtIn: bigint,
+    collateralIn: bigint
+  ) {
+    return await this.convenienceContract.newLiquidityETHCollateral(
+      {
+        maturity: maturity,
+        asset: asset,
+        assetIn: assetIn,
+        debtIn: debtIn,
+        dueTo: this.signer.address,
+        liquidityTo: this.signer.address,
+        deadline: maturity,
+      },
+      { value: collateralIn }
+    )
+  }
   async addLiquidity(
     maturity: bigint,
     asset: string,
@@ -73,11 +121,73 @@ export class Convenience {
       deadline: maturity,
     })
   }
+  async addLiquidityETHAsset(
+    maturity: bigint,
+    collateral: string,
+    assetIn: bigint,
+    minLiquidity: bigint,
+    maxDebt: bigint,
+    maxCollateral: bigint
+  ) {
+    return await this.convenienceContract.addLiquidityETHAsset(
+      {
+        maturity: maturity,
+        collateral: collateral,
+        minLiquidity: minLiquidity,
+        maxDebt: maxDebt,
+        maxCollateral: maxCollateral,
+        dueTo: this.signer.address,
+        liquidityTo: this.signer.address,
+        deadline: maturity,
+      },
+      { value: assetIn }
+    )
+  }
+  async addLiquidityETHCollateral(
+    maturity: bigint,
+    asset: string,
+    assetIn: bigint,
+    minLiquidity: bigint,
+    maxDebt: bigint,
+    maxCollateral: bigint
+  ) {
+    return await this.convenienceContract.addLiquidityETHCollateral(
+      {
+        maturity: maturity,
+        asset: asset,
+        assetIn: assetIn,
+        minLiquidity: minLiquidity,
+        maxDebt: maxDebt,
+        dueTo: this.signer.address,
+        liquidityTo: this.signer.address,
+        deadline: maturity,
+      },
+      { value: maxCollateral }
+    )
+  }
   async removeLiquidity(maturity: bigint, asset: string, collateral: string, liquidityIn: bigint) {
     return await this.convenienceContract.removeLiquidity({
       maturity: maturity,
       asset: asset,
       collateral: collateral,
+      assetTo: this.signer.address,
+      collateralTo: this.signer.address,
+      liquidityIn: liquidityIn,
+    })
+  }
+  async removeLiquidityETHAsset(maturity: bigint, collateral: string, liquidityIn: bigint) {
+    return await this.convenienceContract.removeLiquidityETHAsset({
+      maturity: maturity,
+      collateral: collateral,
+      assetTo: this.signer.address,
+      collateralTo: this.signer.address,
+      liquidityIn: liquidityIn,
+    })
+  }
+  async removeLiquidityETHCollateral(maturity: bigint, asset: string, liquidityIn: bigint) {
+    return await this.convenienceContract.removeLiquidityETHCollateral({
+      maturity: maturity,
+      asset: asset,
       assetTo: this.signer.address,
       collateralTo: this.signer.address,
       liquidityIn: liquidityIn,
@@ -236,6 +346,6 @@ export async function convenienceInit(
   collateral: TestToken,
   signerWithAddress: SignerWithAddress
 ) {
-  const { convenience, factory } = await deploy(asset, collateral, maturity)
-  return new Convenience(convenience, factory, signerWithAddress)
+  const { convenience, factory, weth } = await deploy(asset, collateral, maturity)
+  return new Convenience(convenience, factory, weth, signerWithAddress)
 }
