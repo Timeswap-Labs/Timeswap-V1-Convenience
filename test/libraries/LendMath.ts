@@ -11,7 +11,7 @@ export const verifyYAndZDecreaseLendGivenBond = (
   assetIn: bigint,
   bondOut: bigint
 ) => {
-  const feeBase = BigInt(0x10000 + 50)
+  const feeBase = BigInt(0x10000 + 100)
   const yDecrease = divUp((bondOut - assetIn) << 32n, maturity - currentTime)
   if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
     // console.log('yDecrease out of bounds',yDecrease)
@@ -66,7 +66,7 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
     assetIn: bigint,
     insuranceOut: bigint
   ) => {
-    const feeBase = BigInt(0x10000 + 50)
+    const feeBase = BigInt(0x10000 + 100)
     const xAdjust = state.x + assetIn
     if (xAdjust <= 0 || xAdjust >= MAXUINT112) {
         // console.log('yDecrease out of bounds',yDecrease)
@@ -118,42 +118,75 @@ export const verifyYAndZDecreaseLendGivenPercent = (
     assetIn: bigint,
     percent: bigint
   ) => {
-    const feeBase = BigInt(0x10000 + 50)
+    console.log('input',assetIn,percent,state)
+    const feeBase = BigInt(0x10000 + 100)
     const xAdjust = state.x + assetIn
-    if (xAdjust <= 0 || xAdjust >= MAXUINT112) {
-        // console.log('yDecrease out of bounds',yDecrease)
+    if (xAdjust < 0 || xAdjust >= MAXUINT256) {
+        console.log('xAdjust out of bounds',xAdjust)
         return false
       }
-    const minimum = (assetIn * state.y) << 12n
-    if (minimum <= 0 || minimum >= MAXUINT112) {
-        // console.log('yAdjust out of bounds',yAdjust)
+    let minimum = ((assetIn * state.y) << 12n)
+    if (minimum < 0 || minimum >= MAXUINT256) {
+        console.log('minimum out of bounds',minimum)
         return false
       }
-    const maximum = minimum << 4n
-    if (maximum <= 0 || maximum >= MAXUINT112) {
-        // console.log('yAdjust out of bounds',yAdjust)
+      console.log(minimum)
+    const maximum = (minimum << 4n)/(xAdjust*feeBase)
+    minimum /=(xAdjust*feeBase)
+    if (minimum < 0 || minimum >= MAXUINT256) {
+      console.log('minimum out of bounds',minimum)
+      return false
+    }
+    console.log(minimum)
+    console.log(xAdjust*feeBase)
+    console.log(maximum)
+    if (maximum < minimum || maximum >= MAXUINT256) {
+        console.log('maximum out of bounds',maximum)
         return false
       }
     const yDecrease = (((maximum - minimum) * percent) >> 32n) + minimum
     if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
-        // console.log('yAdjust out of bounds',yAdjust)
+        console.log('yDecrease out of bounds',yDecrease)
         return false
       }
-    const yAdjust = (state.y << 16n) - yDecrease * feeBase
-    if (yAdjust <= 0 || yAdjust >= MAXUINT112) {
-        // console.log('yAdjust out of bounds',yAdjust)
+    const yAdjust = (state.y << 16n) - (yDecrease * feeBase)
+    if (yAdjust < 0 || yAdjust >= MAXUINT256) {
+        console.log('yAdjust out of bounds',yAdjust)
         return false
       }
+      console.log(xAdjust,yAdjust,state.x,state.y)
+      console.log(xAdjust * yAdjust - ((state.x * state.y) << 16n))
+      console.log(state.z<<16n)
+      console.log(xAdjust*yAdjust*feeBase)
+      console.log((xAdjust * yAdjust - ((state.x * state.y) << 16n))*(state.z << 16n))
+      console.log(feeBase)
+      console.log(mulDiv(
+        xAdjust * yAdjust - ((state.x * state.y) << 16n),
+        state.z << 16n,
+        xAdjust * yAdjust * feeBase
+      ))
+
+    if( xAdjust * yAdjust - ((state.x * state.y) << 16n)>= MAXUINT256 ||
+    state.z << 16n >= MAXUINT256 ||
+    xAdjust * yAdjust * feeBase >= MAXUINT256) {
+      return false;
+    }
+
+    if (mulDiv(
+      xAdjust * yAdjust - ((state.x * state.y) << 16n),
+      state.z << 16n,
+      xAdjust * yAdjust * feeBase
+    ) >= MAXUINT256) {return false}
     const zDecrease = mulDiv(
       xAdjust * yAdjust - ((state.x * state.y) << 16n),
       state.z << 16n,
       xAdjust * yAdjust * feeBase
     )
     if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
-        // console.log('yAdjust out of bounds',yAdjust)
+        console.log('zDecrease out of bounds',zDecrease)
         return false
       }
-    return { yDecreaseLendGivenPercent: yDecrease, zDecreaseLendGivenPercent: zDecrease }
+      return true
   }
 export const calcYAndZDecreaseLendGivenBond = (
   state: { x: bigint; y: bigint; z: bigint },
@@ -162,7 +195,7 @@ export const calcYAndZDecreaseLendGivenBond = (
   assetIn: bigint,
   bondOut: bigint
 ) => {
-  const feeBase = BigInt(0x10000 + 50)
+  const feeBase = BigInt(0x10000 + 100)
   const yDecrease = divUp((bondOut - assetIn) << 32n, maturity - currentTime)
   const yAdjust = (state.y << 16n) - yDecrease * feeBase
   const xAdjust = state.x + assetIn
@@ -171,6 +204,7 @@ export const calcYAndZDecreaseLendGivenBond = (
     state.z << 16n,
     xAdjust * yAdjust * feeBase
   )
+  console.log(zDecrease)
   return { yDecreaseLendGivenBond: yDecrease, zDecreaseLendGivenBond: zDecrease }
 }
 
@@ -181,7 +215,7 @@ export const calcYAndZDecreaseLendGivenInsurance = (
   assetIn: bigint,
   insuranceOut: bigint
 ) => {
-  const feeBase = BigInt(0x10000 + 50)
+  const feeBase = BigInt(0x10000 + 100)
   const xAdjust = state.x + assetIn
   const zDecrease = mulDiv(
     ((maturity - currentTime) * state.y) + (state.x << 32n),
@@ -203,7 +237,7 @@ export const calcYAndZDecreaseLendGivenPercent = (
   assetIn: bigint,
   percent: bigint
 ) => {
-  const feeBase = BigInt(0x10000 + 50)
+  const feeBase = BigInt(0x10000 + 100)
   const xAdjust = state.x + assetIn
   const minimum = (assetIn * state.y) << 12n
   const maximum = minimum << 4n
@@ -250,7 +284,7 @@ export const check = (
     z: bigint
   }
 ) => {
-  const feeBase = BigInt(0x10000 + 50)
+  const feeBase = BigInt(0x10000 + 100)
   const xReserve = delState.x + state.x
   const yAdjusted = adjust(state.y, delState.y, feeBase)
   const zAdjusted = adjust(state.z, delState.z, feeBase)

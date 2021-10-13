@@ -38,16 +38,16 @@ describe('Lend Given Percent', () => {
           .record({
             newLiquidityParams: fc
               .record({
-                assetIn: fc.bigUintN(50),
-                debtIn: fc.bigUintN(50),
-                collateralIn: fc.bigUintN(50),
+                assetIn: fc.bigUintN(112),
+                debtIn: fc.bigUintN(112),
+                collateralIn: fc.bigUintN(112),
               })
               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
             lendGivenPercentParams: fc.record({
-              assetIn: fc.bigUintN(30),
+              assetIn: fc.bigUintN(50),
               percent: fc.bigUint(1n<<32n),
-              minInsurance: fc.bigUintN(30),
-              minBond: fc.bigUintN(30)
+              minInsurance: fc.bigUintN(50),
+              minBond: fc.bigUintN(50)
             }),
           })
           .filter((x) => LendFilter.lendGivenPercentSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))

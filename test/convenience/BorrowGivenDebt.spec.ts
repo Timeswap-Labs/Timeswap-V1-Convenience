@@ -123,6 +123,7 @@ describe('Borrow Given Percent', () => {
           // expect(collateralContract).equalBigInt(collateral)
         }
       )
-    )
+    ), {seed: 493300599
+    }
   }).timeout(600000)
 })

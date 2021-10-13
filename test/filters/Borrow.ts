@@ -11,6 +11,7 @@ import {
 } from '../types'
 import { objectMap, UToBObj } from '../shared/Helper'
 import { Uint112 } from '@timeswap-labs/timeswap-v1-sdk-core'
+import { assert } from 'console'
 const MAXUINT112: bigint = 2n ** 112n - 1n
 
 export function borrowGivenPercentSuccess(
@@ -62,6 +63,9 @@ export function borrowGivenPercentSuccess(
     x: borrowGivenPercentParams.assetOut,
     y: yIncreaseBorrowGivenPercent,
     z: zIncreaseBorrowGivenPercent,
+  }
+  if (!BorrowMath.check(state, delState)) {
+    return false
   }
   const debt = BorrowMath.getDebt(delState, maturity, currentTimeB)
   const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTimeB)
@@ -166,6 +170,7 @@ export function borrowGivenCollateralSuccess(
   if (state.x <= borrowGivenCollateralParams.assetOut) {
     return false
   }
+  if(!BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(state,borrowGivenCollateralParams.assetOut,maturity,currentTimeB,borrowGivenCollateralParams.collateralIn)) return false
 
   const { yIncreaseBorrowGivenCollateral, zIncreaseBorrowGivenCollateral } =
     BorrowMath.getYandZIncreaseBorrowGivenCollateral(
@@ -192,6 +197,9 @@ export function borrowGivenCollateralSuccess(
     x: borrowGivenCollateralParams.assetOut,
     y: yIncreaseBorrowGivenCollateral,
     z: zIncreaseBorrowGivenCollateral,
+  }
+  if (!BorrowMath.check(state, delState)) {
+    return false
   }
   const debt = BorrowMath.getDebt(delState, maturity, currentTimeB)
   const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTimeB)

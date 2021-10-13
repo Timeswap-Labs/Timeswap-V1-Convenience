@@ -27,7 +27,7 @@ let signers: SignerWithAddress[] = []
 
 const MAXUINT112: bigint = 2n ** 112n
 
-describe('Borrow Given Percent', () => {
+describe('Borrow Given Collateral', () => {
   async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 31536000n
     signers = await ethers.getSigners()
