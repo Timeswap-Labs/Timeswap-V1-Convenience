@@ -301,9 +301,42 @@ export async function lendGivenPercentFixture(
     fixture.assetToken.address,
     fixture.collateralToken.address,
     lendGivenPercentParams.assetIn,
-    lendGivenPercentParams.percent,
     lendGivenPercentParams.minInsurance,
-    lendGivenPercentParams.minBond
+    lendGivenPercentParams.minBond,
+    lendGivenPercentParams.percent,
+  )
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+export async function lendGivenPercentETHAssetFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  lendGivenPercentParams: LendGivenPercentParams
+) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.lendGivenPercentETHAsset(
+    fixture.maturity,
+    fixture.collateralToken.address,
+    lendGivenPercentParams.minInsurance,
+    lendGivenPercentParams.minBond,
+    lendGivenPercentParams.percent,
+  )
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+export async function lendGivenPercentETHCollateralFixture(
+  fixture: Fixture,
+  signer: SignerWithAddress,
+  lendGivenPercentParams: LendGivenPercentParams
+) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.lendGivenPercentETHCollateral(
+    fixture.maturity,
+    fixture.assetToken.address,
+    lendGivenPercentParams.assetIn,
+    lendGivenPercentParams.minInsurance,
+    lendGivenPercentParams.minBond,
+    lendGivenPercentParams.percent,
   )
 
   return { convenience, assetToken, collateralToken, maturity }

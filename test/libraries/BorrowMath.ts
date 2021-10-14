@@ -23,16 +23,9 @@ export const check = (state: { x: bigint; y: bigint; z: bigint }, delState: { x:
   if (delState.y < minimum) {
     return false
   }
-  console.log(`ts start`)
-  console.log({
-    minimum: minimum,
-    delState: delState,
-    state: state,
-    xReserve: xReserve,
-    yAdjust: yAdjust,
-    zAdjust: zAdjust,
-  })
-  console.log(`ts end`)
+ 
+    
+  //console.log(.*)
   return true
 }
 export const verifyYandZIncreaseBorrowGivenCollateral = (
@@ -46,7 +39,7 @@ export const verifyYandZIncreaseBorrowGivenCollateral = (
 
   const xAdjust = state.x - assetOut
   if (xAdjust < 0 || xAdjust >= MAXUINT256) {
-    console.log('xAdjust out of bounds',xAdjust)
+    //console.log(.*)
     return false
   }
   let denominator = xAdjust * (state.x << 32n)
@@ -54,19 +47,19 @@ export const verifyYandZIncreaseBorrowGivenCollateral = (
   const zIncrease = collateralIn - mulDivUp(subtrahend, assetOut * state.z, denominator)
   
   if (zIncrease <= 0 || zIncrease >= MAXUINT112) {
-    console.log('zDecrease out of bounds',zIncrease)
+    //console.log(.*)
     return false
   }
   const zAdjust = (state.z << 16n) + zIncrease * feeBase
   if (zAdjust < 0 || zAdjust >= MAXUINT256) {
-    console.log('zAdjust out of bounds',zAdjust)
+    //console.log(.*)
     return false
   }
   subtrahend = xAdjust * zAdjust
   denominator = xAdjust * zAdjust * feeBase
   const yIncrease = mulDivUp(((state.x * state.z) << 16n) - subtrahend, state.y << 16n, denominator)
   if (yIncrease <= 0 || yIncrease >= MAXUINT112) {
-    console.log('yDecrease out of bounds',yIncrease)
+    //console.log(.*)
     return false
   }
   return { yIncreaseBorrowGivenCollateral: yIncrease, zIncreaseBorrowGivenCollateral: zIncrease }

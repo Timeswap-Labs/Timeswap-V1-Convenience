@@ -60,7 +60,7 @@ describe('Collect', () => {
           .noShrink(),
         async (data) => {
           const success = async () => {
-            console.log(112)
+            //console.log(.*)
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
@@ -71,10 +71,11 @@ describe('Collect', () => {
             return collect
 
           }
-          console.log(data)
+          //console.log(.*)
         }),
       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-      )
+      )   
+
     }).timeout(100000)
   })
 
@@ -120,7 +121,7 @@ describe('Collect', () => {
             .noShrink(),
           async (data) => {
             const success = async () => {
-              console.log(112)
+              //console.log(.*)
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
               const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
@@ -131,7 +132,7 @@ describe('Collect', () => {
               return collect
   
             }
-            console.log(data)
+            //console.log(.*)
           }),
         { skipAllAfterTimeLimit: 50000, numRuns: 10 }
         )
@@ -180,7 +181,7 @@ describe('Collect', () => {
               .noShrink(),
             async (data) => {
               const success = async () => {
-                console.log(112)
+                //console.log(.*)
                 const constructor = await loadFixture(fixture)
                 await setTime(Number(currentTime + 5000n))
                 const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
@@ -191,7 +192,7 @@ describe('Collect', () => {
                 return collect
     
               }
-              console.log(data)
+              //console.log(.*)
             }),
           { skipAllAfterTimeLimit: 50000, numRuns: 10 }
           )

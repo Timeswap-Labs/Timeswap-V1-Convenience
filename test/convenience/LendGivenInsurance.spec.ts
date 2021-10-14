@@ -215,7 +215,7 @@ async function lendGivenInsuranceProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  console.log(data)
+  //console.log(.*)
   // Trying things
   const neededTime = (await now()) + 100n
   // providers.
@@ -249,12 +249,12 @@ async function lendGivenInsuranceProperties(
     z: zDecreaseLendGivenBond,
   }
   const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
-  console.log('start')
-  console.log(data)
-  console.log(state)
-  console.log(bond)
-  console.log(data.lendGivenInsuranceParams.insuranceOut)
-  console.log('end')
+  //console.log(.*)
+  //console.log(.*)
+  //console.log(.*)
+  //console.log(.*)
+  //console.log(.*)
+  //console.log(.*)
   //   expect(bond).equalBigInt(data.lendGivenBondParams.bondOut)
   // const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
   //   data.newLiquidityParams.assetIn,
@@ -274,6 +274,6 @@ async function lendGivenInsuranceProperties(
   //   ethers.provider
   // )
   // const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // // console.log(liquidityBalanceContract)
+  // // //console.log(.*)
   // expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 }

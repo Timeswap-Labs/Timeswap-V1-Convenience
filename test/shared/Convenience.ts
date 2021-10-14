@@ -331,6 +331,44 @@ export class Convenience {
       deadline: maturity,
     })
   }
+  async lendGivenPercentETHAsset(
+    maturity: bigint,
+    collateral: string,
+    minInsurance: bigint,
+    minBond: bigint,
+    percent: bigint
+  ) {
+    return await this.convenienceContract.lendGivenPercentETHAsset({
+      maturity: maturity,
+      collateral: collateral,
+      bondTo: this.signer.address,
+      insuranceTo: this.signer.address,
+      percent: percent,
+      minInsurance: minInsurance,
+      minBond: minBond,
+      deadline: maturity,
+    })
+  }
+  async lendGivenPercentETHCollateral(
+    maturity: bigint,
+    asset: string,
+    assetIn: bigint,
+    minInsurance: bigint,
+    minBond: bigint,
+    percent: bigint
+  ) {
+    return await this.convenienceContract.lendGivenPercentETHCollateral({
+      maturity: maturity,
+      asset: asset,
+      bondTo: this.signer.address,
+      insuranceTo: this.signer.address,
+      assetIn: assetIn,
+      percent: percent,
+      minInsurance: minInsurance,
+      minBond: minBond,
+      deadline: maturity,
+    })
+  }
   async collectETHAsset(maturity: bigint,  collateral: string, claims: Claims) {
     return await this.convenienceContract.collectETHAsset({
       maturity: maturity,

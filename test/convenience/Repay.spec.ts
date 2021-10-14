@@ -73,7 +73,7 @@ describe('Repay', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            console.log('CT 1', await now())
+            //console.log(.*)
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentFixture(
@@ -85,7 +85,7 @@ describe('Repay', () => {
             return borrowGivenPercent
           }
         }
-      )
+      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -134,7 +134,7 @@ describe('Repay ETHAsset', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            console.log('CT 1', await now())
+            //console.log(.*)
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentFixture(
@@ -146,7 +146,7 @@ describe('Repay ETHAsset', () => {
             return borrowGivenPercent
           }
         }
-      )
+      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -195,7 +195,7 @@ describe('Repay ETHCollateral', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            console.log('CT 1', await now())
+            //console.log(.*)
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentFixture(
@@ -207,7 +207,7 @@ describe('Repay ETHCollateral', () => {
             return borrowGivenPercent
           }
         }
-      )
+      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })

@@ -69,7 +69,7 @@ describe('Remove Liquidity', () => {
 
           await removeLiquidityProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
-      )
+      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -117,7 +117,7 @@ describe('Remove Liquidity ETH Asset', () => {
             collateralToken.address
           )
         }
-      )
+      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -133,13 +133,13 @@ describe('Remove Liquidity ETH Collateral', () => {
           .record({
             newLiquidityParams: fc
               .record({
-                assetIn: fc.bigUintN(50),
-                debtIn: fc.bigUintN(50),
-                collateralIn: fc.bigUintN(50),
+                assetIn: fc.bigUintN(112),
+                debtIn: fc.bigUintN(112),
+                collateralIn: fc.bigUintN(112),
               })
               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5000n, maturity)),
             removeLiquidityParams: fc.record({
-              liquidityIn: fc.bigUintN(50),
+              liquidityIn: fc.bigUintN(112),
             }),
           })
           .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity)),
@@ -169,7 +169,7 @@ describe('Remove Liquidity ETH Collateral', () => {
             convenience.wethContract.address
           )
         }
-      )
+      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -202,16 +202,16 @@ async function removeLiquidityProperties(
     currentTime + 5000n,
     maturity
   )
-  //   console.log(currentTime)
-  //   console.log('ts liquidity state',liquidityBalanceNew);
-  //   console.log('ts liquidity in', data.removeLiquidityParams.liquidityIn);
-  //   console.log('ts updated balance',liquidityBalanceNew - data.removeLiquidityParams.liquidityIn);
+  //   //console.log(.*)
+  //   //console.log(.*)
+  //   //console.log(.*)
+  //   //console.log(.*)
   const liquidityBalance = liquidityBalanceNew - data.removeLiquidityParams.liquidityIn
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
   const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
   const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // console.log(liquidityBalanceContract)
+  // //console.log(.*)
   expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
   const totalLiquidityBalanceContract = await TimeswapPair__factory.connect(

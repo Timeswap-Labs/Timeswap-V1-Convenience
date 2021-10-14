@@ -73,7 +73,7 @@ export function addLiquiditySuccess(
   const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
   const liquidityAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL, maturity)
-  // console.log('ts liquidity out : ', liquidity)
+  // //console.log(.*)
 
   if (
     addLiquidityParams.maxDebt < debt ||

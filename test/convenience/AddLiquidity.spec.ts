@@ -71,8 +71,8 @@ describe('Add Liquidity', () => {
 
           await addLiquidityProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
-      )
-      // { skipAllAfterTimeLimit: 50000, numRuns: 2 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(100000)
 })
@@ -120,7 +120,7 @@ describe('Add Liquidity ETH Asset', () => {
           )
         }
       )
-      // { skipAllAfterTimeLimit: 50000, numRuns: 2 }
+      ,{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(100000)
 })
@@ -169,8 +169,8 @@ describe('Add Liquidity ETH Collateral', () => {
 
           await addLiquidityProperties(data, currentTime, success, assetToken.address, convenience.wethContract.address)
         }
-      )
-      // { skipAllAfterTimeLimit: 50000, numRuns: 2 }
+      ),      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+
     )
   }).timeout(100000)
 })
@@ -201,7 +201,7 @@ async function addLiquidityProperties(
 ) {
   const result = await loadFixture(success)
   // currentTime = await now()
-  // console.log(data)
+  // //console.log(.*)
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -241,6 +241,6 @@ async function addLiquidityProperties(
     ethers.provider
   )
   const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // console.log(liquidityBalanceContract)
+  // //console.log(.*)
   expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 }

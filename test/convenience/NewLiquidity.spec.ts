@@ -52,7 +52,7 @@ describe('New Liquidity', () => {
 
           await newLiquidityProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
-      )
+      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -83,7 +83,7 @@ describe('New Liquidity ETH Asset', () => {
             collateralToken.address
           )
         }
-      )
+      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -109,7 +109,7 @@ describe('New Liquidity ETH Collateral', () => {
           await newLiquidityProperties(data, currentTime, success, assetToken.address, convenience.wethContract.address)
         }
       )
-    )
+    ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
   }).timeout(600000)
 })
 
@@ -149,9 +149,9 @@ async function newLiquidityProperties(
     maturity,
     newCurrentTime
   )
-  // console.log(data)
-  // console.log(liquidityBalance)
-  // console.log((maturity - currentTime))
+  // //console.log(.*)
+  // //console.log(.*)
+  // //console.log(.*)
 
   // expect((await result.assetToken.balanceOf(signers[0].address)).toBigInt()).equalBigInt(
   //   (1n << 150n) - data.assetIn
@@ -163,7 +163,7 @@ async function newLiquidityProperties(
 
   const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
   const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // console.log(liquidityBalanceContract)
+  // //console.log(.*)
   expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
   const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)

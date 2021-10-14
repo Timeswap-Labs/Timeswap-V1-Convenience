@@ -36,7 +36,7 @@ export function lendGivenBondSuccess(
     return false
   }
   const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-  // console.log(state)
+  // //console.log(.*)
   if (
     !LendMath.verifyYAndZDecreaseLendGivenBond(
       state,
@@ -46,7 +46,7 @@ export function lendGivenBondSuccess(
       lendGivenBondParams.bondOut
     )
   ) {
-    // console.log('hey')
+    // //console.log(.*)
     return false
   }
   const { yDecreaseLendGivenBond, zDecreaseLendGivenBond } = LendMath.calcYAndZDecreaseLendGivenBond(
@@ -72,7 +72,7 @@ export function lendGivenBondSuccess(
   if(LendMath.getInsurance(state,delState,maturity,currentTimeLGB)<lendGivenBondParams.minInsurance){
     return false
   }
-  console.log('hey 1')
+  //console.log(.*)
   return true
 }
 export function lendGivenInsuranceSuccess(params: {newLiquidityParams: NewLiquidityParams,lendGivenInsuranceParams:LendGivenInsuranceParams},currentTimeNL:bigint,currentTimeLGI:bigint, maturity:bigint){
@@ -110,7 +110,7 @@ export function lendGivenInsuranceSuccess(params: {newLiquidityParams: NewLiquid
         lendGivenInsuranceParams.insuranceOut
       )
     ) {
-      // console.log('hey')
+      // //console.log(.*)
       return false
     }
     const {yDecreaseLendGivenInsurance, zDecreaseLendGivenInsurance} = LendMath.calcYAndZDecreaseLendGivenInsurance(state,maturity,currentTimeLGI,lendGivenInsuranceParams.assetIn,lendGivenInsuranceParams.insuranceOut)
@@ -151,7 +151,7 @@ export function lendGivenPercentSuccess(params: {newLiquidityParams: NewLiquidit
       currentTimeNL,
       maturity
     )
-    console.log(1);
+    //console.log(.*)
     if (
       !(
         yIncreaseNewLiquidity > 0n &&
@@ -162,7 +162,7 @@ export function lendGivenPercentSuccess(params: {newLiquidityParams: NewLiquidit
     ) {
       return false
     }
-    console.log(2)
+    //console.log(.*)
     const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
     if(!LendMath.verifyYAndZDecreaseLendGivenPercent(state,maturity,currentTimeLGP,lendGivenPercentParams.assetIn,lendGivenPercentParams.percent)) return false
     const {yDecreaseLendGivenPercent, zDecreaseLendGivenPercent} = LendMath.calcYAndZDecreaseLendGivenPercent(state,maturity,currentTimeLGP,lendGivenPercentParams.assetIn,lendGivenPercentParams.percent)
@@ -178,12 +178,15 @@ export function lendGivenPercentSuccess(params: {newLiquidityParams: NewLiquidit
       
       return false
     }
-    console.log(3)
+    //console.log(.*)
     const delState = {x:lendGivenPercentParams.assetIn,y:yDecreaseLendGivenPercent,z:zDecreaseLendGivenPercent}
     if(!LendMath.check(state,delState)){
         return false
     }
     if(LendMath.getBond(delState,maturity,currentTimeLGP)<lendGivenPercentParams.minBond){
+      return false
+    }
+    if(LendMath.getInsurance(state,delState,maturity,currentTimeLGP)<lendGivenPercentParams.minInsurance){
       return false
     }
     return true
@@ -222,7 +225,7 @@ export function collectSuccess(
     return false
   }
   const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-  // console.log(state)
+  // //console.log(.*)
   if (
     !LendMath.verifyYAndZDecreaseLendGivenBond(
       state,
@@ -232,7 +235,7 @@ export function collectSuccess(
       lendGivenBondParams.bondOut
     )
   ) {
-    // console.log('hey')
+    // //console.log(.*)
     return false
   }
   const { yDecreaseLendGivenBond, zDecreaseLendGivenBond } = LendMath.calcYAndZDecreaseLendGivenBond(

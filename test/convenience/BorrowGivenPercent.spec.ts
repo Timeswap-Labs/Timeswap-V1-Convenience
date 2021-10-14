@@ -69,7 +69,7 @@ describe('Borrow Given Percent', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            console.log('CT 1', await now())
+            //console.log(.*)
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentFixture(
@@ -83,7 +83,9 @@ describe('Borrow Given Percent', () => {
           await borrowGivenPercentProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
       )
-    )
+      ,{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )      
+
   }).timeout(600000)
 })
 
@@ -117,7 +119,7 @@ describe('Borrow Given Percent ETH Asset', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            console.log('CT 1', await now())
+            //console.log(.*)
             const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentETHAssetFixture(
@@ -136,8 +138,9 @@ describe('Borrow Given Percent ETH Asset', () => {
             collateralToken.address
           )
         }
-      )
-    )
+      )  ,{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )    
+
   }).timeout(600000)
 })
 
@@ -171,7 +174,7 @@ describe('Borrow Given Percent ETH Collateral', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            console.log('CT 1', await now())
+            //console.log(.*)
             const newLiquidity = await newLiquidityETHCollateralFixture(
               constructor,
               signers[0],
@@ -195,7 +198,9 @@ describe('Borrow Given Percent ETH Collateral', () => {
           )
         }
       )
-    )
+      ,{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )    
+
   }).timeout(600000)
 })
 
@@ -223,7 +228,7 @@ async function borrowGivenPercentProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  // console.log(data)
+  // //console.log(.*)
   // Trying things
   const neededTime = (await now()) + 100n
   // providers.
@@ -258,7 +263,7 @@ async function borrowGivenPercentProperties(
 
   const debt = BorrowMath.getDebt(delState, maturity, currentTime + 10_000n)
   const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTime + 10_000n)
-  // console.log('TS', currentTime + 10_000n)
+  // //console.log(.*)
 
   const cdToken = CollateralizedDebt__factory.connect(
     (await result.convenience.getNatives(assetAddress, collateralAddress, maturity)).collateralizedDebt,

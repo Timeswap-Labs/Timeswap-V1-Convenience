@@ -62,20 +62,20 @@ describe('Lend Given Bond', () => {
           .filter((x) => LendFilter.lendGivenBondSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
         async (data) => {
           const success = async () => {
-            console.log(112)
+            //console.log(.*)
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const lendGivenBond = await lendGivenBondFixture(newLiquidity, signers[0], data.lendGivenBondParams)
-            // console.log(lendGivenBond)
+            // //console.log(.*)
             return lendGivenBond
           }
 
           await lendGivenBondProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
-      )
-      // { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(100000)
 })
@@ -105,13 +105,13 @@ describe('Lend Given Bond ETH Asset', () => {
           .filter((x) => LendFilter.lendGivenBondSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
         async (data) => {
           const success = async () => {
-            console.log(112)
+            //console.log(.*)
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const lendGivenBond = await lendGivenBondETHAssetFixture(newLiquidity, signers[0], data.lendGivenBondParams)
-            // console.log(lendGivenBond)
+            // //console.log(.*)
             return lendGivenBond
           }
 
@@ -123,8 +123,8 @@ describe('Lend Given Bond ETH Asset', () => {
             collateralToken.address
           )
         }
-      )
-      // { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(100000)
 })
@@ -154,7 +154,7 @@ describe('Lend Given Bond ETH Collateral', () => {
           .filter((x) => LendFilter.lendGivenBondSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
         async (data) => {
           const success = async () => {
-            console.log(112)
+            //console.log(.*)
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityETHCollateralFixture(
@@ -168,7 +168,7 @@ describe('Lend Given Bond ETH Collateral', () => {
               signers[0],
               data.lendGivenBondParams
             )
-            // console.log(lendGivenBond)
+            // //console.log(.*)
             return lendGivenBond
           }
 
@@ -180,10 +180,11 @@ describe('Lend Given Bond ETH Collateral', () => {
             convenience.wethContract.address
           )
         }
-      )
-      // { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
-  }).timeout(100000)
+    
+      }).timeout(100000)
 })
 
 async function lendGivenBondProperties(
@@ -209,7 +210,7 @@ async function lendGivenBondProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  console.log(data)
+  //console.log(.*)
   // Trying things
   const neededTime = (await now()) + 100n
   // providers.
@@ -223,7 +224,7 @@ async function lendGivenBondProperties(
     currentTime + 5_000n,
     maturity
   )
-  console.log(3)
+  //console.log(.*)
   const state = {
     x: data.newLiquidityParams.assetIn,
     y: yIncreaseNewLiquidity,
@@ -236,14 +237,14 @@ async function lendGivenBondProperties(
     data.lendGivenBondParams.assetIn,
     data.lendGivenBondParams.bondOut
   )
-  console.log(1)
+  //console.log(.*)
   const delState = { x: data.lendGivenBondParams.assetIn, y: yDecreaseLendGivenBond, z: zDecreaseLendGivenBond }
   const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
-  console.log('start')
-  console.log(data)
-  console.log(state)
-  console.log(bond)
-  console.log(data.lendGivenBondParams.bondOut)
-  console.log('end')
+  //console.log(.*)
+  //console.log(.*)
+  //console.log(.*)
+  //console.log(.*)
+  //console.log(.*)
+  //console.log(.*)
   expect(bond).equalBigInt(data.lendGivenBondParams.bondOut)
 }
