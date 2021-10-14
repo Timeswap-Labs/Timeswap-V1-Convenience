@@ -75,6 +75,56 @@ describe('Add Liquidity', () => {
       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(100000)
+
+  it('Failed', async () => {
+    const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(112),
+                debtIn: fc.bigUintN(112),
+                collateralIn: fc.bigUintN(112),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+            addLiquidityParams: fc.record({
+              assetIn: fc.bigUintN(112),
+              minLiquidity: fc.bigUintN(256),
+              maxDebt: fc.bigUintN(112),
+              maxCollateral: fc.bigUintN(112),
+            }),
+          })
+          .filter((x) => !LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .map((x) => LiquidityFilter.addLiquidityError(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+          await setTime(Number(currentTime + 10000n))
+
+          await expect(
+            constructor.convenience.convenienceContract.addLiquidity({
+              asset: assetToken.address,
+              collateral: collateralToken.address,
+              maturity,
+              liquidityTo: signers[0].address,
+              dueTo: signers[0].address,
+              assetIn: data.addLiquidityParams.assetIn,
+              minLiquidity: data.addLiquidityParams.minLiquidity,
+              maxDebt: data.addLiquidityParams.maxDebt,
+              maxCollateral: data.addLiquidityParams.maxCollateral,
+              deadline: maturity,
+            })
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
+  }).timeout(100000)
 })
 
 describe('Add Liquidity ETH Asset', () => {
@@ -119,8 +169,59 @@ describe('Add Liquidity ETH Asset', () => {
             collateralToken.address
           )
         }
-      )
-      ,{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
+  }).timeout(100000)
+
+  it('Failed', async () => {
+    const { maturity, collateralToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(112),
+                debtIn: fc.bigUintN(112),
+                collateralIn: fc.bigUintN(112),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+            addLiquidityParams: fc.record({
+              assetIn: fc.bigUintN(112),
+              minLiquidity: fc.bigUintN(256),
+              maxDebt: fc.bigUintN(112),
+              maxCollateral: fc.bigUintN(112),
+            }),
+          })
+          .filter((x) => !LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .map((x) => LiquidityFilter.addLiquidityError(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
+          await setTime(Number(currentTime + 10000n))
+
+          await expect(
+            constructor.convenience.convenienceContract.addLiquidityETHAsset(
+              {
+                collateral: collateralToken.address,
+                maturity,
+                liquidityTo: signers[0].address,
+                dueTo: signers[0].address,
+                minLiquidity: data.addLiquidityParams.minLiquidity,
+                maxDebt: data.addLiquidityParams.maxDebt,
+                maxCollateral: data.addLiquidityParams.maxCollateral,
+                deadline: maturity,
+              },
+              { value: data.addLiquidityParams.assetIn }
+            )
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(100000)
 })
@@ -169,8 +270,59 @@ describe('Add Liquidity ETH Collateral', () => {
 
           await addLiquidityProperties(data, currentTime, success, assetToken.address, convenience.wethContract.address)
         }
-      ),      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
+  }).timeout(100000)
 
+  it('Failed', async () => {
+    const { maturity, assetToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(112),
+                debtIn: fc.bigUintN(112),
+                collateralIn: fc.bigUintN(112),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+            addLiquidityParams: fc.record({
+              assetIn: fc.bigUintN(112),
+              minLiquidity: fc.bigUintN(256),
+              maxDebt: fc.bigUintN(112),
+              maxCollateral: fc.bigUintN(112),
+            }),
+          })
+          .filter((x) => !LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .map((x) => LiquidityFilter.addLiquidityError(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
+          await setTime(Number(currentTime + 10000n))
+
+          await expect(
+            constructor.convenience.convenienceContract.addLiquidityETHCollateral(
+              {
+                asset: assetToken.address,
+                maturity,
+                liquidityTo: signers[0].address,
+                dueTo: signers[0].address,
+                assetIn: data.addLiquidityParams.assetIn,
+                minLiquidity: data.addLiquidityParams.minLiquidity,
+                maxDebt: data.addLiquidityParams.maxDebt,
+                deadline: maturity,
+              },
+              { value: data.addLiquidityParams.maxCollateral }
+            )
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(100000)
 })
