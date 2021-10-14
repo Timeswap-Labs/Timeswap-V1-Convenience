@@ -2,14 +2,11 @@ import * as LiquidityMath from '../libraries/LiquidityMath'
 import * as BorrowMath from '../libraries/BorrowMath'
 import {
   AddLiquidityParams,
-  AddLiquidityParamsUint,
   NewLiquidityParams,
-  NewLiquidityParamsUint,
   BorrowGivenPercentParams,
   BorrowGivenDebtParams,
   BorrowGivenCollateralParams,
 } from '../types'
-import { objectMap, UToBObj } from '../shared/Helper'
 const MAXUINT112: bigint = 2n ** 112n - 1n
 
 export function borrowGivenPercentSuccess(

@@ -213,6 +213,44 @@ export class Convenience {
       deadline: maturity,
     })
   }
+  async lendGivenBondETHAsset(
+    maturity: bigint,
+    collateral: string,
+    assetIn: bigint,
+    bondOut: bigint,
+    minInsurance: bigint
+  ) {
+    return await this.convenienceContract.lendGivenBondETHAsset(
+      {
+        maturity: maturity,
+        collateral: collateral,
+        bondTo: this.signer.address,
+        insuranceTo: this.signer.address,
+        bondOut: bondOut,
+        minInsurance: minInsurance,
+        deadline: maturity,
+      },
+      { value: assetIn }
+    )
+  }
+  async lendGivenBondETHCollateral(
+    maturity: bigint,
+    asset: string,
+    assetIn: bigint,
+    bondOut: bigint,
+    minInsurance: bigint
+  ) {
+    return await this.convenienceContract.lendGivenBondETHCollateral({
+      maturity: maturity,
+      asset: asset,
+      bondTo: this.signer.address,
+      insuranceTo: this.signer.address,
+      assetIn: assetIn,
+      bondOut: bondOut,
+      minInsurance: minInsurance,
+      deadline: maturity,
+    })
+  }
   async lendGivenInsurance(
     maturity: bigint,
     asset: string,
@@ -225,6 +263,44 @@ export class Convenience {
       maturity: maturity,
       asset: asset,
       collateral: collateral,
+      bondTo: this.signer.address,
+      insuranceTo: this.signer.address,
+      assetIn: assetIn,
+      insuranceOut: insuranceOut,
+      minBond: minBond,
+      deadline: maturity,
+    })
+  }
+  async lendGivenInsuranceETHAsset(
+    maturity: bigint,
+    collateral: string,
+    assetIn: bigint,
+    insuranceOut: bigint,
+    minBond: bigint
+  ) {
+    return await this.convenienceContract.lendGivenInsuranceETHAsset(
+      {
+        maturity: maturity,
+        collateral: collateral,
+        bondTo: this.signer.address,
+        insuranceTo: this.signer.address,
+        insuranceOut: insuranceOut,
+        minBond: minBond,
+        deadline: maturity,
+      },
+      { value: assetIn }
+    )
+  }
+  async lendGivenInsuranceETHCollateral(
+    maturity: bigint,
+    asset: string,
+    assetIn: bigint,
+    insuranceOut: bigint,
+    minBond: bigint
+  ) {
+    return await this.convenienceContract.lendGivenInsuranceETHCollateral({
+      maturity: maturity,
+      asset: asset,
       bondTo: this.signer.address,
       insuranceTo: this.signer.address,
       assetIn: assetIn,
@@ -285,6 +361,44 @@ export class Convenience {
       deadline: maturity,
     })
   }
+  async borrowGivenDebtETHAsset(
+    maturity: bigint,
+    collateral: string,
+    assetOut: bigint,
+    debtIn: bigint,
+    maxCollateral: bigint
+  ) {
+    return await this.convenienceContract.borrowGivenDebtETHAsset({
+      maturity: maturity,
+      collateral: collateral,
+      dueTo: this.signer.address,
+      assetTo: this.signer.address,
+      assetOut: assetOut,
+      debtIn: debtIn,
+      maxCollateral: maxCollateral,
+      deadline: maturity,
+    })
+  }
+  async borrowGivenDebtETHCollateral(
+    maturity: bigint,
+    asset: string,
+    assetOut: bigint,
+    debtIn: bigint,
+    maxCollateral: bigint
+  ) {
+    return await this.convenienceContract.borrowGivenDebtETHCollateral(
+      {
+        maturity: maturity,
+        asset: asset,
+        dueTo: this.signer.address,
+        assetTo: this.signer.address,
+        assetOut: assetOut,
+        debtIn: debtIn,
+        deadline: maturity,
+      },
+      { value: maxCollateral }
+    )
+  }
   async borrowGivenCollateral(
     maturity: bigint,
     asset: string,
@@ -304,6 +418,44 @@ export class Convenience {
       collateralIn: collateralIn,
       deadline: maturity,
     })
+  }
+  async borrowGivenCollateralETHAsset(
+    maturity: bigint,
+    collateral: string,
+    assetOut: bigint,
+    maxDebt: bigint,
+    collateralIn: bigint
+  ) {
+    return await this.convenienceContract.borrowGivenCollateralETHAsset({
+      maturity: maturity,
+      collateral: collateral,
+      dueTo: this.signer.address,
+      assetTo: this.signer.address,
+      assetOut: assetOut,
+      maxDebt: maxDebt,
+      collateralIn: collateralIn,
+      deadline: maturity,
+    })
+  }
+  async borrowGivenCollateralETHCollateral(
+    maturity: bigint,
+    asset: string,
+    assetOut: bigint,
+    maxDebt: bigint,
+    collateralIn: bigint
+  ) {
+    return await this.convenienceContract.borrowGivenCollateralETHCollateral(
+      {
+        maturity: maturity,
+        asset: asset,
+        dueTo: this.signer.address,
+        assetTo: this.signer.address,
+        assetOut: assetOut,
+        maxDebt: maxDebt,
+        deadline: maturity,
+      },
+      { value: collateralIn }
+    )
   }
   async borrowGivenPercent(
     maturity: bigint,
@@ -326,6 +478,48 @@ export class Convenience {
       percent: percent,
       deadline: maturity,
     })
+  }
+  async borrowGivenPercentETHAsset(
+    maturity: bigint,
+    collateral: string,
+    assetOut: bigint,
+    maxDebt: bigint,
+    maxCollateral: bigint,
+    percent: bigint
+  ) {
+    return await this.convenienceContract.borrowGivenPercentETHAsset({
+      maturity: maturity,
+      collateral: collateral,
+      dueTo: this.signer.address,
+      assetTo: this.signer.address,
+      assetOut: assetOut,
+      maxDebt: maxDebt,
+      maxCollateral: maxCollateral,
+      percent: percent,
+      deadline: maturity,
+    })
+  }
+  async borrowGivenPercentETHCollateral(
+    maturity: bigint,
+    asset: string,
+    assetOut: bigint,
+    maxDebt: bigint,
+    maxCollateral: bigint,
+    percent: bigint
+  ) {
+    return await this.convenienceContract.borrowGivenPercentETHCollateral(
+      {
+        maturity: maturity,
+        asset: asset,
+        dueTo: this.signer.address,
+        assetTo: this.signer.address,
+        assetOut: assetOut,
+        maxDebt: maxDebt,
+        percent: percent,
+        deadline: maturity,
+      },
+      { value: maxCollateral }
+    )
   }
   async repay(maturity: bigint, asset: string, collateral: string, ids: bigint[], maxAssetsIn: bigint[]) {
     return await this.convenienceContract.repay({

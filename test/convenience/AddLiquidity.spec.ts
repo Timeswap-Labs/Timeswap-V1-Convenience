@@ -15,8 +15,9 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { AddLiquidityParams, NewLiquidityParams } from '../types'
-import { ERC20__factory } from '../../typechain'
+import { ERC20__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
+import { Convenience } from '../shared/Convenience'
 
 const { loadFixture } = waffle
 
@@ -36,7 +37,7 @@ async function fixture(): Promise<Fixture> {
 
 describe('Add Liquidity', () => {
   it('Succeeded', async () => {
-    const { maturity } = await loadFixture(fixture)
+    const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
     await fc.assert(
@@ -68,55 +69,7 @@ describe('Add Liquidity', () => {
             return addLiquidity
           }
 
-          // Trying things
-          const neededTime = (await now()) + 100n
-          // providers.
-
-          const result = await loadFixture(success)
-          // currentTime = await now()
-          console.log(data)
-          const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
-            data.newLiquidityParams.assetIn,
-            data.newLiquidityParams.debtIn,
-            data.newLiquidityParams.collateralIn,
-            currentTime + 5_000n,
-            maturity
-          )
-
-          const state = {
-            x: data.newLiquidityParams.assetIn,
-            y: yIncreaseNewLiquidity,
-            z: zIncreaseNewLiquidity,
-          }
-          const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
-            state,
-            data.addLiquidityParams.assetIn
-          )
-          const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
-            data.newLiquidityParams.assetIn,
-            currentTime + 5_000n,
-            maturity
-          )
-          const delState = {
-            x: data.addLiquidityParams.assetIn,
-            y: yIncreaseAddLiquidity,
-            z: zIncreaseAddLiquidity,
-          }
-          const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(
-            state,
-            delState,
-            currentTime + 10_000n,
-            maturity
-          )
-          const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
-          const liquidityToken = ERC20__factory.connect(
-            (await result.convenience.getNatives(result.assetToken.address, result.collateralToken.address, maturity))
-              .liquidity,
-            ethers.provider
-          )
-          const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-          // console.log(liquidityBalanceContract)
-          expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
+          await addLiquidityProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
       )
       // { skipAllAfterTimeLimit: 50000, numRuns: 2 }
@@ -126,7 +79,7 @@ describe('Add Liquidity', () => {
 
 describe('Add Liquidity ETH Asset', () => {
   it('Succeeded', async () => {
-    const { maturity } = await loadFixture(fixture)
+    const { maturity, convenience, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
     await fc.assert(
@@ -158,60 +111,13 @@ describe('Add Liquidity ETH Asset', () => {
             return addLiquidity
           }
 
-          // Trying things
-          const neededTime = (await now()) + 100n
-          // providers.
-
-          const result = await loadFixture(success)
-          // currentTime = await now()
-          console.log(data)
-          const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
-            data.newLiquidityParams.assetIn,
-            data.newLiquidityParams.debtIn,
-            data.newLiquidityParams.collateralIn,
-            currentTime + 5_000n,
-            maturity
+          await addLiquidityProperties(
+            data,
+            currentTime,
+            success,
+            convenience.wethContract.address,
+            collateralToken.address
           )
-
-          const state = {
-            x: data.newLiquidityParams.assetIn,
-            y: yIncreaseNewLiquidity,
-            z: zIncreaseNewLiquidity,
-          }
-          const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
-            state,
-            data.addLiquidityParams.assetIn
-          )
-          const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
-            data.newLiquidityParams.assetIn,
-            currentTime + 5_000n,
-            maturity
-          )
-          const delState = {
-            x: data.addLiquidityParams.assetIn,
-            y: yIncreaseAddLiquidity,
-            z: zIncreaseAddLiquidity,
-          }
-          const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(
-            state,
-            delState,
-            currentTime + 10_000n,
-            maturity
-          )
-          const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
-          const liquidityToken = ERC20__factory.connect(
-            (
-              await result.convenience.getNatives(
-                result.convenience.wethContract.address,
-                result.collateralToken.address,
-                maturity
-              )
-            ).liquidity,
-            ethers.provider
-          )
-          const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-          // console.log(liquidityBalanceContract)
-          expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
         }
       )
       // { skipAllAfterTimeLimit: 50000, numRuns: 2 }
@@ -221,7 +127,7 @@ describe('Add Liquidity ETH Asset', () => {
 
 describe('Add Liquidity ETH Collateral', () => {
   it('Succeeded', async () => {
-    const { maturity } = await loadFixture(fixture)
+    const { maturity, assetToken, convenience } = await loadFixture(fixture)
     let currentTime = await now()
 
     await fc.assert(
@@ -261,63 +167,80 @@ describe('Add Liquidity ETH Collateral', () => {
             return addLiquidity
           }
 
-          // Trying things
-          const neededTime = (await now()) + 100n
-          // providers.
-
-          const result = await loadFixture(success)
-          // currentTime = await now()
-          console.log(data)
-          const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
-            data.newLiquidityParams.assetIn,
-            data.newLiquidityParams.debtIn,
-            data.newLiquidityParams.collateralIn,
-            currentTime + 5_000n,
-            maturity
-          )
-
-          const state = {
-            x: data.newLiquidityParams.assetIn,
-            y: yIncreaseNewLiquidity,
-            z: zIncreaseNewLiquidity,
-          }
-          const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
-            state,
-            data.addLiquidityParams.assetIn
-          )
-          const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
-            data.newLiquidityParams.assetIn,
-            currentTime + 5_000n,
-            maturity
-          )
-          const delState = {
-            x: data.addLiquidityParams.assetIn,
-            y: yIncreaseAddLiquidity,
-            z: zIncreaseAddLiquidity,
-          }
-          const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(
-            state,
-            delState,
-            currentTime + 10_000n,
-            maturity
-          )
-          const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
-          const liquidityToken = ERC20__factory.connect(
-            (
-              await result.convenience.getNatives(
-                result.assetToken.address,
-                result.convenience.wethContract.address,
-                maturity
-              )
-            ).liquidity,
-            ethers.provider
-          )
-          const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-          // console.log(liquidityBalanceContract)
-          expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
+          await addLiquidityProperties(data, currentTime, success, assetToken.address, convenience.wethContract.address)
         }
       )
       // { skipAllAfterTimeLimit: 50000, numRuns: 2 }
     )
   }).timeout(100000)
 })
+
+async function addLiquidityProperties(
+  data: {
+    newLiquidityParams: {
+      assetIn: bigint
+      debtIn: bigint
+      collateralIn: bigint
+    }
+    addLiquidityParams: {
+      assetIn: bigint
+      minLiquidity: bigint
+      maxDebt: bigint
+      maxCollateral: bigint
+    }
+  },
+  currentTime: bigint,
+  success: () => Promise<{
+    convenience: Convenience
+    assetToken: TestToken
+    collateralToken: TestToken
+    maturity: bigint
+  }>,
+  assetAddress: string,
+  collateralAddress: string
+) {
+  const result = await loadFixture(success)
+  // currentTime = await now()
+  // console.log(data)
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    data.newLiquidityParams.assetIn,
+    data.newLiquidityParams.debtIn,
+    data.newLiquidityParams.collateralIn,
+    currentTime + 5_000n,
+    maturity
+  )
+
+  const state = {
+    x: data.newLiquidityParams.assetIn,
+    y: yIncreaseNewLiquidity,
+    z: zIncreaseNewLiquidity,
+  }
+  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
+    state,
+    data.addLiquidityParams.assetIn
+  )
+  const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
+    data.newLiquidityParams.assetIn,
+    currentTime + 5_000n,
+    maturity
+  )
+  const delState = {
+    x: data.addLiquidityParams.assetIn,
+    y: yIncreaseAddLiquidity,
+    z: zIncreaseAddLiquidity,
+  }
+  const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(
+    state,
+    delState,
+    currentTime + 10_000n,
+    maturity
+  )
+  const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
+  const liquidityToken = ERC20__factory.connect(
+    (await result.convenience.getNatives(assetAddress, collateralAddress, maturity)).liquidity,
+    ethers.provider
+  )
+  const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
+  // console.log(liquidityBalanceContract)
+  expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
+}
