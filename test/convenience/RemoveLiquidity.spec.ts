@@ -69,7 +69,51 @@ describe('Remove Liquidity', () => {
 
           await removeLiquidityProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
-      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
+  }).timeout(600000)
+
+  it('Failed', async () => {
+    const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(50),
+                debtIn: fc.bigUintN(50),
+                collateralIn: fc.bigUintN(50),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5000n, maturity)),
+            removeLiquidityParams: fc.record({
+              liquidityIn: fc.bigUintN(50),
+            }),
+          })
+          .filter((x) => !LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity))
+          .map((x) => LiquidityFilter.removeLiquidityError(x, currentTime + 5000n, maturity)),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+          await advanceTime(Number(maturity))
+
+          await expect(
+            constructor.convenience.convenienceContract.removeLiquidity({
+              asset: assetToken.address,
+              collateral: collateralToken.address,
+              maturity,
+              assetTo: signers[0].address,
+              collateralTo: signers[0].address,
+              liquidityIn: data.removeLiquidityParams.liquidityIn,
+            })
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -117,7 +161,50 @@ describe('Remove Liquidity ETH Asset', () => {
             collateralToken.address
           )
         }
-      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
+  }).timeout(600000)
+
+  it('Failed', async () => {
+    const { maturity, collateralToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(50),
+                debtIn: fc.bigUintN(50),
+                collateralIn: fc.bigUintN(50),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5000n, maturity)),
+            removeLiquidityParams: fc.record({
+              liquidityIn: fc.bigUintN(50),
+            }),
+          })
+          .filter((x) => !LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity))
+          .map((x) => LiquidityFilter.removeLiquidityError(x, currentTime + 5000n, maturity)),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
+          await advanceTime(Number(maturity))
+
+          await expect(
+            constructor.convenience.convenienceContract.removeLiquidityETHAsset({
+              collateral: collateralToken.address,
+              maturity,
+              assetTo: signers[0].address,
+              collateralTo: signers[0].address,
+              liquidityIn: data.removeLiquidityParams.liquidityIn,
+            })
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
@@ -169,7 +256,50 @@ describe('Remove Liquidity ETH Collateral', () => {
             convenience.wethContract.address
           )
         }
-      ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
+  }).timeout(600000)
+
+  it('Failed', async () => {
+    const { maturity, assetToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(50),
+                debtIn: fc.bigUintN(50),
+                collateralIn: fc.bigUintN(50),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5000n, maturity)),
+            removeLiquidityParams: fc.record({
+              liquidityIn: fc.bigUintN(50),
+            }),
+          })
+          .filter((x) => !LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity))
+          .map((x) => LiquidityFilter.removeLiquidityError(x, currentTime + 5000n, maturity)),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
+          await advanceTime(Number(maturity))
+
+          await expect(
+            constructor.convenience.convenienceContract.removeLiquidityETHCollateral({
+              asset: assetToken.address,
+              maturity,
+              assetTo: signers[0].address,
+              collateralTo: signers[0].address,
+              liquidityIn: data.removeLiquidityParams.liquidityIn,
+            })
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
