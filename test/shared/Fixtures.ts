@@ -317,6 +317,7 @@ export async function lendGivenPercentETHAssetFixture(
   const txn = await fixture.convenience.lendGivenPercentETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
+    lendGivenPercentParams.assetIn,
     lendGivenPercentParams.minInsurance,
     lendGivenPercentParams.minBond,
     lendGivenPercentParams.percent,

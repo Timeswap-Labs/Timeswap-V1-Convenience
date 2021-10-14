@@ -3,7 +3,7 @@ import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime } fro
 import { expect } from '../shared/Expect'
 import * as LiquidityMath from '../libraries/LiquidityMath'
 import * as LendMath from '../libraries/LendMath'
-import { newLiquidityFixture, constructorFixture, Fixture, lendGivenPercentFixture, lendGivenPercentETHAssetFixture, lendGivenPercentETHCollateralFixture } from '../shared/Fixtures'
+import { newLiquidityFixture, constructorFixture, Fixture, lendGivenPercentFixture, lendGivenPercentETHAssetFixture, lendGivenPercentETHCollateralFixture, newLiquidityETHAssetFixture, newLiquidityETHCollateralFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LendGivenPercentParams, NewLiquidityParams } from '../types'
@@ -162,7 +162,7 @@ describe('Lend Given Percent ETH Asset', () => {
             const success = async () => {
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
-              const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+              const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
               await setTime(Number(currentTime + 10000n))
               const lendGivenBond = await lendGivenPercentETHAssetFixture(newLiquidity, signers[0], data.lendGivenPercentParams)
               return lendGivenBond
@@ -268,7 +268,7 @@ describe('Lend Given Percent ETH Asset', () => {
             const success = async () => {
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
-              const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+              const newLiquidity = await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
               await setTime(Number(currentTime + 10000n))
               const lendGivenBond = await lendGivenPercentETHCollateralFixture(newLiquidity, signers[0], data.lendGivenPercentParams)
               return lendGivenBond

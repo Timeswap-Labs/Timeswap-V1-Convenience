@@ -334,6 +334,7 @@ export class Convenience {
   async lendGivenPercentETHAsset(
     maturity: bigint,
     collateral: string,
+    assetIn:bigint,
     minInsurance: bigint,
     minBond: bigint,
     percent: bigint
@@ -347,7 +348,7 @@ export class Convenience {
       minInsurance: minInsurance,
       minBond: minBond,
       deadline: maturity,
-    })
+    },{value: assetIn})
   }
   async lendGivenPercentETHCollateral(
     maturity: bigint,
