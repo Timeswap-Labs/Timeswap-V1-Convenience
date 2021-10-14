@@ -319,6 +319,26 @@ export async function collectFixture(fixture: Fixture, signer: SignerWithAddress
 
   return { convenience, assetToken, collateralToken, maturity }
 }
+export async function collectETHAssetFixture(fixture: Fixture, signer: SignerWithAddress, collectParams: CollectParams) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.collectETHAsset(
+    fixture.maturity,
+    fixture.collateralToken.address,
+    collectParams.claims
+  )
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+export async function collectETHCollateralFixture(fixture: Fixture, signer: SignerWithAddress, collectParams: CollectParams) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.collectETHCollateral(
+    fixture.maturity,
+    fixture.assetToken.address,
+    collectParams.claims
+  )
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
 export async function borrowGivenDebtFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
@@ -484,6 +504,29 @@ export async function repayFixture(fixture: Fixture, signer: SignerWithAddress, 
     fixture.maturity,
     fixture.assetToken.address,
     fixture.collateralToken.address,
+    repayParams.ids,
+    repayParams.maxAssetsIn
+  )
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+
+export async function repayETHAssetFixture(fixture: Fixture, signer: SignerWithAddress, repayParams: RepayParams) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.repayETHAsset(
+    fixture.maturity,
+    fixture.collateralToken.address,
+    repayParams.ids,
+    repayParams.maxAssetsIn
+  )
+
+  return { convenience, assetToken, collateralToken, maturity }
+}
+export async function repayETHCollateralFixture(fixture: Fixture, signer: SignerWithAddress, repayParams: RepayParams) {
+  const { convenience, assetToken, collateralToken, maturity } = fixture
+  const txn = await fixture.convenience.repayETHCollateral(
+    fixture.maturity,
+    fixture.assetToken.address,
     repayParams.ids,
     repayParams.maxAssetsIn
   )

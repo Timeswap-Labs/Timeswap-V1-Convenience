@@ -331,6 +331,24 @@ export class Convenience {
       deadline: maturity,
     })
   }
+  async collectETHAsset(maturity: bigint,  collateral: string, claims: Claims) {
+    return await this.convenienceContract.collectETHAsset({
+      maturity: maturity,
+      collateral: collateral,
+      collateralTo: this.signer.address,
+      assetTo: this.signer.address,
+      claimsIn: claims,
+    })
+  }
+  async collectETHCollateral(maturity: bigint,  asset: string, claims: Claims) {
+    return await this.convenienceContract.collectETHCollateral({
+      maturity: maturity,
+      asset: asset,
+      collateralTo: this.signer.address,
+      assetTo: this.signer.address,
+      claimsIn: claims,
+    })
+  }
   async collect(maturity: bigint, asset: string, collateral: string, claims: Claims) {
     return await this.convenienceContract.collect({
       maturity: maturity,
@@ -530,8 +548,28 @@ export class Convenience {
       ids: ids,
       maxAssetsIn: maxAssetsIn,
       deadline: maturity,
-    })
+    }
+    )
   }
+  async repayETHAsset(maturity: bigint, collateral: string, ids: bigint[], maxAssetsIn: bigint[]) {
+    return await this.convenienceContract.repayETHAsset({
+      maturity: maturity,
+      collateral: collateral,
+      collateralTo: this.signer.address,
+      ids: ids,
+      maxAssetsIn: maxAssetsIn,
+      deadline: maturity,
+    })}
+    async repayETHCollateral(maturity: bigint, asset: string, ids: bigint[], maxAssetsIn: bigint[]) {
+      return await this.convenienceContract.repayETHCollateral({
+        maturity: maturity,
+        asset: asset,
+        collateralTo: this.signer.address,
+        ids: ids,
+        maxAssetsIn: maxAssetsIn,
+        deadline: maturity,
+      })
+}
 }
 
 export async function convenienceInit(

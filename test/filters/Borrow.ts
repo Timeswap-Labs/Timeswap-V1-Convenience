@@ -6,6 +6,7 @@ import {
   BorrowGivenPercentParams,
   BorrowGivenDebtParams,
   BorrowGivenCollateralParams,
+  RepayParams,
 } from '../types'
 const MAXUINT112: bigint = 2n ** 112n - 1n
 
@@ -211,6 +212,72 @@ export function borrowGivenCollateralSuccess(
   if (borrowGivenCollateralParams.maxDebt < debt || collateral <= 0 || debt > MAXUINT112 || collateral > MAXUINT112)
     return false
 
+  return true
+}
+export function repaySuccess(
+  liquidityParams: {
+    newLiquidityParams: NewLiquidityParams
+    borrowGivenPercentParams: BorrowGivenPercentParams
+    repayParams: RepayParams
+  },
+  currentTimeNL: bigint,
+  currentTimeB: bigint,
+  maturity: bigint
+) {
+  const { newLiquidityParams, borrowGivenPercentParams,repayParams } = liquidityParams
+
+  if (borrowGivenPercentParams.assetOut <= 0 || borrowGivenPercentParams.percent > 0x100000000n) {
+    return false
+  }
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    newLiquidityParams.assetIn,
+    newLiquidityParams.debtIn,
+    newLiquidityParams.collateralIn,
+    currentTimeNL,
+    maturity
+  )
+  const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+
+  if (state.x <= borrowGivenPercentParams.assetOut) {
+    return false
+  }
+
+  const { yIncreaseBorrowGivenPercent, zIncreaseBorrowGivenPercent } = BorrowMath.getYandZIncreaseBorrowGivenPercent(
+    state,
+    borrowGivenPercentParams.assetOut,
+    borrowGivenPercentParams.percent
+  )
+
+  if (
+    !(
+      yIncreaseBorrowGivenPercent > 0n &&
+      zIncreaseBorrowGivenPercent > 0n &&
+      yIncreaseBorrowGivenPercent + state.y <= MAXUINT112 &&
+      zIncreaseBorrowGivenPercent + state.z <= MAXUINT112 &&
+      state.x - borrowGivenPercentParams.assetOut > 0n
+    )
+  ) {
+    return false
+  }
+
+  const delState = {
+    x: borrowGivenPercentParams.assetOut,
+    y: yIncreaseBorrowGivenPercent,
+    z: zIncreaseBorrowGivenPercent,
+  }
+  if (!BorrowMath.check(state, delState)) {
+    return false
+  }
+  const debt = BorrowMath.getDebt(delState, maturity, currentTimeB)
+  const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTimeB)
+
+  if (
+    borrowGivenPercentParams.maxDebt < debt ||
+    borrowGivenPercentParams.maxCollateral < collateral ||
+    debt > MAXUINT112 ||
+    collateral > MAXUINT112
+  )
+    return false
   return true
 }
 
