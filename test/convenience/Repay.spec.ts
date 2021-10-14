@@ -137,7 +137,6 @@ describe('Repay ETHAsset', () => {
             ids : [0n,1n],
             maxAssetsIn: [data.newLiquidityParams.debtIn,data.borrowGivenPercentParams.maxDebt]
           }
-          console.log(repayData)
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
