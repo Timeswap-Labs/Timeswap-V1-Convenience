@@ -12,6 +12,10 @@ import {
   repayFixture,
   repayETHAssetFixture,
   repayETHCollateralFixture,
+  newLiquidityETHAssetFixture,
+  newLiquidityETHCollateralFixture,
+  borrowGivenPercentETHAssetFixture,
+  borrowGivenPercentETHCollateralFixture,
 } from '../shared/Fixtures'
 
 import * as fc from 'fast-check'
@@ -82,9 +86,11 @@ describe('Repay', () => {
               data.borrowGivenPercentParams
             )
             const repay = await repayFixture(borrowGivenPercent,signers[0],repayData)
-            return borrowGivenPercent
+            return repay
           }
+          await loadFixture(success)
         }
+        
       ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
@@ -124,27 +130,28 @@ describe('Repay ETHAsset', () => {
           })
           .filter((x) =>
             BorrowFilter.borrowGivenPercentSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)
-          )
+          ).filter((x)=> (x.newLiquidityParams.debtIn + x.borrowGivenPercentParams.maxDebt <MAXUINT112) )
           .noShrink(),
         async (data) => {
           const repayData = {
             ids : [0n,1n],
             maxAssetsIn: [data.newLiquidityParams.debtIn,data.borrowGivenPercentParams.maxDebt]
           }
+          console.log(repayData)
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
-            const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+            const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
-            const borrowGivenPercent = await borrowGivenPercentFixture(
+            const borrowGivenPercent = await borrowGivenPercentETHAssetFixture(
               newLiquidity,
               signers[0],
               data.borrowGivenPercentParams
             )
             const repay = await repayETHAssetFixture(borrowGivenPercent,signers[0],repayData)
-            return borrowGivenPercent
+            return repay
           }
+          await loadFixture(success)
         }
       ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
@@ -196,9 +203,9 @@ describe('Repay ETHCollateral', () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             //console.log(.*)
-            const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+            const newLiquidity = await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
-            const borrowGivenPercent = await borrowGivenPercentFixture(
+            const borrowGivenPercent = await borrowGivenPercentETHCollateralFixture(
               newLiquidity,
               signers[0],
               data.borrowGivenPercentParams
@@ -206,6 +213,8 @@ describe('Repay ETHCollateral', () => {
             const repay = await repayETHCollateralFixture(borrowGivenPercent,signers[0],repayData)
             return borrowGivenPercent
           }
+          await loadFixture(success)
+
         }
       ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )

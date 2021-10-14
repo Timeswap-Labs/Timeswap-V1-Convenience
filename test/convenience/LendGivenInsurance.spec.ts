@@ -79,7 +79,7 @@ describe('Lend Given Insurance', () => {
           await lendGivenInsuranceProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
       ),
-      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      { skipAllAfterTimeLimit: 50000, numRuns: 5 }
     )
   }).timeout(100000)
 })
@@ -131,7 +131,7 @@ describe('Lend Given Insurance ETH Asset', () => {
           )
         }
       ),
-      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      { skipAllAfterTimeLimit: 50000, numRuns: 5 }
     )
   }).timeout(100000)
 })
@@ -187,7 +187,7 @@ describe('Lend Given Insurance ETH Collateral', () => {
           )
         }
       ),
-      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      { skipAllAfterTimeLimit: 50000, numRuns: 5 }
     )
   }).timeout(100000)
 })

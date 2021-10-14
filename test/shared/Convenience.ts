@@ -598,7 +598,7 @@ export class Convenience {
       ids: ids,
       maxAssetsIn: maxAssetsIn,
       deadline: maturity,
-    })}
+    },{value: maxAssetsIn.reduce((a, b) => a + b, 0n)})}
     async repayETHCollateral(maturity: bigint, asset: string, ids: bigint[], maxAssetsIn: bigint[]) {
       return await this.convenienceContract.repayETHCollateral({
         maturity: maturity,
