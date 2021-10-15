@@ -121,7 +121,7 @@ describe('BorrowMath  Given Collateral', () => {
     }).timeout(600000)
   })
   
-describe('Borrow Given Percent', () => {
+describe('Borrow Math Given Percent', () => {
     it('Succeeded', async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()

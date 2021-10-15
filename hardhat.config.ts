@@ -22,7 +22,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      accounts: { accountsBalance: (1n << 150n).toString() },
+      accounts: { accountsBalance: (1n << 256n).toString() },
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
