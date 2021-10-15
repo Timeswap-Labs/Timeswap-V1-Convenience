@@ -3,7 +3,7 @@ import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime } fro
 import { expect } from '../shared/Expect'
 import * as LiquidityMath from '../libraries/LiquidityMath'
 import * as LendMath from '../libraries/LendMath'
-import { newLiquidityFixture, constructorFixture, Fixture, lendGivenBondFixture, collectFixture, collectETHAssetFixture, collectETHCollateralFixture, newLiquidityETHAssetFixture, lendGivenBondETHAssetFixture } from '../shared/Fixtures'
+import { newLiquidityFixture, constructorFixture, Fixture, lendGivenBondFixture, collectFixture, collectETHAssetFixture, collectETHCollateralFixture, newLiquidityETHAssetFixture, lendGivenBondETHAssetFixture, newLiquidityETHCollateralFixture, lendGivenBondETHCollateralFixture } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LendGivenBondParams, NewLiquidityParams, CollectParams } from '../types'
@@ -172,11 +172,11 @@ describe('Collect', () => {
                 //console.log(.*)
                 const constructor = await loadFixture(fixture)
                 await setTime(Number(currentTime + 5000n))
-                const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
+                const newLiquidity = await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
                 await setTime(Number(currentTime + 10000n))
-                const lendGivenBond = await lendGivenBondETHAssetFixture(newLiquidity, signers[0], data.lendGivenBondParams)
+                const lendGivenBond = await lendGivenBondETHCollateralFixture(newLiquidity, signers[0], data.lendGivenBondParams)
                 await setTime(Number(maturity+1n))
-                const collect = await collectETHAssetFixture(lendGivenBond,signers[0],data.collectParams)
+                const collect = await collectETHCollateralFixture(lendGivenBond,signers[0],data.collectParams)
                 return collect
     
               }
