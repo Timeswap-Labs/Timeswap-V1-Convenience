@@ -263,7 +263,7 @@ library Lend {
         ILend._LendGivenBond memory params
     ) private returns (IPair.Claims memory claimsOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
         console.log(11);
         (uint112 yDecrease, uint112 zDecrease) = pair.givenBond(params.maturity, params.assetIn, params.bondOut);
         console.log(112);
@@ -285,7 +285,7 @@ library Lend {
             )
         );
 
-        require(claimsOut.insurance >= params.minInsurance, 'Safety');
+        require(claimsOut.insurance >= params.minInsurance, 'E515');
     }
 
     function _lendGivenInsurance(
@@ -295,7 +295,7 @@ library Lend {
         ILend._LendGivenInsurance memory params
     ) private returns (IPair.Claims memory claimsOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
 
         (uint112 yDecrease, uint112 zDecrease) = pair.givenInsurance(
             params.maturity,
@@ -321,7 +321,7 @@ library Lend {
             )
         );
 
-        require(claimsOut.bond >= params.minBond, 'Safety');
+        require(claimsOut.bond >= params.minBond, 'E514');
     }
 
     function _lendGivenPercent(
@@ -330,10 +330,10 @@ library Lend {
         IFactory factory,
         ILend._LendGivenPercent memory params
     ) private returns (IPair.Claims memory claimsOut) {
-        require(params.percent <= 0x100000000, 'Invalid');
+        require(params.percent <= 0x100000000, 'E505');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
 
         (uint112 yDecrease, uint112 zDecrease) = pair.givenPercent(params.maturity, params.assetIn, params.percent);
 
@@ -355,8 +355,8 @@ library Lend {
             )
         );
 
-        require(claimsOut.bond >= params.minBond, 'Safety');
-        require(claimsOut.insurance >= params.minInsurance, 'Safety');
+        require(claimsOut.bond >= params.minBond, 'E514');
+        require(claimsOut.insurance >= params.minInsurance, 'E515');
     }
 
     function _lend(
@@ -365,7 +365,7 @@ library Lend {
         IPair pair,
         ILend._Lend memory params
     ) private returns (IPair.Claims memory claimsOut) {
-        require(params.deadline >= block.timestamp, 'Expired');
+        require(params.deadline >= block.timestamp, 'E504');
         console.log('1');
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))

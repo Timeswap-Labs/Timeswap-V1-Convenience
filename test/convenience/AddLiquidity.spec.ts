@@ -298,7 +298,8 @@ describe('Add Liquidity ETH Collateral', () => {
             }),
           })
           .filter((x) => !LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
-          .map((x) => LiquidityFilter.addLiquidityError(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
+          .map((x) => LiquidityFilter.addLiquidityError(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .noShrink(),
         async ({ data, error }) => {
           const constructor = await loadFixture(fixture)
           await setTime(Number(currentTime + 5000n))

@@ -56,13 +56,13 @@ abstract contract ERC721 is IERC721Extended {
             owner == msg.sender || isApprovedForAll[owner][msg.sender],
             'ERC721 :: approve : Approve caller is not owner nor approved for all'
         );
-        require(to != owner, 'ERC721 :: approve : Approval to current owner');
+        require(to != owner, 'E605');
 
         _approve(to, id);
     }
 
     function setApprovalForAll(address operator, bool approved) external override {
-        require(operator != msg.sender, 'ERC721 :: setApprovalForAll : Approve to caller');
+        require(operator != msg.sender, 'E607');
 
         _setApprovalForAll(operator, approved);
     }
@@ -75,7 +75,7 @@ abstract contract ERC721 is IERC721Extended {
     ) private {
         _transfer(from, to, id);
 
-        require(_checkOnERC721Received(from, to, id, data), 'ERC721 :: _safeTransfer : Not Safe Transfer');
+        require(_checkOnERC721Received(from, to, id, data), 'E608');
     }
 
     function _approve(address to, uint256 id) internal {
@@ -100,8 +100,8 @@ abstract contract ERC721 is IERC721Extended {
     }
 
     function _mint(address to, uint256 id) private {
-        require(to != address(0), 'ERC721 :: _mint : Mint to the address(0) address');
-        require(ownerOf[id] == address(0), 'ERC721 :: _mint : Already minted');
+        require(to != address(0), 'E601');
+        require(ownerOf[id] == address(0), 'E604');
 
         balanceOf[to]++;
         ownerOf[id] = to;
@@ -114,7 +114,7 @@ abstract contract ERC721 is IERC721Extended {
         address to,
         uint256 id
     ) private {
-        require(to != address(0), 'ERC721 :: _transfer : Transfer to the address(0) address');
+        require(to != address(0), 'E601');
 
         ownerOf[id] = to;
         balanceOf[from]--;

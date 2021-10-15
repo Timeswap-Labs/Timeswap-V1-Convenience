@@ -42,7 +42,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function tokenURI(uint256 id) external view override returns (string memory) {
-        require(ownerOf[id] != address(0), 'ERC721 :: tokenURI : Doesnt exist');
+        require(ownerOf[id] != address(0), 'E404');
         return NFTTokenURIScaffold.tokenURI(id, pair, dueOf(id), maturity);
     }
 
@@ -62,14 +62,14 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) ERC721Permit("Timeswap Collateralized Debt"){
+    ) ERC721Permit('Timeswap Collateralized Debt') {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
     }
 
     modifier onlyConvenience() {
-        require(msg.sender == address(convenience), 'Forbidden');
+        require(msg.sender == address(convenience), 'E403');
         _;
     }
 
@@ -88,9 +88,8 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
-        require(msg.sender == address(pair), 'Invalid sender');
+        require(msg.sender == address(pair), 'E401');
 
         convenience.collateralizedDebtCallback(pair, maturity, assetIn, data);
     }
-
 }

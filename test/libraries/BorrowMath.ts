@@ -1,7 +1,7 @@
 import { FEE } from '../shared/Constants'
 import { divUp, mulDivUp, shiftUp } from '../shared/Helper'
-const MAXUINT112 = 2**112
-const MAXUINT256 = 2**256
+const MAXUINT112 = 2 ** 112
+const MAXUINT256 = 2 ** 256
 const adjust = (reserve: bigint, increase: bigint) => {
   return (reserve << 16n) + (0x10000n - 100n) * increase
 }
@@ -23,10 +23,28 @@ export const check = (state: { x: bigint; y: bigint; z: bigint }, delState: { x:
   if (delState.y < minimum) {
     return false
   }
- 
-    
+
   //console.log(.*)
   return true
+}
+export const checkError = (
+  state: { x: bigint; y: bigint; z: bigint },
+  delState: { x: bigint; y: bigint; z: bigint }
+) => {
+  const feeBase = 0x10000n - 100n
+  const xReserve = state.x - delState.x
+  const yAdjust = adjust(state.y, delState.y)
+  const zAdjust = adjust(state.z, delState.z)
+  if (!constantProduct(state, { x: xReserve, y: yAdjust, z: zAdjust })) {
+    return 'Invariance'
+  }
+  const minimum = divUp((delState.x * state.y) << 12n, xReserve * feeBase)
+  if (delState.y < minimum) {
+    return 'Minimum'
+  }
+
+  //console.log(.*)
+  return ''
 }
 export const verifyYandZIncreaseBorrowGivenCollateral = (
   state: { x: bigint; y: bigint; z: bigint },
@@ -45,7 +63,7 @@ export const verifyYandZIncreaseBorrowGivenCollateral = (
   let denominator = xAdjust * (state.x << 32n)
   let subtrahend = (maturity - currentTime) * state.y + (state.x << 32n)
   const zIncrease = collateralIn - mulDivUp(subtrahend, assetOut * state.z, denominator)
-  
+
   if (zIncrease <= 0 || zIncrease >= MAXUINT112) {
     //console.log(.*)
     return false

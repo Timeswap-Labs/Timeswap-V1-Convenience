@@ -249,7 +249,7 @@ library Mint {
 
         if (address(pair) == address(0)) pair = factory.createPair(params.asset, params.collateral);
 
-        require(pair.totalLiquidity(params.maturity) == 0, 'Forbidden');
+        require(pair.totalLiquidity(params.maturity) == 0, 'E506');
         (uint112 yIncrease, uint112 zIncrease) = MintMath.givenNew(
             params.maturity,
             params.assetIn,
@@ -290,8 +290,8 @@ library Mint {
         )
     {
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
-        require(pair.totalLiquidity(params.maturity) > 0, 'Forbidden');
+        require(address(pair) != address(0), 'E501');
+        require(pair.totalLiquidity(params.maturity) > 0, 'E507');
 
         (uint112 yIncrease, uint112 zIncrease) = pair.givenAdd(params.maturity, params.assetIn);
 
@@ -314,9 +314,9 @@ library Mint {
             )
         );
 
-        require(liquidityOut >= params.minLiquidity, 'Safety');
-        require(dueOut.debt <= params.maxDebt, 'Safety');
-        require(dueOut.collateral <= params.maxCollateral, 'Safety');
+        require(liquidityOut >= params.minLiquidity, 'E511');
+        require(dueOut.debt <= params.maxDebt, 'E512');
+        require(dueOut.collateral <= params.maxCollateral, 'E513');
     }
 
     function _mint(
@@ -332,7 +332,7 @@ library Mint {
             IPair.Due memory dueOut
         )
     {   
-        require(params.deadline >= block.timestamp, 'Expired');
+        require(params.deadline >= block.timestamp, 'E504');
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0)){
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);

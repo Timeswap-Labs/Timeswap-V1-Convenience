@@ -140,6 +140,70 @@ export function borrowGivenDebtSuccess(
   return true
 }
 
+export function borrowGivenDebtError(
+  params: {
+    newLiquidityParams: NewLiquidityParams
+    borrowGivenDebtParams: BorrowGivenDebtParams
+  },
+  currentTimeNL: bigint,
+  currentTimeB: bigint,
+  maturity: bigint
+) {
+  const { newLiquidityParams, borrowGivenDebtParams } = params
+
+  if (borrowGivenDebtParams.assetOut <= 0) {
+    return { data: params, error: 'E205' }
+  }
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    newLiquidityParams.assetIn,
+    newLiquidityParams.debtIn,
+    newLiquidityParams.collateralIn,
+    currentTimeNL,
+    maturity
+  )
+  const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+
+  if (state.x <= borrowGivenDebtParams.assetOut) {
+    return { data: params, error: '' }
+  }
+
+  const { yIncreaseBorrowGivenDebt, zIncreaseBorrowGivenDebt } = BorrowMath.getYandZIncreaseBorrowGivenDebt(
+    state,
+    borrowGivenDebtParams.assetOut,
+    maturity,
+    currentTimeB,
+    borrowGivenDebtParams.debtIn
+  )
+
+  if (
+    !(
+      yIncreaseBorrowGivenDebt > 0n &&
+      zIncreaseBorrowGivenDebt > 0n &&
+      yIncreaseBorrowGivenDebt + state.y <= MAXUINT112 &&
+      zIncreaseBorrowGivenDebt + state.z <= MAXUINT112 &&
+      state.x - borrowGivenDebtParams.assetOut > 0n
+    )
+  ) {
+    return { data: params, error: '' }
+  }
+
+  const delState = {
+    x: borrowGivenDebtParams.assetOut,
+    y: yIncreaseBorrowGivenDebt,
+    z: zIncreaseBorrowGivenDebt,
+  }
+  const debt = BorrowMath.getDebt(delState, maturity, currentTimeB)
+  const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTimeB)
+  if (!BorrowMath.check(state, delState)) {
+    return { data: params, error: BorrowMath.checkError(state, delState) }
+  }
+  if (debt <= 0 || debt > MAXUINT112 || collateral > MAXUINT112) return { data: params, error: '' }
+
+  if (borrowGivenDebtParams.maxCollateral < collateral) return { data: params, error: 'E513' }
+
+  return { data: params, error: '' }
+}
+
 export function borrowGivenCollateralSuccess(
   liquidityParams: {
     newLiquidityParams: NewLiquidityParams
@@ -166,16 +230,16 @@ export function borrowGivenCollateralSuccess(
   if (state.x <= borrowGivenCollateralParams.assetOut) {
     return false
   }
-  if (
-    !BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(
-      state,
-      borrowGivenCollateralParams.assetOut,
-      maturity,
-      currentTimeB,
-      borrowGivenCollateralParams.collateralIn
-    )
-  )
-    return false
+  // if (
+  //   !BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(
+  //     state,
+  //     borrowGivenCollateralParams.assetOut,
+  //     maturity,
+  //     currentTimeB,
+  //     borrowGivenCollateralParams.collateralIn
+  //   )
+  // )
+  //   return false
 
   const { yIncreaseBorrowGivenCollateral, zIncreaseBorrowGivenCollateral } =
     BorrowMath.getYandZIncreaseBorrowGivenCollateral(
@@ -214,6 +278,82 @@ export function borrowGivenCollateralSuccess(
 
   return true
 }
+
+export function borrowGivenCollateralError(
+  params: {
+    newLiquidityParams: NewLiquidityParams
+    borrowGivenCollateralParams: BorrowGivenCollateralParams
+  },
+  currentTimeNL: bigint,
+  currentTimeB: bigint,
+  maturity: bigint
+) {
+  const { newLiquidityParams, borrowGivenCollateralParams } = params
+
+  if (borrowGivenCollateralParams.assetOut <= 0) {
+    return { data: params, error: 'E205' }
+  }
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    newLiquidityParams.assetIn,
+    newLiquidityParams.debtIn,
+    newLiquidityParams.collateralIn,
+    currentTimeNL,
+    maturity
+  )
+  const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+
+  if (state.x <= borrowGivenCollateralParams.assetOut) {
+    return { data: params, error: '' }
+  }
+  // if (
+  //   !BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(
+  //     state,
+  //     borrowGivenCollateralParams.assetOut,
+  //     maturity,
+  //     currentTimeB,
+  //     borrowGivenCollateralParams.collateralIn
+  //   )
+  // )
+  //   return { data: params, error: '' }
+
+  const { yIncreaseBorrowGivenCollateral, zIncreaseBorrowGivenCollateral } =
+    BorrowMath.getYandZIncreaseBorrowGivenCollateral(
+      state,
+      borrowGivenCollateralParams.assetOut,
+      maturity,
+      currentTimeB,
+      borrowGivenCollateralParams.collateralIn
+    )
+
+  if (
+    !(
+      yIncreaseBorrowGivenCollateral > 0n &&
+      zIncreaseBorrowGivenCollateral > 0n &&
+      yIncreaseBorrowGivenCollateral + state.y <= MAXUINT112 &&
+      zIncreaseBorrowGivenCollateral + state.z <= MAXUINT112 &&
+      state.x - borrowGivenCollateralParams.assetOut > 0n
+    )
+  ) {
+    return { data: params, error: '' }
+  }
+
+  const delState = {
+    x: borrowGivenCollateralParams.assetOut,
+    y: yIncreaseBorrowGivenCollateral,
+    z: zIncreaseBorrowGivenCollateral,
+  }
+  if (!BorrowMath.check(state, delState)) {
+    return { data: params, error: BorrowMath.checkError(state, delState) }
+  }
+  const debt = BorrowMath.getDebt(delState, maturity, currentTimeB)
+  const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTimeB)
+
+  if (collateral <= 0 || debt > MAXUINT112 || collateral > MAXUINT112) return { data: params, error: '' }
+  if (borrowGivenCollateralParams.maxDebt < debt) return { data: params, error: 'E512' }
+
+  return { data: params, error: '' }
+}
+
 export function repaySuccess(
   liquidityParams: {
     newLiquidityParams: NewLiquidityParams
@@ -224,7 +364,7 @@ export function repaySuccess(
   currentTimeB: bigint,
   maturity: bigint
 ) {
-  const { newLiquidityParams, borrowGivenPercentParams,repayParams } = liquidityParams
+  const { newLiquidityParams, borrowGivenPercentParams, repayParams } = liquidityParams
 
   if (borrowGivenPercentParams.assetOut <= 0 || borrowGivenPercentParams.percent > 0x100000000n) {
     return false
