@@ -24,20 +24,8 @@ describe('Msg Value',()=>{
                     const userBalance = (await ethers.provider.getBalance(signer.address)).toBigInt()
                     const userSpent=  (ethSent+gasUsed)
                     const expectedUserBalance = (initalUserBalance- userSpent)
-                    console.log({
-                        contractBalance: contractBalance,
-                        userBalance: userBalance,
-                        userSpent: userSpent,
-                        initialUserBalance: initalUserBalance,
-                        gasUsed: gasUsed,
-                        ethSent: ethSent,
-                        diff: expectedUserBalance- userBalance,
-                        diff2: userSpent- ethSent,
-                        diff3: initalUserBalance - userBalance
-        
-                    },
 
-                    )
+                    
                     if(ethSent>MAXUINT112){
                         expect(userSpent).equalBigInt(ethSent-(MAXUINT256-MAXUINT112))
                         expect(contractBalance).equalBigInt(MAXUINT112);
