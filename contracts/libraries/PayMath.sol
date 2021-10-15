@@ -8,11 +8,11 @@ import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Safe
 library PayMath {
     using SafeCast for uint256;
 
-    function givenMaxAssetsIn(
+    function givenMaxAssetsIn(  
         IDue collateralizedDebt,
         uint256[] memory ids,
         uint112[] memory maxAssetsIn
-    ) internal returns (uint112[] memory assetsIn, uint112[] memory collateralsOut) {
+    ) internal  returns (uint112[] memory assetsIn, uint112[] memory collateralsOut) {
         assetsIn = maxAssetsIn;
         collateralsOut = new uint112[](ids.length);
 

@@ -19,7 +19,7 @@ library LendMath {
         uint256 maturity,
         uint112 assetIn,
         uint128 bondOut
-    ) internal  returns (uint112 yDecrease, uint112 zDecrease) {
+    ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
         ConstantProduct.CP memory cp = pair.get(maturity);
         uint256 _yDecrease = bondOut;

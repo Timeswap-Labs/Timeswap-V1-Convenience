@@ -207,17 +207,16 @@ export const calcYAndZDecreaseLendGivenInsurance = (
 ) => {
   const feeBase = BigInt(0x10000 + 100)
   const xAdjust = state.x + assetIn
-  const zDecrease = mulDiv(
-    (maturity - currentTime) * state.y + (state.x << 32n),
-    assetIn * state.z,
-    xAdjust * (state.x << 32n)
-  )
+  const zDecrease =
+    insuranceOut -
+    mulDiv((maturity - currentTime) * state.y + (state.x << 32n), assetIn * state.z, xAdjust * (state.x << 32n))
   const zAdjust = (state.z << 16n) - zDecrease * feeBase
   const yDecrease = mulDiv(
     xAdjust * zAdjust - ((state.x * state.z) << 16n),
     state.y << 16n,
     xAdjust * zAdjust * feeBase
   )
+
   return { yDecreaseLendGivenInsurance: yDecrease, zDecreaseLendGivenInsurance: zDecrease }
 }
 export const calcYAndZDecreaseLendGivenPercent = (

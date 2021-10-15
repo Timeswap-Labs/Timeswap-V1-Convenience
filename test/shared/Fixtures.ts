@@ -20,6 +20,7 @@ import {
   BorrowGivenPercentParams,
   RepayParams,
 } from '../types'
+import { LendMathCallee, MintMathCallee, TimeswapPair } from '../../typechain'
 
 let assetValue = 100000n ** 100000n
 let collateralValue = 100000n ** 100000n
@@ -566,6 +567,48 @@ export async function repayETHCollateralFixture(fixture: Fixture, signer: Signer
   )
 
   return { convenience, assetToken, collateralToken, maturity }
+}
+export async function mintMathCalleeGivenNewFixture(fixture:Fixture, signer:SignerWithAddress,newLiqudityParams: NewLiquidityParams){
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const mintMathCalleeFactory =await  ethers.getContractFactory('MintMathCallee')
+  const mintMathCalleeContract = (await (mintMathCalleeFactory).deploy()) as MintMathCallee
+  const txn = await mintMathCalleeContract.givenNew(maturity,newLiqudityParams.assetIn,newLiqudityParams.debtIn,newLiqudityParams.collateralIn);
+  return txn
+}
+export async function mintMathCalleeGivenAddFixture(fixture:Fixture, signer:SignerWithAddress,addLiquidityParams: AddLiquidityParams){
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const mintMathCalleeFactory =await  ethers.getContractFactory('MintMathCallee')
+  const mintMathCalleeContract = (await (mintMathCalleeFactory).deploy()) as MintMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await mintMathCalleeContract.givenAdd(pair,maturity,addLiquidityParams.assetIn);
+  return txn
+}
+export async function lendMathGivenBondFixture(fixture:Fixture,signer:SignerWithAddress,lendGivenBondParams: LendGivenBondParams) {
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const lendMathCalleeFactory =await  ethers.getContractFactory('LendMathCallee')
+  const lendMathCalleeContract = (await (lendMathCalleeFactory).deploy()) as LendMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await lendMathCalleeContract.givenBond(pair,maturity,lendGivenBondParams.assetIn,lendGivenBondParams.bondOut)
+  return txn
+
+}
+export async function lendMathGivenInsuranceFixture(fixture:Fixture,signer:SignerWithAddress,lendGivenInsuranceParams: LendGivenInsuranceParams) {
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const lendMathCalleeFactory =await  ethers.getContractFactory('LendMathCallee')
+  const lendMathCalleeContract = (await (lendMathCalleeFactory).deploy()) as LendMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await lendMathCalleeContract.givenInsurance(pair,maturity,lendGivenInsuranceParams.assetIn,lendGivenInsuranceParams.insuranceOut)
+  return txn
+
+}
+export async function lendMathGivenPercentFixture(fixture:Fixture,signer:SignerWithAddress,lendGivenPercentParams: LendGivenPercentParams) {
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const lendMathCalleeFactory =await  ethers.getContractFactory('LendMathCallee')
+  const lendMathCalleeContract = (await (lendMathCalleeFactory).deploy()) as LendMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await lendMathCalleeContract.givenPercent(pair,maturity,lendGivenPercentParams.assetIn,lendGivenPercentParams.percent)
+  return txn
+
 }
 export interface Fixture {
   convenience: Convenience
