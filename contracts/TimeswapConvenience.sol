@@ -1,609 +1,476 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.1;
+pragma solidity =0.8.4;
 
-import {InterfaceTimeswapConvenience} from './interfaces/InterfaceTimeswapConvenience.sol';
-import {InterfaceTimeswapFactory} from './interfaces/InterfaceTimeswapFactory.sol';
-import {InterfaceTimeswapPool} from './interfaces/InterfaceTimeswapPool.sol';
-import {InterfaceERC20} from './interfaces/InterfaceERC20.sol';
-import {InterfaceERC721} from './interfaces/InterfaceERC721.sol';
-import {TimeswapCalculate} from './libraries/TimeswapCalculate.sol';
+import {IConvenience} from './interfaces/IConvenience.sol';
+import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
+import {IWETH} from './interfaces/IWETH.sol';
+import {IDue} from './interfaces/IDue.sol';
+import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {ITimeswapMintCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapMintCallback.sol';
+import {ITimeswapLendCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapLendCallback.sol';
+import {ITimeswapBorrowCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapBorrowCallback.sol';
+import {Mint} from './libraries/Mint.sol';
+import {Burn} from './libraries/Burn.sol';
+import {Lend} from './libraries/Lend.sol';
+import {Withdraw} from './libraries/Withdraw.sol';
+import {Borrow} from './libraries/Borrow.sol';
+import {Pay} from './libraries/Pay.sol';
+import {SafeTransfer} from './libraries/SafeTransfer.sol';
+import {DeployNative} from './libraries/DeployNative.sol';
 
 /// @title Timeswap Convenience
-/// @author Ricsson W. Ngo
-/// @dev Conveniently call the core functions in Timeswap Core contract
-/// @dev Precalculate and transfer necessary tokens to the Timeswap Core contract
-/// @dev Does safety checks in regards to slippage and deadline
-contract TimeswapConvenience is InterfaceTimeswapConvenience {
-    using TimeswapCalculate for InterfaceTimeswapPool;
+/// @author Timeswap Labs
+/// @notice It is recommnded to use this contract to interact with Timeswap Core contract.
+/// @notice All error messages are abbreviated and can be found in the documentation.
+contract TimeswapConvenience is IConvenience {
+    using SafeTransfer for IERC20;
+    using Mint for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using Burn for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using Lend for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using Withdraw for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using Borrow for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using Pay for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
+    using DeployNative for mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native)));
 
     /* ===== MODEL ===== */
 
-    bytes4 private constant TRANSFER_FROM = bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
-    InterfaceTimeswapPool private constant ZERO = InterfaceTimeswapPool(address(type(uint160).min));
+    /// @inheritdoc IConvenience
+    IFactory public immutable override factory;
+    /// @inheritdoc IConvenience
+    IWETH public immutable override weth;
 
-    /// @dev The address of the Timeswap Core factory contract that deploys Timeswap pools
-    InterfaceTimeswapFactory public immutable override factory;
+    /// @dev Stores the addresses of the Liquidty, Bond, Insurance, Collateralized Debt token contracts.
+    mapping(IERC20 => mapping(IERC20 => mapping(uint256 => Native))) private natives;
 
-    /// @dev Set deadlines for when the transactions are not executed fast enough
-    modifier ensure(uint256 _deadline) {
-        require(_deadline >= block.timestamp, 'TimeswapConvenience :: ensure : Expired');
-        _;
+    /* ===== VIEW ===== */
+
+    /// @inheritdoc IConvenience
+    function getNative(
+        IERC20 asset,
+        IERC20 collateral,
+        uint256 maturity
+    ) external view override returns (Native memory) {
+        return natives[asset][collateral][maturity];
     }
 
     /* ===== INIT ===== */
 
-    /// @dev First deploy the Timeswap Core factory contract
-    /// @dev Then deploy the Timeswap Convenience contract
-    /// @param _factory The address of the Timeswap Core factory contract
-    constructor(InterfaceTimeswapFactory _factory) {
+    /// @dev Initializes the Convenience contract.
+    /// @param _factory The address of factory contract used by this contract.
+    /// @param _weth The address of the Wrapped ETH contract.
+    constructor(IFactory _factory, IWETH _weth) {
         factory = _factory;
+        weth = _weth;
     }
 
     /* ===== UPDATE ===== */
 
-    /// @dev Deploy a new Timeswap pool contract and initialize the liquidity with the first mint function in the Timeswap Core contract
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the mint function
-    /// @param _insuranceReceivedAndAssetIn The amount of insurance ERC20 received by the receiver and the increase in the X pool
-    /// @param _bondIncreaseAndCollateralPaid The increase in the Y pool and the amount of collateral ERC20 to be deposited to the pool contract
-    /// @param _bondReceivedAndCollateralLocked The amount of bond ERC20 received by the receiver and the amount of collateral ERC20 to be locked
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract
-    /// @return _insuranceIncreaseAndDebtRequired The increase in the V pool and the amount of debt received
-    /// @return _liquidityReceived The amount of liquidity ERC20 received
-    function newLiquidity(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _insuranceReceivedAndAssetIn,
-        uint256 _bondIncreaseAndCollateralPaid,
-        uint256 _bondReceivedAndCollateralLocked,
-        uint256 _deadline
-    )
+    receive() external payable {}
+
+    /// @inheritdoc IConvenience
+    function newLiquidity(NewLiquidity calldata params)
         external
         override
-        ensure(_deadline)
         returns (
-            uint256 _tokenId,
-            uint256 _insuranceIncreaseAndDebtRequired,
-            uint256 _liquidityReceived
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
         )
     {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-
-        // Deploy a new Timeswap pool if the pool does not exist
-        if (_pool == ZERO) _pool = _createPool(_parameter);
-
-        // Check if pool have liquidity
-        require(_pool.totalSupply() == 0, 'TimeswapConvenience :: newLiquidity : Pool already have Liquidity');
-
-        // Calculate one of the parameter for the mint function in the Timeswap Core contract
-        _insuranceIncreaseAndDebtRequired =
-            (_insuranceReceivedAndAssetIn * _bondReceivedAndCollateralLocked) /
-            _bondIncreaseAndCollateralPaid;
-
-        // Safely transfer the necessary tokens to the Timeswap Core pool
-        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _insuranceReceivedAndAssetIn);
-        _safeTransferFrom(
-            _parameter.collateral,
-            msg.sender,
-            _pool,
-            _bondIncreaseAndCollateralPaid + _bondReceivedAndCollateralLocked
-        );
-
-        // Call the mint function in the Timeswap Core
-        (_tokenId, , , _liquidityReceived) = _pool.mint(
-            _to,
-            _bondIncreaseAndCollateralPaid,
-            _insuranceIncreaseAndDebtRequired
-        );
+        (liquidityOut, id, dueOut) = natives.newLiquidity(this, factory, params);
     }
 
-    /// @dev Add more liquidity into an existing Timeswap pool with the mint function in the Timeswap Core contract
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the mint function
-    /// @param _insuranceReceivedAndAssetIn The amount of insurance ERC20 received by the receiver and the increase in the X pool
-    /// @param _safe The slippage protections of the mint transaction
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract
-    /// @return _bondIncreaseAndCollateralPaid The increase in the Y pool and the amount of collateral ERC20 to be deposited to the pool contract
-    /// @return _insuranceIncreaseAndDebtRequired The increase in the V pool and the amount of debt received
-    /// @return _bondReceivedAndCollateralLocked The amount of bond ERC20 received by the receiver and the amount of collateral ERC20 to be locked
-    /// @return _liquidityReceived The amount of liquidity ERC20 received
-    function addLiquidity(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _insuranceReceivedAndAssetIn,
-        SafeMint memory _safe,
-        uint256 _deadline
-    )
+    /// @inheritdoc IConvenience
+    function newLiquidityETHAsset(NewLiquidityETHAsset calldata params)
         external
+        payable
         override
-        ensure(_deadline)
         returns (
-            uint256 _tokenId,
-            uint256 _bondIncreaseAndCollateralPaid,
-            uint256 _insuranceIncreaseAndDebtRequired,
-            uint256 _bondReceivedAndCollateralLocked,
-            uint256 _liquidityReceived
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
         )
     {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: addLiquidity : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: addLiquidity : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: addLiquidity : No Liquidity');
-
-        // Calculate the necessary parameters for the mint function in the Timeswap Core contract
-        (_bondIncreaseAndCollateralPaid, _insuranceIncreaseAndDebtRequired, _bondReceivedAndCollateralLocked) = _pool
-        .calculateMint(_insuranceReceivedAndAssetIn);
-
-        // Safely transfer the necessary tokens to the Timeswap Core pool
-        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _insuranceReceivedAndAssetIn);
-        _safeTransferFrom(
-            _parameter.collateral,
-            msg.sender,
-            _pool,
-            _bondIncreaseAndCollateralPaid + _bondReceivedAndCollateralLocked
-        );
-
-        // Call the mint function in the Timeswap Core
-        (_tokenId, _bondReceivedAndCollateralLocked, , _liquidityReceived) = _pool.mint(
-            _to,
-            _bondIncreaseAndCollateralPaid,
-            _insuranceIncreaseAndDebtRequired
-        );
-
-        // Check slippage protection
-        require(
-            _insuranceIncreaseAndDebtRequired <= _safe.maxDebt,
-            'TimeswapConvenience :: addLiquidity : Over the maxDebt'
-        );
-        require(
-            _bondIncreaseAndCollateralPaid <= _safe.maxCollateralPaid,
-            'TimeswapConvenience :: addLiquidity : Over the maxCollateralPaid'
-        );
-        require(
-            _bondReceivedAndCollateralLocked <= _safe.maxCollateralLocked,
-            'TimeswapConvenience :: addLiquidity : Over the maxCollateralLocked'
-        );
+        (liquidityOut, id, dueOut) = natives.newLiquidityETHAsset(this, factory, weth, params);
     }
 
-    /// @dev Withdraw liquidity from a Timeswap pool before maturity with the burn function in the Timeswap Core contract
-    /// @dev Precalculate the collateral ERC20 to be locked
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the burn function
-    /// @param _liquidityIn The amount of liquidity ERC20 to be burnt
-    /// @param _maxCollateralLocked The maximum amount of collateral ERC20 willing to be locked
-    /// @param _safe The slippage protections of the burn transaction
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract, returns zero if no Collateralized Debt ERC721 is minted
-    /// @return _collateralLocked The actual collateral ERC20 locked in the Timeswap Core
-    /// @return _debtRequiredAndAssetReceived The debt required and the asset ERC20 received by the receiver
-    /// @return _bondReceived The amount of bond ERC20 received by the receiver
-    /// @return _insuranceReceived The amount of insurance ERC20 received by the receiver
-    function removeLiquidityBeforeMaturity(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _liquidityIn,
-        uint256 _maxCollateralLocked,
-        SafeBurn memory _safe,
-        uint256 _deadline
-    )
+    /// @inheritdoc IConvenience
+    function newLiquidityETHCollateral(NewLiquidityETHCollateral calldata params)
         external
+        payable
         override
-        ensure(_deadline)
         returns (
-            uint256 _tokenId,
-            uint256 _collateralLocked,
-            uint256 _debtRequiredAndAssetReceived,
-            uint256 _bondReceived,
-            uint256 _insuranceReceived
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
         )
     {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : Pool Does Not Exist');
-        require(
-            _pool.maturity() > block.timestamp,
-            'TimeswapConvenience :: removeLiquidityBeforeMaturity : Pool Matured'
+        (liquidityOut, id, dueOut) = natives.newLiquidityETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function addLiquidity(AddLiquidity calldata params)
+        external
+        override
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, id, dueOut) = natives.addLiquidity(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function addLiquidityETHAsset(AddLiquidityETHAsset calldata params)
+        external
+        payable
+        override
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, id, dueOut) = natives.addLiquidityETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function addLiquidityETHCollateral(AddLiquidityETHCollateral calldata params)
+        external
+        payable
+        override
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, id, dueOut) = natives.addLiquidityETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function removeLiquidity(RemoveLiquidity calldata params)
+        external
+        override
+        returns (IPair.Tokens memory tokensOut)
+    {
+        tokensOut = natives.removeLiquidity(factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function removeLiquidityETHAsset(RemoveLiquidityETHAsset calldata params)
+        external
+        override
+        returns (IPair.Tokens memory tokensOut)
+    {
+        tokensOut = natives.removeLiquidityETHAsset(factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function removeLiquidityETHCollateral(RemoveLiquidityETHCollateral calldata params)
+        external
+        override
+        returns (IPair.Tokens memory tokensOut)
+    {
+        tokensOut = natives.removeLiquidityETHCollateral(factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenBond(LendGivenBond calldata params) external override returns (IPair.Claims memory claimsOut) {
+        claimsOut = natives.lendGivenBond(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenBondETHAsset(LendGivenBondETHAsset calldata params)
+        external
+        payable
+        override
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = natives.lendGivenBondETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
+        external
+        payable
+        override
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = natives.lendGivenBondETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenInsurance(LendGivenInsurance calldata params)
+        external
+        override
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = natives.lendGivenInsurance(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenInsuranceETHAsset(LendGivenInsuranceETHAsset calldata params)
+        external
+        payable
+        override
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = natives.lendGivenInsuranceETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenInsuranceETHCollateral(LendGivenInsuranceETHCollateral calldata params)
+        external
+        override
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = natives.lendGivenInsuranceETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenPercent(LendGivenPercent calldata params)
+        external
+        override
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = natives.lendGivenPercent(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenPercentETHAsset(LendGivenPercentETHAsset calldata params)
+        external
+        payable
+        override
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = natives.lendGivenPercentETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function lendGivenPercentETHCollateral(LendGivenPercentETHCollateral calldata params)
+        external
+        override
+        returns (IPair.Claims memory claimsOut)
+    {
+        claimsOut = natives.lendGivenPercentETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function collect(Collect calldata params) external override returns (IPair.Tokens memory tokensOut) {
+        tokensOut = natives.collect(factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function collectETHAsset(CollectETHAsset calldata params)
+        external
+        override
+        returns (IPair.Tokens memory tokensOut)
+    {
+        tokensOut = natives.collectETHAsset(factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function collectETHCollateral(CollectETHCollateral calldata params)
+        external
+        override
+        returns (IPair.Tokens memory tokensOut)
+    {
+        tokensOut = natives.collectETHCollateral(factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenDebt(BorrowGivenDebt calldata params)
+        external
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenDebt(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
+        external
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenDebtETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
+        external
+        payable
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenDebtETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenCollateral(BorrowGivenCollateral calldata params)
+        external
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenCollateral(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
+        external
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenCollateralETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
+        external
+        payable
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenPercent(BorrowGivenPercent calldata params)
+        external
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenPercent(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenPercentETHAsset(BorrowGivenPercentETHAsset calldata params)
+        external
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenPercentETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function borrowGivenPercentETHCollateral(BorrowGivenPercentETHCollateral calldata params)
+        external
+        payable
+        override
+        returns (uint256 id, IPair.Due memory dueOut)
+    {
+        (id, dueOut) = natives.borrowGivenPercentETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function repay(Repay memory params) external override returns (uint128 assetIn, uint128 collateralOut) {
+        (assetIn, collateralOut) = natives.pay(factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function repayETHAsset(RepayETHAsset memory params)
+        external
+        payable
+        override
+        returns (uint128 assetIn, uint128 collateralOut)
+    {
+        (assetIn, collateralOut) = natives.payETHAsset(factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function repayETHCollateral(RepayETHCollateral memory params)
+        external
+        override
+        returns (uint128 assetIn, uint128 collateralOut)
+    {
+        (assetIn, collateralOut) = natives.payETHCollateral(factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function deployNative(Deploy memory params) external override {
+        natives.deploy(this, factory, params);
+    }
+
+    /// @inheritdoc ITimeswapMintCallback
+    function timeswapMintCallback(
+        uint112 assetIn,
+        uint112 collateralIn,
+        bytes calldata data
+    ) external override {
+        (IERC20 asset, IERC20 collateral, address assetFrom, address collateralFrom) = abi.decode(
+            data,
+            (IERC20, IERC20, address, address)
         );
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: removeLiquidityBeforeMaturity : No Liquidity');
+        IPair pair = factory.getPair(asset, collateral);
 
-        // Safely transfer liquidity ERC20 to the Timeswap Core pool
-        _safeTransferFrom(_pool, msg.sender, _pool, _liquidityIn);
+        require(msg.sender == address(pair), 'Invalid sender');
 
-        if (_maxCollateralLocked > 0) {
-            // Calculate the collateral ERC20 required to lock
-            _collateralLocked = _pool.calculateBurn(_liquidityIn, _maxCollateralLocked);
-
-            // Safely transfer collateral ERC20 to the Timeswap Core pool
-            _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _collateralLocked);
+        if (assetFrom == address(this)) {
+            weth.deposit{value: assetIn}();
+            asset.safeTransfer(pair, assetIn);
+        } else {
+            asset.safeTransferFrom(assetFrom, pair, assetIn);
         }
 
-        // Call the burn function in the Timeswap Core
-        (_tokenId, _collateralLocked, _debtRequiredAndAssetReceived, _bondReceived, _insuranceReceived) = _pool.burn(
-            _to
-        );
-
-        // Check slippage protection
-        require(
-            _debtRequiredAndAssetReceived >= _safe.minAsset,
-            'TimeswapConvenience :: removeLiquidityBeforeMaturity : Under the minAsset'
-        );
-        require(
-            _bondReceived >= _safe.minBond,
-            'TimeswapConvenience :: removeLiquidityBeforeMaturity : Under the minBond'
-        );
-        require(
-            _insuranceReceived >= _safe.minInsurance,
-            'TimeswapConvenience :: removeLiquidityBeforeMaturity : Under the minInsurance'
-        );
-    }
-
-    /// @dev Withdraw liquidity from a Timeswap pool after maturity with the burn function in the Timeswap Core contract
-    /// @dev No need for deadline and slippage protection as no slippage can happen after maturity of the pool
-    /// @dev No Collateralized Debt ERC721 will be minted anymore after maturity of the pool
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the burn function
-    /// @param _liquidityIn The amount of liquidity ERC20 to be burnt
-    /// @return _bondReceived The amount of bond ERC20 received by the receiver
-    /// @return _insuranceReceived The amount of insurance ERC20 received by the receiver
-    function removeLiquidityAfterMaturity(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _liquidityIn
-    ) external override returns (uint256 _bondReceived, uint256 _insuranceReceived) {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: removeLiquidityAfterMaturity : Pool Does Not Exist');
-        require(
-            _pool.maturity() <= block.timestamp,
-            'TimeswapConvenience :: removeLiquidityAfterMaturity : Pool Not Matured'
-        );
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: removeLiquidityAfterMaturity : No Liquidity');
-
-        // Safely transfer liquidity ERC20 to the Timeswap Core pool
-        _safeTransferFrom(_pool, msg.sender, _pool, _liquidityIn);
-
-        // Call the burn function in the Timeswap Core
-        (, , , _bondReceived, _insuranceReceived) = _pool.burn(_to);
-    }
-
-    /// @dev Lend asset ERC20 with the lend function in the Timeswap Core contract by giving bond received
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the lend function
-    /// @param _assetIn The amount of asset ERC20 to be lent
-    /// @param _givenBondReceived The desired amount of bond ERC20 received
-    /// @param _safe The slippage protections of the lend transaction
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _bondReceived The actual amount of bond ERC20 received by the receiver
-    /// @return _insuranceReceived The actual amount of insurance ERC20 received by the receiver
-    function lendGivenBondReceived(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _assetIn,
-        uint256 _givenBondReceived,
-        SafeLend memory _safe,
-        uint256 _deadline
-    ) external override ensure(_deadline) returns (uint256 _bondReceived, uint256 _insuranceReceived) {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: lendGivenBondReceived : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: lendGivenBondReceived : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: lendGivenBondReceived : No Liquidity');
-
-        // Calculate the necessary parameters for the lend function in the Timeswap Core contract
-        uint256 _bondDecrease;
-        uint256 _rateDecrease;
-
-        (_bondDecrease, _rateDecrease) = _pool.calculateLendGivenBondReceived(_assetIn, _givenBondReceived);
-
-        // Safely transfer asset ERC20 to the Timeswap Core pool
-        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetIn);
-
-        // Call the lend function in the Timeswap Core
-        (_bondReceived, _insuranceReceived) = _pool.lend(_to, _bondDecrease, _rateDecrease);
-
-        // Check slippage protection
-        require(_bondReceived >= _safe.minBond, 'TimeswapConvenience :: lendGivenBondReceived : Under the minBond');
-        require(
-            _insuranceReceived >= _safe.minInsurance,
-            'TimeswapConvenience :: lendGivenBondReceived : Under the minInsurance'
-        );
-    }
-
-    /// @dev Lend asset ERC20 with the lend function in the Timeswap Core contract by giving insurance received
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the lend function
-    /// @param _assetIn The amount of asset ERC20 to be lent
-    /// @param _givenInsuranceReceived The desired amount of insurance ERC20 received
-    /// @param _safe The slippage protections of the lend transaction
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _bondReceived The actual amount of bond ERC20 received by the receiver
-    /// @return _insuranceReceived The actual amount of insurance ERC20 received by the receiver
-    function lendGivenInsuranceReceived(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _assetIn,
-        uint256 _givenInsuranceReceived,
-        SafeLend memory _safe,
-        uint256 _deadline
-    ) external override ensure(_deadline) returns (uint256 _bondReceived, uint256 _insuranceReceived) {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: lendGivenInsuranceReceived : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: lendGivenInsuranceReceived : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: lendGivenInsuranceReceived : No Liquidity');
-
-        // Calculate the necessary parameters for the lend function in the Timeswap Core contract
-        uint256 _bondDecrease;
-        uint256 _rateDecrease;
-
-        (_bondDecrease, _rateDecrease) = _pool.calculateLendGivenInsuranceReceived(_assetIn, _givenInsuranceReceived);
-
-        // Safely transfer asset ERC20 to the Timeswap Core pool
-        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetIn);
-
-        // Call the lend function in the Timeswap Core
-        (_bondReceived, _insuranceReceived) = _pool.lend(_to, _bondDecrease, _rateDecrease);
-
-        // Check slippage protection
-        require(
-            _bondReceived >= _safe.minBond,
-            'TimeswapConvenience :: lendGivenInsuranceReceived : Under the minBond'
-        );
-        require(
-            _insuranceReceived >= _safe.minInsurance,
-            'TimeswapConvenience :: lendGivenInsuranceReceived : Under the minInsurance'
-        );
-    }
-
-    /// @dev Borrw asset ERC20 and lock collateral with the borrow function in the Timeswap Core contract given collateral locked
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the borrow function
-    /// @param _assetReceived The amount of asset ERC20 to be borrowed
-    /// @param _givenCollateralLocked The desired amount of interest required
-    /// @param _safe The slippage protections of the borrow transaction
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract
-    /// @return _collateralLocked The actual amount of collateral ERC20 locked by the receiver
-    /// @return _debtRequired The actual amount of debt required
-    function borrowGivenCollateralLocked(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _assetReceived,
-        uint256 _givenCollateralLocked,
-        SafeBorrow memory _safe,
-        uint256 _deadline
-    )
-        external
-        override
-        ensure(_deadline)
-        returns (
-            uint256 _tokenId,
-            uint256 _collateralLocked,
-            uint256 _debtRequired
-        )
-    {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: borrowGivenCollateralLocked : Pool Does Not Exist');
-        require(
-            _pool.maturity() > block.timestamp,
-            'TimeswapConvenience :: borrowGivenCollateralLocked : Pool Matured'
-        );
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: borrowGivenCollateralLocked : No Liquidity');
-
-        // Calculate the necessary parameters for the borrow function in the Timeswap Core contract
-        uint256 _bondIncrease;
-        uint256 _rateIncrease;
-        (_bondIncrease, _rateIncrease, _collateralLocked) = _pool.calculateBorrowGivenDesiredCollateralLocked(
-            _assetReceived,
-            _givenCollateralLocked
-        );
-
-        // Safely transfer collateral ERC20 to the Timeswap Core pool
-        _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _collateralLocked);
-
-        // Call the borrow function in the Timeswap Core
-        (_tokenId, _collateralLocked, _debtRequired) = _pool.borrow(_to, _assetReceived, _bondIncrease, _rateIncrease);
-
-        // Check slippage protection
-        require(
-            _collateralLocked <= _safe.maxCollateralLocked,
-            'TimeswapConvenience :: borrowGivenCollateralLocked : Over the maxCollateralLocked'
-        );
-        require(
-            _debtRequired - _assetReceived <= _safe.maxInterestRequired,
-            'TimeswapConvenience :: borrowGivenCollateralLocked : Over the maxInterestRequired'
-        );
-    }
-
-    /// @dev Borrw asset ERC20 and lock collateral with the borrow function in the Timeswap Core contract given interest required
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the borrow function
-    /// @param _assetReceived The amount of asset ERC20 to be borrowed
-    /// @param _givenInterestRequired The desired amount of interest required
-    /// @param _safe The slippage protections of the borrow transaction
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _tokenId The id of the newly minted collateralized debt ERC721 token contract
-    /// @return _collateralLocked The actual amount of collateral ERC20 locked by the receiver
-    /// @return _debtRequired The actual amount of debt required
-    function borrowGivenInterestRequired(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _assetReceived,
-        uint256 _givenInterestRequired,
-        SafeBorrow memory _safe,
-        uint256 _deadline
-    )
-        external
-        override
-        ensure(_deadline)
-        returns (
-            uint256 _tokenId,
-            uint256 _collateralLocked,
-            uint256 _debtRequired
-        )
-    {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: borrowGivenInterestRequired : Pool Does Not Exist');
-        require(
-            _pool.maturity() > block.timestamp,
-            'TimeswapConvenience :: borrowGivenInterestRequired : Pool Matured'
-        );
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: borrowGivenInterestRequired : No Liquidity');
-
-        // Calculate the necessary parameters for the borrow function in the Timeswap Core contract
-        uint256 _bondIncrease;
-        uint256 _rateIncrease;
-        (_bondIncrease, _rateIncrease, _collateralLocked) = _pool.calculateBorrowGivenInterestRequired(
-            _assetReceived,
-            _givenInterestRequired
-        );
-
-        // Safely transfer collateral ERC20 to the Timeswap Core pool
-        _safeTransferFrom(_parameter.collateral, msg.sender, _pool, _collateralLocked);
-
-        // Call the borrow function in the Timeswap Core
-        (_tokenId, _collateralLocked, _debtRequired) = _pool.borrow(_to, _assetReceived, _bondIncrease, _rateIncrease);
-
-        // Check slippage protection
-        require(
-            _collateralLocked <= _safe.maxCollateralLocked,
-            'TimeswapConvenience :: borrowGivenInterestRequired : Over the maxCollateralLocked'
-        );
-        require(
-            _debtRequired - _assetReceived <= _safe.maxInterestRequired,
-            'TimeswapConvenience :: borrowGivenInterestRequired : Over the maxInterestRequired'
-        );
-    }
-
-    /// @dev Pay back the debt of the collateralized debt ERC721 with the pay function in the Tiemswap Core contract
-    /// @dev No need for slippage protection as no slippage can happen with debt payment
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the pay function
-    /// @param _tokenId The id of the collateralized debt ERC721, the receiver is the owner of the token
-    /// @param _assetIn The amount of asset ERC20 to be deposited to pay back debt
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _collateralReceived The amount of collateral ERC20 to be unlocked and received by the receiver
-    function repay(
-        Parameter memory _parameter,
-        address _to,
-        uint256 _tokenId,
-        uint256 _assetIn,
-        uint256 _deadline
-    ) external override ensure(_deadline) returns (uint256 _collateralReceived) {
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: repay : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: repay : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: repay : No Liquidity');
-
-        InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
-
-        // Safely transfer collateralized debt ERC721 to this contract
-        _collateralizedDebt.safeTransferFrom(msg.sender, address(this), _tokenId);
-
-        // Safely transfer asset ERC20 to the Timeswap Core pool
-        _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetIn);
-
-        // Call the pay function in the Timeswap Core
-        _collateralReceived = _pool.pay(_to, _tokenId);
-
-        // Safely transfer back the collateralized debt ERC721 to msg.sender
-        _collateralizedDebt.safeTransferFrom(address(this), msg.sender, _tokenId);
-    }
-
-    /// @dev Pay back the debt of multiple collateralized debt ERC721 with the multiple pay function in the Tiemswap Core contract
-    /// @dev No need for slippage protection as no slippage can happen with debt payment
-    /// @param _parameter The three parameters for the Timeswap pool
-    /// @param _to The receiver of the pay function
-    /// @param _tokenIds The array of ids of the collateralized debt ERC721, the receiver is the owner of the token
-    /// @param _assetsIn The array of amount of asset ERC20 to be deposited to pay back debt per collateralized debt ERC721
-    /// @param _deadline The unix timestamp where the transactions must revert after
-    /// @return _collateralReceived The total amount of collateral ERC20 to be unlocked
-    function repayMultiple(
-        Parameter memory _parameter,
-        address _to,
-        uint256[] memory _tokenIds,
-        uint256[] memory _assetsIn,
-        uint256 _deadline
-    ) external override ensure(_deadline) returns (uint256 _collateralReceived) {
-        // Must have equal lengths array
-        require(_tokenIds.length == _assetsIn.length, 'TimeswapConvenience :: repayMultiple : Unequal Length');
-
-        // Get the address of the pool
-        InterfaceTimeswapPool _pool = _getPool(_parameter);
-        // Sanity checks
-        require(_pool != ZERO, 'TimeswapConvenience :: repayMultiple : Pool Does Not Exist');
-        require(_pool.maturity() > block.timestamp, 'TimeswapConvenience :: repayMultiple : Pool Matured');
-        require(_pool.totalSupply() > 0, 'TimeswapConvenience :: repayMultiple : No Liquidity');
-
-        InterfaceERC721 _collateralizedDebt = _pool.collateralizedDebt();
-
-        for (uint256 _index = 0; _index < _tokenIds.length; _index++) {
-            uint256 _tokenId = _tokenIds[_index]; // gas saving
-
-            // Safely transfer collateralized debt ERC721 to this contract
-            _collateralizedDebt.safeTransferFrom(msg.sender, address(this), _tokenId);
-
-            // Safely transfer asset ERC20 to the Timeswap Core pool
-            _safeTransferFrom(_parameter.asset, msg.sender, _pool, _assetsIn[_index]);
-
-            // Call the pay function in the Timeswap Core
-            _collateralReceived += _pool.pay(_to, _tokenId);
-
-            // Safely transfer back the collateralized debt ERC721 to msg.sender
-            _collateralizedDebt.safeTransferFrom(address(this), msg.sender, _tokenId);
+        if (collateralFrom == address(this)) {
+            weth.deposit{value: collateralIn}();
+            collateral.safeTransfer(pair, collateralIn);
+        } else {
+            collateral.safeTransferFrom(collateralFrom, pair, collateralIn);
         }
     }
 
-    function onERC721Received(
-        address,
-        address,
-        uint256,
-        bytes memory
-    ) public pure override returns (bytes4) {
-        return this.onERC721Received.selector;
+    /// @inheritdoc ITimeswapLendCallback
+    function timeswapLendCallback(uint112 assetIn, bytes calldata data) external override {
+        (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
+        IPair pair = factory.getPair(asset, collateral);
+
+        require(msg.sender == address(pair), 'Invalid sender');
+
+        if (from == address(this)) {
+            weth.deposit{value: assetIn}();
+            asset.safeTransfer(pair, assetIn);
+        } else {
+            asset.safeTransferFrom(from, pair, assetIn);
+        }
     }
 
-    /* ===== HELPER ===== */
+    /// @inheritdoc ITimeswapBorrowCallback
+    function timeswapBorrowCallback(uint112 collateralIn, bytes calldata data) external override {
+        (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
+        IPair pair = factory.getPair(asset, collateral);
 
-    /// @dev Safely transfer the tokens of an ERC20 token contract
-    /// @dev Will revert if failed at calling the transfer function
-    function _safeTransferFrom(
-        InterfaceERC20 _token,
-        address _from,
-        InterfaceTimeswapPool _to,
-        uint256 _value
-    ) private {
-        (bool _success, bytes memory _data) = address(_token).call(
-            abi.encodeWithSelector(TRANSFER_FROM, _from, address(_to), _value)
-        );
-        require(
-            _success && (_data.length == 0 || abi.decode(_data, (bool))),
-            'TimeswapConvenience :: _safeTransfer : Transfer Failed'
-        );
+        require(msg.sender == address(pair), 'Invalid sender');
+
+        if (from == address(this)) {
+            weth.deposit{value: collateralIn}();
+            collateral.safeTransfer(pair, collateralIn);
+        } else {
+            collateral.safeTransferFrom(from, pair, collateralIn);
+        }
     }
 
-    /// @dev Get the address of the Timeswap Core pool given the parameters
-    function _getPool(Parameter memory _parameter) private view returns (InterfaceTimeswapPool _pool) {
-        _pool = factory.getPool(_parameter.asset, _parameter.collateral, _parameter.maturity);
-    }
+    /// @inheritdoc IConvenience
+    function collateralizedDebtCallback(
+        IPair pair,
+        uint256 maturity,
+        uint128 assetIn,
+        bytes calldata data
+    ) external override {
+        (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
 
-    /// @dev Deploy a new Timeswap Core pool given the parameters
-    function _createPool(Parameter memory _parameter) private returns (InterfaceTimeswapPool _pool) {
-        _pool = factory.createPool(_parameter.asset, _parameter.collateral, _parameter.maturity);
+        IDue collateralizedDebt = natives[asset][collateral][maturity].collateralizedDebt;
+
+        require(msg.sender == address(collateralizedDebt), 'Invalid sender');
+
+        if (from == address(this)) {
+            weth.deposit{value: assetIn}();
+            asset.safeTransfer(pair, assetIn);
+        } else {
+            asset.safeTransferFrom(from, pair, assetIn);
+        }
     }
 }

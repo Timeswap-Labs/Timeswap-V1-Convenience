@@ -54,6 +54,7 @@ typings/
 
 # Optional npm cache directory
 .npm
+.npmrc
 
 # Optional eslint cache
 .eslintcache
@@ -131,10 +132,6 @@ npm-debug.log
 blockchain/geth/**
 blockchain/keystore/**
 blockchain/history
-
-#truffle
-yarn.lock
-package-lock.json
 
 # End of https://www.toptal.com/developers/gitignore/api/soliditytruffle,node
 contracts/interfaces/artifacts
