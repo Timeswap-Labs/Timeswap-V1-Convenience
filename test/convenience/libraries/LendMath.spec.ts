@@ -1,4 +1,4 @@
-import * as MintMath from '../../libraries/LiquidityMath'
+
 import { constructorFixture, Fixture, lendMathGivenBondFixture, lendMathGivenInsuranceFixture, lendMathGivenPercentFixture, mintMathCalleeGivenAddFixture, mintMathCalleeGivenNewFixture, newLiquidityFixture } from '../../shared/Fixtures'
 import * as fc from 'fast-check'
 // import { loadFixture } from '@ethereum-waffle/provider'
@@ -68,7 +68,7 @@ describe('Lend Math Given Bond', () => {
   
 
   })
-  describe('Lend Given Insurance', () => {
+  describe('Lend Math Given Insurance', () => {
     it('Succeeded', async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
@@ -114,7 +114,7 @@ describe('Lend Math Given Bond', () => {
       )
     }).timeout(100000)
 })
-describe('Lend Given Percent', () => {
+describe('Lend Math Given Percent', () => {
   async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 31536000n
     signers = await ethers.getSigners()

@@ -5,7 +5,7 @@ import {BorrowMath} from '../libraries/BorrowMath.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 
 contract BorrowMathCallee{
-     function givenBond(
+     function givenDebt(
          IPair pair,
         uint256 maturity,
         uint112 assetOut,
@@ -13,7 +13,7 @@ contract BorrowMathCallee{
     ) view public returns (uint112, uint112){
         return BorrowMath.givenDebt(pair,maturity,assetOut,debtIn);
     }
-     function givenInsurance(
+     function givenCollateral(
         IPair pair,
         uint256 maturity,
         uint112 assetOut,

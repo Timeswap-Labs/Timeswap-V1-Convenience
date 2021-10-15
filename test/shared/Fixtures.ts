@@ -20,7 +20,7 @@ import {
   BorrowGivenPercentParams,
   RepayParams,
 } from '../types'
-import { LendMathCallee, MintMathCallee, TimeswapPair } from '../../typechain'
+import { BorrowMathCallee, LendMathCallee, MintMathCallee, TimeswapPair } from '../../typechain'
 
 let assetValue = 100000n ** 100000n
 let collateralValue = 100000n ** 100000n
@@ -607,6 +607,32 @@ export async function lendMathGivenPercentFixture(fixture:Fixture,signer:SignerW
   const lendMathCalleeContract = (await (lendMathCalleeFactory).deploy()) as LendMathCallee
   const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
   const txn = await lendMathCalleeContract.givenPercent(pair,maturity,lendGivenPercentParams.assetIn,lendGivenPercentParams.percent)
+  return txn
+
+}
+export async function borrowMathGivenDebtFixture(fixture:Fixture,signer:SignerWithAddress,borrowGivenDebt: BorrowGivenDebtParams) {
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const borrowMathCalleeFactory =await  ethers.getContractFactory('BorrowMathCallee')
+  const borrowMathCalleeContract = (await (borrowMathCalleeFactory).deploy()) as BorrowMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await borrowMathCalleeContract.givenDebt(pair,maturity,borrowGivenDebt.assetOut,borrowGivenDebt.debtIn)
+  return txn
+
+}
+export async function borrowMathGivenCollateralFixture(fixture:Fixture,signer:SignerWithAddress,borrowGivenCollateral: BorrowGivenCollateralParams) {
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const borrowMathCalleeFactory =await  ethers.getContractFactory('BorrowMathCallee')
+  const borrowMathCalleeContract = (await (borrowMathCalleeFactory).deploy()) as BorrowMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await borrowMathCalleeContract.givenCollateral(pair,maturity,borrowGivenCollateral.assetOut,borrowGivenCollateral.collateralIn)
+  return txn
+}
+export async function borrowMathGivenPercentFixture(fixture:Fixture,signer:SignerWithAddress,borrowGivenPercent: BorrowGivenPercentParams) {
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const borrowMathCalleeFactory =await  ethers.getContractFactory('BorrowMathCallee')
+  const borrowMathCalleeContract = (await (borrowMathCalleeFactory).deploy()) as BorrowMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await borrowMathCalleeContract.givenPercent(pair,maturity,borrowGivenPercent.assetOut,borrowGivenPercent.percent)
   return txn
 
 }
