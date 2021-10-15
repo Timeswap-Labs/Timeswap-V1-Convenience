@@ -198,7 +198,7 @@ export const calcYAndZDecreaseLendGivenBond = (
   assetIn: bigint,
   bondOut: bigint
 ) => {
-  const feeBase = BigInt(0x10000 + 100)
+  const feeBase = 0x10000n + 100n
   const yDecrease = divUp((bondOut - assetIn) << 32n, maturity - currentTime)
   const yAdjust = (state.y << 16n) - yDecrease * feeBase
   const xAdjust = state.x + assetIn

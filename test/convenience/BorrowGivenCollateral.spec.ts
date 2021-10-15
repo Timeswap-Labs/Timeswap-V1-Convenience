@@ -316,15 +316,13 @@ async function borrowGivenCollateralProperties(
   const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTime + 10_000n)
   //console.log(.*)
 
-  const cdToken = CollateralizedDebt__factory.connect(
-    (await result.convenience.getNatives(assetAddress, collateralAddress, maturity)).collateralizedDebt,
-    ethers.provider
-  )
+  const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
+  const cdToken = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
 
   const cdTokenBalance = await cdToken.dueOf(1)
-  const debtContract = cdTokenBalance.debt
-  const collateralContract = cdTokenBalance.collateral
+  const debtContract = cdTokenBalance.debt.toBigInt()
+  const collateralContract = cdTokenBalance.collateral.toBigInt()
 
-  // expect(debtContract).equalBigInt(debt)
-  // expect(collateralContract).equalBigInt(collateral)
+  expect(debtContract).equalBigInt(debt)
+  expect(collateralContract).equalBigInt(collateral)
 }
