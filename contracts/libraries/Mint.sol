@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.1;
+pragma solidity =0.8.4;
 
 import {IConvenience} from '../interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
@@ -11,7 +11,6 @@ import {MintMath} from './MintMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import 'hardhat/console.sol';
 
 library Mint {
     using MintMath for IPair;

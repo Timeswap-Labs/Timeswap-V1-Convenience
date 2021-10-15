@@ -1,5 +1,5 @@
 import { ethers, waffle } from 'hardhat'
-import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime, advanceTime } from '../shared/Helper'
+import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime, advanceTime } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import * as LiquidityMath from '../libraries/LiquidityMath'
 import {

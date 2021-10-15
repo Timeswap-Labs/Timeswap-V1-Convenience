@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.1;
+pragma solidity =0.8.4;
 
 import {IConvenience} from '../interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
@@ -7,7 +7,6 @@ import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Deploy} from './Deploy.sol';
 import {IDeployNative} from '../interfaces/IDeployNative.sol';
-import 'hardhat/console.sol';
 
 library DeployNative {
     using Deploy for IConvenience.Native;

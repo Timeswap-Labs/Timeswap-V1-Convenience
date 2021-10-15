@@ -1,5 +1,5 @@
 import { ethers, waffle } from 'hardhat'
-import { mulDivUp, now, setTime, shiftUp } from '../shared/Helper'
+import { mulDivUp, now, setTime, shiftRightUp } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import {
   newLiquidityFixture,

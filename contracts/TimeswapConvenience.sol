@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.1;
+pragma solidity =0.8.4;
 
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
@@ -406,7 +406,7 @@ contract TimeswapConvenience is IConvenience {
         );
         IPair pair = factory.getPair(asset, collateral);
 
-        require(msg.sender == address(pair), 'E401');
+        require(msg.sender == address(pair), 'Invalid sender');
 
         if (assetFrom == address(this)) {
             weth.deposit{value: assetIn}();
@@ -428,7 +428,7 @@ contract TimeswapConvenience is IConvenience {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 
-        require(msg.sender == address(pair), 'E401');
+        require(msg.sender == address(pair), 'Invalid sender');
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();
@@ -443,7 +443,7 @@ contract TimeswapConvenience is IConvenience {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 
-        require(msg.sender == address(pair), 'E401');
+        require(msg.sender == address(pair), 'Invalid sender');
 
         if (from == address(this)) {
             weth.deposit{value: collateralIn}();
@@ -464,7 +464,7 @@ contract TimeswapConvenience is IConvenience {
 
         IDue collateralizedDebt = natives[asset][collateral][maturity].collateralizedDebt;
 
-        require(msg.sender == address(collateralizedDebt), 'E402');
+        require(msg.sender == address(collateralizedDebt), 'Invalid sender');
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();

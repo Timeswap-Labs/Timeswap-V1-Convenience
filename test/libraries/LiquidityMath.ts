@@ -1,4 +1,4 @@
-import { mulDiv, now, min, shiftUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
+import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
 
 export const getYandZIncreaseNewLiquidity = (
   assetIn: bigint,
@@ -46,7 +46,7 @@ export const getDebtAddLiquidity = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  return shiftUp((maturity - currentTime) * delState.y, 32n) + delState.x
+  return shiftRightUp((maturity - currentTime) * delState.y, 32n) + delState.x
 }
 
 export const getCollateralAddLiquidity = (

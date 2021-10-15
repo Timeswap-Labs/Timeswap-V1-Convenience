@@ -1,5 +1,5 @@
 import { FEE } from '../shared/Constants'
-import { divUp, mulDivUp, shiftUp } from '../shared/Helper'
+import { divUp, mulDivUp, shiftRightUp } from '../shared/Helper'
 const MAXUINT112 = 2 ** 112
 const MAXUINT256 = 2 ** 256
 const adjust = (reserve: bigint, increase: bigint) => {
@@ -152,7 +152,7 @@ export const getYandZIncreaseBorrowGivenDebt = (
 }
 
 export const getDebt = (delState: { x: bigint; y: bigint; z: bigint }, maturity: bigint, currentTime: bigint) => {
-  return shiftUp((maturity - currentTime) * delState.y, 32n) + delState.x
+  return shiftRightUp((maturity - currentTime) * delState.y, 32n) + delState.x
 }
 
 export const getCollateral = (

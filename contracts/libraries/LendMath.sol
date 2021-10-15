@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity =0.8.1;
+pragma solidity =0.8.4;
 
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol';
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
-import 'hardhat/console.sol';
 library LendMath {
     using Math for uint256;
     using FullMath for uint256;

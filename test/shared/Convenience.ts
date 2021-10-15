@@ -591,14 +591,18 @@ export class Convenience {
     )
   }
   async repayETHAsset(maturity: bigint, collateral: string, ids: bigint[], maxAssetsIn: bigint[]) {
-    return await this.convenienceContract.repayETHAsset({
+    return await this.convenienceContract.repayETHAsset(
+      {
       maturity: maturity,
       collateral: collateral,
       collateralTo: this.signer.address,
       ids: ids,
       maxAssetsIn: maxAssetsIn,
       deadline: maturity,
-    },{value: maxAssetsIn.reduce((a, b) => a + b, 0n)})}
+    },{
+      value: maxAssetsIn.reduce((a, b) => a + b, 0n)
+    }
+    )}
     async repayETHCollateral(maturity: bigint, asset: string, ids: bigint[], maxAssetsIn: bigint[]) {
       return await this.convenienceContract.repayETHCollateral({
         maturity: maturity,

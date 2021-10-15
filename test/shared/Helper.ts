@@ -61,7 +61,7 @@ export function divUp(x: bigint, y: bigint): bigint {
   return z
 }
 
-export function shiftUp(x: bigint, y: bigint): bigint {
+export function shiftRightUp(x: bigint, y: bigint): bigint {
   let z = x >> y
   if (x != z << y) z++
   return z
@@ -77,5 +77,5 @@ export default {
   min,
   mulDivUp,
   divUp,
-  shiftUp,
+  shiftRightUp,
 }
