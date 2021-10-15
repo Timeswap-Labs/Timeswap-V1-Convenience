@@ -44,7 +44,7 @@ export function newLiquidityError(newLiquidityParams: NewLiquidityParams, curren
   }
 
   if (!(yIncreaseNewLiquidity > 0n && zIncreaseNewLiquidity > 0n)) {
-    return { data: newLiquidityParams, error: 'Invalid' }
+    return { data: newLiquidityParams, error: '' }
   }
 
   return { data: newLiquidityParams, error: '' }
@@ -150,7 +150,7 @@ export function addLiquidityError(
   }
 
   if (!(yIncreaseAddLiquidity > 0n && zIncreaseAddLiquidity > 0n)) {
-    return { data: liquidityParams, error: 'Invalid' }
+    return { data: liquidityParams, error: '' }
   }
 
   const delState = { x: addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity }
@@ -164,12 +164,16 @@ export function addLiquidityError(
     return { data: liquidityParams, error: '' }
   }
 
-  if (
-    addLiquidityParams.maxDebt < debt ||
-    addLiquidityParams.maxCollateral < collateral ||
-    addLiquidityParams.minLiquidity > liquidityAdd
-  ) {
-    return { data: liquidityParams, error: 'Safety' }
+  if (addLiquidityParams.minLiquidity > liquidityAdd) {
+    return { data: liquidityParams, error: 'E511' }
+  }
+
+  if (addLiquidityParams.maxDebt < debt) {
+    return { data: liquidityParams, error: 'E512' }
+  }
+
+  if (addLiquidityParams.maxCollateral < collateral) {
+    return { data: liquidityParams, error: 'E513' }
   }
 
   return { data: liquidityParams, error: '' }
@@ -194,7 +198,7 @@ export function removeLiquidityError(
 ) {
   const { newLiquidityParams, removeLiquidityParams } = liquidityParams
   if (removeLiquidityParams.liquidityIn <= 0) {
-    return { data: liquidityParams, error: 'Invalid' }
+    return { data: liquidityParams, error: 'E205' }
   }
   const liquidity = LiquidityMath.liquidityCalculateNewLiquidity(newLiquidityParams.assetIn, currentTime, maturity)
   if (removeLiquidityParams.liquidityIn > liquidity) {

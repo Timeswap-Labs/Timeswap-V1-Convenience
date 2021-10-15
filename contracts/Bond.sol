@@ -42,16 +42,17 @@ contract Bond is IClaim, ERC20Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) ERC20Permit("Timeswap Bond") {
+    ) ERC20Permit('Timeswap Bond') {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
     }
 
     modifier onlyConvenience() {
-        require(msg.sender == address(convenience), 'Forbidden');
+        require(msg.sender == address(convenience), 'E403');
         _;
     }
+
     function mint(address to, uint128 amount) external override onlyConvenience {
         _mint(to, amount);
     }

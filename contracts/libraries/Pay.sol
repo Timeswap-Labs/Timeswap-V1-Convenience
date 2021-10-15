@@ -94,13 +94,13 @@ library Pay {
         IFactory factory,
         IPay._Repay memory params
     ) private returns (uint128 assetIn, uint128 collateralOut) {
-        require(params.deadline >= block.timestamp, 'Expired');
+        require(params.deadline >= block.timestamp, 'E504');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
 
         IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
-        require(address(collateralizedDebt) != address(0), 'Zero');
+        require(address(collateralizedDebt) != address(0), 'E502');
 
         (uint112[] memory assetsIn, uint112[] memory collateralsOut) = collateralizedDebt.givenMaxAssetsIn(
             params.ids,

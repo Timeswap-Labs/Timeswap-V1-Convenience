@@ -76,11 +76,58 @@ describe('Borrow Given Debt', () => {
 
           await borrowGivenDebtProperties(data, currentTime, success, assetToken.address, collateralToken.address)
         }
-      )
-      ,
-    { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
+  }).timeout(600000)
 
+  it('Failed', async () => {
+    const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(112),
+                debtIn: fc.bigUintN(112),
+                collateralIn: fc.bigUintN(112),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+            borrowGivenDebtParams: fc.record({
+              assetOut: fc.bigUintN(112),
+              debtIn: fc.bigUintN(112),
+              maxCollateral: fc.bigUintN(112),
+            }),
+          })
+          .filter((x) => !BorrowFilter.borrowGivenDebtSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .map((x) => BorrowFilter.borrowGivenDebtError(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .noShrink(),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+          await setTime(Number(currentTime + 10000n))
+
+          await expect(
+            constructor.convenience.convenienceContract.borrowGivenDebt({
+              asset: assetToken.address,
+              collateral: collateralToken.address,
+              maturity,
+              assetTo: signers[0].address,
+              dueTo: signers[0].address,
+              assetOut: data.borrowGivenDebtParams.assetOut,
+              debtIn: data.borrowGivenDebtParams.debtIn,
+              maxCollateral: data.borrowGivenDebtParams.maxCollateral,
+              deadline: maturity,
+            })
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
   }).timeout(600000)
 })
 
@@ -131,11 +178,58 @@ describe('Borrow Given Debt ETH Asset', () => {
             collateralToken.address
           )
         }
-      )
-      
-    ,{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
-    )
+      ),
 
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
+  }).timeout(600000)
+
+  it('Failed', async () => {
+    const { maturity, collateralToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(112),
+                debtIn: fc.bigUintN(112),
+                collateralIn: fc.bigUintN(112),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+            borrowGivenDebtParams: fc.record({
+              assetOut: fc.bigUintN(112),
+              debtIn: fc.bigUintN(112),
+              maxCollateral: fc.bigUintN(112),
+            }),
+          })
+          .filter((x) => !BorrowFilter.borrowGivenDebtSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .map((x) => BorrowFilter.borrowGivenDebtError(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .noShrink(),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
+          await setTime(Number(currentTime + 10000n))
+
+          await expect(
+            constructor.convenience.convenienceContract.borrowGivenDebtETHAsset({
+              collateral: collateralToken.address,
+              maturity,
+              assetTo: signers[0].address,
+              dueTo: signers[0].address,
+              assetOut: data.borrowGivenDebtParams.assetOut,
+              debtIn: data.borrowGivenDebtParams.debtIn,
+              maxCollateral: data.borrowGivenDebtParams.maxCollateral,
+              deadline: maturity,
+            })
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
   }).timeout(600000)
 })
 
@@ -193,7 +287,56 @@ describe('Borrow Given Debt ETH Collateral', () => {
       ),
       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
+  }).timeout(600000)
 
+  it('Failed', async () => {
+    const { maturity, assetToken } = await loadFixture(fixture)
+    let currentTime = await now()
+
+    await fc.assert(
+      fc.asyncProperty(
+        fc
+          .record({
+            newLiquidityParams: fc
+              .record({
+                assetIn: fc.bigUintN(112),
+                debtIn: fc.bigUintN(112),
+                collateralIn: fc.bigUintN(112),
+              })
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+            borrowGivenDebtParams: fc.record({
+              assetOut: fc.bigUintN(112),
+              debtIn: fc.bigUintN(112),
+              maxCollateral: fc.bigUintN(112),
+            }),
+          })
+          .filter((x) => !BorrowFilter.borrowGivenDebtSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .map((x) => BorrowFilter.borrowGivenDebtError(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
+          .noShrink(),
+        async ({ data, error }) => {
+          const constructor = await loadFixture(fixture)
+          await setTime(Number(currentTime + 5000n))
+          await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
+          await setTime(Number(currentTime + 10000n))
+
+          await expect(
+            constructor.convenience.convenienceContract.borrowGivenDebtETHCollateral(
+              {
+                asset: assetToken.address,
+                maturity,
+                assetTo: signers[0].address,
+                dueTo: signers[0].address,
+                assetOut: data.borrowGivenDebtParams.assetOut,
+                debtIn: data.borrowGivenDebtParams.debtIn,
+                deadline: maturity,
+              },
+              { value: data.borrowGivenDebtParams.maxCollateral }
+            )
+          ).to.be.revertedWith(error)
+        }
+      ),
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+    )
   }).timeout(600000)
 })
 

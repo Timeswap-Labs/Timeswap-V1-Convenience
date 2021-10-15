@@ -278,7 +278,7 @@ library Borrow {
         IBorrow._BorrowGivenDebt memory params
     ) private returns (uint256 id, IPair.Due memory dueOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
 
         (uint112 yIncrease, uint112 zIncrease) = pair.givenDebt(params.maturity, params.assetOut, params.debtIn);
 
@@ -300,7 +300,7 @@ library Borrow {
             )
         );
 
-        require(dueOut.collateral <= params.maxCollateral, 'Safety');
+        require(dueOut.collateral <= params.maxCollateral, 'E513');
     }
 
     function _borrowGivenCollateral(
@@ -310,7 +310,7 @@ library Borrow {
         IBorrow._BorrowGivenCollateral memory params
     ) private returns (uint256 id, IPair.Due memory dueOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
 
         (uint112 yIncrease, uint112 zIncrease) = pair.givenCollateral(
             params.maturity,
@@ -336,7 +336,7 @@ library Borrow {
             )
         );
 
-        require(dueOut.debt <= params.maxDebt, 'Safety');
+        require(dueOut.debt <= params.maxDebt, 'E512');
     }
 
     function _borrowGivenPercent(
@@ -345,10 +345,10 @@ library Borrow {
         IFactory factory,
         IBorrow._BorrowGivenPercent memory params
     ) private returns (uint256 id, IPair.Due memory dueOut) {
-        require(params.percent <= 0x100000000, 'Invalid');
+        require(params.percent <= 0x100000000, 'E505');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
 
         (uint112 yIncrease, uint112 zIncrease) = pair.givenPercent(params.maturity, params.assetOut, params.percent);
 
@@ -370,8 +370,8 @@ library Borrow {
             )
         );
 
-        require(dueOut.debt <= params.maxDebt, 'Safety');
-        require(dueOut.collateral <= params.maxCollateral, 'Safety');
+        require(dueOut.debt <= params.maxDebt, 'E512');
+        require(dueOut.collateral <= params.maxCollateral, 'E513');
     }
 
     function _borrow(
@@ -380,7 +380,7 @@ library Borrow {
         IPair pair,
         IBorrow._Borrow memory params
     ) private returns (uint256 id, IPair.Due memory dueOut) {
-        require(params.deadline >= block.timestamp, 'Expired');
+        require(params.deadline >= block.timestamp, 'E504');
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))

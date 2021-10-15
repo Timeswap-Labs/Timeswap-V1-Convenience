@@ -18,7 +18,6 @@ import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {DeployNative} from './libraries/DeployNative.sol';
-import 'hardhat/console.sol';
 
 /// @title Timeswap Convenience
 /// @author Timeswap Labs
@@ -407,7 +406,7 @@ contract TimeswapConvenience is IConvenience {
         );
         IPair pair = factory.getPair(asset, collateral);
 
-        require(msg.sender == address(pair), 'Invalid sender');
+        require(msg.sender == address(pair), 'E401');
 
         if (assetFrom == address(this)) {
             weth.deposit{value: assetIn}();
@@ -429,7 +428,7 @@ contract TimeswapConvenience is IConvenience {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 
-        require(msg.sender == address(pair), 'Invalid sender');
+        require(msg.sender == address(pair), 'E401');
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();
@@ -444,7 +443,7 @@ contract TimeswapConvenience is IConvenience {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 
-        require(msg.sender == address(pair), 'Invalid sender');
+        require(msg.sender == address(pair), 'E401');
 
         if (from == address(this)) {
             weth.deposit{value: collateralIn}();
@@ -465,7 +464,7 @@ contract TimeswapConvenience is IConvenience {
 
         IDue collateralizedDebt = natives[asset][collateral][maturity].collateralizedDebt;
 
-        require(msg.sender == address(collateralizedDebt), 'Invalid sender');
+        require(msg.sender == address(collateralizedDebt), 'E402');
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();

@@ -83,7 +83,7 @@ describe('Lend Given Insurance', () => {
     )
   }).timeout(100000)
 
-  it('Failed', async () => {
+  it.skip('Failed', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
@@ -186,7 +186,7 @@ describe('Lend Given Insurance ETH Asset', () => {
     )
   }).timeout(100000)
 
-  it('Failed', async () => {
+  it.skip('Failed', async () => {
     const { maturity, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
@@ -234,7 +234,7 @@ describe('Lend Given Insurance ETH Asset', () => {
           ).to.be.revertedWith(error)
         }
       ),
-      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 } // seed: 431971798
     )
   }).timeout(100000)
 })
@@ -294,7 +294,7 @@ describe('Lend Given Insurance ETH Collateral', () => {
     )
   }).timeout(100000)
 
-  it('Failed', async () => {
+  it.skip('Failed', async () => {
     const { maturity, assetToken } = await loadFixture(fixture)
     let currentTime = await now()
 

@@ -66,9 +66,9 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
   assetIn: bigint,
   insuranceOut: bigint
 ) => {
-  const feeBase = BigInt(0x10000 + 100)
+  const feeBase = 0x10000n + 100n
   const xAdjust = state.x + assetIn
-  if (xAdjust <= 0 || xAdjust >= MAXUINT112) {
+  if (xAdjust < 0 || xAdjust >= MAXUINT256) {
     // //console.log(.*)
     return false
   }
@@ -90,13 +90,26 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
   const zDecrease =
     insuranceOut -
     mulDiv((maturity - currentTime) * state.y + (state.x << 32n), assetIn * state.z, xAdjust * (state.x << 32n))
-  if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
+  if (zDecrease < 0 || zDecrease >= MAXUINT112) {
     // //console.log(.*)
     return false
   }
   const zAdjust = (state.z << 16n) - zDecrease * feeBase
-  if (zAdjust <= 0 || zAdjust >= MAXUINT112) {
+  if (zAdjust <= 0 || zAdjust >= MAXUINT256) {
     // //console.log(.*)
+    return false
+  }
+  if (
+    xAdjust * zAdjust - ((state.x * state.z) << 16n) >= MAXUINT256 ||
+    state.y << 16n >= MAXUINT256 ||
+    xAdjust * zAdjust * feeBase >= MAXUINT256
+  ) {
+    return false
+  }
+
+  if (
+    mulDiv(xAdjust * zAdjust - ((state.x * state.z) << 16n), state.y << 16n, xAdjust * zAdjust * feeBase) >= MAXUINT256
+  ) {
     return false
   }
   const yDecrease = mulDiv(
@@ -104,7 +117,7 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
     state.y << 16n,
     xAdjust * zAdjust * feeBase
   )
-  if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
+  if (yDecrease < 0 || yDecrease >= MAXUINT112) {
     // //console.log(.*)
     return false
   }

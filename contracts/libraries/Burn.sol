@@ -74,10 +74,10 @@ library Burn {
         IBurn.RemoveLiquidity memory params
     ) private returns (IPair.Tokens memory tokensOut) {
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
 
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
-        require(address(native.liquidity) != address(0), 'Forbidden');
+        require(address(native.liquidity) != address(0), 'E502');
 
         tokensOut = native.liquidity.burn(msg.sender, params.assetTo, params.collateralTo, params.liquidityIn);
     }

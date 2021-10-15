@@ -42,14 +42,14 @@ contract Liquidity is ILiquidity, ERC20Permit {
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) ERC20Permit("Timeswap Liquidity") {
+    ) ERC20Permit('Timeswap Liquidity') {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
     }
 
     modifier onlyConvenience() {
-        require(msg.sender == address(convenience), 'Forbidden');
+        require(msg.sender == address(convenience), 'E403');
         _;
     }
 

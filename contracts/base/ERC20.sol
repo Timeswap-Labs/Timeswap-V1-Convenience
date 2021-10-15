@@ -47,7 +47,7 @@ abstract contract ERC20 is IERC20Metadata {
         address to,
         uint256 amount
     ) private {
-        require(to != address(0), 'Zero');
+        require(to != address(0), 'E601');
 
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
@@ -66,7 +66,7 @@ abstract contract ERC20 is IERC20Metadata {
     }
 
     function _mint(address to, uint256 amount) internal {
-        require(to != address(0), 'Zero');
+        require(to != address(0), 'E601');
 
         balanceOf[to] += amount;
 

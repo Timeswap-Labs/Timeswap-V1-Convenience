@@ -85,7 +85,7 @@ export function lendGivenBondError(
 ) {
   const { newLiquidityParams, lendGivenBondParams } = params
   if (lendGivenBondParams.assetIn <= 0) {
-    return { data: params, error: 'Invalid' }
+    return { data: params, error: 'E205' }
   }
   if (
     lendGivenBondParams.bondOut <= 0 ||
@@ -106,7 +106,7 @@ export function lendGivenBondError(
   }
 
   if (!(yIncreaseNewLiquidity > 0n && zIncreaseNewLiquidity > 0n)) {
-    return { data: params, error: 'Invalid' }
+    return { data: params, error: '' }
   }
   const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
   // //console.log(.*)
@@ -139,7 +139,7 @@ export function lendGivenBondError(
     return { data: params, error: LendMath.checkError(state, delState) }
   }
   if (LendMath.getInsurance(state, delState, maturity, currentTimeLGB) < lendGivenBondParams.minInsurance) {
-    return { data: params, error: 'Safety' }
+    return { data: params, error: 'E515' }
   }
   //console.log(.*)
   return { data: params, error: '' }
@@ -152,11 +152,7 @@ export function lendGivenInsuranceSuccess(
   maturity: bigint
 ) {
   const { newLiquidityParams, lendGivenInsuranceParams } = params
-  if (
-    lendGivenInsuranceParams.assetIn <= 0 ||
-    lendGivenInsuranceParams.insuranceOut <= 0 ||
-    lendGivenInsuranceParams.minBond <= 0
-  ) {
+  if (lendGivenInsuranceParams.assetIn <= 0 || lendGivenInsuranceParams.insuranceOut <= 0) {
     return false
   }
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
@@ -196,17 +192,19 @@ export function lendGivenInsuranceSuccess(
     lendGivenInsuranceParams.assetIn,
     lendGivenInsuranceParams.insuranceOut
   )
+  console.log(yDecreaseLendGivenInsurance, zDecreaseLendGivenInsurance, state)
   if (
     !(
-      yDecreaseLendGivenInsurance > 0n &&
-      zDecreaseLendGivenInsurance > 0n &&
+      yDecreaseLendGivenInsurance >= 0n &&
+      zDecreaseLendGivenInsurance >= 0n &&
       lendGivenInsuranceParams.assetIn + state.x < MAXUINT112 &&
-      state.y - yDecreaseLendGivenInsurance > 0n &&
-      state.z - zDecreaseLendGivenInsurance > 0n
+      state.y - yDecreaseLendGivenInsurance >= 0n &&
+      state.z - zDecreaseLendGivenInsurance >= 0n
     )
   ) {
     return false
   }
+  console.log('here')
   const delState = {
     x: lendGivenInsuranceParams.assetIn,
     y: yDecreaseLendGivenInsurance,
@@ -229,9 +227,9 @@ export function lendGivenInsuranceError(
 ) {
   const { newLiquidityParams, lendGivenInsuranceParams } = params
   if (lendGivenInsuranceParams.assetIn <= 0) {
-    return { data: params, error: 'Invalid' }
+    return { data: params, error: 'E205' }
   }
-  if (lendGivenInsuranceParams.insuranceOut <= 0 || lendGivenInsuranceParams.minBond <= 0) {
+  if (lendGivenInsuranceParams.insuranceOut <= 0) {
     return { data: params, error: '' }
   }
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
@@ -246,7 +244,7 @@ export function lendGivenInsuranceError(
   }
 
   if (!(yIncreaseNewLiquidity > 0n && zIncreaseNewLiquidity > 0n)) {
-    return { data: params, error: 'Invalid' }
+    return { data: params, error: '' }
   }
   const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
   if (
@@ -270,11 +268,11 @@ export function lendGivenInsuranceError(
   )
   if (
     !(
-      yDecreaseLendGivenInsurance > 0n &&
-      zDecreaseLendGivenInsurance > 0n &&
+      yDecreaseLendGivenInsurance >= 0n &&
+      zDecreaseLendGivenInsurance >= 0n &&
       lendGivenInsuranceParams.assetIn + state.x < MAXUINT112 &&
-      state.y - yDecreaseLendGivenInsurance > 0n &&
-      state.z - zDecreaseLendGivenInsurance > 0n
+      state.y - yDecreaseLendGivenInsurance >= 0n &&
+      state.z - zDecreaseLendGivenInsurance >= 0n
     )
   ) {
     return { data: params, error: '' }
@@ -288,7 +286,7 @@ export function lendGivenInsuranceError(
     return { data: params, error: LendMath.checkError(state, delState) }
   }
   if (LendMath.getBond(delState, maturity, currentTimeLGI) < lendGivenInsuranceParams.minBond) {
-    return { data: params, error: 'Safety' }
+    return { data: params, error: 'E514' }
   }
   return { data: params, error: '' }
 }

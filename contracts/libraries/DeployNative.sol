@@ -18,13 +18,13 @@ library DeployNative {
         IFactory factory,
         IDeployNative.Deploy memory params
     ) internal {
-        require(params.deadline >= block.timestamp, 'Expired');
+        require(params.deadline >= block.timestamp, 'E504');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
-        require(address(pair) != address(0), 'Zero');
+        require(address(pair) != address(0), 'E501');
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
-        require(address(native.liquidity) == address(0), 'Invalid');
+        require(address(native.liquidity) == address(0), 'E503');
 
         native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
     }
