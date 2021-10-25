@@ -1,5 +1,5 @@
 {
-  "version": "1.0.37",
+  "version": "1.0.40",
   "name": "@timeswap-labs/timeswap-v1-convenience",
   "files": [
     "contracts/interfaces",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@timeswap-labs/timeswap-v1-core": "1.0.13",
+    "@timeswap-labs/timeswap-v1-core": "1.0.15",
     "@typechain/ethers-v5": "^7.0.1",
     "@typechain/hardhat": "^2.1.2",
     "@types/chai": "^4.2.19",
