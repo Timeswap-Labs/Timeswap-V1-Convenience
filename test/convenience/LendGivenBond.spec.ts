@@ -383,11 +383,34 @@ async function lendGivenBondProperties(
   //console.log(.*)
   const delState = { x: data.lendGivenBondParams.assetIn, y: yDecreaseLendGivenBond, z: zDecreaseLendGivenBond }
   const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
+  const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
+
+  const insuranceToken = ERC20__factory.connect(natives.insurance, ethers.provider)
+  const bondToken = ERC20__factory.connect(natives.bond, ethers.provider)
+
+  
+  const assetToken = ERC20__factory.connect(assetAddress,ethers.provider)
+  const collateralToken = ERC20__factory.connect(collateralAddress,ethers.provider)
+  const insuranceTokenName = await insuranceToken.name()
+  const insuranceTokenSymbol = await insuranceToken.symbol()
+  const insuranceTokenDecimals  = await insuranceToken.decimals()
+  const bondTokenName = await bondToken.name()
+  const bondTokenSymbol = await bondToken.symbol()
+  const bondTokenDecimals = await bondToken.decimals()
+
+  const assetTokenSymbol = await assetToken.symbol()
+  const assetTokenName = await assetToken.name()
+  const collateralTokenSymbol = await collateralToken.symbol()
+  const collateralTokenName = await collateralToken.name()
+
+  expect(insuranceTokenSymbol).equals(`TS-INS-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
+  expect(insuranceTokenName).equals(`Timeswap Insurance - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
+  expect(insuranceTokenDecimals).equals(18)
+  
+  
+  expect(bondTokenSymbol).equals(`TS-BND-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
+  expect(bondTokenName).equals(`Timeswap Bond - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
+  expect(bondTokenDecimals).equals(18)
+
   expect(bond).equalBigInt(data.lendGivenBondParams.bondOut)
 }

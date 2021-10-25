@@ -18,6 +18,7 @@ import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {DeployNative} from './libraries/DeployNative.sol';
+import 'hardhat/console.sol';
 
 /// @title Timeswap Convenience
 /// @author Timeswap Labs
@@ -391,6 +392,7 @@ contract TimeswapConvenience is IConvenience {
 
     /// @inheritdoc IConvenience
     function deployNative(Deploy memory params) external override {
+        console.log('1');
         natives.deploy(this, factory, params);
     }
 

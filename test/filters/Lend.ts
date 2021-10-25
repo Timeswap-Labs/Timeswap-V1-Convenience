@@ -85,7 +85,7 @@ export function lendGivenBondError(
 ) {
   const { newLiquidityParams, lendGivenBondParams } = params
   if (lendGivenBondParams.assetIn <= 0) {
-    return { data: params, error: 'E205' }
+    return { data: params, error: '' }
   }
   if (
     lendGivenBondParams.bondOut <= 0 ||

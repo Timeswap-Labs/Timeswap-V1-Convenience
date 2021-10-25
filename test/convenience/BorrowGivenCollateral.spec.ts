@@ -87,7 +87,7 @@ describe('Borrow Given Collateral', () => {
     )
   }).timeout(600000)
 
-  it.skip('Failed', async () => {
+  it('Failed', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
@@ -131,7 +131,7 @@ describe('Borrow Given Collateral', () => {
               maxDebt: data.borrowGivenCollateralParams.maxDebt,
               deadline: maturity,
             })
-          ).to.be.revertedWith(error)
+          ).to.be.revertedWith('')
         }
       ),
       { skipAllAfterTimeLimit: 50000, numRuns: 10 }

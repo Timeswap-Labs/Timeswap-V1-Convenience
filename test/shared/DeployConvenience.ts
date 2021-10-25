@@ -1,12 +1,13 @@
 import { run, ethers } from 'hardhat'
+import { TimeswapFactory__factory } from '../../typechain'
 import type { TestToken } from '../../typechain/TestToken'
 import type { TimeswapConvenience as ConvenienceContract } from '../../typechain/TimeswapConvenience'
-import type { TimeswapFactory as FactoryContract } from '../../typechain/TimeswapFactory'
+import type { TimeswapFactory as FactoryContract, TimeswapFactory } from '../../typechain/TimeswapFactory'
 import type { WETH9 as WethContract } from '../../typechain/WETH9'
 import { Convenience } from './Convenience'
 // import { experimentalAddHardhatNetworkMessageTraceHook } from "hardhat/config";
 
-export async function deploy(assetToken: TestToken, collateralToken: TestToken, maturity: bigint) {
+export async function deploy(assetToken: TestToken, collateralToken: TestToken, maturity: bigint, factory?: TimeswapFactory) {
   const accounts = await ethers.getSigners()
 
   const nftSVG = await ethers.getContractFactory('NFTSVG')
@@ -24,6 +25,7 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
   const deployLibraryContractAddresses: string[] = []
 
   const deployERC20 = await ethers.getContractFactory('DeployERC20')
+  
   const deployERC20contract = await deployERC20.deploy()
   await deployERC20contract.deployTransaction.wait()
   deployLibraryContractAddresses.push(deployERC20contract.address)
@@ -76,22 +78,29 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
     },
   })
   const WETH9 = await ethers.getContractFactory('WETH9')
-  const factoryContract = (await Factory.deploy(accounts[0].address, 100, 50)) as FactoryContract
-
-  await factoryContract.deployTransaction.wait()
-  const wethContract = (await WETH9.deploy()) as WethContract
-  await wethContract.deployTransaction.wait()
-
-  const convenienceContract = (await Convenience.deploy(
-    factoryContract.address,
-    wethContract.address
-  )) as ConvenienceContract
-  await convenienceContract.deployTransaction.wait()
-  const deployedContracts = {
-    factory: factoryContract,
-    convenience: convenienceContract,
-    weth: wethContract,
+  let factoryContract
+  if (factory!=undefined){
+    factoryContract = factory
+  }
+  else{
+    factoryContract = (await Factory.deploy(accounts[0].address, 100, 50)) as TimeswapFactory
+    await factoryContract.deployTransaction.wait()
   }
 
-  return deployedContracts
+  const wethContract = (await WETH9.deploy()) as WethContract
+  await wethContract.deployTransaction.wait()
+  
+
+const convenienceContract = (await Convenience.deploy(
+  factoryContract.address,
+  wethContract.address
+)) as ConvenienceContract
+
+await convenienceContract.deployTransaction.wait()
+const deployedContracts = {
+  factory: factoryContract,
+  convenience: convenienceContract,
+  weth: wethContract,
+}
+return deployedContracts
 }

@@ -5,33 +5,48 @@ import { expect } from '../../shared/Expect'
 import { MsgValueCallee } from '../../../typechain'
 import { infiniteStream } from 'fast-check'
 import { ContractTransaction } from '@ethersproject/contracts'
+import { loadFixture } from '@ethereum-waffle/provider'
+import { Fixture } from '../../shared/Fixtures'
+import { Wallet } from '@ethersproject/wallet'
+import { deployContract } from 'ethereum-waffle'
+import { advanceTimeAndBlock } from '../../shared/Helper'
 const MAXUINT256 = (1n << 256n) -1n
 const MAXUINT112 = (1n << 112n) -1n
+
+async function msgValueContractFixture() {
+    const msgValueCalleeFactory = await ethers.getContractFactory('MsgValueCallee')
+    // const msgValueCalleeFactor =await deployContract(wallet, )
+    const msgValueCalleeContract =  (await msgValueCalleeFactory.deploy()) as MsgValueCallee
+    await msgValueCalleeContract.deployTransaction.wait()
+    await ethers.provider.send('evm_mine',[])
+    return msgValueCalleeContract
+}
+
+
 describe('Msg Value',()=>{
     it('Succeded', async()=>{
-        const signer = (await ethers.getSigners())[0]
+        const signers = await ethers.getSigners()
+        console.log((await signers[0].getBalance()).toString())
         await fc.assert(
             fc.asyncProperty(
-                fc.bigUintN(100).filter((x)=> x>0).noShrink(),
+                fc.bigUintN(200).filter((x)=> x>0).noShrink(),
                 async (ethSent) => {
-                    const msgValueCalleeFactory = await ethers.getContractFactory('MsgValueCallee')
-                    const msgValueContract = (await msgValueCalleeFactory.deploy()) as MsgValueCallee
-                    const initalUserBalance = await (await ethers.provider.getBalance(signer.address)).toBigInt()
-
-                    const txn: ContractTransaction = await msgValueContract.connect(signer).getUint112({value: ethSent.toString()})
-                    const gasUsed = (await txn.wait()).gasUsed.toBigInt()
-                    const contractBalance = (await ethers.provider.getBalance(msgValueContract.address)).toBigInt()
-                    const userBalance = (await ethers.provider.getBalance(signer.address)).toBigInt()
-                    const userSpent=  (ethSent+gasUsed)
-                    const expectedUserBalance = (initalUserBalance- userSpent)
-
+                    async function msgValueFixture(){
+                        const signer = signers[1]
                     
+                        const msgValueContract = await msgValueContractFixture()
+                    
+                        const txn: ContractTransaction = await msgValueContract.connect(signers[1]).getUint112({value: ethSent.toString()})
+                        await txn.wait()
+                    
+                        return msgValueContract
+                    }
+                    const msgValueContract = await  msgValueFixture()
+                    const contractBalance = (await ethers.provider.getBalance(msgValueContract.address)).toBigInt()
                     if(ethSent>MAXUINT112){
-                        expect(userSpent).equalBigInt(ethSent-(MAXUINT256-MAXUINT112))
                         expect(contractBalance).equalBigInt(MAXUINT112);
                     }
                     else{
-                        expect(userBalance).equalBigInt(expectedUserBalance)
                         expect(contractBalance).equalBigInt(ethSent)
                     }
                 }

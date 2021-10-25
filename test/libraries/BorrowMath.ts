@@ -40,7 +40,7 @@ export const checkError = (
   }
   const minimum = divUp((delState.x * state.y) << 12n, xReserve * feeBase)
   if (delState.y < minimum) {
-    return 'Minimum'
+    return 'E302'
   }
 
   //console.log(.*)
