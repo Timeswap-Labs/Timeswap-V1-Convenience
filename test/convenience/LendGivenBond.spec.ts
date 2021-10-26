@@ -16,7 +16,7 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LendGivenBondParams, NewLiquidityParams } from '../types'
-import { ERC20__factory, TestToken } from '../../typechain'
+import { Bond__factory, ERC20__factory, Insurance__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'

@@ -15,7 +15,7 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { AddLiquidityParams, NewLiquidityParams } from '../types'
-import { ERC20__factory, TestToken } from '../../typechain'
+import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
 
@@ -275,7 +275,7 @@ describe('Add Liquidity ETH Collateral', () => {
     )
   }).timeout(100000)
 
-  it('Failed', async () => {
+  it.only('Failed', async () => {
     const { maturity, assetToken } = await loadFixture(fixture)
     let currentTime = await now()
 
@@ -320,10 +320,10 @@ describe('Add Liquidity ETH Collateral', () => {
               },
               { value: data.addLiquidityParams.maxCollateral }
             )
-          ).to.be.revertedWith('')
+          ).to.be.reverted // revertedWith(error)
         }
       ),
-      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
+      { skipAllAfterTimeLimit: 50000, numRuns: 10, seed: 1195527756 }
     )
   }).timeout(100000)
 })
@@ -389,11 +389,31 @@ async function addLiquidityProperties(
     maturity
   )
   const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
-  const liquidityToken = ERC20__factory.connect(
-    (await result.convenience.getNatives(assetAddress, collateralAddress, maturity)).liquidity,
-    ethers.provider
+
+  const debt = LiquidityMath.getDebtAddLiquidity(
+    { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    maturity,
+    currentTime + 10_000n
   )
+  const collateral = LiquidityMath.getCollateralAddLiquidity(
+    { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    maturity,
+    currentTime + 10_000n
+  )
+
+  const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
+
+  const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
   const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
   // //console.log(.*)
   expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
+
+  const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
+  const collateralizedDebtToken = await collateralizedDebtContract.dueOf(1)
+
+  const collateralBalanceContract = collateralizedDebtToken.collateral.toBigInt()
+  const debtBalanceContract = collateralizedDebtToken.debt.toBigInt()
+
+  expect(collateralBalanceContract).equalBigInt(collateral)
+  expect(debtBalanceContract).equalBigInt(debt)
 }
