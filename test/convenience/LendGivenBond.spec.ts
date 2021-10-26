@@ -383,23 +383,34 @@ async function lendGivenBondProperties(
   //console.log(.*)
   const delState = { x: data.lendGivenBondParams.assetIn, y: yDecreaseLendGivenBond, z: zDecreaseLendGivenBond }
   const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
-  const insurance = LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n)
+  const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
-  const natives = await result.convenience.getNatives(assetAddress, collateralAddress, result.maturity)
+  const insuranceToken = ERC20__factory.connect(natives.insurance, ethers.provider)
+  const bondToken = ERC20__factory.connect(natives.bond, ethers.provider)
 
-  const bondToken = Bond__factory.connect(natives.bond, ethers.provider)
-  const insuranceToken = Insurance__factory.connect(natives.insurance, ethers.provider)
+  
+  const assetToken = ERC20__factory.connect(assetAddress,ethers.provider)
+  const collateralToken = ERC20__factory.connect(collateralAddress,ethers.provider)
+  const insuranceTokenName = await insuranceToken.name()
+  const insuranceTokenSymbol = await insuranceToken.symbol()
+  const insuranceTokenDecimals  = await insuranceToken.decimals()
+  const bondTokenName = await bondToken.name()
+  const bondTokenSymbol = await bondToken.symbol()
+  const bondTokenDecimals = await bondToken.decimals()
 
-  const bondContractBalance = (await bondToken.balanceOf(signers[0].address)).toBigInt()
-  const insuranceContractBalance = (await insuranceToken.balanceOf(signers[0].address)).toBigInt()
+  const assetTokenSymbol = await assetToken.symbol()
+  const assetTokenName = await assetToken.name()
+  const collateralTokenSymbol = await collateralToken.symbol()
+  const collateralTokenName = await collateralToken.name()
 
-  expect(bondContractBalance).equalBigInt(bond)
-  expect(insuranceContractBalance).equalBigInt(insurance)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
+  expect(insuranceTokenSymbol).equals(`TS-INS-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
+  expect(insuranceTokenName).equals(`Timeswap Insurance - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
+  expect(insuranceTokenDecimals).equals(18)
+  
+  
+  expect(bondTokenSymbol).equals(`TS-BND-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
+  expect(bondTokenName).equals(`Timeswap Bond - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
+  expect(bondTokenDecimals).equals(18)
+
   expect(bond).equalBigInt(data.lendGivenBondParams.bondOut)
 }

@@ -189,7 +189,7 @@ describe('New Liquidity ETH Collateral', () => {
         fc
           .record({ assetIn: fc.bigUintN(112), debtIn: fc.bigUintN(112), collateralIn: fc.bigUintN(112) })
           .filter((x) => !LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity))
-          .map((x) => LiquidityFilter.newLiquidityError(x, currentTime + 5_000n, maturity)),
+          .map((x) => LiquidityFilter.newLiquidityError(x, currentTime + 5_000n, maturity)).noShrink(),
         async ({ data, error }) => {
           const constructor = await loadFixture(fixture)
           await setTime(Number(currentTime + 5000n))
@@ -232,7 +232,6 @@ async function newLiquidityProperties(
 ) {
   const result = await loadFixture(success)
   const newCurrentTime = currentTime + 5_000n
-  const liquidityBalance = LiquidityMath.liquidityCalculateNewLiquidity(data.assetIn, newCurrentTime, maturity)
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.assetIn,
     data.debtIn,
@@ -240,6 +239,13 @@ async function newLiquidityProperties(
     newCurrentTime,
     maturity
   )
+  const state = {
+    x: data.assetIn,
+    y: yIncreaseNewLiquidity,
+    z: zIncreaseNewLiquidity,
+  }
+  const liquidityBalance = LiquidityMath.liquidityCalculateNewLiquidity(state, newCurrentTime, maturity)
+
   const debt = LiquidityMath.getDebtAddLiquidity(
     { x: data.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity },
     maturity,
@@ -264,12 +270,34 @@ async function newLiquidityProperties(
 
   const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
   const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // //console.log(.*)
+  
+  const assetToken = ERC20__factory.connect(assetAddress,ethers.provider)
+  const collateralToken = ERC20__factory.connect(collateralAddress,ethers.provider)
+  const liquidityTokenName = await liquidityToken.name()
+  const liquidityTokenSymbol = await liquidityToken.symbol()
+  const liquidityTokenDecimals  = await liquidityToken.decimals()
+
+  const assetTokenSymbol = await assetToken.symbol()
+  const assetTokenName = await assetToken.name()
+  const collateralTokenSymbol = await collateralToken.symbol()
+  const collateralTokenName = await collateralToken.name()
+  expect(liquidityTokenSymbol).equals(`TS-LIQ-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
+  expect(liquidityTokenName).equals(`Timeswap Liquidity - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
+  expect(liquidityTokenDecimals).equals(18)
   expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
   const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
   const collateralizedDebtToken = await collateralizedDebtContract.dueOf(0)
 
+  const collateralizedDebtName = await collateralizedDebtContract.name()
+  const collateralizedDebtSymbol = await collateralizedDebtContract.symbol()
+  const collateralizedDebtCollateralDecimals = await collateralizedDebtContract.collateralDecimals()
+  const collateralizedDebtAssetDecimals = await collateralizedDebtContract.assetDecimals()
+
+  expect(collateralizedDebtName).equals(`Timeswap Collateralized Debt - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
+  expect(collateralizedDebtSymbol).equals(`TS-CDT-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
+  expect(collateralizedDebtAssetDecimals).equals(18)
+  expect(collateralizedDebtCollateralDecimals).equals(18)
   const collateralBalanceContract = collateralizedDebtToken.collateral.toBigInt()
   const debtBalanceContract = collateralizedDebtToken.debt.toBigInt()
 

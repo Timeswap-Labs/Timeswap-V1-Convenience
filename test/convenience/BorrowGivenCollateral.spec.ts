@@ -87,56 +87,6 @@ describe('Borrow Given Collateral', () => {
     )
   }).timeout(600000)
 
-  it.skip('Failed', async () => {
-    const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
-    let currentTime = await now()
-
-    await fc.assert(
-      fc.asyncProperty(
-        fc
-          .record({
-            newLiquidityParams: fc
-              .record({
-                assetIn: fc.bigUintN(50),
-                debtIn: fc.bigUintN(50),
-                collateralIn: fc.bigUintN(50),
-              })
-              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-            borrowGivenCollateralParams: fc.record({
-              assetOut: fc.bigUintN(50),
-              collateralIn: fc.bigUintN(50),
-              maxDebt: fc.bigUintN(50),
-            }),
-          })
-          .filter((x) =>
-            BorrowFilter.borrowGivenCollateralSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)
-          )
-          .map((x) => BorrowFilter.borrowGivenCollateralError(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
-          .noShrink(),
-        async ({ data, error }) => {
-          const constructor = await loadFixture(fixture)
-          await setTime(Number(currentTime + 5000n))
-          await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
-          await setTime(Number(currentTime + 10000n))
-
-          await expect(
-            constructor.convenience.convenienceContract.borrowGivenCollateral({
-              asset: assetToken.address,
-              collateral: collateralToken.address,
-              maturity,
-              assetTo: signers[0].address,
-              dueTo: signers[0].address,
-              assetOut: data.borrowGivenCollateralParams.assetOut,
-              collateralIn: data.borrowGivenCollateralParams.collateralIn,
-              maxDebt: data.borrowGivenCollateralParams.maxDebt,
-              deadline: maturity,
-            })
-          ).to.be.revertedWith(error)
-        }
-      ),
-      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-    )
-  }).timeout(600000)
 })
 
 describe('Borrow Given Collateral ETH Asset', () => {
