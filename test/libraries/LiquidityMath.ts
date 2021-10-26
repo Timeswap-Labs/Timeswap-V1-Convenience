@@ -1,5 +1,22 @@
 import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
 
+
+
+export function cbrt(val: bigint): bigint {
+  let x = 0n;
+  for (let y = 1n << 255n; y > 0n; y >>= 3n) {
+    x <<= 1n;
+    let z = 3n * x * (x + 1n) + 1n;
+    if (val / y >= z) {
+      val -= y * z;
+      x += 1n;
+    }
+  }
+  return x;
+}
+
+
+
 export const getYandZIncreaseNewLiquidity = (
   assetIn: bigint,
   debtIn: bigint,
@@ -19,10 +36,10 @@ export const getYandZIncreaseAddLiquidity = (state: { x: bigint; y: bigint; z: b
   const zIncrease = (state.z * assetIn) / state.x
 
   return { yIncreaseAddLiquidity: yIncrease, zIncreaseAddLiquidity: zIncrease }
-}
+} 
 
-export const liquidityCalculateNewLiquidity = (assetIn: bigint, currentTime: bigint, maturity: bigint) => {
-  return ((assetIn << 56n) * 0x10000000000n) / ((maturity - currentTime) * 50n + 0x10000000000n)
+export const liquidityCalculateNewLiquidity = (delState: { x: bigint; y: bigint; z: bigint }, currentTime: bigint, maturity: bigint) => {
+  return ((cbrt(delState.x))*cbrt(delState.y*delState.z) * 0x10000000000n) / ((maturity - currentTime) * 50n + 0x10000000000n)
 }
 
 export const liquidityCalculateAddLiquidity = (
@@ -31,7 +48,7 @@ export const liquidityCalculateAddLiquidity = (
   currentTime: bigint,
   maturity: bigint
 ) => {
-  const initialTotalLiquidity = state.x << 56n
+  const initialTotalLiquidity = (cbrt(state.x))*cbrt(state.y*state.z)
   const totalLiquidity = min(
     mulDiv(initialTotalLiquidity, delState.x, state.x),
     mulDiv(initialTotalLiquidity, delState.y, state.y),

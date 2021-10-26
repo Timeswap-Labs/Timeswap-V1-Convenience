@@ -123,7 +123,7 @@ describe('Borrow Given Debt', () => {
               maxCollateral: data.borrowGivenDebtParams.maxCollateral,
               deadline: maturity,
             })
-          ).to.be.revertedWith(error)
+          ).to.be.revertedWith('')
         }
       ),
       { skipAllAfterTimeLimit: 50000, numRuns: 10 }

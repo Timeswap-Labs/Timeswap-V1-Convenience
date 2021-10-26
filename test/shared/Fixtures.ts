@@ -573,26 +573,34 @@ export async function repayETHCollateralFixture(fixture: Fixture, signer: Signer
 export async function mintNewCoreFixture(signer:SignerWithAddress,maturity:bigint,xIncrease:bigint,yIncrease:bigint,zIncrease:bigint){
   const assetToken = await testTokenNew('DAI', 'DAI', assetValue)
   const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
+  console.log(1)
 
   const pairContractCalleeFactory = await ethers.getContractFactory('TimeswapPairCallee')
   const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
   const factoryContractFactory = await ethers.getContractFactory('TimeswapFactory')
-  
+  console.log(2)
+
   const factory = (await factoryContractFactory.deploy(signer.address, 3000, 3000)) as TimeswapFactory
   await factory.deployed()
+  console.log(3)
+
   await factory.createPair(assetToken.address, collateralToken.address)
   const pairContract = pairContractFactory.attach(
     await factory.getPair(assetToken.address, collateralToken.address)
   ) as TimeswapPair
+
   const pairContractCallee = (await pairContractCalleeFactory.deploy(pairContract.address)) as TimeswapPairCallee
   await assetToken.connect(signer).approve(pairContractCallee.address, 1n << 112n)
+
   await collateralToken.connect(signer).approve(pairContractCallee.address, 1n <<112n)
+
   await pairContractCallee.mint(maturity,signer.address,xIncrease,yIncrease,zIncrease)
+
   const  { convenience, weth }= await  deploy(assetToken,collateralToken,maturity,factory)
-  
+
   await assetToken.connect(signer).approve(convenience.address, 1n << 112n)
+
   await collateralToken.connect(signer).approve(convenience.address, 1n <<112n)
-   
   return {convenience: (new Convenience(convenience, factory, weth, signer)), assetToken, collateralToken, maturity, pairContractCallee,pairContract}
 }
 export async function mintMathCalleeGivenNewFixture(fixture:Fixture, signer:SignerWithAddress,newLiqudityParams: NewLiquidityParams){

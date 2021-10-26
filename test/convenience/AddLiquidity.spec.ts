@@ -15,7 +15,7 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { AddLiquidityParams, NewLiquidityParams } from '../types'
-import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
+import { CollateralizedDebt__factory, ERC20__factory, TestToken, TimeswapPair, TimeswapPair__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
 
@@ -58,7 +58,7 @@ describe('Add Liquidity', () => {
               maxCollateral: fc.bigUintN(112),
             }),
           })
-          .filter((x) => LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
+          .filter((x) => LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)).noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
@@ -275,7 +275,7 @@ describe('Add Liquidity ETH Collateral', () => {
     )
   }).timeout(100000)
 
-  it.only('Failed', async () => {
+  it('Failed', async () => {
     const { maturity, assetToken } = await loadFixture(fixture)
     let currentTime = await now()
 
@@ -372,16 +372,17 @@ async function addLiquidityProperties(
     state,
     data.addLiquidityParams.assetIn
   )
-  const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
-    data.newLiquidityParams.assetIn,
-    currentTime + 5_000n,
-    maturity
-  )
   const delState = {
     x: data.addLiquidityParams.assetIn,
     y: yIncreaseAddLiquidity,
     z: zIncreaseAddLiquidity,
   }
+  const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
+    state,
+    currentTime + 5_000n,
+    maturity
+  )
+
   const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(
     state,
     delState,
@@ -389,6 +390,10 @@ async function addLiquidityProperties(
     maturity
   )
   const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
+  console.log({
+    newliquidity: liquidityBalanceNew,
+    addLiquidity: liquidityBalanceAdd
+  })
 
   const debt = LiquidityMath.getDebtAddLiquidity(
     { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },

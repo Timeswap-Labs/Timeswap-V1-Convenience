@@ -232,7 +232,6 @@ async function newLiquidityProperties(
 ) {
   const result = await loadFixture(success)
   const newCurrentTime = currentTime + 5_000n
-  const liquidityBalance = LiquidityMath.liquidityCalculateNewLiquidity(data.assetIn, newCurrentTime, maturity)
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.assetIn,
     data.debtIn,
@@ -240,6 +239,13 @@ async function newLiquidityProperties(
     newCurrentTime,
     maturity
   )
+  const state = {
+    x: data.assetIn,
+    y: yIncreaseNewLiquidity,
+    z: zIncreaseNewLiquidity,
+  }
+  const liquidityBalance = LiquidityMath.liquidityCalculateNewLiquidity(state, newCurrentTime, maturity)
+
   const debt = LiquidityMath.getDebtAddLiquidity(
     { x: data.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity },
     maturity,

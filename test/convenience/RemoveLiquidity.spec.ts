@@ -20,6 +20,7 @@ import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../ty
 import { TimeswapPair__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
+import { cbrt } from '../libraries/LiquidityMath'
 
 const { loadFixture } = waffle
 
@@ -56,7 +57,7 @@ describe('Remove Liquidity', () => {
               liquidityIn: fc.bigUintN(50),
             }),
           })
-          .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity)),
+          .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity)).noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
@@ -138,7 +139,7 @@ describe('Remove Liquidity ETH Asset', () => {
               liquidityIn: fc.bigUintN(50),
             }),
           })
-          .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity)),
+          .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity)).noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
@@ -224,7 +225,7 @@ describe('Remove Liquidity ETH Collateral', () => {
                 debtIn: fc.bigUintN(112),
                 collateralIn: fc.bigUintN(112),
               })
-              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5000n, maturity)),
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5000n, maturity)).noShrink(),
             removeLiquidityParams: fc.record({
               liquidityIn: fc.bigUintN(112),
             }),
@@ -327,11 +328,26 @@ async function removeLiquidityProperties(
 ) {
   const result = await loadFixture(success)
   //   currentTime = await now()
-  const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
+    data.newLiquidityParams.debtIn,
+    data.newLiquidityParams.collateralIn,
     currentTime + 5000n,
     maturity
   )
+  const state = {
+    x: data.newLiquidityParams.assetIn,
+    y: yIncreaseNewLiquidity,
+    z: zIncreaseNewLiquidity,
+  }
+  const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
+    state,
+    currentTime + 5000n,
+    maturity
+  )
+  // console.log(liquidityBalanceNew)
+  // console.log(data.removeLiquidityParams.liquidityIn)
+  // console.log(liquidityBalanceNew - data.removeLiquidityParams.liquidityIn)
   //   //console.log(.*)
   //   //console.log(.*)
   //   //console.log(.*)
@@ -348,6 +364,6 @@ async function removeLiquidityProperties(
     await result.convenience.factoryContract.getPair(assetAddress, collateralAddress),
     ethers.provider
   ).totalLiquidity(maturity)
-  const totalLiquidityBalance = (data.newLiquidityParams.assetIn << 56n) - data.removeLiquidityParams.liquidityIn
+  const totalLiquidityBalance = ((BigInt(cbrt(state.x))*cbrt(state.y*state.z)))- data.removeLiquidityParams.liquidityIn
   expect(totalLiquidityBalanceContract).equalBigInt(totalLiquidityBalance)
 }
