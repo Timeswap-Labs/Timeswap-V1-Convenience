@@ -13,7 +13,7 @@ import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
 
 library Pay {
-    using PayMath for IDue;
+    using PayMath for IPair;
 
     function pay(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
@@ -102,7 +102,9 @@ library Pay {
         IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
         require(address(collateralizedDebt) != address(0), 'E502');
 
-        (uint112[] memory assetsIn, uint112[] memory collateralsOut) = collateralizedDebt.givenMaxAssetsIn(
+        (uint112[] memory assetsIn, uint112[] memory collateralsOut) = pair.givenMaxAssetsIn(
+            params.maturity,
+            collateralizedDebt,
             params.ids,
             params.maxAssetsIn
         );
