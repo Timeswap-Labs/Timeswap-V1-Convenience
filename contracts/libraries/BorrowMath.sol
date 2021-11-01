@@ -64,14 +64,15 @@ library BorrowMath {
         xAdjust -= assetOut;
 
         uint256 _zIncrease = collateralIn;
-        uint256 subtrahend = maturity;
-        subtrahend -= block.timestamp;
-        subtrahend *= cp.y;
-        subtrahend += uint256(cp.x) << 32;
-        uint256 denominator = xAdjust;
-        denominator *= uint256(cp.x) << 32;
-        subtrahend = subtrahend.mulDivUp(assetOut * cp.z, denominator);
+        _zIncrease *= xAdjust;
+        uint256 subtrahend = cp.z;
+        subtrahend *= assetOut;
         _zIncrease -= subtrahend;
+        _zIncrease <<= 32;
+        uint256 denominator = maturity;
+        denominator -= block.timestamp;
+        denominator *= cp.y;
+        _zIncrease /= denominator;
         zIncrease = _zIncrease.toUint112();
 
         uint256 zAdjust = cp.z;

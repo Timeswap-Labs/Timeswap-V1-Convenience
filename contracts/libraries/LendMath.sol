@@ -21,18 +21,22 @@ library LendMath {
         uint128 bondOut
     ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
+
         ConstantProduct.CP memory cp = pair.get(maturity);
+
         uint256 _yDecrease = bondOut;
         _yDecrease -= assetIn;
         _yDecrease <<= 32;
         _yDecrease = _yDecrease.divUp(maturity - block.timestamp);
         yDecrease = _yDecrease.toUint112();
+
         uint256 yAdjust = cp.y;
         yAdjust <<= 16;
         yAdjust -= _yDecrease * feeBase;
 
         uint256 xAdjust = cp.x;
         xAdjust += assetIn;
+
         uint256 _zDecrease = xAdjust;
         _zDecrease *= yAdjust;
         uint256 subtrahend = cp.x;
@@ -60,14 +64,15 @@ library LendMath {
         xAdjust += assetIn;
 
         uint256 _zDecrease = insuranceOut;
-        uint256 subtrahend = maturity;
-        subtrahend -= block.timestamp;
-        subtrahend *= cp.y;
-        subtrahend += uint256(cp.x) << 32;
-        uint256 denominator = xAdjust;
-        denominator *= uint256(cp.x) << 32;
-        subtrahend = subtrahend.mulDiv(uint256(assetIn) * cp.z, denominator);
+        _zDecrease *= xAdjust;
+        uint256 subtrahend = cp.z;
+        subtrahend *= assetIn;
         _zDecrease -= subtrahend;
+        _zDecrease <<= 32;
+        uint256 denominator = maturity;
+        denominator -= block.timestamp;
+        denominator *= cp.y;
+        _zDecrease = _zDecrease.divUp(denominator);
         zDecrease = _zDecrease.toUint112();
 
         uint256 zAdjust = cp.z;

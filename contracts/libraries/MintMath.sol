@@ -5,6 +5,7 @@ import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.
 import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
+
 library MintMath {
     using Math for uint256;
     using ConstantProduct for IPair;
@@ -21,16 +22,18 @@ library MintMath {
         _yIncrease <<= 32;
         _yIncrease /= maturity - block.timestamp;
         yIncrease = _yIncrease.toUint112();
-        uint256 denominator = maturity;
-        denominator -= block.timestamp;
-        denominator *= yIncrease;
-        denominator += uint256(assetIn) << 33;
+
         uint256 _zIncrease = collateralIn;
         _zIncrease *= assetIn;
         _zIncrease <<= 32;
+        uint256 denominator = maturity;
+        denominator -= block.timestamp;
+        denominator *= yIncrease;
+        uint256 addend = assetIn;
+        addend <<= 32;
+        denominator += addend;
         _zIncrease /= denominator;
         zIncrease = _zIncrease.toUint112();
-
     }
 
     function givenAdd(
