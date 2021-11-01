@@ -9,11 +9,14 @@ import * as LiquidityMath from '../libraries/LiquidityMath'
 import { Convenience } from '../shared/Convenience'
 import { expect } from '../shared/Expect'
 import {
-  borrowGivenDebtFixture, constructorFixture,
-  Fixture, newLiquidityFixture, repayFixture
+  borrowGivenDebtFixture,
+  constructorFixture,
+  Fixture,
+  newLiquidityFixture,
+  repayFixture,
 } from '../shared/Fixtures'
+import { testcases } from '../test-cases'
 import { now, setTime } from '../shared/Helper'
-
 
 const { loadFixture } = waffle
 
@@ -35,53 +38,31 @@ describe('Borrow Given Debt', () => {
   it('Succeeded', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
+    // console.log(testcases)
 
-    await fc.assert(
-      fc.asyncProperty(
-        fc
-          .record({
-            newLiquidityParams: fc
-              .record({
-                assetIn: fc.bigUintN(112),
-                debtIn: fc.bigUintN(112),
-                collateralIn: fc.bigUintN(112),
-              })
-              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-            borrowGivenDebtParamsList: fc.array(fc.record({
-              assetOut: fc.bigUintN(30),
-              debtIn: fc.bigUintN(112),
-              maxCollateral: fc.bigUintN(112),
-            }),{minLength: 5, maxLength:5})
-          })
-          .filter((x) => BorrowFilter.borrowGivenMultipleDebtSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
-          .noShrink(),
-        async (data) => {
-          const repayData = {
-            ids : [0n,1n],
-            maxAssetsIn: [data.newLiquidityParams.debtIn]
-          }
-          const success = async () => {
-            const constructor = await loadFixture(fixture)
-            await setTime(Number(currentTime + 5000n))
-            const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
-            await setTime(Number(currentTime + 10000n))
-            let currentFixture = newLiquidity
-            for(let i =0;i<data.borrowGivenDebtParamsList.length;i++){
-              await setTime(Number(currentTime + ((5000n)*BigInt(i+3))))
-              currentFixture = await  borrowGivenDebtFixture(currentFixture, signers[0], data.borrowGivenDebtParamsList[i])
-            }
-            const repay = await repayFixture(currentFixture,signers[0],repayData)
-            return repay
-          }
-
-          // await borrowGivenDebtProperties(data, currentTime, success, assetToken.address, collateralToken.address)
-        }
-      ),
-      { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-    )
+    const success = async () => {
+      const constructor = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await loadFixture(() => newLiquidityFixture(constructor, signers[0], testcases.newLiquidity))
+      await setTime(Number(currentTime + 10000n))
+      const borrowGivenDebt = await loadFixture(() =>
+        borrowGivenDebtFixture(newLiquidity, signers[0], testcases.borrow[0])
+      )
+      let currentFixture = borrowGivenDebt
+      for (let i = 1; i < testcases.borrow.length; i++) {
+        console.log(i)
+        await setTime(Number(currentTime + 5000n * BigInt(i + 3)))
+        currentFixture = await loadFixture(() =>
+          borrowGivenDebtFixture(currentFixture, signers[0], testcases.borrow[i])
+        )
+      }
+      const repay = await repayFixture(currentFixture, signers[0], { ids: [1n], maxAssetsIn: [10n] })
+      
+      return repay
+    }
+    await loadFixture(success)
+    // await borrowGivenDebtProperties(data, currentTime, success, assetToken.address, collateralToken.address)
   }).timeout(600000)
-
-
 })
 
 async function borrowGivenDebtProperties(
