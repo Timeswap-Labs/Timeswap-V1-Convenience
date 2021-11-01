@@ -1,29 +1,19 @@
-import { ethers, waffle } from 'hardhat'
-import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
-import { expect } from '../shared/Expect'
-import * as LiquidityMath from '../libraries/LiquidityMath'
-import * as BorrowMath from '../libraries/BorrowMath'
-import {
-  newLiquidityFixture,
-  constructorFixture,
-  Fixture,
-  addLiquidityFixture,
-  borrowGivenDebtFixture,
-  borrowGivenDebtETHCollateralFixture,
-  newLiquidityETHCollateralFixture,
-  borrowGivenDebtETHAssetFixture,
-  newLiquidityETHAssetFixture,
-  repayFixture,
-} from '../shared/Fixtures'
-
-import * as fc from 'fast-check'
-import { AddLiquidityParams, NewLiquidityParams } from '../types'
-import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
-import * as LiquidityFilter from '../filters/Liquidity'
-import * as BorrowFilter from '../filters/Borrow'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import * as fc from 'fast-check'
+import { ethers, waffle } from 'hardhat'
+import { CollateralizedDebt__factory, TestToken } from '../../typechain'
+import * as BorrowFilter from '../filters/Borrow'
+import * as LiquidityFilter from '../filters/Liquidity'
+import * as BorrowMath from '../libraries/BorrowMath'
+import * as LiquidityMath from '../libraries/LiquidityMath'
 import { Convenience } from '../shared/Convenience'
-import { kMaxLength } from 'buffer'
+import { expect } from '../shared/Expect'
+import {
+  borrowGivenDebtFixture, constructorFixture,
+  Fixture, newLiquidityFixture, repayFixture
+} from '../shared/Fixtures'
+import { now, setTime } from '../shared/Helper'
+
 
 const { loadFixture } = waffle
 
@@ -61,7 +51,7 @@ describe('Borrow Given Debt', () => {
               assetOut: fc.bigUintN(30),
               debtIn: fc.bigUintN(112),
               maxCollateral: fc.bigUintN(112),
-            }),{minLength: 5, maxLength:10})
+            }),{minLength: 5, maxLength:5})
           })
           .filter((x) => BorrowFilter.borrowGivenMultipleDebtSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
           .noShrink(),
