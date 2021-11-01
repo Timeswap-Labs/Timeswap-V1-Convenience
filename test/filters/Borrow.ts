@@ -118,7 +118,6 @@ export function borrowGivenDebtSuccess(
   ) {
     return false
   }
-
   const delState = {
     x: borrowGivenDebtParams.assetOut,
     y: yIncreaseBorrowGivenDebt,
@@ -143,14 +142,13 @@ export function borrowGivenMultipleDebtSuccess(
   currentTimeB: bigint,
   maturity: bigint
 ) {
-  console.log(1)
   const { newLiquidityParams, borrowGivenDebtParamsList } = liquidityParams
+  
   for(let i=0;i<borrowGivenDebtParamsList.length;i++){
-    if (borrowGivenDebtParamsList[i].assetOut <= 0 && borrowGivenDebtParamsList[i].assetOut >= newLiquidityParams.assetIn/100n) {
+    if (borrowGivenDebtParamsList[i].assetOut <= 0) {
       return false
     }
   }
-  console.log(2)
 
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     newLiquidityParams.assetIn,
@@ -159,10 +157,9 @@ export function borrowGivenMultipleDebtSuccess(
     currentTimeNL,
     maturity
   )
-  console.log(3)
 
   let state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-
+  
   if (state.x <= borrowGivenDebtParamsList[0].assetOut) {
     return false
   }
@@ -174,9 +171,7 @@ export function borrowGivenMultipleDebtSuccess(
     currentTimeB,
     borrowGivenDebtParamsList[0].debtIn
   )
-  console.log(4)
-  console.log(state)
-    console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt, yIncreaseBorrowGivenDebt+state.y,zIncreaseBorrowGivenDebt+state.z)
+
   if (
     !(
       yIncreaseBorrowGivenDebt > 0n &&

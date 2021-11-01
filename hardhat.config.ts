@@ -1,9 +1,9 @@
-import '@typechain/hardhat'
 import '@nomiclabs/hardhat-waffle'
-import { HardhatUserConfig } from 'hardhat/types'
+import '@typechain/hardhat'
 import * as dotenv from 'dotenv'
 import 'hardhat-contract-sizer'
-import "hardhat-gas-reporter"
+// import "hardhat-gas-reporter"
+import { HardhatUserConfig } from 'hardhat/types'
 import 'solidity-coverage'
 
 dotenv.config()
@@ -35,11 +35,11 @@ const config: HardhatUserConfig = {
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
   },
-  contractSizer: {
-    alphaSort: true,
-    runOnCompile: true,
-    disambiguatePaths: false,
-  },
+  // contractSizer: {
+  //   alphaSort: true,
+  //   runOnCompile: true,
+  //   disambiguatePaths: false,
+  // },
 }
 
 export default config
