@@ -3,6 +3,7 @@ import '@nomiclabs/hardhat-waffle'
 import { HardhatUserConfig } from 'hardhat/types'
 import * as dotenv from 'dotenv'
 import 'hardhat-contract-sizer'
+import "hardhat-gas-reporter"
 import 'solidity-coverage'
 
 dotenv.config()

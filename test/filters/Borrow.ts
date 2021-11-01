@@ -139,7 +139,127 @@ export function borrowGivenDebtSuccess(
 
   return true
 }
+export function borrowGivenMultipleDebtSuccess(
+  liquidityParams: {
+    newLiquidityParams: NewLiquidityParams
+    borrowGivenDebtParamsList: BorrowGivenDebtParams[]
+  },
+  currentTimeNL: bigint,
+  currentTimeB: bigint,
+  maturity: bigint
+) {
+  console.log(1)
+  const { newLiquidityParams, borrowGivenDebtParamsList } = liquidityParams
+  for(let i=0;i<borrowGivenDebtParamsList.length;i++){
+    if (borrowGivenDebtParamsList[i].assetOut <= 0 && borrowGivenDebtParamsList[i].assetOut >= newLiquidityParams.assetIn/100n) {
+      return false
+    }
+  }
+  console.log(2)
 
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    newLiquidityParams.assetIn,
+    newLiquidityParams.debtIn,
+    newLiquidityParams.collateralIn,
+    currentTimeNL,
+    maturity
+  )
+  console.log(3)
+
+  let state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+
+  if (state.x <= borrowGivenDebtParamsList[0].assetOut) {
+    return false
+  }
+
+  const { yIncreaseBorrowGivenDebt, zIncreaseBorrowGivenDebt } = BorrowMath.getYandZIncreaseBorrowGivenDebt(
+    state,
+    borrowGivenDebtParamsList[0].assetOut,
+    maturity,
+    currentTimeB,
+    borrowGivenDebtParamsList[0].debtIn
+  )
+  console.log(4)
+  console.log(state)
+    console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt, yIncreaseBorrowGivenDebt+state.y,zIncreaseBorrowGivenDebt+state.z)
+  if (
+    !(
+      yIncreaseBorrowGivenDebt > 0n &&
+      zIncreaseBorrowGivenDebt > 0n &&
+      yIncreaseBorrowGivenDebt + state.y <= MAXUINT112 &&
+      zIncreaseBorrowGivenDebt + state.z <= MAXUINT112 
+    )
+  ) {
+    return false
+  }
+  console.log(5)
+
+
+  let delState = {
+    x: borrowGivenDebtParamsList[0].assetOut,
+    y: yIncreaseBorrowGivenDebt,
+    z: zIncreaseBorrowGivenDebt,
+  }
+  const debt = BorrowMath.getDebt(delState, maturity, currentTimeB)
+  const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTimeB)
+  if (!BorrowMath.check(state, delState)) {
+    return false
+  }
+  console.log(6)
+
+  if (debt <= 0 || borrowGivenDebtParamsList[0].maxCollateral < collateral || debt > MAXUINT112 || collateral > MAXUINT112)
+    return false
+    console.log(7)
+
+  state = delState
+  currentTimeB = currentTimeB+5000n
+  console.log(3)
+
+for(let i = 1;i<borrowGivenDebtParamsList.length;i++){
+  console.log(`p${i}`)
+
+  if (state.x <= borrowGivenDebtParamsList[i].assetOut) {
+    return false
+  }
+  const { yIncreaseBorrowGivenDebt, zIncreaseBorrowGivenDebt } = BorrowMath.getYandZIncreaseBorrowGivenDebt(
+    state,
+    borrowGivenDebtParamsList[i].assetOut,
+    maturity,
+    currentTimeB,
+    borrowGivenDebtParamsList[i].debtIn
+  )
+
+  if (
+    !(
+      yIncreaseBorrowGivenDebt > 0n &&
+      zIncreaseBorrowGivenDebt > 0n &&
+      yIncreaseBorrowGivenDebt + state.y <= MAXUINT112 &&
+      zIncreaseBorrowGivenDebt + state.z <= MAXUINT112 &&
+      state.x - borrowGivenDebtParamsList[i].assetOut > 0n
+    )
+  ) {
+    return false
+  }
+
+  const delState = {
+    x: borrowGivenDebtParamsList[i].assetOut,
+    y: yIncreaseBorrowGivenDebt,
+    z: zIncreaseBorrowGivenDebt,
+  }
+  const debt = BorrowMath.getDebt(delState, maturity, currentTimeB)
+  const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTimeB)
+  if (!BorrowMath.check(state, delState)) {
+    return false
+  }
+  if (debt <= 0 || borrowGivenDebtParamsList[i].maxCollateral < collateral || debt > MAXUINT112 || collateral > MAXUINT112)
+    return false
+
+  state =  delState
+  currentTimeB = currentTimeB + 5000n
+}
+
+  return true
+}
 export function borrowGivenDebtError(
   params: {
     newLiquidityParams: NewLiquidityParams
