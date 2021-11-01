@@ -6,6 +6,7 @@ import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
+
 library LendMath {
     using Math for uint256;
     using FullMath for uint256;
@@ -43,7 +44,6 @@ library LendMath {
         denominator *= feeBase;
         _zDecrease = _zDecrease.mulDiv(uint256(cp.z) << 16, denominator);
         zDecrease = _zDecrease.toUint112();
-
     }
 
     function givenInsurance(
@@ -54,12 +54,10 @@ library LendMath {
     ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
 
-
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         uint256 xAdjust = cp.x;
         xAdjust += assetIn;
-
 
         uint256 _zDecrease = insuranceOut;
         uint256 subtrahend = maturity;
@@ -71,7 +69,6 @@ library LendMath {
         subtrahend = subtrahend.mulDiv(uint256(assetIn) * cp.z, denominator);
         _zDecrease -= subtrahend;
         zDecrease = _zDecrease.toUint112();
-
 
         uint256 zAdjust = cp.z;
         zAdjust <<= 16;
