@@ -544,7 +544,7 @@ export async function repayFixture(fixture: Fixture, signer: SignerWithAddress, 
     repayParams.ids,
     repayParams.maxAssetsIn
   )
-
+  
   return { convenience, assetToken, collateralToken, maturity }
 }
 

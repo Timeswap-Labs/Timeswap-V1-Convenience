@@ -38,7 +38,7 @@ describe('Borrow Given Debt', () => {
   it('Succeeded', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
-    console.log(testcases)
+    // console.log(testcases)
 
     const success = async () => {
       const constructor = await loadFixture(fixture)
@@ -50,13 +50,14 @@ describe('Borrow Given Debt', () => {
       )
       let currentFixture = borrowGivenDebt
       for (let i = 1; i < testcases.borrow.length; i++) {
-        console.log(1)
+        console.log(i)
         await setTime(Number(currentTime + 5000n * BigInt(i + 3)))
         currentFixture = await loadFixture(() =>
           borrowGivenDebtFixture(currentFixture, signers[0], testcases.borrow[i])
         )
       }
       const repay = await repayFixture(currentFixture, signers[0], { ids: [1n], maxAssetsIn: [10n] })
+      
       return repay
     }
     await loadFixture(success)

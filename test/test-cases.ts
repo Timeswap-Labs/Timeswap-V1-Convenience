@@ -1,10 +1,10 @@
 export const testcases = {
   newLiquidity: {
-    assetIn: 1000000n,
-    debtIn: 2000000n,
-    collateralIn: 1000000n,
+    assetIn: 1000000000n,
+    debtIn: 2000000000n,
+    collateralIn: 1000000000n,
   },
-  borrow: Array(100).fill({
+  borrow: Array(5000).fill({
     assetOut: 100n,
     debtIn: 150n,
     maxCollateral: 1000n,
