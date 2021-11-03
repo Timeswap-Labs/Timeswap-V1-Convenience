@@ -6,9 +6,6 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
   if (newLiquidityParams.assetIn < 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
     return false
   }
-  if (newLiquidityParams.assetIn < (1n<<50n)){
-    return false
-  }
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     newLiquidityParams.assetIn,
     newLiquidityParams.debtIn,
@@ -16,6 +13,11 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
     currentTime,
     maturity
   )
+  console.log({
+    xIncrease: newLiquidityParams.assetIn,
+    yIncrease: yIncreaseNewLiquidity,
+    zIncrease: zIncreaseNewLiquidity
+  })
 
   if (
     !(

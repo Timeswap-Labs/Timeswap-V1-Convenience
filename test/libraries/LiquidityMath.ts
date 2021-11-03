@@ -1,4 +1,4 @@
-import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
+import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime, divUp } from '../shared/Helper'
 
 
 
@@ -25,7 +25,7 @@ export const getYandZIncreaseNewLiquidity = (
   maturity: bigint
 ) => {
   const yIncrease = ((debtIn - assetIn) << 32n) / (maturity - currentTime)
-  const denominator = (maturity - currentTime) * yIncrease + (assetIn << 33n)
+  const denominator = (maturity - currentTime) * yIncrease + (assetIn << 32n)
   const zIncrease = ((collateralIn * assetIn) << 32n) / denominator
 
   return { yIncreaseNewLiquidity: yIncrease, zIncreaseNewLiquidity: zIncrease }
@@ -71,5 +71,5 @@ export const getCollateralAddLiquidity = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  return mulDivUp((maturity - currentTime) * delState.y + (delState.x << 33n), delState.z, delState.x << 32n)
+  return divUp((maturity - currentTime) * delState.y * delState.z, delState.x << 32n) + delState.z
 }

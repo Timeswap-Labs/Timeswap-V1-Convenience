@@ -352,10 +352,9 @@ export const getInsurance = (
   currentTime: bigint
 ) => {
   return (
-    mulDiv(
-      (maturity - currentTime) * state.y + (state.x << 32n),
-      delState.x * state.z,
-      ((delState.x + state.x) * state.x) << 32n
-    ) + delState.z
+    
+      (maturity - currentTime) * state.y * delState.z + (state.z + delState.x << 32n)/  
+      (delState.x + state.x) << 32n
+    
   )
 }

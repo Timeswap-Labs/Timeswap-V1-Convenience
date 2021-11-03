@@ -41,7 +41,7 @@ describe('New Liquidity', () => {
       fc.asyncProperty(
         fc
           .record({ assetIn: fc.bigUintN(112), debtIn: fc.bigUintN(112), collateralIn: fc.bigUintN(112) })
-          .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+          .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)).noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
