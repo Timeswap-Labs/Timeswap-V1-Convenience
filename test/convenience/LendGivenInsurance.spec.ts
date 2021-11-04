@@ -415,7 +415,7 @@ async function lendGivenInsuranceProperties(
   expect(bondContractBalance).equalBigInt(bond)
   expect(insuranceContractBalance).equalBigInt(insurance)
 
-  expect(insurance).equalBigInt(data.lendGivenInsuranceParams.insuranceOut)
+  expect(insurance).gteBigInt(data.lendGivenInsuranceParams.insuranceOut)
   //console.log(.*)
   //console.log(.*)
   //console.log(.*)

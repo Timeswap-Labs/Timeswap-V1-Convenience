@@ -13,11 +13,11 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
     currentTime,
     maturity
   )
-  console.log({
-    xIncrease: newLiquidityParams.assetIn,
-    yIncrease: yIncreaseNewLiquidity,
-    zIncrease: zIncreaseNewLiquidity
-  })
+  // console.log({
+  //   xIncrease: newLiquidityParams.assetIn,
+  //   yIncrease: yIncreaseNewLiquidity,
+  //   zIncrease: zIncreaseNewLiquidity
+  // })
 
   if (
     !(

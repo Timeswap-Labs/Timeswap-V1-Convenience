@@ -74,22 +74,23 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
   }
 
   if (
-    (maturity - currentTime) * state.y + (state.x << 32n) >= MAXUINT256 ||
-    assetIn * state.z >= MAXUINT256 ||
-    xAdjust * (state.x << 32n) >= MAXUINT256
+    (((insuranceOut * xAdjust) - (state.z* assetIn))) <<32n>= MAXUINT256 ||
+    (maturity-currentTime)*state.y >= MAXUINT256 ||
+    (((insuranceOut * xAdjust) - (state.z* assetIn))) <<32n <= 0
+
   ) {
     return false
   }
 
   if (
-    mulDiv((maturity - currentTime) * state.y + (state.x << 32n), assetIn * state.z, xAdjust * (state.x << 32n)) >=
+     divUp((((insuranceOut * xAdjust) - (state.z* assetIn))<<32n), (maturity-currentTime)*state.y)
+    >=
     MAXUINT256
   ) {
     return false
   }
-  const zDecrease =
-    insuranceOut -
-    mulDiv((maturity - currentTime) * state.y + (state.x << 32n), assetIn * state.z, xAdjust * (state.x << 32n))
+  const zDecrease = divUp((((insuranceOut * xAdjust) - (state.z* assetIn)))<<32n, (maturity-currentTime)*state.y)
+
   if (zDecrease < 0 || zDecrease >= MAXUINT112) {
     // //console.log(.*)
     return false
@@ -220,9 +221,7 @@ export const calcYAndZDecreaseLendGivenInsurance = (
 ) => {
   const feeBase = BigInt(0x10000 + 100)
   const xAdjust = state.x + assetIn
-  const zDecrease =
-    insuranceOut -
-    mulDiv((maturity - currentTime) * state.y + (state.x << 32n), assetIn * state.z, xAdjust * (state.x << 32n))
+  const zDecrease = divUp((((insuranceOut * xAdjust) - (state.z* assetIn)))<<32n, (maturity-currentTime)*state.y)
   const zAdjust = (state.z << 16n) - zDecrease * feeBase
   const yDecrease = mulDiv(
     xAdjust * zAdjust - ((state.x * state.z) << 16n),
@@ -351,10 +350,21 @@ export const getInsurance = (
   maturity: bigint,
   currentTime: bigint
 ) => {
+  const addend =((state.z * delState.x) << 32n)
+  const _insuranceOut =(((maturity - currentTime) * state.y) * delState.z)
+  const denominator =  ((delState.x + state.x) << 32n)
+  console.log('ts')
+  console.log({
+  state: state,
+  delState: delState,
+  insurance:      (_insuranceOut+addend)/denominator,
+  _insuranceOut:_insuranceOut,
+  addend: addend,
+  denominator:denominator
+
+  })
   return (
     
-      (maturity - currentTime) * state.y * delState.z + (state.z + delState.x << 32n)/  
-      (delState.x + state.x) << 32n
-    
+    (_insuranceOut+addend)/denominator
   )
 }

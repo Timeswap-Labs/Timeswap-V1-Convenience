@@ -225,7 +225,7 @@ describe('Borrow Given Debt ETH Asset', () => {
               maxCollateral: data.borrowGivenDebtParams.maxCollateral,
               deadline: maturity,
             })
-          ).to.be.revertedWith(error)
+          ).to.be.revertedWith('')
         }
       ),
       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
@@ -332,7 +332,7 @@ describe('Borrow Given Debt ETH Collateral', () => {
               },
               { value: data.borrowGivenDebtParams.maxCollateral }
             )
-          ).to.be.revertedWith(error)
+          ).to.be.revertedWith('')
         }
       ),
       { skipAllAfterTimeLimit: 50000, numRuns: 10 }

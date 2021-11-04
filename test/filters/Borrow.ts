@@ -216,8 +216,8 @@ export function borrowGivenMultipleDebtSuccess(
   // console.log(3)
 
 for(let i = 1;i<borrowGivenDebtParamsList.length;i++){
-  console.log(`p${i}`)
-  console.log(state)
+  // console.log(`p${i}`)
+  // console.log(state)
   if (state.x <= borrowGivenDebtParamsList[i].assetOut) {
     return false
   }
@@ -229,7 +229,7 @@ for(let i = 1;i<borrowGivenDebtParamsList.length;i++){
     currentTimeB,
     borrowGivenDebtParamsList[i].debtIn
   )
-console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt)
+// console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt)
   if (
     !(
       yIncreaseBorrowGivenDebt > 0n &&
@@ -241,7 +241,7 @@ console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt)
   ) {
     return false
   }
-  console.log(2)
+  // console.log(2)
 
 
   const delState = {
@@ -356,16 +356,16 @@ export function borrowGivenCollateralSuccess(
   if (state.x <= borrowGivenCollateralParams.assetOut) {
     return false
   }
-  // if (
-  //   !BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(
-  //     state,
-  //     borrowGivenCollateralParams.assetOut,
-  //     maturity,
-  //     currentTimeB,
-  //     borrowGivenCollateralParams.collateralIn
-  //   )
-  // )
-  //   return false
+  if (
+    !BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(
+      state,
+      borrowGivenCollateralParams.assetOut,
+      maturity,
+      currentTimeB,
+      borrowGivenCollateralParams.collateralIn
+    )
+  )
+    return false
 
   const { yIncreaseBorrowGivenCollateral, zIncreaseBorrowGivenCollateral } =
     BorrowMath.getYandZIncreaseBorrowGivenCollateral(

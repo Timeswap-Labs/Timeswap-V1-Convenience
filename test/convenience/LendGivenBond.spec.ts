@@ -412,5 +412,5 @@ async function lendGivenBondProperties(
   expect(bondTokenName).equals(`Timeswap Bond - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
   expect(bondTokenDecimals).equals(18)
 
-  expect(bond).equalBigInt(data.lendGivenBondParams.bondOut)
+  expect(bond).gteBigInt(data.lendGivenBondParams.bondOut)
 }
