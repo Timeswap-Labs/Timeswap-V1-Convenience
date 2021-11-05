@@ -1,7 +1,7 @@
 
 import { constructorFixture, Fixture, lendMathGivenBondFixture, lendMathGivenInsuranceFixture, lendMathGivenPercentFixture, mintMathCalleeGivenAddFixture, mintMathCalleeGivenNewFixture, newLiquidityFixture } from '../../shared/Fixtures'
 import * as fc from 'fast-check'
-// import { loadFixture } from '@ethereum-waffle/provider'
+
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
 import { now, setTime } from '../../shared/Helper'
@@ -50,7 +50,6 @@ describe('Lend Math Given Bond', () => {
             .filter((x) => LendFilter.lendGivenBondSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
           async (data) => {
             const success = async () => {
-              //console.log(.*)
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
               const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
@@ -157,10 +156,9 @@ describe('Lend Math Given Percent', () => {
             const lendGivenBond = await lendMathGivenPercentFixture(newLiquidity, signers[0], data.lendGivenPercentParams)
             return lendGivenBond
           }
-          //console.log(.*)
-          // Trying things
           
-          // providers.
+          
+          
           const [yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
           await lendMathGivenPercentProperties(data, currentTime, maturity,yDecrease,zDecrease)
 
@@ -188,12 +186,11 @@ describe('Lend Math Given Percent', () => {
     yDecrease: bigint,
     zDecrease: bigint
   ) {
-    //console.log(.*)
-    // Trying things
+    
     const neededTime = (await now()) + 100n
-    // providers.
+    
   
-    // currentTime = await now()
+    
     const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
       data.newLiquidityParams.assetIn,
       data.newLiquidityParams.debtIn,
@@ -201,7 +198,6 @@ describe('Lend Math Given Percent', () => {
       currentTime + 5_000n,
       maturity
     )
-    //console.log(.*)
     const state = {
       x: data.newLiquidityParams.assetIn,
       y: yIncreaseNewLiquidity,
@@ -236,11 +232,10 @@ async function lendMathGivenInsuranceProperties(
     yDecrease: bigint,
     zDecrease: bigint
   ) {
-    //console.log(.*)
-    // Trying things
+    
     const neededTime = (await now()) + 100n
-    // providers.
-    // currentTime = await now()
+    
+    
     const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
       data.newLiquidityParams.assetIn,
       data.newLiquidityParams.debtIn,
@@ -283,7 +278,7 @@ async function lendMathGivenInsuranceProperties(
     yDecrease: bigint,
     zDecrease: bigint
   ) {
-  // currentTime = await now()
+  
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,

@@ -6,7 +6,6 @@ import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
-
 library BorrowMath {
     using Math for uint256;
     using FullMath for uint256;
@@ -78,7 +77,6 @@ library BorrowMath {
         uint256 zAdjust = cp.z;
         zAdjust <<= 16;
         zAdjust += _zIncrease * feeBase;
-
         uint256 _yIncrease = cp.x;
         _yIncrease *= cp.z;
         _yIncrease <<= 16;

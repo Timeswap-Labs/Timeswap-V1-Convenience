@@ -20,13 +20,12 @@ export const check = (state: { x: bigint; y: bigint; z: bigint }, delState: { x:
     return false
   }
   const minimum = divUp((delState.x * state.y) << 12n, xReserve * feeBase)
-  // console.log(minimum)
-  // console.log(delState.y)
+
   if (delState.y < minimum) {
     return false
   }
 
-  //console.log(.*)
+  
   return true
 }
 export const checkError = (
@@ -45,7 +44,7 @@ export const checkError = (
     return 'E302'
   }
 
-  //console.log(.*)
+  
   return ''
 }
 export const verifyYandZIncreaseBorrowGivenCollateral = (
@@ -59,33 +58,31 @@ export const verifyYandZIncreaseBorrowGivenCollateral = (
 
   const xAdjust = state.x - assetOut
   if (xAdjust < 0 || xAdjust >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
   let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 32n
   let denominator = (maturity - currentTime) * state.y 
   const zIncrease = _zIncrease / denominator
-  // console.log('zIncrease ts:', zIncrease)
   if (zIncrease <= 0 || zIncrease >= MAXUINT112) {
-    //console.log(.*)
+    
     return false
   }
   const zAdjust = (state.z << 16n) + zIncrease * feeBase
   if (zAdjust < 0 || zAdjust >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
-  // console.log(zIncrease)
   
   let subtrahend = xAdjust * zAdjust
   if (((state.x * state.z) << 16n) - subtrahend <= 0 ) {
-    //console.log(.*)
+    
     return false
   }
   denominator = xAdjust * zAdjust * feeBase
   const yIncrease = mulDivUp(((state.x * state.z) << 16n) - subtrahend, state.y << 16n, denominator)
   if (yIncrease <= 0 || yIncrease >= MAXUINT112) {
-    //console.log(.*)
+    
     return false
   }
   return { yIncreaseBorrowGivenCollateral: yIncrease, zIncreaseBorrowGivenCollateral: zIncrease }

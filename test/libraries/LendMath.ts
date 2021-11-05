@@ -14,17 +14,14 @@ export const verifyYAndZDecreaseLendGivenBond = (
   const feeBase = BigInt(0x10000 + 100)
   const yDecrease = divUp((bondOut - assetIn) << 32n, maturity - currentTime)
   if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
-    // //console.log(.*)
     return false
   }
   const yAdjust = (state.y << 16n) - yDecrease * feeBase
   if (yAdjust <= 0 || yAdjust >= MAXUINT112) {
-    // //console.log(.*)
     return false
   }
   const xAdjust = state.x + assetIn
   if (xAdjust <= 0 || xAdjust >= MAXUINT112) {
-    // //console.log(.*)
     return false
   }
   const zDecrease = mulDiv(
@@ -33,30 +30,8 @@ export const verifyYAndZDecreaseLendGivenBond = (
     xAdjust * yAdjust * feeBase
   )
   if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
-    // //console.log(.*)
-    //     yDecrease: yDecrease,
-    //     yAdjust: yAdjust,
-    //     xAdjust: xAdjust,
-    //     zDecrease: zDecrease,
-    //     maturity: maturity,
-    //     currentTime: currentTime,
-    //     bondOut: bondOut,
-    //     assetIn: assetIn,
-    //     state: state
-    // })
-    // //console.log(.*)
     return false
   }
-  // //console.log(.*)
-  //     yDecrease: yDecrease,
-  //     yAdjust: yAdjust,
-  //     xAdjust: xAdjust,
-  //     zDecrease: zDecrease,
-  //     maturity: maturity,
-  //     currentTime: currentTime,
-  //     bondOut: bondOut,
-  //     assetIn: assetIn
-  // })
   return true
 }
 export const verifyYAndZDecreaseLendGivenInsurance = (
@@ -69,7 +44,6 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
   const feeBase = 0x10000n + 100n
   const xAdjust = state.x + assetIn
   if (xAdjust < 0 || xAdjust >= MAXUINT256) {
-    // //console.log(.*)
     return false
   }
 
@@ -92,12 +66,10 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
   const zDecrease = divUp((((insuranceOut * xAdjust) - (state.z* assetIn)))<<32n, (maturity-currentTime)*state.y)
 
   if (zDecrease < 0 || zDecrease >= MAXUINT112) {
-    // //console.log(.*)
     return false
   }
   const zAdjust = (state.z << 16n) - zDecrease * feeBase
   if (zAdjust <= 0 || zAdjust >= MAXUINT256) {
-    // //console.log(.*)
     return false
   }
   if (
@@ -119,7 +91,6 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
     xAdjust * zAdjust * feeBase
   )
   if (yDecrease < 0 || yDecrease >= MAXUINT112) {
-    // //console.log(.*)
     return false
   }
   return { yDecreaseLendGivenInsurance: yDecrease, zDecreaseLendGivenInsurance: zDecrease }
@@ -131,40 +102,40 @@ export const verifyYAndZDecreaseLendGivenPercent = (
   assetIn: bigint,
   percent: bigint
 ) => {
-  //console.log(.*)
+  
   const feeBase = BigInt(0x10000 + 100)
   const xAdjust = state.x + assetIn
   if (xAdjust < 0 || xAdjust >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
   let minimum = (assetIn * state.y) << 12n
   if (minimum < 0 || minimum >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
-  //console.log(.*)
+  
   const maximum = (minimum << 4n) / (xAdjust * feeBase)
   minimum /= xAdjust * feeBase
   if (minimum < 0 || minimum >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
+  
+  
+  
   if (maximum < minimum || maximum >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
   const yDecrease = (((maximum - minimum) * percent) >> 32n) + minimum
   if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
-    //console.log(.*)
+    
     return false
   }
   const yAdjust = (state.y << 16n) - yDecrease * feeBase
   if (yAdjust < 0 || yAdjust >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
 
@@ -187,7 +158,7 @@ export const verifyYAndZDecreaseLendGivenPercent = (
     xAdjust * yAdjust * feeBase
   )
   if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
-    //console.log(.*)
+    
     return false
   }
   return true
@@ -208,7 +179,7 @@ export const calcYAndZDecreaseLendGivenBond = (
     state.z << 16n,
     xAdjust * yAdjust * feeBase
   )
-  //console.log(.*)
+  
   return { yDecreaseLendGivenBond: yDecrease, zDecreaseLendGivenBond: zDecrease }
 }
 
@@ -238,7 +209,7 @@ export const calcYAndZDecreaseLendGivenPercent = (
   assetIn: bigint,
   percent: bigint
 ) => {
-  //console.log(.*)
+  
   const feeBase = BigInt(0x10000 + 100)
   const xAdjust = state.x + assetIn
 
@@ -300,13 +271,13 @@ export const check = (
   if (checkConstantProduct(state, { x: xReserve, y: yAdjusted, z: zAdjusted })) {
     const minimum = ((delState.x * state.y) << 12n) / (xReserve * feeBase)
     if (delState.y < minimum) {
-      //console.log(.*)
+      
       return false
     } else {
       return true
     }
   } else {
-    //console.log(.*)
+    
     return false
   }
 }
@@ -330,13 +301,13 @@ export const checkError = (
   if (checkConstantProduct(state, { x: xReserve, y: yAdjusted, z: zAdjusted })) {
     const minimum = ((delState.x * state.y) << 12n) / (xReserve * feeBase)
     if (delState.y < minimum) {
-      //console.log(.*)
+      
       return 'Minimum'
     } else {
       return ''
     }
   } else {
-    //console.log(.*)
+    
     return 'Invariance'
   }
 }
@@ -353,16 +324,8 @@ export const getInsurance = (
   const addend =((state.z * delState.x) << 32n)
   const _insuranceOut =(((maturity - currentTime) * state.y) * delState.z)
   const denominator =  ((delState.x + state.x) << 32n)
-  console.log('ts')
-  console.log({
-  state: state,
-  delState: delState,
-  insurance:      (_insuranceOut+addend)/denominator,
-  _insuranceOut:_insuranceOut,
-  addend: addend,
-  denominator:denominator
-
-  })
+  
+   
   return (
     
     (_insuranceOut+addend)/denominator

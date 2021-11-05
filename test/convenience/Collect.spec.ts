@@ -61,7 +61,6 @@ describe('Collect', () => {
           .noShrink(),
         async (data) => {
           const success = async () => {
-            //console.log(.*)
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
@@ -115,7 +114,6 @@ describe('Collect', () => {
             .noShrink(),
           async (data) => {
             const success = async () => {
-              //console.log(.*)
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
               const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
@@ -126,7 +124,6 @@ describe('Collect', () => {
               return collect
   
             }
-            //console.log(.*)
             await loadFixture(success)
           }),
         { skipAllAfterTimeLimit: 50000, numRuns: 10 }
@@ -169,7 +166,6 @@ describe('Collect', () => {
               .noShrink(),
             async (data) => {
               const success = async () => {
-                //console.log(.*)
                 const constructor = await loadFixture(fixture)
                 await setTime(Number(currentTime + 5000n))
                 const newLiquidity = await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
@@ -180,7 +176,6 @@ describe('Collect', () => {
                 return collect
     
               }
-              //console.log(.*)
               await loadFixture(success)
             }),
           { skipAllAfterTimeLimit: 50000, numRuns: 10 }

@@ -234,7 +234,7 @@ describe('Lend Given Insurance ETH Asset', () => {
           ).to.be.revertedWith('')
         }
       ),
-      { skipAllAfterTimeLimit: 50000, numRuns: 10 } // seed: 431971798
+      { skipAllAfterTimeLimit: 50000, numRuns: 10 } 
     )
   }).timeout(100000)
 })
@@ -368,13 +368,12 @@ async function lendGivenInsuranceProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  //console.log(.*)
-  // Trying things
+  
   const neededTime = (await now()) + 100n
-  // providers.
+  
 
   const result = await loadFixture(success)
-  // currentTime = await now()
+  
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -416,31 +415,25 @@ async function lendGivenInsuranceProperties(
   expect(insuranceContractBalance).equalBigInt(insurance)
 
   expect(insurance).gteBigInt(data.lendGivenInsuranceParams.insuranceOut)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //console.log(.*)
-  //   expect(bond).equalBigInt(data.lendGivenBondParams.bondOut)
-  // const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
-  //   data.newLiquidityParams.assetIn,
-  //   currentTime + 5_000n,
-  //   maturity
-  // )
-  // const delState = {
-  //   x: data.addLiquidityParams.assetIn,
-  //   y: yIncreaseAddLiquidity,
-  //   z: zIncreaseAddLiquidity,
-  // }
-  // const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTime + 10_000n,maturity)
-  // const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
-  // const liquidityToken = ERC20__factory.connect(
-  //   (await result.convenience.getNatives(result.assetToken.address, result.collateralToken.address, maturity))
-  //     .liquidity,
-  //   ethers.provider
-  // )
-  // const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // // //console.log(.*)
-  // expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }

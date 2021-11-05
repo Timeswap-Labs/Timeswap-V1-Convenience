@@ -256,16 +256,14 @@ async function newLiquidityProperties(
     maturity,
     newCurrentTime
   )
-  // //console.log(.*)
-  // //console.log(.*)
-  // //console.log(.*)
 
-  // expect((await result.assetToken.balanceOf(signers[0].address)).toBigInt()).equalBigInt(
-  //   (1n << 150n) - data.assetIn
-  // )
-  // expect((await result.collateralToken.balanceOf(signers[0].address)).toBigInt()).equalBigInt(
-  //   (1n << 150n) - data.collateralIn
-  // )
+
+  
+  
+  
+  
+  
+  
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
   const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)

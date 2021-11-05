@@ -9,7 +9,6 @@ import {ITimeswapLendCallback} from '@timeswap-labs/timeswap-v1-core/contracts/i
 import {ITimeswapMintCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapPayCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapPayCallback.sol';
 
-import 'hardhat/console.sol';
 
 
 contract TimeswapPairCallee {

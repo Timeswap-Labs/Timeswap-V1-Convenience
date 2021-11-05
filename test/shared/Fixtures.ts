@@ -573,16 +573,13 @@ export async function repayETHCollateralFixture(fixture: Fixture, signer: Signer
 export async function mintNewCoreFixture(signer:SignerWithAddress,maturity:bigint,xIncrease:bigint,yIncrease:bigint,zIncrease:bigint){
   const assetToken = await testTokenNew('DAI', 'DAI', assetValue)
   const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
-  console.log(1)
 
   const pairContractCalleeFactory = await ethers.getContractFactory('TimeswapPairCallee')
   const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
   const factoryContractFactory = await ethers.getContractFactory('TimeswapFactory')
-  console.log(2)
 
   const factory = (await factoryContractFactory.deploy(signer.address, 3000, 3000)) as TimeswapFactory
   await factory.deployed()
-  console.log(3)
 
   await factory.createPair(assetToken.address, collateralToken.address)
   const pairContract = pairContractFactory.attach(

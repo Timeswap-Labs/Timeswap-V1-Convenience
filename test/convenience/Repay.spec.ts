@@ -23,7 +23,7 @@ import { AddLiquidityParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as BorrowFilter from '../filters/Borrow'
-// import { Uint112, Uint256, Uint40 } from '@timeswap-labs/timeswap-v1-sdk-core'
+
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 const { loadFixture } = waffle
@@ -77,7 +77,6 @@ describe('Repay', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentFixture(
@@ -201,7 +200,6 @@ describe('Repay ETHCollateral', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
             const newLiquidity = await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentETHCollateralFixture(

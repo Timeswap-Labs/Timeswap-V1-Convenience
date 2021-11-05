@@ -38,7 +38,6 @@ describe('Borrow Given Debt', () => {
   it('Succeeded', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
-    // console.log(testcases)
 
     const success = async () => {
       const constructor = await loadFixture(fixture)
@@ -50,7 +49,6 @@ describe('Borrow Given Debt', () => {
       )
       let currentFixture = borrowGivenDebt
       for (let i = 1; i < testcases.borrow.length; i++) {
-        console.log(i)
         await setTime(Number(currentTime + 5000n * BigInt(i + 3)))
         currentFixture = await loadFixture(() =>
           borrowGivenDebtFixture(currentFixture, signers[0], testcases.borrow[i])
@@ -61,7 +59,7 @@ describe('Borrow Given Debt', () => {
       return repay
     }
     await loadFixture(success)
-    // await borrowGivenDebtProperties(data, currentTime, success, assetToken.address, collateralToken.address)
+    
   }).timeout(600000)
 })
 
@@ -88,13 +86,11 @@ async function borrowGivenDebtProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  //console.log(.*)
-  // Trying things
+  
   const neededTime = (await now()) + 100n
-  // providers.
+  
 
   const result = await loadFixture(success)
-  // currentTime = await now()
 
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
@@ -125,7 +121,6 @@ async function borrowGivenDebtProperties(
 
   const debt = BorrowMath.getDebt(delState, maturity, currentTime + 10_000n)
   const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTime + 10_000n)
-  //console.log(.*)
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
   const cdToken = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)

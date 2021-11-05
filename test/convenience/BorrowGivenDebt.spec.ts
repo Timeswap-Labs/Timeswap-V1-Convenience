@@ -67,7 +67,6 @@ describe('Borrow Given Debt', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenDebt = await borrowGivenDebtFixture(newLiquidity, signers[0], data.borrowGivenDebtParams)
@@ -159,7 +158,6 @@ describe('Borrow Given Debt ETH Asset', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
             const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenDebt = await borrowGivenDebtETHAssetFixture(
@@ -261,7 +259,6 @@ describe('Borrow Given Debt ETH Collateral', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
             const newLiquidity = await newLiquidityETHCollateralFixture(
               constructor,
               signers[0],
@@ -363,14 +360,11 @@ async function borrowGivenDebtProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  //console.log(.*)
-  // Trying things
+  
   const neededTime = (await now()) + 100n
-  // providers.
+  
 
   const result = await loadFixture(success)
-  // currentTime = await now()
-
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -400,7 +394,6 @@ async function borrowGivenDebtProperties(
 
   const debt = BorrowMath.getDebt(delState, maturity, currentTime + 10_000n)
   const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTime + 10_000n)
-  //console.log(.*)
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
   const cdToken = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
