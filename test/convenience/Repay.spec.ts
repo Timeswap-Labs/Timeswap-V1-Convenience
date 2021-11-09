@@ -20,11 +20,12 @@ import {
 
 import * as fc from 'fast-check'
 import { AddLiquidityParams, NewLiquidityParams } from '../types'
-import { CollateralizedDebt__factory, ERC20__factory } from '../../typechain'
+import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as BorrowFilter from '../filters/Borrow'
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { Convenience } from '../shared/Convenience'
 
 const { loadFixture } = waffle
 
@@ -44,7 +45,7 @@ describe('Repay', () => {
   }
 
   it('Succeeded', async () => {
-    const { maturity } = await loadFixture(fixture)
+    const { maturity, assetToken,collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
     await fc.assert(
@@ -87,8 +88,11 @@ describe('Repay', () => {
             const repay = await repayFixture(borrowGivenPercent,signers[0],repayData)
             return repay
           }
-          await loadFixture(success)
+          // await loadFixture(success)
+          await repayProperties(data,repayData,currentTime,success,assetToken.address,collateralToken.address)
+
         }
+
         
       ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
@@ -106,7 +110,7 @@ describe('Repay ETHAsset', () => {
   }
 
   it('Succeeded', async () => {
-    const { maturity } = await loadFixture(fixture)
+    const { maturity, assetToken,convenience, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
     await fc.assert(
@@ -149,7 +153,7 @@ describe('Repay ETHAsset', () => {
             const repay = await repayETHAssetFixture(borrowGivenPercent,signers[0],repayData)
             return repay
           }
-          await loadFixture(success)
+          await repayProperties(data,repayData,currentTime,success, convenience.wethContract.address,collateralToken.address)
         }
       ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
@@ -167,7 +171,7 @@ describe('Repay ETHCollateral', () => {
   }
 
   it('Succeeded', async () => {
-    const { maturity } = await loadFixture(fixture)
+    const { maturity , assetToken, collateralToken, convenience} = await loadFixture(fixture)
     let currentTime = await now()
 
     await fc.assert(
@@ -210,10 +214,83 @@ describe('Repay ETHCollateral', () => {
             const repay = await repayETHCollateralFixture(borrowGivenPercent,signers[0],repayData)
             return borrowGivenPercent
           }
-          await loadFixture(success)
+          await repayProperties(data,repayData,currentTime,success,assetToken.address,            convenience.wethContract.address
+            )
 
         }
       ),{ skipAllAfterTimeLimit: 50000, numRuns: 10 }
     )
   }).timeout(600000)
 })
+async function repayProperties(
+  data: {
+    newLiquidityParams: {
+      assetIn: bigint
+      debtIn: bigint
+      collateralIn: bigint
+    }
+    borrowGivenPercentParams: {
+      assetOut: bigint
+      percent: bigint
+      maxDebt: bigint
+      maxCollateral: bigint
+    }
+  },
+  repayData: {
+    ids: bigint[],
+    maxAssetsIn: bigint[]
+  },
+  currentTime: bigint,
+  success: () => Promise<{
+    convenience: Convenience
+    assetToken: TestToken
+    collateralToken: TestToken
+    maturity: bigint
+  }>,
+  assetAddress: string,
+  collateralAddress: string
+) {
+  
+  const neededTime = (await now()) + 100n
+  
+
+  const result = await loadFixture(success)
+
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    data.newLiquidityParams.assetIn,
+    data.newLiquidityParams.debtIn,
+    data.newLiquidityParams.collateralIn,
+    currentTime + 5_000n,
+    maturity
+  )
+
+  const state = {
+    x: data.newLiquidityParams.assetIn,
+    y: yIncreaseNewLiquidity,
+    z: zIncreaseNewLiquidity,
+  }
+  const { yIncreaseBorrowGivenPercent, zIncreaseBorrowGivenPercent } = BorrowMath.getYandZIncreaseBorrowGivenPercent(
+    state,
+    data.borrowGivenPercentParams.assetOut,
+    data.borrowGivenPercentParams.percent
+  )
+
+  const delState = {
+    x: data.borrowGivenPercentParams.assetOut,
+    y: yIncreaseBorrowGivenPercent,
+    z: zIncreaseBorrowGivenPercent,
+  }
+
+  const debt = BorrowMath.getDebt(delState, maturity, currentTime + 10_000n) - BigInt(repayData.maxAssetsIn.reduce((a,b)=> a+b,0n))
+  const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTime + 10_000n) 
+
+  const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
+  const cdToken = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
+
+  const cdTokenBalance = await cdToken.dueOf(1)
+  const debtContract = cdTokenBalance.debt.toBigInt()
+  const collateralContract = cdTokenBalance.collateral.toBigInt()
+
+  expect(debtContract).equalBigInt(0n)
+  expect(collateralContract).equalBigInt(0n)
+}

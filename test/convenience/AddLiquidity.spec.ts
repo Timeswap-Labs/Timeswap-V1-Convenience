@@ -353,7 +353,6 @@ async function addLiquidityProperties(
   collateralAddress: string
 ) {
   const result = await loadFixture(success)
-  
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
