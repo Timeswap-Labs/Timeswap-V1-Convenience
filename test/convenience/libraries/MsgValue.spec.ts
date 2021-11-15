@@ -15,7 +15,6 @@ const MAXUINT112 = (1n << 112n) -1n
 
 async function msgValueContractFixture() {
     const msgValueCalleeFactory = await ethers.getContractFactory('MsgValueCallee')
-    // const msgValueCalleeFactor =await deployContract(wallet, )
     const msgValueCalleeContract =  (await msgValueCalleeFactory.deploy()) as MsgValueCallee
     await msgValueCalleeContract.deployTransaction.wait()
     await ethers.provider.send('evm_mine',[])
@@ -26,7 +25,6 @@ async function msgValueContractFixture() {
 describe('Msg Value',()=>{
     it('Succeded', async()=>{
         const signers = await ethers.getSigners()
-        console.log((await signers[0].getBalance()).toString())
         await fc.assert(
             fc.asyncProperty(
                 fc.bigUintN(200).filter((x)=> x>0).noShrink(),

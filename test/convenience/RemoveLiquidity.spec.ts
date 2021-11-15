@@ -20,7 +20,6 @@ import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../ty
 import { TimeswapPair__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
-import { cbrt } from '../libraries/LiquidityMath'
 
 const { loadFixture } = waffle
 
@@ -327,7 +326,7 @@ async function removeLiquidityProperties(
   collateralAddress: string
 ) {
   const result = await loadFixture(success)
-  //   currentTime = await now()
+  
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -345,25 +344,17 @@ async function removeLiquidityProperties(
     currentTime + 5000n,
     maturity
   )
-  // console.log(liquidityBalanceNew)
-  // console.log(data.removeLiquidityParams.liquidityIn)
-  // console.log(liquidityBalanceNew - data.removeLiquidityParams.liquidityIn)
-  //   //console.log(.*)
-  //   //console.log(.*)
-  //   //console.log(.*)
-  //   //console.log(.*)
   const liquidityBalance = liquidityBalanceNew - data.removeLiquidityParams.liquidityIn
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
   const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
   const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // //console.log(.*)
   expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
   const totalLiquidityBalanceContract = await TimeswapPair__factory.connect(
     await result.convenience.factoryContract.getPair(assetAddress, collateralAddress),
     ethers.provider
   ).totalLiquidity(maturity)
-  const totalLiquidityBalance = ((BigInt(cbrt(state.x))*cbrt(state.y*state.z)))- data.removeLiquidityParams.liquidityIn
+  const totalLiquidityBalance = (state.x <<16n)- data.removeLiquidityParams.liquidityIn
   expect(totalLiquidityBalanceContract).equalBigInt(totalLiquidityBalance)
 }

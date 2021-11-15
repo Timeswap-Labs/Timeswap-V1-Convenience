@@ -7,9 +7,10 @@ import { newLiquidityFixture, constructorFixture, Fixture, lendGivenBondFixture,
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LendGivenBondParams, NewLiquidityParams, CollectParams } from '../types'
-import { ERC20__factory } from '../../typechain'
+import { Bond__factory, ERC20__factory, Insurance__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as LendFilter from '../filters/Lend'
+import { Convenience } from '../shared/Convenience'
 
 const { loadFixture } = waffle
 
@@ -30,7 +31,7 @@ describe('Collect', () => {
 
 
   it('Succeeded', async () => {
-    const { maturity } = await loadFixture(fixture)
+    const { maturity,assetToken,collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
     await fc.assert(
@@ -61,7 +62,6 @@ describe('Collect', () => {
           .noShrink(),
         async (data) => {
           const success = async () => {
-            //console.log(.*)
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
@@ -72,7 +72,7 @@ describe('Collect', () => {
             return collect
 
           }
-          await loadFixture(success)
+          await collectProperties(data,currentTime,success,assetToken.address,collateralToken.address)
         }),
       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
       )   
@@ -84,7 +84,7 @@ describe('Collect', () => {
 
   
     it('Succeeded', async () => {
-      const { maturity } = await loadFixture(fixture)
+      const { maturity,assetToken,collateralToken, convenience } = await loadFixture(fixture)
       let currentTime = await now()
   
       await fc.assert(
@@ -115,7 +115,6 @@ describe('Collect', () => {
             .noShrink(),
           async (data) => {
             const success = async () => {
-              //console.log(.*)
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
               const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
@@ -126,8 +125,8 @@ describe('Collect', () => {
               return collect
   
             }
-            //console.log(.*)
-            await loadFixture(success)
+            await collectProperties(data,currentTime,success,convenience.wethContract.address,
+              collateralToken.address)
           }),
         { skipAllAfterTimeLimit: 50000, numRuns: 10 }
         )
@@ -138,7 +137,7 @@ describe('Collect', () => {
 
     
       it('Succeeded', async () => {
-        const { maturity } = await loadFixture(fixture)
+        const { maturity,assetToken,collateralToken, convenience } = await loadFixture(fixture)
         let currentTime = await now()
     
         await fc.assert(
@@ -169,7 +168,6 @@ describe('Collect', () => {
               .noShrink(),
             async (data) => {
               const success = async () => {
-                //console.log(.*)
                 const constructor = await loadFixture(fixture)
                 await setTime(Number(currentTime + 5000n))
                 const newLiquidity = await newLiquidityETHCollateralFixture(constructor, signers[0], data.newLiquidityParams)
@@ -180,10 +178,86 @@ describe('Collect', () => {
                 return collect
     
               }
-              //console.log(.*)
-              await loadFixture(success)
+              await collectProperties(data,currentTime,success,assetToken.address,            convenience.wethContract.address)
             }),
           { skipAllAfterTimeLimit: 50000, numRuns: 10 }
           )
         }).timeout(100000)
       })
+      async function collectProperties(
+        data: {
+          newLiquidityParams: {
+            assetIn: bigint
+            debtIn: bigint
+            collateralIn: bigint
+          }
+          lendGivenBondParams: {
+            assetIn: bigint,
+            bondOut: bigint,
+            minInsurance: bigint,
+          },
+          collectParams:{
+              claims: {
+                  bond: bigint,
+                  insurance: bigint
+              }}},
+
+              
+        currentTime: bigint,
+        success: () => Promise<{
+          convenience: Convenience
+          assetToken: TestToken
+          collateralToken: TestToken
+          maturity: bigint
+        }>,
+        assetAddress: string,
+        collateralAddress: string
+      ) {
+        
+        const neededTime = (await now()) + 100n
+        
+      
+        const result = await loadFixture(success)
+      
+        const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+          data.newLiquidityParams.assetIn,
+          data.newLiquidityParams.debtIn,
+          data.newLiquidityParams.collateralIn,
+          currentTime + 5_000n,
+          maturity
+        )
+      
+        const state = {
+          x: data.newLiquidityParams.assetIn,
+          y: yIncreaseNewLiquidity,
+          z: zIncreaseNewLiquidity,
+        }
+        const { yDecreaseLendGivenBond, zDecreaseLendGivenBond } = LendMath.calcYAndZDecreaseLendGivenBond(
+          state,
+          maturity,
+          currentTime + 10_000n,
+          data.lendGivenBondParams.assetIn,
+          data.lendGivenBondParams.bondOut
+        )
+      
+        const delState = {
+          x: data.lendGivenBondParams.assetIn,
+          y: yDecreaseLendGivenBond,
+          z: zDecreaseLendGivenBond,
+        }
+      
+        const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n) - data.collectParams.claims.bond
+        const insurance =LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n) - data.collectParams.claims.insurance
+      
+        const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
+        const bondToken = Bond__factory.connect(natives.bond, ethers.provider)
+        const insuranceToken = Insurance__factory.connect(natives.insurance,ethers.provider)
+
+        
+        const bondBalance = await bondToken.balanceOf(signers[0].address)
+        const insuranceBalance = await insuranceToken.balanceOf(signers[0].address)
+      
+        expect(bondBalance).equalBigInt(bond)
+        expect(insuranceBalance).equalBigInt(insurance)
+      }
+      

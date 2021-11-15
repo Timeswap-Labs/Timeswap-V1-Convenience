@@ -320,7 +320,7 @@ describe('Add Liquidity ETH Collateral', () => {
               },
               { value: data.addLiquidityParams.maxCollateral }
             )
-          ).to.be.reverted // revertedWith(error)
+          ).to.be.reverted 
         }
       ),
       { skipAllAfterTimeLimit: 50000, numRuns: 10, seed: 1195527756 }
@@ -353,8 +353,6 @@ async function addLiquidityProperties(
   collateralAddress: string
 ) {
   const result = await loadFixture(success)
-  // currentTime = await now()
-  // //console.log(.*)
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -390,10 +388,6 @@ async function addLiquidityProperties(
     maturity
   )
   const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
-  console.log({
-    newliquidity: liquidityBalanceNew,
-    addLiquidity: liquidityBalanceAdd
-  })
 
   const debt = LiquidityMath.getDebtAddLiquidity(
     { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
@@ -410,7 +404,6 @@ async function addLiquidityProperties(
 
   const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
   const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // //console.log(.*)
   expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
   const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)

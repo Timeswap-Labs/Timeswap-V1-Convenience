@@ -5,7 +5,7 @@ import type { TimeswapConvenience as ConvenienceContract } from '../../typechain
 import type { TimeswapFactory as FactoryContract, TimeswapFactory } from '../../typechain/TimeswapFactory'
 import type { WETH9 as WethContract } from '../../typechain/WETH9'
 import { Convenience } from './Convenience'
-// import { experimentalAddHardhatNetworkMessageTraceHook } from "hardhat/config";
+
 
 export async function deploy(assetToken: TestToken, collateralToken: TestToken, maturity: bigint, factory?: TimeswapFactory) {
   const accounts = await ethers.getSigners()

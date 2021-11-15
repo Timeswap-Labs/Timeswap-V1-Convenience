@@ -69,14 +69,13 @@ describe('Borrow Given Percent', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentFixture(
               newLiquidity,
               signers[0],
               data.borrowGivenPercentParams
-            )
+            ) 
             return borrowGivenPercent
           }
 
@@ -118,7 +117,6 @@ describe('Borrow Given Percent ETH Asset', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
             const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
             const borrowGivenPercent = await borrowGivenPercentETHAssetFixture(
@@ -173,7 +171,6 @@ describe('Borrow Given Percent ETH Collateral', () => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            //console.log(.*)
             const newLiquidity = await newLiquidityETHCollateralFixture(
               constructor,
               signers[0],
@@ -226,13 +223,11 @@ async function borrowGivenPercentProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  // //console.log(.*)
-  // Trying things
+  
   const neededTime = (await now()) + 100n
-  // providers.
+  
 
   const result = await loadFixture(success)
-  // currentTime = await now()
 
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     data.newLiquidityParams.assetIn,
@@ -261,7 +256,6 @@ async function borrowGivenPercentProperties(
 
   const debt = BorrowMath.getDebt(delState, maturity, currentTime + 10_000n)
   const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTime + 10_000n)
-  // //console.log(.*)
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
   const cdToken = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)

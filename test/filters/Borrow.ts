@@ -155,7 +155,6 @@ export function borrowGivenMultipleDebtSuccess(
       return false
     }
   }
-  // console.log(2)
 
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     newLiquidityParams.assetIn,
@@ -164,7 +163,7 @@ export function borrowGivenMultipleDebtSuccess(
     currentTimeNL,
     maturity
   )
-  // console.log(3)
+  
 
   let state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
 
@@ -179,9 +178,6 @@ export function borrowGivenMultipleDebtSuccess(
     currentTimeB,
     borrowGivenDebtParamsList[0].debtIn
   )
-  // console.log(4)
-  // console.log(state)
-    // console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt, yIncreaseBorrowGivenDebt+state.y,zIncreaseBorrowGivenDebt+state.z)
   if (
     !(
       yIncreaseBorrowGivenDebt > 0n &&
@@ -192,7 +188,6 @@ export function borrowGivenMultipleDebtSuccess(
   ) {
     return false
   }
-  // console.log(5)
 
 
   let delState = {
@@ -205,23 +200,18 @@ export function borrowGivenMultipleDebtSuccess(
   if (!BorrowMath.check(state, delState)) {
     return false
   }
-  // console.log(6)
 
   if (debt <= 0 || borrowGivenDebtParamsList[0].maxCollateral < collateral || debt > MAXUINT112 || collateral > MAXUINT112)
     return false
-    // console.log(7)
 
   state = updateState(state,delState)
   currentTimeB = currentTimeB+5000n
-  // console.log(3)
 
 for(let i = 1;i<borrowGivenDebtParamsList.length;i++){
-  console.log(`p${i}`)
-  console.log(state)
+  
   if (state.x <= borrowGivenDebtParamsList[i].assetOut) {
     return false
   }
-  console.log(1)
   const { yIncreaseBorrowGivenDebt, zIncreaseBorrowGivenDebt } = BorrowMath.getYandZIncreaseBorrowGivenDebt(
     state,
     borrowGivenDebtParamsList[i].assetOut,
@@ -229,7 +219,6 @@ for(let i = 1;i<borrowGivenDebtParamsList.length;i++){
     currentTimeB,
     borrowGivenDebtParamsList[i].debtIn
   )
-console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt)
   if (
     !(
       yIncreaseBorrowGivenDebt > 0n &&
@@ -241,7 +230,6 @@ console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt)
   ) {
     return false
   }
-  console.log(2)
 
 
   const delState = {
@@ -254,11 +242,9 @@ console.log(yIncreaseBorrowGivenDebt,zIncreaseBorrowGivenDebt)
   if (!BorrowMath.check(state, delState)) {
     return false
   }
-  console.log(3)
 
   if (debt <= 0 || borrowGivenDebtParamsList[i].maxCollateral < collateral || debt > MAXUINT112 || collateral > MAXUINT112)
     return false
-    console.log(4)
 
   state =  updateState(delState,state)
   currentTimeB = currentTimeB + 5000n
@@ -356,16 +342,16 @@ export function borrowGivenCollateralSuccess(
   if (state.x <= borrowGivenCollateralParams.assetOut) {
     return false
   }
-  // if (
-  //   !BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(
-  //     state,
-  //     borrowGivenCollateralParams.assetOut,
-  //     maturity,
-  //     currentTimeB,
-  //     borrowGivenCollateralParams.collateralIn
-  //   )
-  // )
-  //   return false
+  if (
+    !BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(
+      state,
+      borrowGivenCollateralParams.assetOut,
+      maturity,
+      currentTimeB,
+      borrowGivenCollateralParams.collateralIn
+    )
+  )
+    return false
 
   const { yIncreaseBorrowGivenCollateral, zIncreaseBorrowGivenCollateral } =
     BorrowMath.getYandZIncreaseBorrowGivenCollateral(
@@ -431,16 +417,6 @@ export function borrowGivenCollateralError(
   if (state.x <= borrowGivenCollateralParams.assetOut) {
     return { data: params, error: '' }
   }
-  // if (
-  //   !BorrowMath.verifyYandZIncreaseBorrowGivenCollateral(
-  //     state,
-  //     borrowGivenCollateralParams.assetOut,
-  //     maturity,
-  //     currentTimeB,
-  //     borrowGivenCollateralParams.collateralIn
-  //   )
-  // )
-  //   return { data: params, error: '' }
 
   const { yIncreaseBorrowGivenCollateral, zIncreaseBorrowGivenCollateral } =
     BorrowMath.getYandZIncreaseBorrowGivenCollateral(

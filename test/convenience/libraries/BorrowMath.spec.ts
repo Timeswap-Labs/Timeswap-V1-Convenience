@@ -1,7 +1,7 @@
 
 import { borrowMathGivenCollateralFixture, borrowMathGivenDebtFixture, borrowMathGivenPercentFixture, constructorFixture, Fixture, lendMathGivenBondFixture, lendMathGivenInsuranceFixture, lendMathGivenPercentFixture, mintMathCalleeGivenAddFixture, mintMathCalleeGivenNewFixture, newLiquidityFixture } from '../../shared/Fixtures'
 import * as fc from 'fast-check'
-// import { loadFixture } from '@ethereum-waffle/provider'
+
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
 import { now, setTime } from '../../shared/Helper'
@@ -55,7 +55,6 @@ describe('Borrow Math Given Debt', () => {
             const success = async () => {
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
-              //console.log(.*)
               const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
               await setTime(Number(currentTime + 10000n))
               const borrowGivenDebt = await borrowMathGivenDebtFixture(newLiquidity, signers[0], data.borrowGivenDebtParams)
@@ -102,7 +101,6 @@ describe('BorrowMath  Given Collateral', () => {
             const success = async () => {
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
-              //console.log(.*)
               const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
               await setTime(Number(currentTime + 10000n))
               const borrowGivenCollateral = await borrowMathGivenCollateralFixture(
@@ -151,7 +149,6 @@ describe('Borrow Math Given Percent', () => {
             const success = async () => {
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
-              //console.log(.*)
               const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
               await setTime(Number(currentTime + 10000n))
               const borrowGivenPercent = await borrowMathGivenPercentFixture(
@@ -189,12 +186,11 @@ async function borrowMathGivenDebtProperties(
     yIncrease: bigint,
     zIncrease: bigint
   ) {
-    //console.log(.*)
-    // Trying things
+    
     const neededTime = (await now()) + 100n
-    // providers.
+    
   
-    // currentTime = await now()
+    
   
     const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
       data.newLiquidityParams.assetIn,
@@ -238,12 +234,11 @@ async function borrowMathGivenCollateralProperties(
     yIncrease: bigint,
     zIncrease: bigint
   ) {
-    //console.log(.*)
-    // Trying things
+    
     const neededTime = (await now()) + 100n
-    // providers.
+    
   
-    // currentTime = await now()
+    
   
     const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
       data.newLiquidityParams.assetIn,
@@ -266,7 +261,7 @@ async function borrowMathGivenCollateralProperties(
         currentTime + 10_000n,
         data.borrowGivenCollateralParams.collateralIn
       )
-    // expect(collateralContract).equalBigInt(collateral)
+    
     expect(yIncrease).equalBigInt(yIncreaseBorrowGivenCollateral)
     expect(zIncrease).equalBigInt(zIncreaseBorrowGivenCollateral)
   }
@@ -290,12 +285,11 @@ async function borrowMathGivenPercentProperties(
     yIncrease: bigint,
     zIncrease: bigint
   ) {
-    // //console.log(.*)
-    // Trying things
+    
     const neededTime = (await now()) + 100n
-    // providers.
+    
   
-    // currentTime = await now()
+    
   
     const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
       data.newLiquidityParams.assetIn,

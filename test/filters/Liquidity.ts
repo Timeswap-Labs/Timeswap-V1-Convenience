@@ -6,9 +6,6 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
   if (newLiquidityParams.assetIn < 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
     return false
   }
-  if (newLiquidityParams.assetIn < (1n<<50n)){
-    return false
-  }
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
     newLiquidityParams.assetIn,
     newLiquidityParams.debtIn,
@@ -99,7 +96,6 @@ export function addLiquiditySuccess(
   const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
   const liquidityAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL, maturity)
-  // //console.log(.*)
 
   if (
     addLiquidityParams.maxDebt < debt ||
@@ -161,7 +157,6 @@ export function addLiquidityError(
   const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
   const liquidityAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL, maturity)
-  // //console.log(.*)
 
   if (debt > MAXUINT112 || collateral > MAXUINT112) {
     return { data: liquidityParams, error: '' }

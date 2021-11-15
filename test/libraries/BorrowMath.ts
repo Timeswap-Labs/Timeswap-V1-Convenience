@@ -20,11 +20,12 @@ export const check = (state: { x: bigint; y: bigint; z: bigint }, delState: { x:
     return false
   }
   const minimum = divUp((delState.x * state.y) << 12n, xReserve * feeBase)
+
   if (delState.y < minimum) {
     return false
   }
 
-  //console.log(.*)
+  
   return true
 }
 export const checkError = (
@@ -43,7 +44,7 @@ export const checkError = (
     return 'E302'
   }
 
-  //console.log(.*)
+  
   return ''
 }
 export const verifyYandZIncreaseBorrowGivenCollateral = (
@@ -57,27 +58,31 @@ export const verifyYandZIncreaseBorrowGivenCollateral = (
 
   const xAdjust = state.x - assetOut
   if (xAdjust < 0 || xAdjust >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
-  let denominator = xAdjust * (state.x << 32n)
-  let subtrahend = (maturity - currentTime) * state.y + (state.x << 32n)
-  const zIncrease = collateralIn - mulDivUp(subtrahend, assetOut * state.z, denominator)
-
+  let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 32n
+  let denominator = (maturity - currentTime) * state.y 
+  const zIncrease = _zIncrease / denominator
   if (zIncrease <= 0 || zIncrease >= MAXUINT112) {
-    //console.log(.*)
+    
     return false
   }
   const zAdjust = (state.z << 16n) + zIncrease * feeBase
   if (zAdjust < 0 || zAdjust >= MAXUINT256) {
-    //console.log(.*)
+    
     return false
   }
-  subtrahend = xAdjust * zAdjust
+  
+  let subtrahend = xAdjust * zAdjust
+  if (((state.x * state.z) << 16n) - subtrahend <= 0 ) {
+    
+    return false
+  }
   denominator = xAdjust * zAdjust * feeBase
   const yIncrease = mulDivUp(((state.x * state.z) << 16n) - subtrahend, state.y << 16n, denominator)
   if (yIncrease <= 0 || yIncrease >= MAXUINT112) {
-    //console.log(.*)
+    
     return false
   }
   return { yIncreaseBorrowGivenCollateral: yIncrease, zIncreaseBorrowGivenCollateral: zIncrease }
@@ -118,13 +123,13 @@ export const getYandZIncreaseBorrowGivenCollateral = (
 
   const xAdjust = state.x - assetOut
 
-  let denominator = xAdjust * (state.x << 32n)
-  let subtrahend = (maturity - currentTime) * state.y + (state.x << 32n)
-  const zIncrease = collateralIn - mulDivUp(subtrahend, assetOut * state.z, denominator)
 
+  let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 32n
+  let denominator = (maturity - currentTime) * state.y 
+  const zIncrease = _zIncrease / denominator
   const zAdjust = (state.z << 16n) + zIncrease * feeBase
 
-  subtrahend = xAdjust * zAdjust
+  let subtrahend = xAdjust * zAdjust
   denominator = xAdjust * zAdjust * feeBase
   const yIncrease = mulDivUp(((state.x * state.z) << 16n) - subtrahend, state.y << 16n, denominator)
 
@@ -162,10 +167,9 @@ export const getCollateral = (
   currentTime: bigint
 ) => {
   return (
-    mulDivUp(
-      (maturity - currentTime) * state.y + (state.x << 32n),
-      delState.x * state.z,
-      ((state.x - delState.x) * state.x) << 32n
-    ) + delState.z
+    divUp(
+      ((maturity - currentTime) * state.y * delState.z) + ((state.z * delState.x) <<32n),
+      ((state.x - delState.x) ) << 32n
+    ) 
   )
 }

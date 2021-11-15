@@ -1,7 +1,6 @@
 import * as MintMath from '../../libraries/LiquidityMath'
 import { constructorFixture, Fixture, mintMathCalleeGivenAddFixture, mintMathCalleeGivenNewFixture, newLiquidityFixture } from '../../shared/Fixtures'
 import * as fc from 'fast-check'
-// import { loadFixture } from '@ethereum-waffle/provider'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { ethers, waffle } from 'hardhat'
 import { now, setTime } from '../../shared/Helper'
@@ -141,8 +140,6 @@ describe('Mint Math Given New', () => {
       yIncrease: bigint,
       zIncrease:bigint
     ) {
-      // currentTime = await now()
-      // //console.log(.*)
       const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
         data.newLiquidityParams.assetIn,
         data.newLiquidityParams.debtIn,
