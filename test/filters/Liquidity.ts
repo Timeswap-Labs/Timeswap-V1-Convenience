@@ -13,11 +13,6 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
     currentTime,
     maturity
   )
-  // console.log({
-  //   xIncrease: newLiquidityParams.assetIn,
-  //   yIncrease: yIncreaseNewLiquidity,
-  //   zIncrease: zIncreaseNewLiquidity
-  // })
 
   if (
     !(
@@ -101,7 +96,6 @@ export function addLiquiditySuccess(
   const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
   const liquidityAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL, maturity)
-  // //console.log(.*)
 
   if (
     addLiquidityParams.maxDebt < debt ||
@@ -163,7 +157,6 @@ export function addLiquidityError(
   const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
   const liquidityAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL, maturity)
-  // //console.log(.*)
 
   if (debt > MAXUINT112 || collateral > MAXUINT112) {
     return { data: liquidityParams, error: '' }

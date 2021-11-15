@@ -20,7 +20,6 @@ import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../ty
 import { TimeswapPair__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
-import { cbrt } from '../libraries/LiquidityMath'
 
 const { loadFixture } = waffle
 
@@ -356,6 +355,6 @@ async function removeLiquidityProperties(
     await result.convenience.factoryContract.getPair(assetAddress, collateralAddress),
     ethers.provider
   ).totalLiquidity(maturity)
-  const totalLiquidityBalance = ((BigInt(cbrt(state.x))*cbrt(state.y*state.z)))- data.removeLiquidityParams.liquidityIn
+  const totalLiquidityBalance = (state.x <<16n)- data.removeLiquidityParams.liquidityIn
   expect(totalLiquidityBalanceContract).equalBigInt(totalLiquidityBalance)
 }
