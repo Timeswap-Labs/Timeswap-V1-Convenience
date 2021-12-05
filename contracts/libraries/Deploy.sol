@@ -13,7 +13,12 @@ library Deploy {
     using DeployERC20 for IConvenience.Native;
     using DeployERC721 for IConvenience.Native;
 
-    event DeployNative(IERC20 asset, IERC20 collateral, uint256 maturity, IConvenience.Native native);
+    /// @dev Emits when the new natives are deployed.
+    /// @param asset The address of the asset ERC20 contract.
+    /// @param collateral The address of the collateral ERC20 contract.
+    /// @param maturity The unix timestamp maturity of the Pool.
+    /// @param native The native ERC20 and ERC721 contracts deployed.
+    event DeployNative(IERC20 indexed asset, IERC20 indexed collateral, uint256 maturity, IConvenience.Native native);
 
     function deploy(
         IConvenience.Native storage native,
