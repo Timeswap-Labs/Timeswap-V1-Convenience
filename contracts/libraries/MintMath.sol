@@ -36,7 +36,7 @@ library MintMath {
         zIncrease = _zIncrease.toUint112();
     }
 
-    function givenAdd(
+    function givenAsset(
         IPair pair,
         uint256 maturity,
         uint112 assetIn
@@ -52,5 +52,81 @@ library MintMath {
         _zIncrease *= assetIn;
         _zIncrease /= cp.x;
         zIncrease = _zIncrease.toUint112();
+    }
+
+    function givenDebt(
+        IPair pair,
+        uint256 maturity,
+        uint112 debtIn
+    )
+        internal
+        view
+        returns (
+            uint112 xIncrease,
+            uint112 yIncrease,
+            uint112 zIncrease
+        )
+    {
+        ConstantProduct.CP memory cp = pair.get(maturity);
+
+        uint256 _yIncrease = debtIn;
+        _yIncrease *= cp.y;
+        _yIncrease <<= 32;
+        uint256 denominator = maturity;
+        denominator -= block.timestamp;
+        denominator *= cp.y;
+        uint256 addend = cp.x;
+        addend <<= 32;
+        denominator += addend;
+        _yIncrease /= denominator;
+        yIncrease = _yIncrease.toUint112();
+
+        uint256 _xIncrease = cp.x;
+        _xIncrease *= _yIncrease;
+        _xIncrease /= cp.y;
+        xIncrease = _xIncrease.toUint112();
+
+        uint256 _zIncrease = cp.z;
+        _zIncrease *= _yIncrease;
+        _zIncrease /= cp.y;
+        zIncrease = _zIncrease.toUint112();
+    }
+
+    function givenCollateral(
+        IPair pair,
+        uint256 maturity,
+        uint112 collateralIn
+    )
+        internal
+        view
+        returns (
+            uint112 xIncrease,
+            uint112 yIncrease,
+            uint112 zIncrease
+        )
+    {
+        ConstantProduct.CP memory cp = pair.get(maturity);
+
+        uint256 _zIncrease = collateralIn;
+        _zIncrease *= cp.x;
+        _zIncrease <<= 32;
+        uint256 denominator = maturity;
+        denominator -= block.timestamp;
+        denominator *= cp.y;
+        uint256 addend = cp.x;
+        addend <<= 32;
+        denominator += addend;
+        _zIncrease /= denominator;
+        zIncrease = _zIncrease.toUint112();
+
+        uint256 _xIncrease = cp.x;
+        _xIncrease *= _zIncrease;
+        _xIncrease /= cp.z;
+        xIncrease = _xIncrease.toUint112();
+
+        uint256 _yIncrease = cp.y;
+        _yIncrease *= _zIncrease;
+        _yIncrease /= cp.z;
+        yIncrease = _yIncrease.toUint112();
     }
 }

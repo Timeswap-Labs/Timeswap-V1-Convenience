@@ -110,7 +110,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function addLiquidity(AddLiquidity calldata params)
+    function liquidityGivenAsset(LiquidityGivenAsset calldata params)
         external
         override
         returns (
@@ -119,11 +119,11 @@ contract TimeswapConvenience is IConvenience {
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.addLiquidity(this, factory, params);
+        (liquidityOut, id, dueOut) = natives.liquidityGivenAsset(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
-    function addLiquidityETHAsset(AddLiquidityETHAsset calldata params)
+    function liquidityGivenAssetETHAsset(LiquidityGivenAssetETHAsset calldata params)
         external
         payable
         override
@@ -133,11 +133,11 @@ contract TimeswapConvenience is IConvenience {
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.addLiquidityETHAsset(this, factory, weth, params);
+        (liquidityOut, id, dueOut) = natives.liquidityGivenAssetETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
-    function addLiquidityETHCollateral(AddLiquidityETHCollateral calldata params)
+    function liquidityGivenAssetETHCollateral(LiquidityGivenAssetETHCollateral calldata params)
         external
         payable
         override
@@ -147,7 +147,100 @@ contract TimeswapConvenience is IConvenience {
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.addLiquidityETHCollateral(this, factory, weth, params);
+        (liquidityOut, id, dueOut) = natives.liquidityGivenAssetETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function liquidityGivenDebt(LiquidityGivenDebt calldata params)
+        external
+        override
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenDebt(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function liquidityGivenDebtETHAsset(LiquidityGivenDebtETHAsset calldata params)
+        external
+        payable
+        override
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenDebtETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function liquidityGivenDebtETHCollateral(LiquidityGivenDebtETHCollateral calldata params)
+        external
+        payable
+        override
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenDebtETHCollateral(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function liquidityGivenCollateral(LiquidityGivenCollateral calldata params)
+        external
+        override
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenCollateral(this, factory, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function liquidityGivenCollateralETHAsset(LiquidityGivenCollateralETHAsset calldata params)
+        external
+        payable
+        override
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenCollateralETHAsset(this, factory, weth, params);
+    }
+
+    /// @inheritdoc IConvenience
+    function liquidityGivenCollateralETHCollateral(LiquidityGivenCollateralETHCollateral calldata params)
+        external
+        payable
+        override
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenCollateralETHCollateral(
+            this,
+            factory,
+            weth,
+            params
+        );
     }
 
     /// @inheritdoc IConvenience

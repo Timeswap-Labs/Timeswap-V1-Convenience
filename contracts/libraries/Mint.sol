@@ -121,116 +121,6 @@ library Mint {
         );
     }
 
-    function addLiquidity(
-        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
-        IMint.AddLiquidity calldata params
-    )
-        external
-        returns (
-            uint256 liquidityOut,
-            uint256 id,
-            IPair.Due memory dueOut
-        )
-    {
-        (liquidityOut, id, dueOut) = _addLiquidity(
-            natives,
-            convenience,
-            factory,
-            IMint._AddLiquidity(
-                params.asset,
-                params.collateral,
-                params.maturity,
-                msg.sender,
-                msg.sender,
-                params.liquidityTo,
-                params.dueTo,
-                params.assetIn,
-                params.minLiquidity,
-                params.maxDebt,
-                params.maxCollateral,
-                params.deadline
-            )
-        );
-    }
-
-    function addLiquidityETHAsset(
-        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
-        IWETH weth,
-        IMint.AddLiquidityETHAsset calldata params
-    )
-        external
-        returns (
-            uint256 liquidityOut,
-            uint256 id,
-            IPair.Due memory dueOut
-        )
-    {
-        uint112 assetIn = MsgValue.getUint112();
-
-        (liquidityOut, id, dueOut) = _addLiquidity(
-            natives,
-            convenience,
-            factory,
-            IMint._AddLiquidity(
-                weth,
-                params.collateral,
-                params.maturity,
-                address(this),
-                msg.sender,
-                params.liquidityTo,
-                params.dueTo,
-                assetIn,
-                params.minLiquidity,
-                params.maxDebt,
-                params.maxCollateral,
-                params.deadline
-            )
-        );
-    }
-
-    function addLiquidityETHCollateral(
-        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
-        IWETH weth,
-        IMint.AddLiquidityETHCollateral calldata params
-    )
-        external
-        returns (
-            uint256 liquidityOut,
-            uint256 id,
-            IPair.Due memory dueOut
-        )
-    {
-        uint112 maxCollateral = MsgValue.getUint112();
-
-        (liquidityOut, id, dueOut) = _addLiquidity(
-            natives,
-            convenience,
-            factory,
-            IMint._AddLiquidity(
-                params.asset,
-                weth,
-                params.maturity,
-                msg.sender,
-                address(this),
-                params.liquidityTo,
-                params.dueTo,
-                params.assetIn,
-                params.minLiquidity,
-                params.maxDebt,
-                maxCollateral,
-                params.deadline
-            )
-        );
-
-        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
-    }
-
     function _newLiquidity(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
@@ -275,11 +165,121 @@ library Mint {
         );
     }
 
-    function _addLiquidity(
+    function liquidityGivenAsset(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IMint._AddLiquidity memory params
+        IMint.LiquidityGivenAsset calldata params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, id, dueOut) = _liquidityGivenAsset(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenAsset(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                params.assetIn,
+                params.minLiquidity,
+                params.maxDebt,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
+    }
+
+    function liquidityGivenAssetETHAsset(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IWETH weth,
+        IMint.LiquidityGivenAssetETHAsset calldata params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        uint112 assetIn = MsgValue.getUint112();
+
+        (liquidityOut, id, dueOut) = _liquidityGivenAsset(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenAsset(
+                weth,
+                params.collateral,
+                params.maturity,
+                address(this),
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                assetIn,
+                params.minLiquidity,
+                params.maxDebt,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
+    }
+
+    function liquidityGivenAssetETHCollateral(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IWETH weth,
+        IMint.LiquidityGivenAssetETHCollateral calldata params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        uint112 maxCollateral = MsgValue.getUint112();
+
+        (liquidityOut, id, dueOut) = _liquidityGivenAsset(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenAsset(
+                params.asset,
+                weth,
+                params.maturity,
+                msg.sender,
+                address(this),
+                params.liquidityTo,
+                params.dueTo,
+                params.assetIn,
+                params.minLiquidity,
+                params.maxDebt,
+                maxCollateral,
+                params.deadline
+            )
+        );
+
+        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
+    }
+
+    function _liquidityGivenAsset(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IMint._LiquidityGivenAsset memory params
     )
         private
         returns (
@@ -292,7 +292,7 @@ library Mint {
         require(address(pair) != address(0), 'E501');
         require(pair.totalLiquidity(params.maturity) > 0, 'E507');
 
-        (uint112 yIncrease, uint112 zIncrease) = pair.givenAdd(params.maturity, params.assetIn);
+        (uint112 yIncrease, uint112 zIncrease) = pair.givenAsset(params.maturity, params.assetIn);
 
         (liquidityOut, id, dueOut) = _mint(
             natives,
@@ -318,6 +318,329 @@ library Mint {
         require(dueOut.collateral <= params.maxCollateral, 'E513');
     }
 
+    function liquidityGivenDebt(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IMint.LiquidityGivenDebt memory params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, assetIn, id, dueOut) = _liquidityGivenDebt(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenDebt(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                params.debtIn,
+                params.minLiquidity,
+                params.maxAsset,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
+    }
+
+    function liquidityGivenDebtETHAsset(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IWETH weth,
+        IMint.LiquidityGivenDebtETHAsset memory params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        uint112 maxAsset = MsgValue.getUint112();
+
+        (liquidityOut, assetIn, id, dueOut) = _liquidityGivenDebt(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenDebt(
+                weth,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                params.debtIn,
+                params.minLiquidity,
+                maxAsset,
+                params.maxCollateral,
+                params.deadline
+            )
+        );
+
+        if (maxAsset - assetIn > 0) ETH.transfer(payable(msg.sender), maxAsset - assetIn);
+    }
+
+    function liquidityGivenDebtETHCollateral(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IWETH weth,
+        IMint.LiquidityGivenDebtETHCollateral memory params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        uint112 maxCollateral = MsgValue.getUint112();
+
+        (liquidityOut, assetIn, id, dueOut) = _liquidityGivenDebt(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenDebt(
+                params.asset,
+                weth,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                params.debtIn,
+                params.minLiquidity,
+                params.maxAsset,
+                maxCollateral,
+                params.deadline
+            )
+        );
+
+        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
+    }
+
+    function _liquidityGivenDebt(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IMint._LiquidityGivenDebt memory params
+    )
+        private
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'E501');
+        require(pair.totalLiquidity(params.maturity) > 0, 'E507');
+
+        (uint112 xIncrease, uint112 yIncrease, uint112 zIncrease) = pair.givenDebt(params.maturity, params.debtIn);
+
+        assetIn = xIncrease;
+
+        (liquidityOut, id, dueOut) = _mint(
+            natives,
+            convenience,
+            pair,
+            IMint._Mint(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetFrom,
+                params.collateralFrom,
+                params.liquidityTo,
+                params.dueTo,
+                assetIn,
+                yIncrease,
+                zIncrease,
+                params.deadline
+            )
+        );
+
+        require(liquidityOut >= params.minLiquidity, 'E511');
+        require(xIncrease <= params.maxAsset, 'E513'); // Fix error code
+        require(dueOut.collateral <= params.maxCollateral, 'E512');
+    }
+
+    function liquidityGivenCollateral(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IMint.LiquidityGivenCollateral memory params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        (liquidityOut, assetIn, id, dueOut) = _liquidityGivenCollateral(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenCollateral(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                params.collateralIn,
+                params.minLiquidity,
+                params.maxAsset,
+                params.maxDebt,
+                params.deadline
+            )
+        );
+    }
+
+    function liquidityGivenCollateralETHAsset(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IWETH weth,
+        IMint.LiquidityGivenCollateralETHAsset memory params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        uint112 maxAsset = MsgValue.getUint112();
+
+        (liquidityOut, assetIn, id, dueOut) = _liquidityGivenCollateral(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenCollateral(
+                weth,
+                params.collateral,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                params.collateralIn,
+                params.minLiquidity,
+                maxAsset,
+                params.maxDebt,
+                params.deadline
+            )
+        );
+
+        if (maxAsset - assetIn > 0) ETH.transfer(payable(msg.sender), maxAsset - assetIn);
+    }
+
+    function liquidityGivenCollateralETHCollateral(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IWETH weth,
+        IMint.LiquidityGivenCollateralETHCollateral memory params
+    )
+        external
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        uint112 collateralIn = MsgValue.getUint112();
+
+        (liquidityOut, assetIn, id, dueOut) = _liquidityGivenCollateral(
+            natives,
+            convenience,
+            factory,
+            IMint._LiquidityGivenCollateral(
+                params.asset,
+                weth,
+                params.maturity,
+                msg.sender,
+                msg.sender,
+                params.liquidityTo,
+                params.dueTo,
+                collateralIn,
+                params.minLiquidity,
+                params.maxAsset,
+                params.maxDebt,
+                params.deadline
+            )
+        );
+    }
+
+    function _liquidityGivenCollateral(
+        mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
+        IConvenience convenience,
+        IFactory factory,
+        IMint._LiquidityGivenCollateral memory params
+    )
+        private
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
+    {
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'E501');
+        require(pair.totalLiquidity(params.maturity) > 0, 'E507');
+
+        (uint112 xIncrease, uint112 yIncrease, uint112 zIncrease) = pair.givenCollateral(
+            params.maturity,
+            params.collateralIn
+        );
+
+        assetIn = xIncrease;
+
+        (liquidityOut, id, dueOut) = _mint(
+            natives,
+            convenience,
+            pair,
+            IMint._Mint(
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetFrom,
+                params.collateralFrom,
+                params.liquidityTo,
+                params.dueTo,
+                assetIn,
+                yIncrease,
+                zIncrease,
+                params.deadline
+            )
+        );
+
+        require(liquidityOut >= params.minLiquidity, 'E511');
+        require(xIncrease <= params.maxAsset, 'E513'); // Fix error code
+        require(dueOut.debt <= params.maxDebt, 'E512');
+    }
+
     function _mint(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
@@ -330,10 +653,10 @@ library Mint {
             uint256 id,
             IPair.Due memory dueOut
         )
-    {   
+    {
         require(params.deadline >= block.timestamp, 'E504');
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
-        if (address(native.liquidity) == address(0)){
+        if (address(native.liquidity) == address(0)) {
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
         }
         (liquidityOut, id, dueOut) = pair.mint(
