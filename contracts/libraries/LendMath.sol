@@ -70,10 +70,10 @@ library LendMath {
         uint256 subtrahend = cp.z;
         subtrahend *= assetIn;
         _zDecrease -= subtrahend;
-        _zDecrease <<= 32;
+        _zDecrease <<= 24;
         uint256 denominator = maturity;
         denominator -= block.timestamp;
-        denominator *= cp.y;
+        denominator *= xAdjust;
         _zDecrease = _zDecrease.divUp(denominator);
         zDecrease = _zDecrease.toUint112();
 
