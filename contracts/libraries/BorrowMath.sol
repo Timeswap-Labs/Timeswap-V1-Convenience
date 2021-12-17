@@ -70,7 +70,7 @@ library BorrowMath {
         uint256 subtrahend = cp.z;
         subtrahend *= assetOut;
         _zIncrease -= subtrahend;
-        _zIncrease <<= 24;
+        _zIncrease <<= 25;
         uint256 denominator = maturity;
         denominator -= block.timestamp;
         denominator *= xAdjust;

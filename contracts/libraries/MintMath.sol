@@ -108,10 +108,10 @@ library MintMath {
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         uint256 _zIncrease = collateralIn;
-        _zIncrease <<= 24;
+        _zIncrease <<= 25;
         uint256 denominator = maturity;
         denominator -= block.timestamp;
-        denominator += 0x1000000;
+        denominator += 0x2000000;
         _zIncrease /= denominator;
         zIncrease = _zIncrease.toUint112();
 
