@@ -99,7 +99,7 @@ export class Convenience {
       { value: collateralIn }
     )
   }
-  async addLiquidity(
+  async liquidityGivenAsset(
     maturity: bigint,
     asset: string,
     collateral: string,
@@ -108,7 +108,7 @@ export class Convenience {
     maxDebt: bigint,
     maxCollateral: bigint
   ) {
-    return await this.convenienceContract.addLiquidity({
+    return await this.convenienceContract.liquidityGivenAsset({
       maturity: maturity,
       asset: asset,
       collateral: collateral,
@@ -121,7 +121,7 @@ export class Convenience {
       deadline: maturity,
     })
   }
-  async addLiquidityETHAsset(
+  async liquidityGivenETHAsset(
     maturity: bigint,
     collateral: string,
     assetIn: bigint,
@@ -129,7 +129,7 @@ export class Convenience {
     maxDebt: bigint,
     maxCollateral: bigint
   ) {
-    return await this.convenienceContract.addLiquidityETHAsset(
+    return await this.convenienceContract.liquidityGivenAssetETHAsset(
       {
         maturity: maturity,
         collateral: collateral,
@@ -143,7 +143,7 @@ export class Convenience {
       { value: assetIn }
     )
   }
-  async addLiquidityETHCollateral(
+  async liquidityGivenETHCollateral(
     maturity: bigint,
     asset: string,
     assetIn: bigint,
@@ -151,7 +151,7 @@ export class Convenience {
     maxDebt: bigint,
     maxCollateral: bigint
   ) {
-    return await this.convenienceContract.addLiquidityETHCollateral(
+    return await this.convenienceContract.liquidityGivenAssetETHCollateral(
       {
         maturity: maturity,
         asset: asset,

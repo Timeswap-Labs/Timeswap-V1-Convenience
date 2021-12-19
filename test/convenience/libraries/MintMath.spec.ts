@@ -55,7 +55,7 @@ describe('Mint Math Given New', () => {
       }).timeout(100000)
     })
 
-    describe('Mint Math Add', () => {
+    describe('Mint Math Given Asset', () => {
       it('Succeeded', async () => {
         const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
         let currentTime = await now()
@@ -91,7 +91,7 @@ describe('Mint Math Given New', () => {
 
               const [yIncrease,zIncrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
     
-              await mintMathAddProperties(data, currentTime,maturity, yIncrease,zIncrease)
+              await mintMathGivenAssetProperties(data, currentTime,maturity, yIncrease,zIncrease)
             }
           ),
           { skipAllAfterTimeLimit: 50000, numRuns: 10 }
@@ -121,7 +121,7 @@ describe('Mint Math Given New', () => {
       expect(zIncrease).equalBigInt(zIncreaseNewLiquidity)
     }
     
-    async function mintMathAddProperties(
+    async function mintMathGivenAssetProperties(
       data: {
         newLiquidityParams: {
           assetIn: bigint
