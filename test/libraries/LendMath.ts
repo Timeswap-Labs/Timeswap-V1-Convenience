@@ -48,22 +48,22 @@ export const verifyYAndZDecreaseLendGivenInsurance = (
   }
 
   if (
-    (((insuranceOut * xAdjust) - (state.z* assetIn))) <<32n>= MAXUINT256 ||
+    (((insuranceOut * xAdjust) - (state.z* assetIn))) <<25n>= MAXUINT256 ||
     (maturity-currentTime)*state.y >= MAXUINT256 ||
-    (((insuranceOut * xAdjust) - (state.z* assetIn))) <<32n <= 0
+    (((insuranceOut * xAdjust) - (state.z* assetIn))) <<25n <= 0
 
   ) {
     return false
   }
 
   if (
-     divUp((((insuranceOut * xAdjust) - (state.z* assetIn))<<32n), (maturity-currentTime)*state.y)
+     divUp((((insuranceOut * xAdjust) - (state.z* assetIn))<<25n), (maturity-currentTime)*xAdjust)
     >=
     MAXUINT256
   ) {
     return false
   }
-  const zDecrease = divUp((((insuranceOut * xAdjust) - (state.z* assetIn)))<<32n, (maturity-currentTime)*state.y)
+  const zDecrease = divUp((((insuranceOut * xAdjust) - (state.z* assetIn)))<<32n, (maturity-currentTime)*xAdjust)
 
   if (zDecrease < 0 || zDecrease >= MAXUINT112) {
     return false
@@ -192,14 +192,20 @@ export const calcYAndZDecreaseLendGivenInsurance = (
 ) => {
   const feeBase = BigInt(0x10000 + 100)
   const xAdjust = state.x + assetIn
-  const zDecrease = divUp((((insuranceOut * xAdjust) - (state.z* assetIn)))<<32n, (maturity-currentTime)*state.y)
+  const zDecrease = divUp((((insuranceOut * xAdjust) - (state.z* assetIn)))<<25n, (maturity-currentTime)*xAdjust)
   const zAdjust = (state.z << 16n) - zDecrease * feeBase
   const yDecrease = mulDiv(
     xAdjust * zAdjust - ((state.x * state.z) << 16n),
     state.y << 16n,
     xAdjust * zAdjust * feeBase
   )
-
+  console.log({
+    feeBase: feeBase,
+    xAdjust: xAdjust,
+    zDecrease: zDecrease,
+    zAdjust: zAdjust,
+    yDecrease: yDecrease
+  })
   return { yDecreaseLendGivenInsurance: yDecrease, zDecreaseLendGivenInsurance: zDecrease }
 }
 export const calcYAndZDecreaseLendGivenPercent = (

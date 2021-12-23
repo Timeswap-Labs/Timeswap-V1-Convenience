@@ -10,7 +10,7 @@ import type {TimeswapPairCallee} from '../../typechain/TimeswapPairCallee'
 import { ethers } from 'hardhat'
 import {
   NewLiquidityParams,
-  AddLiquidityParams,
+  AddLiquidityGivenAssetParams,
   RemoveLiquidityParams,
   LendGivenBondParams,
   LendGivenInsuranceParams,
@@ -97,7 +97,7 @@ export async function newLiquidityETHCollateralFixture(
 export async function liquidityGivenAssetFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: AddLiquidityParams
+  addLiquidityParams: AddLiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenAsset(
@@ -116,7 +116,7 @@ export async function liquidityGivenAssetFixture(
 export async function liquidityGivenAssetETHAssetFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: AddLiquidityParams
+  addLiquidityParams: AddLiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenETHAsset(
@@ -134,7 +134,7 @@ export async function liquidityGivenAssetETHAssetFixture(
 export async function liquidityGivenAssetETHCollateralFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: AddLiquidityParams
+  addLiquidityParams: AddLiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenETHCollateral(
@@ -607,7 +607,7 @@ export async function mintMathCalleeGivenNewFixture(fixture:Fixture, signer:Sign
   const txn = await mintMathCalleeContract.givenNew(maturity,newLiqudityParams.assetIn,newLiqudityParams.debtIn,newLiqudityParams.collateralIn);
   return txn
 }
-export async function mintMathCalleeGivenAssetFixture(fixture:Fixture, signer:SignerWithAddress,addLiquidityParams: AddLiquidityParams){
+export async function mintMathCalleeGivenAssetFixture(fixture:Fixture, signer:SignerWithAddress,addLiquidityParams: AddLiquidityGivenAssetParams){
   const {convenience, assetToken, collateralToken, maturity} = fixture
   const mintMathCalleeFactory =await  ethers.getContractFactory('MintMathCallee')
   const mintMathCalleeContract = (await (mintMathCalleeFactory).deploy()) as MintMathCallee

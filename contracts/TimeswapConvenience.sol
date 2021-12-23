@@ -535,9 +535,7 @@ contract TimeswapConvenience is IConvenience {
     function timeswapBorrowCallback(uint112 collateralIn, bytes calldata data) external override {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
-
         require(msg.sender == address(pair), 'Invalid sender');
-
         if (from == address(this)) {
             weth.deposit{value: collateralIn}();
             collateral.safeTransfer(pair, collateralIn);

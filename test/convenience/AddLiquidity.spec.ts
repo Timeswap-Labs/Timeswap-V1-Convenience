@@ -14,7 +14,7 @@ import {
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
-import { AddLiquidityParams, NewLiquidityParams } from '../types'
+import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken, TimeswapPair, TimeswapPair__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'

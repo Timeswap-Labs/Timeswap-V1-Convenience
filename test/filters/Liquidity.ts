@@ -1,5 +1,5 @@
 import * as LiquidityMath from '../libraries/LiquidityMath'
-import { AddLiquidityParams, NewLiquidityParams, RemoveLiquidityParams } from '../types'
+import { AddLiquidityGivenAssetParams, NewLiquidityParams, RemoveLiquidityParams } from '../types'
 const MAXUINT112: bigint = 2n ** 112n
 
 export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, currentTime: bigint, maturity: bigint) {
@@ -51,7 +51,7 @@ export function newLiquidityError(newLiquidityParams: NewLiquidityParams, curren
 }
 
 export function addLiquiditySuccess(
-  liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityParams },
+  liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityGivenAssetParams },
   currentTimeNL: bigint,
   currentTimeAL: bigint,
   maturity: bigint
@@ -110,7 +110,7 @@ export function addLiquiditySuccess(
 }
 
 export function addLiquidityError(
-  liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityParams },
+  liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityGivenAssetParams },
   currentTimeNL: bigint,
   currentTimeAL: bigint,
   maturity: bigint

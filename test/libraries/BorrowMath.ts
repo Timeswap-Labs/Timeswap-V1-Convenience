@@ -61,8 +61,8 @@ export const verifyYandZIncreaseBorrowGivenCollateral = (
     
     return false
   }
-  let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 32n
-  let denominator = (maturity - currentTime) * state.y 
+  let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 25n
+  let denominator = (maturity - currentTime) * xAdjust
   const zIncrease = _zIncrease / denominator
   if (zIncrease <= 0 || zIncrease >= MAXUINT112) {
     
@@ -124,8 +124,8 @@ export const getYandZIncreaseBorrowGivenCollateral = (
   const xAdjust = state.x - assetOut
 
 
-  let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 32n
-  let denominator = (maturity - currentTime) * state.y 
+  let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 25n
+  let denominator = (maturity - currentTime) * xAdjust 
   const zIncrease = _zIncrease / denominator
   const zAdjust = (state.z << 16n) + zIncrease * feeBase
 
