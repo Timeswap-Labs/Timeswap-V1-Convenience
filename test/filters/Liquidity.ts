@@ -24,6 +24,21 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
   ) {
     return false
   }
+  const collateral =LiquidityMath.getCollateralAddLiquidity(
+    {x:newLiquidityParams.assetIn,y:yIncreaseNewLiquidity,z:zIncreaseNewLiquidity},
+    maturity,currentTime)
+    console.log('collateral TS',collateral)
+  const debt = LiquidityMath.getDebtAddLiquidity(
+    {x:newLiquidityParams.assetIn,y:yIncreaseNewLiquidity,z:zIncreaseNewLiquidity},
+    maturity,currentTime)
+  if(!(
+    collateral > 0n &&
+    debt > 0n &&
+    collateral < MAXUINT112 &&
+    debt < MAXUINT112
+  )){
+    return false
+  }
   return true
 }
 

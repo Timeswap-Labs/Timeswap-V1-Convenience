@@ -59,5 +59,5 @@ export const getCollateralAddLiquidity = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  return divUp((maturity - currentTime) * delState.y * delState.z, delState.x << 32n) + delState.z
+  return shiftRightUp(((maturity - currentTime)  * delState.z), 25n) + delState.z
 }

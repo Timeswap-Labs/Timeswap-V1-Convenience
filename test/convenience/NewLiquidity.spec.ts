@@ -99,7 +99,7 @@ describe('New Liquidity ETH Asset', () => {
       fc.asyncProperty(
         fc
           .record({ assetIn: fc.bigUintN(112), debtIn: fc.bigUintN(112), collateralIn: fc.bigUintN(112) })
-          .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+          .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)).noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
@@ -164,7 +164,7 @@ describe('New Liquidity ETH Collateral', () => {
       fc.asyncProperty(
         fc
           .record({ assetIn: fc.bigUintN(112), debtIn: fc.bigUintN(112), collateralIn: fc.bigUintN(112) })
-          .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
+          .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)).noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
@@ -244,7 +244,9 @@ async function newLiquidityProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
+  console.log()
   const liquidityBalance = LiquidityMath.liquidityCalculateNewLiquidity(state, newCurrentTime, maturity)
+  console.log('Liquidity Balance TS', liquidityBalance)
 
   const debt = LiquidityMath.getDebtAddLiquidity(
     { x: data.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity },
