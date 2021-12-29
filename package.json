@@ -1,5 +1,5 @@
 {
-  "version": "1.0.46",
+  "version": "1.0.47",
   "name": "@timeswap-labs/timeswap-v1-convenience",
   "files": [
     "contracts/interfaces",
@@ -65,8 +65,5 @@
   "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Convenience.git",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
-  },
-  "volta": {
-    "node": "16.9.1"
   }
 }

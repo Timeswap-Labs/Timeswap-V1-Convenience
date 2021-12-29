@@ -109,7 +109,7 @@ library BorrowMath {
         if (percent <= 0x80000000) {
             uint256 yMid = cp.y;
             yMid *= cp.y;
-            yMid << 32;
+            yMid <<= 32;
             uint256 denominator = xAdjust;
             denominator *= feeBase;
             denominator *= feeBase;

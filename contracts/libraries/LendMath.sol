@@ -160,7 +160,7 @@ library LendMath {
             zMid /= feeBase;
             uint256 subtrahend = cp.z;
             subtrahend *= cp.z;
-            subtrahend << 32;
+            subtrahend <<= 32;
             uint256 denominator = xAdjust;
             denominator *= feeBase;
             denominator *= feeBase;
