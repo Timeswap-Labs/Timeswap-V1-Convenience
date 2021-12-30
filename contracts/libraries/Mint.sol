@@ -11,7 +11,6 @@ import {MintMath} from './MintMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import 'hardhat/console.sol';
 
 library Mint {
     using MintMath for IPair;
@@ -140,6 +139,8 @@ library Mint {
         if (address(pair) == address(0)) pair = factory.createPair(params.asset, params.collateral);
 
         require(pair.totalLiquidity(params.maturity) == 0, 'E506');
+        require(params.debtIn > params.assetIn,'Error code to be fixed');
+        
         (uint112 yIncrease, uint112 zIncrease) = MintMath.givenNew(
             params.maturity,
             params.assetIn,
@@ -656,13 +657,12 @@ library Mint {
         )
     {
         require(params.deadline >= block.timestamp, 'E504');
+        require(params.maturity > block.timestamp,'Error code to be fixed');
+
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0)) {
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
         }
-        console.log('xIncrease sent to core contract is',params.xIncrease);
-        console.log('yIncrease sent to core contract is',params.yIncrease);
-        console.log('zIncrease sent to core contract is',params.zIncrease);
         (liquidityOut, id, dueOut) = pair.mint(
             params.maturity,
             address(native.liquidity),

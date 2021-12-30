@@ -95,6 +95,7 @@ library Pay {
         IPay._Repay memory params
     ) private returns (uint128 assetIn, uint128 collateralOut) {
         require(params.deadline >= block.timestamp, 'E504');
+        require(params.maturity > block.timestamp, 'Error code to be fixed');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');

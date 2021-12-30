@@ -363,6 +363,7 @@ library Lend {
         ILend._Lend memory params
     ) private returns (IPair.Claims memory claimsOut) {
         require(params.deadline >= block.timestamp, 'E504');
+        require(params.maturity > block.timestamp, 'Error code to be fixed');
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);

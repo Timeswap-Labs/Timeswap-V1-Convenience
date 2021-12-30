@@ -24,16 +24,13 @@ library MintMath {
         yIncrease = _yIncrease.toUint112();
 
         uint256 _zIncrease = collateralIn;
-        _zIncrease *= assetIn;
-        _zIncrease <<= 32;
+        _zIncrease <<= 25;
         uint256 denominator = maturity;
         denominator -= block.timestamp;
-        denominator *= yIncrease;
-        uint256 addend = assetIn;
-        addend <<= 32;
-        denominator += addend;
+        denominator += 0x2000000;
         _zIncrease /= denominator;
         zIncrease = _zIncrease.toUint112();
+
     }
 
     function givenAsset(
