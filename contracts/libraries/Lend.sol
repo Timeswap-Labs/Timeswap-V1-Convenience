@@ -261,9 +261,12 @@ library Lend {
         IFactory factory,
         ILend._LendGivenBond memory params
     ) private returns (IPair.Claims memory claimsOut) {
+        require(params.bondOut > params.assetIn, 'Error code to be fixed');
+
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
         (uint112 yDecrease, uint112 zDecrease) = pair.givenBond(params.maturity, params.assetIn, params.bondOut);
+
         claimsOut = _lend(
             natives,
             convenience,
@@ -364,9 +367,11 @@ library Lend {
     ) private returns (IPair.Claims memory claimsOut) {
         require(params.deadline >= block.timestamp, 'E504');
         require(params.maturity > block.timestamp, 'Error code to be fixed');
+
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
+
         claimsOut = pair.lend(
             params.maturity,
             address(native.bond),

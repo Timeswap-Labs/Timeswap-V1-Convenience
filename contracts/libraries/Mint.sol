@@ -134,13 +134,14 @@ library Mint {
             IPair.Due memory dueOut
         )
     {
+        require(params.debtIn > params.assetIn, 'Error code to be fixed');
+
         IPair pair = factory.getPair(params.asset, params.collateral);
 
         if (address(pair) == address(0)) pair = factory.createPair(params.asset, params.collateral);
 
         require(pair.totalLiquidity(params.maturity) == 0, 'E506');
-        require(params.debtIn > params.assetIn,'Error code to be fixed');
-        
+
         (uint112 yIncrease, uint112 zIncrease) = MintMath.givenNew(
             params.maturity,
             params.assetIn,
@@ -657,7 +658,7 @@ library Mint {
         )
     {
         require(params.deadline >= block.timestamp, 'E504');
-        require(params.maturity > block.timestamp,'Error code to be fixed');
+        require(params.maturity > block.timestamp, 'Error code to be fixed');
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0)) {
