@@ -102,49 +102,91 @@ export const verifyYAndZDecreaseLendGivenPercent = (
   if (xAdjust < 0 || xAdjust >= MAXUINT256) {
     return false
   }
-  let minimum = (assetIn * state.y) << 12n
-  if (minimum < 0 || minimum >= MAXUINT256) {
-    return false
-  }
 
-  const maximum = (minimum << 4n) / (xAdjust * feeBase)
-  minimum /= xAdjust * feeBase
-  if (minimum < 0 || minimum >= MAXUINT256) {
-    return false
-  }
+  if (percent <= 0x80000000n) {
+    let yMid = (state.y << 16n) / feeBase
+    const denominator = xAdjust * feeBase * feeBase
+    const subtrahend = sqrtUp(mulDivUp((state.y * state.y) << 32n, state.x, denominator))
+    yMid -= subtrahend
 
-  if (maximum < minimum || maximum >= MAXUINT256) {
-    return false
-  }
-  const yDecrease = (((maximum - minimum) * percent) >> 32n) + minimum
-  if (yDecrease <= 0 || yDecrease >= MAXUINT112) {
-    return false
-  }
-  const yAdjust = (state.y << 16n) - yDecrease * feeBase
-  if (yAdjust < 0 || yAdjust >= MAXUINT256) {
-    return false
-  }
+    if (
+      yMid < 0 ||
+      yMid >= MAXUINT256 ||
+      denominator < 0 ||
+      denominator >= MAXUINT256 ||
+      subtrahend < 0 ||
+      subtrahend >= MAXUINT256
+    ) {
+      return false
+    }
 
-  if (
-    xAdjust * yAdjust - ((state.x * state.y) << 16n) >= MAXUINT256 ||
-    state.z << 16n >= MAXUINT256 ||
-    xAdjust * yAdjust * feeBase >= MAXUINT256
-  ) {
-    return false
-  }
+    const yMin = ((assetIn * state.y) << 12n) / (xAdjust * feeBase)
 
-  if (
-    mulDiv(xAdjust * yAdjust - ((state.x * state.y) << 16n), state.z << 16n, xAdjust * yAdjust * feeBase) >= MAXUINT256
-  ) {
-    return false
-  }
-  const zDecrease = mulDiv(
-    xAdjust * yAdjust - ((state.x * state.y) << 16n),
-    state.z << 16n,
-    xAdjust * yAdjust * feeBase
-  )
-  if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
-    return false
+    if (yMin < 0 || yMin >= MAXUINT256) {
+      return false
+    }
+
+    const yDecrease = (((yMid - yMin) * percent) >> 31n) + yMin
+
+    if (yDecrease < 0 || yDecrease >= MAXUINT112) {
+      return false
+    }
+
+    const yAdjust = (state.y << 16n) - yDecrease * feeBase
+
+    if (yAdjust <= 0 || yAdjust >= MAXUINT256) {
+      return false
+    }
+
+    const zDecrease = mulDiv(
+      xAdjust * yAdjust - ((state.x * state.y) << 16n),
+      state.z << 16n,
+      xAdjust * yAdjust * feeBase
+    )
+
+    if (zDecrease <= 0 || zDecrease >= MAXUINT112) {
+      return false
+    }
+  } else {
+    let zMid = (state.z << 16n) / feeBase
+    const denominator = xAdjust * feeBase * feeBase
+    const subtrahend = sqrtUp(mulDivUp((state.z * state.z) << 32n, state.x, denominator))
+    zMid -= subtrahend
+
+    if (
+      zMid < 0 ||
+      zMid >= MAXUINT256 ||
+      denominator < 0 ||
+      denominator >= MAXUINT256 ||
+      subtrahend < 0 ||
+      subtrahend >= MAXUINT256
+    ) {
+      return false
+    }
+
+    percent = 0x100000000n - percent
+
+    const zDecrease = (zMid * percent) >> 31n
+
+    if (zDecrease < 0 || zDecrease >= MAXUINT112) {
+      return false
+    }
+
+    const zAdjust = (state.z << 16n) - zDecrease * feeBase
+
+    if (zAdjust <= 0 || zAdjust >= MAXUINT256) {
+      return false
+    }
+
+    const yDecrease = mulDiv(
+      xAdjust * zAdjust - ((state.x * state.z) << 16n),
+      state.y << 16n,
+      xAdjust * zAdjust * feeBase
+    )
+
+    if (yDecrease < 0 || yDecrease >= MAXUINT112) {
+      return false
+    }
   }
   return true
 }
