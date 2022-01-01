@@ -11,7 +11,6 @@ import {MintMath} from './MintMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import 'hardhat/console.sol';
 
 library Mint {
     using MintMath for IPair;
@@ -135,7 +134,7 @@ library Mint {
             IPair.Due memory dueOut
         )
     {
-        require(params.debtIn > params.assetIn, 'Error code to be fixed');
+        require(params.debtIn > params.assetIn, 'E516');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
 
@@ -479,7 +478,7 @@ library Mint {
         );
 
         require(liquidityOut >= params.minLiquidity, 'E511');
-        require(xIncrease <= params.maxAsset, 'E513'); // Fix error code
+        require(xIncrease <= params.maxAsset, 'E513');
         require(dueOut.collateral <= params.maxCollateral, 'E512');
     }
 
@@ -641,7 +640,7 @@ library Mint {
         );
 
         require(liquidityOut >= params.minLiquidity, 'E511');
-        require(xIncrease <= params.maxAsset, 'E513'); // Fix error code
+        require(xIncrease <= params.maxAsset, 'E513');
         require(dueOut.debt <= params.maxDebt, 'E512');
     }
 
@@ -659,15 +658,12 @@ library Mint {
         )
     {
         require(params.deadline >= block.timestamp, 'E504');
-        require(params.maturity > block.timestamp, 'Error code to be fixed');
+        require(params.maturity > block.timestamp, 'E508');
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0)) {
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
         }
-        console.log('xIncrease sent to contract',params.xIncrease);
-        console.log('yIncrease sent to contract',params.yIncrease);
-        console.log('zIncrease sent to contract',params.zIncrease);
         (liquidityOut, id, dueOut) = pair.mint(
             params.maturity,
             address(native.liquidity),

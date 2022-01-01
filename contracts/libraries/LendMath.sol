@@ -7,7 +7,7 @@ import {SquareRoot} from './SquareRoot.sol';
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
-import 'hardhat/console.sol';
+
 library LendMath {
     using Math for uint256;
     using SquareRoot for uint256;
@@ -59,12 +59,10 @@ library LendMath {
         uint128 insuranceOut
     ) internal view returns (uint112 yDecrease, uint112 zDecrease) {
         uint256 feeBase = 0x10000 + pair.fee();
-        console.log('fee contract',feeBase);
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         uint256 xAdjust = cp.x;
         xAdjust += assetIn;
-        console.log('xAdjust contract',xAdjust);
         uint256 _zDecrease = insuranceOut;
         _zDecrease *= xAdjust;
         uint256 subtrahend = cp.z;
@@ -76,12 +74,10 @@ library LendMath {
         denominator *= xAdjust;
         _zDecrease = _zDecrease.divUp(denominator);
         zDecrease = _zDecrease.toUint112();
-        console.log('zDecrease contract',zDecrease);
         uint256 zAdjust = cp.z;
         zAdjust <<= 16;
         zAdjust -= zDecrease * feeBase;
-        
-        console.log('zAdjust contract',zAdjust);
+
         uint256 _yDecrease = xAdjust;
         _yDecrease *= zAdjust;
         subtrahend = cp.x;
@@ -93,10 +89,7 @@ library LendMath {
         denominator *= feeBase;
         _yDecrease = _yDecrease.mulDiv(uint256(cp.y) << 16, denominator);
         yDecrease = _yDecrease.toUint112();
-        console.log('yDecrease contract',yDecrease);
-
     }
-
 
     function givenPercent(
         IPair pair,

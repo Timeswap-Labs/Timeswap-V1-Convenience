@@ -277,7 +277,7 @@ library Borrow {
         IFactory factory,
         IBorrow._BorrowGivenDebt memory params
     ) private returns (uint256 id, IPair.Due memory dueOut) {
-        require(params.debtIn > params.assetOut, 'Error code to be fixed');
+        require(params.debtIn > params.assetOut, 'E518');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
@@ -383,7 +383,7 @@ library Borrow {
         IBorrow._Borrow memory params
     ) private returns (uint256 id, IPair.Due memory dueOut) {
         require(params.deadline >= block.timestamp, 'E504');
-        require(params.maturity >= block.timestamp, 'Error code to be fixed');
+        require(params.maturity > block.timestamp, 'E508');
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
