@@ -11,6 +11,7 @@ import {MintMath} from './MintMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
+import 'hardhat/console.sol';
 
 library Mint {
     using MintMath for IPair;
@@ -664,6 +665,9 @@ library Mint {
         if (address(native.liquidity) == address(0)) {
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
         }
+        console.log('xIncrease sent to contract',params.xIncrease);
+        console.log('yIncrease sent to contract',params.yIncrease);
+        console.log('zIncrease sent to contract',params.zIncrease);
         (liquidityOut, id, dueOut) = pair.mint(
             params.maturity,
             address(native.liquidity),

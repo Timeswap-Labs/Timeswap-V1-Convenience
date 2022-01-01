@@ -366,8 +366,8 @@ export const getInsurance = (
   currentTime: bigint
 ) => {
   const addend = (state.z * delState.x) << 32n
-  const _insuranceOut = (maturity - currentTime) * state.y * delState.z
-  const denominator = (delState.x + state.x) << 32n
-
-  return (_insuranceOut + addend) / denominator
+  const _insuranceOut = ((maturity - currentTime) * delState.z)>>25n
+  const denominator = (delState.x + state.x) 
+  const minimum = (state.z*delState.x)/denominator
+  return (_insuranceOut + minimum)
 }

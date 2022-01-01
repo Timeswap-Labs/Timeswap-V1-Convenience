@@ -166,10 +166,9 @@ export const getCollateral = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  return (
-    divUp(
-      ((maturity - currentTime) * state.y * delState.z) + ((state.z * delState.x) <<32n),
-      ((state.x - delState.x) ) << 32n
-    ) 
-  )
+  const _collateralIn = shiftRightUp(((maturity-currentTime)*delState.z),25n);
+  const denominator = state.x-delState.x
+  const minimum = divUp(state.z*delState.x,denominator)
+  return _collateralIn+minimum  
+  
 }
