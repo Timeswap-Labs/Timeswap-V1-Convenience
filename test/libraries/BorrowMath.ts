@@ -25,7 +25,6 @@ export const check = (state: { x: bigint; y: bigint; z: bigint }, delState: { x:
     return false
   }
 
-  
   return true
 }
 export const checkError = (
@@ -44,7 +43,6 @@ export const checkError = (
     return 'E302'
   }
 
-  
   return ''
 }
 export const verifyYandZIncreaseBorrowGivenCollateral = (
@@ -58,31 +56,26 @@ export const verifyYandZIncreaseBorrowGivenCollateral = (
 
   const xAdjust = state.x - assetOut
   if (xAdjust < 0 || xAdjust >= MAXUINT256) {
-    
     return false
   }
-  let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 25n
+  let _zIncrease = (collateralIn * xAdjust - state.z * assetOut) << 25n
   let denominator = (maturity - currentTime) * xAdjust
   const zIncrease = _zIncrease / denominator
   if (zIncrease <= 0 || zIncrease >= MAXUINT112) {
-    
     return false
   }
   const zAdjust = (state.z << 16n) + zIncrease * feeBase
   if (zAdjust < 0 || zAdjust >= MAXUINT256) {
-    
     return false
   }
-  
+
   let subtrahend = xAdjust * zAdjust
-  if (((state.x * state.z) << 16n) - subtrahend <= 0 ) {
-    
+  if (((state.x * state.z) << 16n) - subtrahend <= 0) {
     return false
   }
   denominator = xAdjust * zAdjust * feeBase
   const yIncrease = mulDivUp(((state.x * state.z) << 16n) - subtrahend, state.y << 16n, denominator)
   if (yIncrease <= 0 || yIncrease >= MAXUINT112) {
-    
     return false
   }
   return { yIncreaseBorrowGivenCollateral: yIncrease, zIncreaseBorrowGivenCollateral: zIncrease }
@@ -123,9 +116,8 @@ export const getYandZIncreaseBorrowGivenCollateral = (
 
   const xAdjust = state.x - assetOut
 
-
-  let _zIncrease= ((collateralIn  * xAdjust) - (state.z * assetOut)) << 25n
-  let denominator = (maturity - currentTime) * xAdjust 
+  let _zIncrease = (collateralIn * xAdjust - state.z * assetOut) << 25n
+  let denominator = (maturity - currentTime) * xAdjust
   const zIncrease = _zIncrease / denominator
   const zAdjust = (state.z << 16n) + zIncrease * feeBase
 
@@ -166,9 +158,6 @@ export const getCollateral = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  const _collateralIn = shiftRightUp(((maturity-currentTime)*delState.z),25n);
-  const denominator = state.x-delState.x
-  const minimum = divUp(state.z*delState.x,denominator)
-  return _collateralIn+minimum  
-  
+  console.log('Ts', state.x, state.z, delState.x, delState.z)
+  return shiftRightUp((maturity - currentTime) * delState.z, 25n) + divUp(state.z * delState.x, state.x - delState.x)
 }

@@ -97,7 +97,7 @@ library Borrow {
             )
         );
 
-        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
+        if (maxCollateral > dueOut.collateral) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
     }
 
     function borrowGivenCollateral(
@@ -181,7 +181,7 @@ library Borrow {
             )
         );
 
-        if (collateralIn - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), collateralIn - dueOut.collateral);
+        if (collateralIn > dueOut.collateral) ETH.transfer(payable(msg.sender), collateralIn - dueOut.collateral);
     }
 
     function borrowGivenPercent(
@@ -268,7 +268,7 @@ library Borrow {
             )
         );
 
-        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
+        if (maxCollateral > dueOut.collateral) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
     }
 
     function _borrowGivenDebt(

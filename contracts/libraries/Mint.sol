@@ -276,7 +276,7 @@ library Mint {
             )
         );
 
-        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
+        if (maxCollateral > dueOut.collateral) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
     }
 
     function _liquidityGivenAsset(
@@ -394,7 +394,7 @@ library Mint {
             )
         );
 
-        if (maxAsset - assetIn > 0) ETH.transfer(payable(msg.sender), maxAsset - assetIn);
+        if (maxAsset > assetIn) ETH.transfer(payable(msg.sender), maxAsset - assetIn);
     }
 
     function liquidityGivenDebtETHCollateral(
@@ -434,7 +434,7 @@ library Mint {
             )
         );
 
-        if (maxCollateral - dueOut.collateral > 0) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
+        if (maxCollateral > dueOut.collateral) ETH.transfer(payable(msg.sender), maxCollateral - dueOut.collateral);
     }
 
     function _liquidityGivenDebt(
@@ -555,7 +555,7 @@ library Mint {
             )
         );
 
-        if (maxAsset - assetIn > 0) ETH.transfer(payable(msg.sender), maxAsset - assetIn);
+        if (maxAsset > assetIn) ETH.transfer(payable(msg.sender), maxAsset - assetIn);
     }
 
     function liquidityGivenCollateralETHCollateral(

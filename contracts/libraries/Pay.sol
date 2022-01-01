@@ -59,7 +59,7 @@ library Pay {
             )
         );
 
-        if (maxAssetIn - assetIn > 0) ETH.transfer(payable(msg.sender), maxAssetIn - assetIn);
+        if (maxAssetIn > assetIn) ETH.transfer(payable(msg.sender), maxAssetIn - assetIn);
     }
 
     function payETHCollateral(
