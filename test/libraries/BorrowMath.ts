@@ -1,5 +1,5 @@
 import { FEE } from '../shared/Constants'
-import { divUp, mulDivUp, shiftRightUp } from '../shared/Helper'
+import { divUp, mulDivUp, shiftRightUp, sqrtUp } from '../shared/Helper'
 const MAXUINT112 = 2 ** 112
 const MAXUINT256 = 2 ** 256
 const adjust = (reserve: bigint, increase: bigint) => {
@@ -87,20 +87,40 @@ export const getYandZIncreaseBorrowGivenPercent = (
   percent: bigint
 ) => {
   const feeBase = 0x10000n - 100n
-
   const xAdjust = state.x - assetOut
 
-  let denominator = xAdjust * feeBase
-  const minimum = divUp((assetOut * state.y) << 12n, denominator)
-  const maximum = (minimum << 4n) / denominator
+  let yIncrease = 0n
+  let zIncrease = 0n
 
-  const yIncrease = (((maximum - minimum) * percent) >> 32n) + minimum
-  const yAdjust = (state.y << 16n) + yIncrease * feeBase
+  if (percent <= 0x80000000n) {
+    let yMid = (state.y * state.y) << 32n
+    const denominator = xAdjust * feeBase * feeBase
+    yMid = sqrtUp(mulDivUp(yMid, state.x, denominator))
+    const subtrahend = (state.y << 16n) / feeBase
+    yMid -= subtrahend
 
-  const subtrahend = xAdjust * yAdjust
-  denominator = xAdjust * yAdjust * feeBase
+    const yMin = divUp((assetOut * state.y) << 12n, xAdjust * feeBase)
 
-  const zIncrease = mulDivUp(((state.x * state.y) << 16n) - subtrahend, state.z << 16n, denominator)
+    yIncrease = shiftRightUp((yMid - yMin) * percent, 31n) + yMin
+
+    const yAdjust = (state.y << 16n) + yIncrease * feeBase
+
+    zIncrease = mulDivUp(((state.x * state.y) << 16n) - xAdjust * yAdjust, state.z << 16n, xAdjust * yAdjust * feeBase)
+  } else {
+    let zMid = (state.z * state.z) << 32n
+    const denominator = xAdjust * feeBase * feeBase
+    zMid = sqrtUp(mulDivUp(zMid, state.x, denominator))
+    const subtrahend = (state.z << 16n) / feeBase
+    zMid -= subtrahend
+
+    percent = 0x100000000n - percent
+
+    zIncrease = shiftRightUp(zMid * percent, 31n)
+
+    const zAdjust = (state.z << 16n) + zIncrease * feeBase
+
+    yIncrease = mulDivUp(((state.x * state.z) << 16n) - xAdjust * zAdjust, state.y << 16n, xAdjust * zAdjust * feeBase)
+  }
 
   return { yIncreaseBorrowGivenPercent: yIncrease, zIncreaseBorrowGivenPercent: zIncrease }
 }
