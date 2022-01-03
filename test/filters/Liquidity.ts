@@ -1,9 +1,9 @@
 import * as LiquidityMath from '../libraries/LiquidityMath'
-import { AddLiquidityParams, NewLiquidityParams, RemoveLiquidityParams } from '../types'
+import { AddLiquidityGivenAssetParams, NewLiquidityParams, RemoveLiquidityParams } from '../types'
 const MAXUINT112: bigint = 2n ** 112n
 
 export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, currentTime: bigint, maturity: bigint) {
-  if (newLiquidityParams.assetIn < 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
+  if (newLiquidityParams.assetIn <= 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
     return false
   }
   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
@@ -22,6 +22,21 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
       zIncreaseNewLiquidity < MAXUINT112
     )
   ) {
+    return false
+  }
+  const collateral =LiquidityMath.getCollateralAddLiquidity(
+    {x:newLiquidityParams.assetIn,y:yIncreaseNewLiquidity,z:zIncreaseNewLiquidity},
+    maturity,currentTime)
+    console.log('collateral TS',collateral)
+  const debt = LiquidityMath.getDebtAddLiquidity(
+    {x:newLiquidityParams.assetIn,y:yIncreaseNewLiquidity,z:zIncreaseNewLiquidity},
+    maturity,currentTime)
+  if(!(
+    collateral > 0n &&
+    debt > 0n &&
+    collateral < MAXUINT112 &&
+    debt < MAXUINT112
+  )){
     return false
   }
   return true
@@ -51,7 +66,7 @@ export function newLiquidityError(newLiquidityParams: NewLiquidityParams, curren
 }
 
 export function addLiquiditySuccess(
-  liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityParams },
+  liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityGivenAssetParams },
   currentTimeNL: bigint,
   currentTimeAL: bigint,
   maturity: bigint
@@ -110,7 +125,7 @@ export function addLiquiditySuccess(
 }
 
 export function addLiquidityError(
-  liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityParams },
+  liquidityParams: { newLiquidityParams: NewLiquidityParams; addLiquidityParams: AddLiquidityGivenAssetParams },
   currentTimeNL: bigint,
   currentTimeAL: bigint,
   maturity: bigint

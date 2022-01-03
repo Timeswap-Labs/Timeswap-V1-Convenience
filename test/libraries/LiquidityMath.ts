@@ -13,8 +13,8 @@ export const getYandZIncreaseNewLiquidity = (
   maturity: bigint
 ) => {
   const yIncrease = ((debtIn - assetIn) << 32n) / (maturity - currentTime)
-  const denominator = (maturity - currentTime) * yIncrease + (assetIn << 32n)
-  const zIncrease = ((collateralIn * assetIn) << 32n) / denominator
+  const denominator = (maturity - currentTime) + BigInt(0x2000000)
+  const zIncrease = (collateralIn<< 25n) / denominator
 
   return { yIncreaseNewLiquidity: yIncrease, zIncreaseNewLiquidity: zIncrease }
 }
@@ -59,5 +59,6 @@ export const getCollateralAddLiquidity = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  return divUp((maturity - currentTime) * delState.y * delState.z, delState.x << 32n) + delState.z
+  console.log('TS collateral is',shiftRightUp(((maturity - currentTime)  * delState.z), 25n) + delState.z);
+  return shiftRightUp(((maturity - currentTime)  * delState.z), 25n) + delState.z
 }

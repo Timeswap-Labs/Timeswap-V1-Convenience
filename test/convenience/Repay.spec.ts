@@ -7,7 +7,7 @@ import {
   newLiquidityFixture,
   constructorFixture,
   Fixture,
-  addLiquidityFixture,
+  liquidityGivenAssetFixture,
   borrowGivenPercentFixture,
   repayFixture,
   repayETHAssetFixture,
@@ -19,7 +19,7 @@ import {
 } from '../shared/Fixtures'
 
 import * as fc from 'fast-check'
-import { AddLiquidityParams, NewLiquidityParams } from '../types'
+import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as BorrowFilter from '../filters/Borrow'

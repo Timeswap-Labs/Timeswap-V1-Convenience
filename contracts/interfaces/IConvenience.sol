@@ -117,7 +117,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function addLiquidity(AddLiquidity calldata params)
+    function liquidityGivenAsset(LiquidityGivenAsset calldata params)
         external
         returns (
             uint256 liquidityOut,
@@ -133,7 +133,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function addLiquidityETHAsset(AddLiquidityETHAsset calldata params)
+    function liquidityGivenAssetETHAsset(LiquidityGivenAssetETHAsset calldata params)
         external
         payable
         returns (
@@ -151,11 +151,123 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function addLiquidityETHCollateral(AddLiquidityETHCollateral calldata params)
+    function liquidityGivenAssetETHCollateral(LiquidityGivenAssetETHCollateral calldata params)
         external
         payable
         returns (
             uint256 liquidityOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
+
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev Must have the asset ERC20 approve this contract before calling this function.
+    /// @dev Must have the collateral ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return assetIn The amount of asset ERC20 lent by caller.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
+    function liquidityGivenDebt(LiquidityGivenDebt calldata params)
+        external
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
+
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev The asset deposited is ETH which will be wrapped as WETH.
+    /// @dev Msg.value is the assetIn amount.
+    /// @dev Must have the collateral ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return assetIn The amount of asset ERC20 lent by caller.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
+    function liquidityGivenDebtETHAsset(LiquidityGivenDebtETHAsset calldata params)
+        external
+        payable
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
+
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev The collateral ERC20 is the WETH contract.
+    /// @dev The collateral locked is ETH which will be wrapped as WETH.
+    /// @dev Msg.value is the maxCollateral amount. Any excess ETH will be returned to Msg.sender.
+    /// @dev Must have the asset ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return assetIn The amount of asset ERC20 lent by caller.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
+    function liquidityGivenDebtETHCollateral(LiquidityGivenDebtETHCollateral calldata params)
+        external
+        payable
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
+
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev Must have the asset ERC20 approve this contract before calling this function.
+    /// @dev Must have the collateral ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return assetIn The amount of asset ERC20 lent by caller.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
+    function liquidityGivenCollateral(LiquidityGivenCollateral calldata params)
+        external
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
+
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev The asset deposited is ETH which will be wrapped as WETH.
+    /// @dev Msg.value is the assetIn amount.
+    /// @dev Must have the collateral ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return assetIn The amount of asset ERC20 lent by caller.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
+    function liquidityGivenCollateralETHAsset(LiquidityGivenCollateralETHAsset calldata params)
+        external
+        payable
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
+
+    /// @dev Calls the mint function and add more liquidity to an existing pool.
+    /// @dev The collateral ERC20 is the WETH contract.
+    /// @dev The collateral locked is ETH which will be wrapped as WETH.
+    /// @dev Msg.value is the maxCollateral amount. Any excess ETH will be returned to Msg.sender.
+    /// @dev Must have the asset ERC20 approve this contract before calling this function.
+    /// @param params The parameters for this function found in IMint interface.
+    /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
+    /// @return assetIn The amount of asset ERC20 lent by caller.
+    /// @return id The array index of the collateralized debt received by dueTo.
+    /// @return dueOut The collateralized debt received by dueTo.
+    function liquidityGivenCollateralETHCollateral(LiquidityGivenCollateralETHCollateral calldata params)
+        external
+        payable
+        returns (
+            uint256 liquidityOut,
+            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         );
@@ -405,7 +517,7 @@ interface IConvenience is
     function deployNative(Deploy memory params) external;
 
     /// @dev In the implementation you must pay the asset token owed for the pay transaction.
-    /// The caller of this method must be checked to be a TimeswapPair deployed by the canonical TimeswapFactory.
+    /// The caller of this method must be checked to be a Collateralized Debt ERC721 deployed by the canonical TimeswapConvenience.
     /// @param pair The address of the pair contract from collateralized debt token.
     /// @param maturity The maturity of the pair contract from collateralized debt token.
     /// @param assetIn The amount of asset tokens owed due to the pool for the pay transaction

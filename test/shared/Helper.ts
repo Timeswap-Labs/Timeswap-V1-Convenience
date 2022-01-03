@@ -45,6 +45,29 @@ export function mulDivUp(a: bigint, b: bigint, denominator: bigint): bigint {
   return z
 }
 
+export function sqrt(y: bigint): bigint {
+  let z = 0n
+
+  if (y > 3n) {
+    z = y
+    let x = y / 2n + 1n
+    while (x < z) {
+      z = x
+      x = (y / x + x) / 2n
+    }
+  } else if (y != 0n) {
+    z = 1n
+  }
+
+  return z
+}
+
+export function sqrtUp(y: bigint): bigint {
+  let z = sqrt(y)
+  if (z % y > 0n) z++
+  return z
+}
+
 export function min(x: bigint, y: bigint, z: bigint): bigint {
   if (x <= y && x <= z) {
     return x

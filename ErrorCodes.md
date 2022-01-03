@@ -52,6 +52,10 @@ New liquidity can only be call to initialize a new pool.
 
 Add liquidity can only be called to an already initialized pool.
 
+### E508
+
+Maturity is less that current Timestamp.
+
 ### E511
 
 Liquidity is less than min Liquidity.
@@ -71,6 +75,18 @@ Bond is less than min Bond.
 ### E515
 
 Insurance is less than min Insurance.
+
+### E516
+
+Debt In is less than or equal to Asset In.
+
+### E517
+
+Bond Out is less than or equal to Asset In.
+
+### E518
+
+Debt In is less than or equal to Asset Out.
 
 ### E521
 
@@ -109,3 +125,9 @@ Cannot approve to the caller
 ### E608
 
 Not safe transfer
+
+## Callback
+
+### E701
+
+Invalid Sender

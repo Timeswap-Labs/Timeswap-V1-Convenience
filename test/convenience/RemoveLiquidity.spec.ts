@@ -6,7 +6,7 @@ import {
   newLiquidityFixture,
   constructorFixture,
   Fixture,
-  addLiquidityFixture,
+  liquidityGivenAssetFixture,
   removeLiquidityFixture,
   newLiquidityETHAssetFixture,
   removeLiquidityETHAssetFixture,
@@ -15,7 +15,7 @@ import {
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
-import { AddLiquidityParams, NewLiquidityParams } from '../types'
+import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
 import { TimeswapPair__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'

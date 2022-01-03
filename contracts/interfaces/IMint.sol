@@ -50,7 +50,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct AddLiquidity {
+    struct LiquidityGivenAsset {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -63,7 +63,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct AddLiquidityETHAsset {
+    struct LiquidityGivenAssetETHAsset {
         IERC20 collateral;
         uint256 maturity;
         address liquidityTo;
@@ -74,7 +74,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct AddLiquidityETHCollateral {
+    struct LiquidityGivenAssetETHCollateral {
         IERC20 asset;
         uint256 maturity;
         address liquidityTo;
@@ -85,7 +85,7 @@ interface IMint {
         uint256 deadline;
     }
 
-    struct _AddLiquidity {
+    struct _LiquidityGivenAsset {
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;
@@ -97,6 +97,106 @@ interface IMint {
         uint256 minLiquidity;
         uint112 maxDebt;
         uint112 maxCollateral;
+        uint256 deadline;
+    }
+
+    struct LiquidityGivenDebt {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address liquidityTo;
+        address dueTo;
+        uint112 debtIn;
+        uint256 minLiquidity;
+        uint112 maxAsset;
+        uint112 maxCollateral;
+        uint256 deadline;
+    }
+
+    struct LiquidityGivenDebtETHAsset {
+        IERC20 collateral;
+        uint256 maturity;
+        address liquidityTo;
+        address dueTo;
+        uint112 debtIn;
+        uint256 minLiquidity;
+        uint112 maxCollateral;
+        uint256 deadline;
+    }
+
+    struct LiquidityGivenDebtETHCollateral {
+        IERC20 asset;
+        uint256 maturity;
+        address liquidityTo;
+        address dueTo;
+        uint112 debtIn;
+        uint256 minLiquidity;
+        uint112 maxAsset;
+        uint256 deadline;
+    }
+
+    struct _LiquidityGivenDebt {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address assetFrom;
+        address collateralFrom;
+        address liquidityTo;
+        address dueTo;
+        uint112 debtIn;
+        uint256 minLiquidity;
+        uint112 maxAsset;
+        uint112 maxCollateral;
+        uint256 deadline;
+    }
+
+    struct LiquidityGivenCollateral {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address liquidityTo;
+        address dueTo;
+        uint112 collateralIn;
+        uint256 minLiquidity;
+        uint112 maxAsset;
+        uint112 maxDebt;
+        uint256 deadline;
+    }
+
+    struct LiquidityGivenCollateralETHAsset {
+        IERC20 collateral;
+        uint256 maturity;
+        address liquidityTo;
+        address dueTo;
+        uint112 collateralIn;
+        uint256 minLiquidity;
+        uint112 maxDebt;
+        uint256 deadline;
+    }
+
+    struct LiquidityGivenCollateralETHCollateral {
+        IERC20 asset;
+        uint256 maturity;
+        address liquidityTo;
+        address dueTo;
+        uint256 minLiquidity;
+        uint112 maxAsset;
+        uint112 maxDebt;
+        uint256 deadline;
+    }
+
+    struct _LiquidityGivenCollateral {
+        IERC20 asset;
+        IERC20 collateral;
+        uint256 maturity;
+        address assetFrom;
+        address collateralFrom;
+        address liquidityTo;
+        address dueTo;
+        uint112 collateralIn;
+        uint256 minLiquidity;
+        uint112 maxAsset;
+        uint112 maxDebt;
         uint256 deadline;
     }
 

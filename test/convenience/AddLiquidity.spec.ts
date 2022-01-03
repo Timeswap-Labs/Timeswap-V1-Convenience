@@ -1,4 +1,4 @@
-import { ethers, waffle } from 'hardhat'
+import {  ethers,waffle } from 'hardhat'
 import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import * as LiquidityMath from '../libraries/LiquidityMath'
@@ -6,15 +6,15 @@ import {
   newLiquidityFixture,
   constructorFixture,
   Fixture,
-  addLiquidityFixture,
+  liquidityGivenAssetFixture,
   newLiquidityETHAssetFixture,
-  addLiquidityETHAssetFixture,
+  liquidityGivenAssetETHAssetFixture,
   newLiquidityETHCollateralFixture,
-  addLiquidityETHCollateralFixture,
+  liquidityGivenAssetETHCollateralFixture,
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
-import { AddLiquidityParams, NewLiquidityParams } from '../types'
+import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken, TimeswapPair, TimeswapPair__factory } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
@@ -65,7 +65,7 @@ describe('Add Liquidity', () => {
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
-            const addLiquidity = await addLiquidityFixture(newLiquidity, signers[0], data.addLiquidityParams)
+            const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], data.addLiquidityParams)
             return addLiquidity
           }
 
@@ -107,7 +107,7 @@ describe('Add Liquidity', () => {
           await setTime(Number(currentTime + 10000n))
 
           await expect(
-            constructor.convenience.convenienceContract.addLiquidity({
+            constructor.convenience.convenienceContract.liquidityGivenAsset({
               asset: assetToken.address,
               collateral: collateralToken.address,
               maturity,
@@ -157,7 +157,7 @@ describe('Add Liquidity ETH Asset', () => {
             await setTime(Number(currentTime + 5000n))
             const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
-            const addLiquidity = await addLiquidityETHAssetFixture(newLiquidity, signers[0], data.addLiquidityParams)
+            const addLiquidity = await liquidityGivenAssetETHAssetFixture(newLiquidity, signers[0], data.addLiquidityParams)
             return addLiquidity
           }
 
@@ -205,7 +205,7 @@ describe('Add Liquidity ETH Asset', () => {
           await setTime(Number(currentTime + 10000n))
 
           await expect(
-            constructor.convenience.convenienceContract.addLiquidityETHAsset(
+            constructor.convenience.convenienceContract.liquidityGivenAssetETHAsset(
               {
                 collateral: collateralToken.address,
                 maturity,
@@ -260,7 +260,7 @@ describe('Add Liquidity ETH Collateral', () => {
               data.newLiquidityParams
             )
             await setTime(Number(currentTime + 10000n))
-            const addLiquidity = await addLiquidityETHCollateralFixture(
+            const addLiquidity = await liquidityGivenAssetETHCollateralFixture(
               newLiquidity,
               signers[0],
               data.addLiquidityParams
@@ -307,7 +307,7 @@ describe('Add Liquidity ETH Collateral', () => {
           await setTime(Number(currentTime + 10000n))
 
           await expect(
-            constructor.convenience.convenienceContract.addLiquidityETHCollateral(
+            constructor.convenience.convenienceContract.liquidityGivenAssetETHCollateral(
               {
                 asset: assetToken.address,
                 maturity,
