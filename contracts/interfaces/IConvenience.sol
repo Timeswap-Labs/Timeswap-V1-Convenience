@@ -517,7 +517,7 @@ interface IConvenience is
     function deployNative(Deploy memory params) external;
 
     /// @dev In the implementation you must pay the asset token owed for the pay transaction.
-    /// The caller of this method must be checked to be a TimeswapPair deployed by the canonical TimeswapFactory.
+    /// The caller of this method must be checked to be a Collateralized Debt ERC721 deployed by the canonical TimeswapConvenience.
     /// @param pair The address of the pair contract from collateralized debt token.
     /// @param maturity The maturity of the pair contract from collateralized debt token.
     /// @param assetIn The amount of asset tokens owed due to the pool for the pay transaction
