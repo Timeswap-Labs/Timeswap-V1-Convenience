@@ -18,10 +18,7 @@ abstract contract ERC721 is IERC721Extended {
     }
 
     modifier isApproved(address owner, uint256 id) {
-        require(
-            owner == msg.sender || getApproved[id] == msg.sender || isApprovedForAll[owner][msg.sender],
-            'Forrbidden'
-        );
+        require(owner == msg.sender || getApproved[id] == msg.sender || isApprovedForAll[owner][msg.sender], '611');
         _;
     }
 
@@ -52,10 +49,7 @@ abstract contract ERC721 is IERC721Extended {
 
     function approve(address to, uint256 id) external override {
         address owner = ownerOf[id];
-        require(
-            owner == msg.sender || isApprovedForAll[owner][msg.sender],
-            'ERC721 :: approve : Approve caller is not owner nor approved for all'
-        );
+        require(owner == msg.sender || isApprovedForAll[owner][msg.sender], '609');
         require(to != owner, 'E605');
 
         _approve(to, id);
@@ -93,10 +87,7 @@ abstract contract ERC721 is IERC721Extended {
     function _safeMint(address to, uint256 id) internal {
         _mint(to, id);
 
-        require(
-            _checkOnERC721Received(address(0), to, id, ''),
-            'ERC721 :: _safeMint : Transfer to non ERC721Receiver implementer'
-        );
+        require(_checkOnERC721Received(address(0), to, id, ''), 'E610');
     }
 
     function _mint(address to, uint256 id) private {
@@ -150,7 +141,7 @@ abstract contract ERC721 is IERC721Extended {
                     revert(add(32, _return), returnDataSize)
                 }
             } else {
-                revert('ERC721 :: _checkOnERC721Received : Transfer to non ERC721Receiver implementer');
+                revert('E610');
             }
             bytes4 retval = abi.decode(returnData, (bytes4));
             return (retval == 0x150b7a02);
