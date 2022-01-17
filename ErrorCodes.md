@@ -142,6 +142,10 @@ Transfer to non ERC721Receiver implementer
 
 Not approved to transfer
 
+### E612
+
+Factory address should not be the weth address
+
 ## Callback
 
 ### E701

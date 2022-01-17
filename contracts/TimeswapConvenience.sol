@@ -62,6 +62,7 @@ contract TimeswapConvenience is IConvenience {
     constructor(IFactory _factory, IWETH _weth) {
         require(address(_factory) != address(0), 'E601');
         require(address(_weth) != address(0), 'E601');
+        require(address(_factory) != address(_weth), 'E612');
 
         factory = _factory;
         weth = _weth;
