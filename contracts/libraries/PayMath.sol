@@ -18,7 +18,7 @@ library PayMath {
         assetsIn = maxAssetsIn;
         collateralsOut = new uint112[](ids.length);
 
-        for (uint256 i; i < ids.length; i++) {
+        for (uint256 i; i < ids.length; ) {
             IPair.Due memory due = pair.dueOf(maturity, address(collateralizedDebt), ids[i]);
 
             if (assetsIn[i] > due.debt) assetsIn[i] = due.debt;
@@ -29,6 +29,10 @@ library PayMath {
                     _collateralOut /= due.debt;
                 }
                 collateralsOut[i] = _collateralOut.toUint112();
+            }
+
+            unchecked {
+                ++i;
             }
         }
     }
