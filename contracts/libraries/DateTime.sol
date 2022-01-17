@@ -27,8 +27,8 @@ pragma solidity ^0.8.0;
 // ----------------------------------------------------------------------------
 
 library DateTime {
-    uint256 constant SECONDS_PER_DAY = 24 * 60 * 60;
-    uint256 constant SECONDS_PER_HOUR = 60 * 60;
+    uint256 constant SECONDS_PER_DAY = 86400;
+    uint256 constant SECONDS_PER_HOUR = 3600;
     uint256 constant SECONDS_PER_MINUTE = 60;
     int256 constant OFFSET19700101 = 2440588;
 
