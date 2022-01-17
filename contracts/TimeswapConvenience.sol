@@ -61,6 +61,7 @@ contract TimeswapConvenience is IConvenience {
     /// @param _weth The address of the Wrapped ETH contract.
     constructor(IFactory _factory, IWETH _weth) {
         require(address(_weth) != address(0), 'E601');
+
         factory = _factory;
         weth = _weth;
     }
