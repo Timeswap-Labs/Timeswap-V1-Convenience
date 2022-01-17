@@ -9,6 +9,8 @@ library MsgValue {
 
     function getUint112() internal returns (uint112 value) {
         value = msg.value.truncateUint112();
-        if (msg.value > value) ETH.transfer(payable(msg.sender), msg.value - value);
+        unchecked {
+            if (msg.value > value) ETH.transfer(payable(msg.sender), msg.value - value);
+        }
     }
 }

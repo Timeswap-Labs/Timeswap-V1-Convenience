@@ -126,6 +126,18 @@ Cannot approve to the caller
 
 Not safe transfer
 
+### E609
+
+Approve caller is not owner nor approved for all
+
+### E610
+
+Transfer to non ERC721Receiver implementer
+
+### E611
+
+Not approved to transfer
+
 ## Callback
 
 ### E701
