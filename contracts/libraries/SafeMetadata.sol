@@ -9,8 +9,7 @@ library SafeMetadata {
         (bool success, bytes memory data) = address(token).staticcall(
             abi.encodeWithSelector(IERC20Metadata.name.selector)
         );
-        if (success) return abi.decode(data, (string));
-        return 'Token';
+        return success ? returnDataToString(data) : 'Token';
     }
 
     function safeSymbol(IERC20 token) internal view returns (string memory) {
