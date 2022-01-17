@@ -144,7 +144,7 @@ library NFTTokenURIScaffold {
 
         string memory precisionDigitsString = toStringTrimmed(precisionDigits);
         uint256 lengthDiff = decimal - bytes(precisionDigits.toString()).length;
-        for (uint256 i = 0; i < lengthDiff; i++) {
+        for (uint256 i; i < lengthDiff; i++) {
             precisionDigitsString = string(abi.encodePacked('0', precisionDigitsString));
         }
 
@@ -172,7 +172,7 @@ library NFTTokenURIScaffold {
 
         string memory precisionDigitsString = toStringTrimmed(precisionDigits);
         uint256 lengthDiff = 4 - bytes(precisionDigits.toString()).length;
-        for (uint256 i = 0; i < lengthDiff; i++) {
+        for (uint256 i; i < lengthDiff; i++) {
             precisionDigitsString = string(abi.encodePacked('0', precisionDigitsString));
         }
 
@@ -226,7 +226,7 @@ library NFTTokenURIScaffold {
         bytes memory str = new bytes(2 + data.length * 2);
         str[0] = '0';
         str[1] = 'x';
-        for (uint256 i = 0; i < data.length; i++) {
+        for (uint256 i; i < data.length; i++) {
             str[2 + i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
             str[3 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
         }
@@ -239,7 +239,7 @@ library NFTTokenURIScaffold {
         string memory text
     ) public pure returns (string memory) {
         bytes memory a = new bytes(end - begin + 1);
-        for (uint256 i = 0; i <= end - begin; i++) {
+        for (uint256 i; i <= end - begin; i++) {
             a[i] = bytes(text)[i + begin - 1];
         }
         return string(a);
