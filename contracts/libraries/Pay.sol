@@ -83,7 +83,7 @@ library Pay {
             )
         );
 
-        if (collateralOut > 0) {
+        if (collateralOut != 0) {
             weth.withdraw(collateralOut);
             ETH.transfer(params.collateralTo, collateralOut);
         }

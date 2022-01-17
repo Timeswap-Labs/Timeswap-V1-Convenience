@@ -144,7 +144,7 @@ abstract contract ERC721 is IERC721Extended {
             );
             if (success) {
                 returnData = _return;
-            } else if (_return.length > 0) {
+            } else if (_return.length != 0) {
                 assembly {
                     let returnDataSize := mload(_return)
                     revert(add(32, _return), returnDataSize)

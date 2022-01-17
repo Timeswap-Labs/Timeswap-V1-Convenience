@@ -18,6 +18,6 @@ library SquareRoot {
 
     function sqrtUp(uint256 y) internal pure returns (uint256 z) {
         z = sqrt(y);
-        if (y % z > 0) z++;
+        if (y % z != 0) z++;
     }
 }

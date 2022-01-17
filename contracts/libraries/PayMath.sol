@@ -24,7 +24,7 @@ library PayMath {
             if (assetsIn[i] > due.debt) assetsIn[i] = due.debt;
             if (msg.sender == collateralizedDebt.ownerOf(ids[i])) {
                 uint256 _collateralOut = due.collateral;
-                if (due.debt > 0) {
+                if (due.debt != 0) {
                     _collateralOut *= assetsIn[i];
                     _collateralOut /= due.debt;
                 }

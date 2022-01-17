@@ -293,7 +293,7 @@ library Mint {
     {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
-        require(pair.totalLiquidity(params.maturity) > 0, 'E507');
+        require(pair.totalLiquidity(params.maturity) != 0, 'E507');
 
         (uint112 yIncrease, uint112 zIncrease) = pair.givenAsset(params.maturity, params.assetIn);
 
@@ -452,7 +452,7 @@ library Mint {
     {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
-        require(pair.totalLiquidity(params.maturity) > 0, 'E507');
+        require(pair.totalLiquidity(params.maturity) != 0, 'E507');
 
         (uint112 xIncrease, uint112 yIncrease, uint112 zIncrease) = pair.givenDebt(params.maturity, params.debtIn);
 
@@ -611,7 +611,7 @@ library Mint {
     {
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
-        require(pair.totalLiquidity(params.maturity) > 0, 'E507');
+        require(pair.totalLiquidity(params.maturity) != 0, 'E507');
 
         (uint112 xIncrease, uint112 yIncrease, uint112 zIncrease) = pair.givenCollateral(
             params.maturity,

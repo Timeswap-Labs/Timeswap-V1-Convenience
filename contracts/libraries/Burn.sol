@@ -37,7 +37,7 @@ library Burn {
             )
         );
 
-        if (tokensOut.asset > 0) {
+        if (tokensOut.asset != 0) {
             weth.withdraw(tokensOut.asset);
             ETH.transfer(params.assetTo, tokensOut.asset);
         }
@@ -62,7 +62,7 @@ library Burn {
             )
         );
 
-        if (tokensOut.collateral > 0) {
+        if (tokensOut.collateral != 0) {
             weth.withdraw(tokensOut.collateral);
             ETH.transfer(params.collateralTo, tokensOut.collateral);
         }

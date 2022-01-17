@@ -37,7 +37,7 @@ library Withdraw {
             )
         );
 
-        if (tokensOut.asset > 0) {
+        if (tokensOut.asset != 0) {
             weth.withdraw(tokensOut.asset);
             ETH.transfer(params.assetTo, tokensOut.asset);
         }
@@ -55,7 +55,7 @@ library Withdraw {
             IWithdraw.Collect(params.asset, weth, params.maturity, params.assetTo, address(this), params.claimsIn)
         );
 
-        if (tokensOut.collateral > 0) {
+        if (tokensOut.collateral != 0) {
             weth.withdraw(tokensOut.collateral);
             ETH.transfer(params.collateralTo, tokensOut.collateral);
         }
@@ -72,9 +72,9 @@ library Withdraw {
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
         require(address(native.liquidity) != address(0), 'E502');
 
-        if (params.claimsIn.bond > 0)
+        if (params.claimsIn.bond != 0)
             tokensOut.asset = native.bond.burn(msg.sender, params.assetTo, params.claimsIn.bond);
-        if (params.claimsIn.insurance > 0)
+        if (params.claimsIn.insurance != 0)
             tokensOut.collateral = native.insurance.burn(msg.sender, params.collateralTo, params.claimsIn.insurance);
     }
 }
