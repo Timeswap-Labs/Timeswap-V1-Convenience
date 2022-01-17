@@ -88,6 +88,10 @@ Bond Out is less than or equal to Asset In.
 
 Debt In is less than or equal to Asset Out.
 
+### E519
+
+Asset In is greater than max Asset.
+
 ### E521
 
 ETH transfer failed

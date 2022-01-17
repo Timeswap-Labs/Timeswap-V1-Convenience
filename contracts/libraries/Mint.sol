@@ -478,8 +478,8 @@ library Mint {
         );
 
         require(liquidityOut >= params.minLiquidity, 'E511');
-        require(xIncrease <= params.maxAsset, 'E513');
-        require(dueOut.collateral <= params.maxCollateral, 'E512');
+        require(xIncrease <= params.maxAsset, 'E519');
+        require(dueOut.collateral <= params.maxCollateral, 'E513');
     }
 
     function liquidityGivenCollateral(
@@ -640,7 +640,7 @@ library Mint {
         );
 
         require(liquidityOut >= params.minLiquidity, 'E511');
-        require(xIncrease <= params.maxAsset, 'E513');
+        require(xIncrease <= params.maxAsset, 'E519');
         require(dueOut.debt <= params.maxDebt, 'E512');
     }
 
