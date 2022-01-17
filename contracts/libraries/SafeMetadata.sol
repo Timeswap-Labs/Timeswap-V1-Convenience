@@ -23,8 +23,7 @@ library SafeMetadata {
         (bool success, bytes memory data) = address(token).staticcall(
             abi.encodeWithSelector(IERC20Metadata.decimals.selector)
         );
-        if (success && data.length >= 32) return abi.decode(data, (uint8));
-        return 18;
+        return success && data.length == 32 ? abi.decode(data, (uint8)) : 18;
     }
 
     function returnDataToString(bytes memory data) private pure returns (string memory) {
