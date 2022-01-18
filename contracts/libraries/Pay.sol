@@ -96,6 +96,7 @@ library Pay {
     ) private returns (uint128 assetIn, uint128 collateralOut) {
         require(params.deadline >= block.timestamp, 'E504');
         require(params.maturity > block.timestamp, 'E508');
+        require(params.ids.length == params.maxAssetsIn.length, '520');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
