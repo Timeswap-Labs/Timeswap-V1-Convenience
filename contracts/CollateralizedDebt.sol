@@ -88,8 +88,10 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
-        require(msg.sender == address(pair), 'E401');
+        IPair _pair = pair;
 
-        convenience.collateralizedDebtCallback(pair, maturity, assetIn, data);
+        require(msg.sender == address(_pair), 'E401');
+
+        convenience.collateralizedDebtCallback(_pair, maturity, assetIn, data);
     }
 }
