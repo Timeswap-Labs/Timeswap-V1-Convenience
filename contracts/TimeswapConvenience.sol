@@ -70,7 +70,9 @@ contract TimeswapConvenience is IConvenience {
 
     /* ===== UPDATE ===== */
 
-    receive() external payable {}
+    receive() external payable {
+        require(msg.sender == address(weth));
+    }
 
     /// @inheritdoc IConvenience
     function newLiquidity(NewLiquidity calldata params)
