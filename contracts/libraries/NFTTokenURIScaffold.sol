@@ -187,10 +187,10 @@ library NFTTokenURIScaffold {
         uint256 digits;
         uint256 flag;
         while (temp != 0) {
-            if (temp % 10 == 0 && flag == 0) {
+            if (flag == 0 && temp % 10 == 0) {
                 temp /= 10;
                 continue;
-            } else if (temp % 10 != 0 && flag == 0) {
+            } else if (flag == 0 && temp % 10 != 0) {
                 flag++;
                 digits++;
             } else {
@@ -202,10 +202,10 @@ library NFTTokenURIScaffold {
         bytes memory buffer = new bytes(digits);
         flag = 0;
         while (value != 0) {
-            if (value % 10 == 0 && flag == 0) {
+            if (flag == 0 && value % 10 == 0) {
                 value /= 10;
                 continue;
-            } else if (value % 10 != 0 && flag == 0) {
+            } else if (flag == 0 && value % 10 != 0) {
                 flag++;
                 digits -= 1;
                 buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
