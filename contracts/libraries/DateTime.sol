@@ -184,8 +184,7 @@ library DateTime {
         uint256 day
     ) internal pure returns (bool valid) {
         if (year >= 1970 && month != 0 && month <= 12) {
-            uint256 daysInMonth = _getDaysInMonth(year, month);
-            if (day != 0 && day <= daysInMonth) {
+            if (day != 0 && day <= _getDaysInMonth(year, month)) {
                 valid = true;
             }
         }
