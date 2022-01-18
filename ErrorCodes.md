@@ -92,6 +92,10 @@ Debt In is less than or equal to Asset Out.
 
 Asset In is greater than max Asset.
 
+### E520
+
+Ids length and maxAssetsIn length do not match.
+
 ### E521
 
 ETH transfer failed

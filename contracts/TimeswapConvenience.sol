@@ -505,15 +505,17 @@ contract TimeswapConvenience is IConvenience {
 
         require(msg.sender == address(pair), 'E701');
 
+        IWETH _weth = weth;
+
         if (assetFrom == address(this)) {
-            weth.deposit{value: assetIn}();
+            _weth.deposit{value: assetIn}();
             asset.safeTransfer(pair, assetIn);
         } else {
             asset.safeTransferFrom(assetFrom, pair, assetIn);
         }
 
         if (collateralFrom == address(this)) {
-            weth.deposit{value: collateralIn}();
+            _weth.deposit{value: collateralIn}();
             collateral.safeTransfer(pair, collateralIn);
         } else {
             collateral.safeTransferFrom(collateralFrom, pair, collateralIn);
