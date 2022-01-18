@@ -103,7 +103,6 @@ library NFTTokenURIScaffold {
         string memory maturityDate,
         uint256 maturityTimestamp
     ) internal view returns (string memory) {
-        /// TODO - finalize SVG
         NFTSVG.SVGParams memory params = NFTSVG.SVGParams({
             tokenId: tokenId,
             svgTitle: string(
