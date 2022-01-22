@@ -35,8 +35,10 @@ interface IConvenience is
 {
     struct Native {
         ILiquidity liquidity;
-        IClaim bond;
-        IClaim insurance;
+        IClaim bondInterest;
+        IClaim bondPrincipal;
+        IClaim insuranceInterest;
+        IClaim insurancePrincipal;
         IDue collateralizedDebt;
     }
 

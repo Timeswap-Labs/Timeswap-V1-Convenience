@@ -9,7 +9,7 @@ import {ERC20Permit} from './base/ERC20Permit.sol';
 import {SafeMetadata} from './libraries/SafeMetadata.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
-contract Insurance is IClaim, ERC20Permit {
+contract BondInterest is IClaim, ERC20Permit {
     using SafeMetadata for IERC20;
     using Strings for uint256;
 
@@ -21,37 +21,35 @@ contract Insurance is IClaim, ERC20Permit {
         string memory assetName = pair.asset().safeName();
         string memory collateralName = pair.collateral().safeName();
         return
-            string(
-                abi.encodePacked('Timeswap Insurance - ', assetName, ' - ', collateralName, ' - ', maturity.toString())
-            );
+            string(abi.encodePacked('Timeswap Bond Interest - ', assetName, ' - ', collateralName, ' - ', maturity.toString()));
     }
 
     function symbol() external view override returns (string memory) {
         string memory assetSymbol = pair.asset().safeSymbol();
         string memory collateralSymbol = pair.collateral().safeSymbol();
-        return string(abi.encodePacked('TS-INS-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
+        return string(abi.encodePacked('TS-BND-INT-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
     }
 
     function decimals() external view override returns (uint8) {
-        return pair.collateral().safeDecimals();
+        return pair.asset().safeDecimals();
     }
 
     function totalSupply() external view override returns (uint256) {
-        return pair.claimsOf(maturity, address(this)).insurance;
+        return pair.claimsOf(maturity, address(this)).bondInterest;
     }
 
     constructor(
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) ERC20Permit('Timeswap Insurance') {
+    ) ERC20Permit('Timeswap Bond Interest') {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
     }
 
-    modifier onlyConvenience() {
-        require(msg.sender == address(convenience), 'E403');
+    modifier onlyConvenience(){
+        require(msg.sender == address(convenience),'E403');
         _;
     }
 
@@ -65,7 +63,5 @@ contract Insurance is IClaim, ERC20Permit {
         uint128 amount
     ) external override onlyConvenience returns (uint128 tokenOut) {
         _burn(from, amount);
-
-        tokenOut = pair.withdraw(maturity, to, to, IPair.Claims(0, amount)).collateral;
     }
 }

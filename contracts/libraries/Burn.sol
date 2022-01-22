@@ -79,6 +79,8 @@ library Burn {
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
         require(address(native.liquidity) != address(0), 'E502');
 
-        tokensOut = native.liquidity.burn(msg.sender, params.assetTo, params.collateralTo, params.liquidityIn);
+        tokensOut = pair.burn(params.maturity, params.assetTo, params.collateralTo, params.liquidityIn);
+
+        native.liquidity.burn(msg.sender, params.assetTo, params.collateralTo, params.liquidityIn);
     }
 }

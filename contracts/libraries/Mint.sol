@@ -666,7 +666,7 @@ library Mint {
         }
         (liquidityOut, id, dueOut) = pair.mint(
             params.maturity,
-            address(native.liquidity),
+            address(this),
             address(native.collateralizedDebt),
             params.xIncrease,
             params.yIncrease,
