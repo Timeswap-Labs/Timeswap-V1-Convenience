@@ -392,7 +392,7 @@ library Borrow {
         (id, dueOut) = pair.borrow(
             params.maturity,
             params.assetTo,
-            address(native.collateralizedDebt),
+            address(this),
             params.xDecrease,
             params.yIncrease,
             params.zIncrease,

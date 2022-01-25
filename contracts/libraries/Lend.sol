@@ -285,7 +285,7 @@ library Lend {
             )
         );
 
-        require(claimsOut.insuranceInterest >= params.minInsurance, 'E515');
+        require(uint128(claimsOut.insuranceInterest) + claimsOut.insurancePrincipal>= params.minInsurance, 'E515');
     }
 
     function _lendGivenInsurance(
@@ -321,7 +321,7 @@ library Lend {
             )
         );
 
-        require(claimsOut.bondInterest >= params.minBond, 'E514');
+        require(uint128(claimsOut.bondInterest) + claimsOut.bondPrincipal >= params.minBond, 'E514');
     }
 
     function _lendGivenPercent(
@@ -355,8 +355,8 @@ library Lend {
             )
         );
 
-        require(claimsOut.bondInterest >= params.minBond, 'E514');
-        require(claimsOut.insuranceInterest >= params.minInsurance, 'E515');
+        require(uint128(claimsOut.bondInterest) +claimsOut.bondPrincipal>= params.minBond, 'E514');
+        require(uint128(claimsOut.insuranceInterest) + claimsOut.insuranceInterest >= params.minInsurance, 'E515');
     }
 
     function _lend(

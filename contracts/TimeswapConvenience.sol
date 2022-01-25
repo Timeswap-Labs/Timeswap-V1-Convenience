@@ -10,6 +10,7 @@ import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {ITimeswapMintCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapMintCallback.sol';
 import {ITimeswapLendCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapBorrowCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapBorrowCallback.sol';
+import {ITimeswapPayCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapPayCallback.sol';
 import {Mint} from './libraries/Mint.sol';
 import {Burn} from './libraries/Burn.sol';
 import {Lend} from './libraries/Lend.sol';
@@ -552,17 +553,15 @@ contract TimeswapConvenience is IConvenience {
         }
     }
 
-    /// @inheritdoc IConvenience
-    function collateralizedDebtCallback(
-        IPair pair,
-        uint256 maturity,
+    /// @inheritdoc ITimeswapPayCallback
+    function timeswapPayCallback(
         uint128 assetIn,
         bytes calldata data
     ) external override {
-        (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
+        (IERC20 asset, IERC20 collateral, address from,uint256 maturity) = abi.decode(data, (IERC20, IERC20, address,uint256));
 
         IDue collateralizedDebt = natives[asset][collateral][maturity].collateralizedDebt;
-
+        IPair pair = factory.getPair(asset, collateral);
         require(msg.sender == address(collateralizedDebt), 'E701');
 
         if (from == address(this)) {

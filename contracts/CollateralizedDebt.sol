@@ -76,22 +76,5 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     function mint(address to, uint256 id) external override onlyConvenience {
         _safeMint(to, id);
     }
-
-    function burn(
-        address to,
-        uint256[] memory ids,
-        uint112[] memory assetsIn,
-        uint112[] memory collateralsOut,
-        bytes calldata data
-    ) external override onlyConvenience returns (uint128 assetIn, uint128 collateralOut) {
-        (assetIn, collateralOut) = pair.pay(maturity, to, address(this), ids, assetsIn, collateralsOut, data);
-    }
-
-    function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
-        IPair _pair = pair;
-
-        require(msg.sender == address(_pair), 'E401');
-
-        convenience.collateralizedDebtCallback(_pair, maturity, assetIn, data);
-    }
+  
 }
