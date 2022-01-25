@@ -110,17 +110,9 @@ library Pay {
             params.ids,
             params.maxAssetsIn
         );
-        
-        return _pay1(params,pair,assetsIn,collateralsOut);
+        (assetIn, collateralOut) = pair.pay(params.maturity, params.collateralTo, address(this), params.ids, assetsIn, collateralsOut,bytes(abi.encode(params.asset, params.collateral, params.from,params.maturity)));
 
-    }
-    function _pay1(
-                IPay._Repay memory params,
-                IPair pair,
-                uint112[] memory assetsIn,
-                uint112[] memory collateralsOut
-    )private returns (uint128 assetIn,uint128 collateralOut){
-                (assetIn, collateralOut) = pair.pay(params.maturity, params.collateralTo, address(this), params.ids, assetsIn, collateralsOut,bytes(abi.encode(params.asset, params.collateral, params.from,params.maturity)));
+        
 
     }
 }
