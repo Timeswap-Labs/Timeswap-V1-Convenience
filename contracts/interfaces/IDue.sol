@@ -6,7 +6,12 @@ import {IConvenience} from './IConvenience.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 
 /// @author Ricsson W. Ngo
-interface IDue is IERC721Permit{
+interface IDue is IERC721Permit {
+    struct Position {
+        uint256 id;
+        IPair.Due due;
+    }
+
     // VIEW
 
     function convenience() external returns (IConvenience);
@@ -17,8 +22,9 @@ interface IDue is IERC721Permit{
 
     function dueOf(uint256 id) external returns (IPair.Due memory);
 
+    function positionsOf(address owner) external returns (Position[] memory positions);
+
     // UPDATE
 
     function mint(address to, uint256 id) external;
-
 }

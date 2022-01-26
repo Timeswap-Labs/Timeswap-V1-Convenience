@@ -58,6 +58,15 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         return pair.dueOf(maturity, address(this), id);
     }
 
+    function positionsOf(address owner) external view override returns (Position[] memory positions) {
+        for (uint256 i; pair.totalDuesOf(maturity, convenience); ) {
+            if (ownerOf[i] == owner) positions.push(Position(i, pair.dueOf(maturity, address(this), i)));
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     constructor(
         IConvenience _convenience,
         IPair _pair,
@@ -76,5 +85,4 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     function mint(address to, uint256 id) external override onlyConvenience {
         _safeMint(to, id);
     }
-  
 }
