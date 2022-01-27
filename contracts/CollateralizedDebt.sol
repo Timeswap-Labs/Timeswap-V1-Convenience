@@ -42,8 +42,8 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function tokenURI(uint256 id) external view override returns (string memory) {
-        require(ownerOf[id] != address(0), 'E404');
-        return NFTTokenURIScaffold.tokenURI(id, pair, pair.dueOf(maturity, address(this), id), maturity);
+        require(_owners[id] != address(0), 'E404');
+        return NFTTokenURIScaffold.tokenURI(id, pair, pair.dueOf(maturity, address(convenience), id), maturity);
     }
 
     function assetDecimals() external view override returns (uint8) {
@@ -54,17 +54,17 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         return pair.collateral().safeDecimals();
     }
 
-    function dueOf(uint256 id) external view override returns (IPair.Due memory) {
-        return pair.dueOf(maturity, address(this), id);
+    function totalSupply() external view override returns (uint256) {
+        return pair.totalDuesOf(maturity, address(convenience));
     }
 
-    function positionsOf(address owner) external view override returns (Position[] memory positions) {
-        for (uint256 i; pair.totalDuesOf(maturity, convenience); ) {
-            if (ownerOf[i] == owner) positions.push(Position(i, pair.dueOf(maturity, address(this), i)));
-            unchecked {
-                ++i;
-            }
-        }
+    function tokenByIndex(uint256 id) external view override returns (uint256) {
+        require(id < pair.totalDuesOf(maturity, address(convenience)), 'E614');
+        return id;
+    }
+
+    function dueOf(uint256 id) external view override returns (IPair.Due memory) {
+        return pair.dueOf(maturity, convenience, id);
     }
 
     constructor(

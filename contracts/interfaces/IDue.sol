@@ -7,11 +7,6 @@ import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.
 
 /// @author Ricsson W. Ngo
 interface IDue is IERC721Permit {
-    struct Position {
-        uint256 id;
-        IPair.Due due;
-    }
-
     // VIEW
 
     function convenience() external returns (IConvenience);
@@ -21,8 +16,6 @@ interface IDue is IERC721Permit {
     function maturity() external returns (uint256);
 
     function dueOf(uint256 id) external returns (IPair.Due memory);
-
-    function positionsOf(address owner) external returns (Position[] memory positions);
 
     // UPDATE
 
