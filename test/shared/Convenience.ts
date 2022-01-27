@@ -12,8 +12,10 @@ import { Claims, CollectParams } from '../types'
 import { deploy } from './DeployConvenience'
 interface Native {
   liquidity: string
-  bond: string
-  insurance: string
+  bondInterest: string
+  bondPrincipal: string
+  insuranceInterest: string
+  insurancePrincipal: string
   collateralizedDebt: string
 }
 export class Convenience {
