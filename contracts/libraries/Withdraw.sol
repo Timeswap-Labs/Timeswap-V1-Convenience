@@ -71,16 +71,14 @@ library Withdraw {
 
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
         require(address(native.liquidity) != address(0), 'E502');
-        
+
         tokensOut = pair.withdraw(params.maturity, params.assetTo, params.collateralTo, params.claimsIn);
 
-        if (params.claimsIn.bondInterest != 0)
-            native.bondInterest.burn(msg.sender, params.assetTo, params.claimsIn.bondInterest);
-        if (params.claimsIn.bondPrincipal != 0)
-            native.bondPrincipal.burn(msg.sender, params.assetTo, params.claimsIn.bondPrincipal);
+        if (params.claimsIn.bondInterest != 0) native.bondInterest.burn(msg.sender, params.claimsIn.bondInterest);
+        if (params.claimsIn.bondPrincipal != 0) native.bondPrincipal.burn(msg.sender, params.claimsIn.bondPrincipal);
         if (params.claimsIn.insuranceInterest != 0)
-            native.insuranceInterest.burn(msg.sender,params.collateralTo,params.claimsIn.insuranceInterest);
+            native.insuranceInterest.burn(msg.sender, params.claimsIn.insuranceInterest);
         if (params.claimsIn.insurancePrincipal != 0)
-            native.insurancePrincipal.burn(msg.sender,params.collateralTo,params.claimsIn.insurancePrincipal);
+            native.insurancePrincipal.burn(msg.sender, params.claimsIn.insurancePrincipal);
     }
 }

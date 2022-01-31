@@ -6,7 +6,7 @@ import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFa
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Deploy} from './Deploy.sol';
-import {IDeployNative} from '../interfaces/IDeployNative.sol';
+import {IDeployNatives} from '../interfaces/IDeployNatives.sol';
 
 library DeployNative {
     using Deploy for IConvenience.Native;
@@ -15,7 +15,7 @@ library DeployNative {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IDeployNative.Deploy memory params
+        IDeployNatives.DeployNatives memory params
     ) internal {
         require(params.deadline >= block.timestamp, 'E504');
 

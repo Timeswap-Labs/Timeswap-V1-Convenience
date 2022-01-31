@@ -19,9 +19,5 @@ interface IClaim is IERC20Permit {
 
     function mint(address to, uint128 amount) external;
 
-    function burn(
-        address from,
-        address to,
-        uint128 amount
-    ) external returns (uint128 tokenOut);
+    function burn(address from, uint128 amount) external;
 }

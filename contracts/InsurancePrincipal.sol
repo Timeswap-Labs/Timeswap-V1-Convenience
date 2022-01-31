@@ -22,7 +22,14 @@ contract InsurancePrincipal is IClaim, ERC20Permit {
         string memory collateralName = pair.collateral().safeName();
         return
             string(
-                abi.encodePacked('Timeswap Insurance Principal- ', assetName, ' - ', collateralName, ' - ', maturity.toString())
+                abi.encodePacked(
+                    'Timeswap Insurance Principal- ',
+                    assetName,
+                    ' - ',
+                    collateralName,
+                    ' - ',
+                    maturity.toString()
+                )
             );
     }
 
@@ -55,16 +62,11 @@ contract InsurancePrincipal is IClaim, ERC20Permit {
         _;
     }
 
-    function mint(address to, uint128 amount) external override onlyConvenience{
+    function mint(address to, uint128 amount) external override onlyConvenience {
         _mint(to, amount);
     }
 
-    function burn(
-        address from,
-        address to,
-        uint128 amount
-    ) external override onlyConvenience returns (uint128 tokenOut) {
+    function burn(address from, uint128 amount) external override onlyConvenience {
         _burn(from, amount);
-
     }
 }
