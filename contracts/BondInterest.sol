@@ -44,7 +44,7 @@ contract BondInterest is IClaim, ERC20Permit {
     }
 
     function totalSupply() external view override returns (uint256) {
-        return pair.claimsOf(maturity, address(this)).bondInterest;
+        return pair.claimsOf(maturity, address(convenience)).bondInterest;
     }
 
     constructor(

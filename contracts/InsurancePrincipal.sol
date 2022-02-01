@@ -44,7 +44,7 @@ contract InsurancePrincipal is IClaim, ERC20Permit {
     }
 
     function totalSupply() external view override returns (uint256) {
-        return pair.claimsOf(maturity, address(this)).insurancePrincipal;
+        return pair.claimsOf(maturity, address(convenience)).insurancePrincipal;
     }
 
     constructor(

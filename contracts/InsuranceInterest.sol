@@ -44,7 +44,7 @@ contract InsuranceInterest is IClaim, ERC20Permit {
     }
 
     function totalSupply() external view override returns (uint256) {
-        return pair.claimsOf(maturity, address(this)).insuranceInterest;
+        return pair.claimsOf(maturity, address(convenience)).insuranceInterest;
     }
 
     constructor(
