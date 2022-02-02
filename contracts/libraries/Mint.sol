@@ -135,10 +135,12 @@ library Mint {
         )
     {
         require(params.debtIn > params.assetIn, 'E516');
+        require(params.maturity > block.timestamp, 'E508');
 
         IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'E501');
 
-        if (address(pair) == address(0)) pair = factory.createPair(params.asset, params.collateral);
+        // if (address(pair) == address(0)) pair = factory.createPair(params.asset, params.collateral);
 
         require(pair.totalLiquidity(params.maturity) == 0, 'E506');
 
@@ -661,9 +663,9 @@ library Mint {
         require(params.maturity > block.timestamp, 'E508');
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
-        if (address(native.liquidity) == address(0)) {
+        if (address(native.liquidity) == address(0))
             native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
-        }
+
         (liquidityOut, id, dueOut) = pair.mint(
             params.maturity,
             address(this),
@@ -673,6 +675,7 @@ library Mint {
             params.zIncrease,
             bytes(abi.encode(params.asset, params.collateral, params.assetFrom, params.collateralFrom))
         );
+
         native.liquidity.mint(params.liquidityTo, liquidityOut);
         native.collateralizedDebt.mint(params.dueTo, id);
     }

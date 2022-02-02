@@ -30,7 +30,6 @@ library MintMath {
         denominator += 0x2000000;
         _zIncrease /= denominator;
         zIncrease = _zIncrease.toUint112();
-
     }
 
     function givenAsset(
@@ -80,7 +79,7 @@ library MintMath {
 
         uint256 _xIncrease = cp.x;
         _xIncrease *= _yIncrease;
-        _xIncrease /= cp.y;
+        _xIncrease = _xIncrease.divUp(cp.y);
         xIncrease = _xIncrease.toUint112();
 
         uint256 _zIncrease = cp.z;
@@ -114,7 +113,7 @@ library MintMath {
 
         uint256 _xIncrease = cp.x;
         _xIncrease *= _zIncrease;
-        _xIncrease /= cp.z;
+        _xIncrease = _xIncrease.divUp(cp.z);
         xIncrease = _xIncrease.toUint112();
 
         uint256 _yIncrease = cp.y;

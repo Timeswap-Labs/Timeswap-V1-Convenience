@@ -1,7 +1,10 @@
 export interface Claims {
-  bond: bigint
-  insurance: bigint
+  bondInterest: bigint
+  bondPrincipal: bigint
+  insuranceInterest: bigint
+  insurancePrincipal: bigint
 }
 export interface CollectParams {
   claims: Claims
 }
+  

@@ -21,7 +21,16 @@ contract BondPrincipal is IClaim, ERC20Permit {
         string memory assetName = pair.asset().safeName();
         string memory collateralName = pair.collateral().safeName();
         return
-            string(abi.encodePacked('Timeswap Bond Principal - ', assetName, ' - ', collateralName, ' - ', maturity.toString()));
+            string(
+                abi.encodePacked(
+                    'Timeswap Bond Principal - ',
+                    assetName,
+                    ' - ',
+                    collateralName,
+                    ' - ',
+                    maturity.toString()
+                )
+            );
     }
 
     function symbol() external view override returns (string memory) {
@@ -35,7 +44,7 @@ contract BondPrincipal is IClaim, ERC20Permit {
     }
 
     function totalSupply() external view override returns (uint256) {
-        return pair.claimsOf(maturity, address(this)).bondPrincipal;
+        return pair.claimsOf(maturity, address(convenience)).bondPrincipal;
     }
 
     constructor(
@@ -57,11 +66,7 @@ contract BondPrincipal is IClaim, ERC20Permit {
         _mint(to, amount);
     }
 
-    function burn(
-        address from,
-        address to,
-        uint128 amount
-    ) external override onlyConvenience returns (uint128 tokenOut) {
+    function burn(address from, uint128 amount) external override onlyConvenience {
         _burn(from, amount);
     }
 }

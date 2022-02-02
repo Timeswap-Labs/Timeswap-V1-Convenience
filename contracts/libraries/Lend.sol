@@ -285,7 +285,7 @@ library Lend {
             )
         );
 
-        require(uint128(claimsOut.insuranceInterest) + claimsOut.insurancePrincipal>= params.minInsurance, 'E515');
+        require(uint128(claimsOut.insuranceInterest) + claimsOut.insurancePrincipal >= params.minInsurance, 'E515');
     }
 
     function _lendGivenInsurance(
@@ -355,8 +355,8 @@ library Lend {
             )
         );
 
-        require(uint128(claimsOut.bondInterest) +claimsOut.bondPrincipal>= params.minBond, 'E514');
-        require(uint128(claimsOut.insuranceInterest) + claimsOut.insuranceInterest >= params.minInsurance, 'E515');
+        require(uint128(claimsOut.bondInterest) + claimsOut.bondPrincipal >= params.minBond, 'E514');
+        require(uint128(claimsOut.insuranceInterest) + claimsOut.insurancePrincipal >= params.minInsurance, 'E515');
     }
 
     function _lend(
@@ -385,6 +385,6 @@ library Lend {
         native.bondInterest.mint(params.bondTo, claimsOut.bondInterest);
         native.bondPrincipal.mint(params.bondTo, claimsOut.bondPrincipal);
         native.insuranceInterest.mint(params.insuranceTo, claimsOut.insuranceInterest);
-        native.insurancePrincipal.mint(params.insuranceTo,claimsOut.insurancePrincipal);
+        native.insurancePrincipal.mint(params.insuranceTo, claimsOut.insurancePrincipal);
     }
 }

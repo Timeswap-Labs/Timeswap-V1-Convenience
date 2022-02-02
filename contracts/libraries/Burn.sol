@@ -81,6 +81,6 @@ library Burn {
 
         tokensOut = pair.burn(params.maturity, params.assetTo, params.collateralTo, params.liquidityIn);
 
-        native.liquidity.burn(msg.sender, params.assetTo, params.collateralTo, params.liquidityIn);
+        native.liquidity.burn(msg.sender, params.liquidityIn);
     }
 }

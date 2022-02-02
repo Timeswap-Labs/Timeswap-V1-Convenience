@@ -57,13 +57,7 @@ contract Liquidity is ILiquidity, ERC20Permit {
         _mint(to, amount);
     }
 
-    function burn(
-        address from,
-        address assetTo,
-        address collateralTo,
-        uint256 amount
-    ) external override onlyConvenience returns (IPair.Tokens memory tokensOut) {
+    function burn(address from, uint256 amount) external override onlyConvenience {
         _burn(from, amount);
-
     }
 }

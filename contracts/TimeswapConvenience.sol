@@ -17,8 +17,8 @@ import {Lend} from './libraries/Lend.sol';
 import {Withdraw} from './libraries/Withdraw.sol';
 import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
-import {SafeTransfer} from './libraries/SafeTransfer.sol';
 import {DeployNative} from './libraries/DeployNative.sol';
+import {SafeTransfer} from './libraries/SafeTransfer.sol';
 
 /// @title Timeswap Convenience
 /// @author Timeswap Labs
@@ -73,6 +73,16 @@ contract TimeswapConvenience is IConvenience {
 
     receive() external payable {
         require(msg.sender == address(weth));
+    }
+
+    /// @inheritdoc IConvenience
+    function deployPair(DeployPair calldata params) external override {
+        factory.createPair(params.asset, params.collateral);
+    }
+
+    /// @inheritdoc IConvenience
+    function deployNatives(DeployNatives calldata params) external override {
+        natives.deploy(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
@@ -489,11 +499,6 @@ contract TimeswapConvenience is IConvenience {
         (assetIn, collateralOut) = natives.payETHCollateral(factory, weth, params);
     }
 
-    /// @inheritdoc IConvenience
-    function deployNative(Deploy memory params) external override {
-        natives.deploy(this, factory, params);
-    }
-
     /// @inheritdoc ITimeswapMintCallback
     function timeswapMintCallback(
         uint112 assetIn,
@@ -554,11 +559,11 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc ITimeswapPayCallback
-    function timeswapPayCallback(
-        uint128 assetIn,
-        bytes calldata data
-    ) external override {
-        (IERC20 asset, IERC20 collateral, address from,uint256 maturity) = abi.decode(data, (IERC20, IERC20, address,uint256));
+    function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
+        (IERC20 asset, IERC20 collateral, address from, uint256 maturity) = abi.decode(
+            data,
+            (IERC20, IERC20, address, uint256)
+        );
 
         IDue collateralizedDebt = natives[asset][collateral][maturity].collateralizedDebt;
         IPair pair = factory.getPair(asset, collateral);

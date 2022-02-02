@@ -18,7 +18,8 @@ import {ITimeswapMintCallback} from '@timeswap-labs/timeswap-v1-core/contracts/i
 import {ITimeswapLendCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapLendCallback.sol';
 import {ITimeswapBorrowCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapBorrowCallback.sol';
 import {ITimeswapPayCallback} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/callback/ITimeswapPayCallback.sol';
-import {IDeployNative} from './IDeployNative.sol';
+import {IDeployNatives} from './IDeployNatives.sol';
+import {IDeployPair} from './IDeployPair.sol';
 
 /// @title Timeswap Convenience Interface
 /// @author Ricsson W. Ngo
@@ -33,7 +34,8 @@ interface IConvenience is
     ITimeswapLendCallback,
     ITimeswapBorrowCallback,
     ITimeswapPayCallback,
-    IDeployNative
+    IDeployPair,
+    IDeployNatives
 {
     struct Native {
         ILiquidity liquidity;
@@ -61,6 +63,14 @@ interface IConvenience is
         IERC20 collateral,
         uint256 maturity
     ) external view returns (Native memory);
+
+    /// @dev Create pair contracts.
+    /// @param params The parameters for this function found in IDeployPair interface.
+    function deployPair(IDeployPair.DeployPair calldata params) external;
+
+    /// @dev Create native token contracts.
+    /// @param params The parameters for this function found in IDeployNative interface.
+    function deployNatives(IDeployNatives.DeployNatives calldata params) external;
 
     /// @dev Calls the mint function and creates a new pool.
     /// @dev If the pair does not exist, creates a new pair first.
@@ -515,10 +525,4 @@ interface IConvenience is
     function repayETHCollateral(RepayETHCollateral memory params)
         external
         returns (uint128 assetIn, uint128 collateralOut);
-
-    /// @dev Create native token contracts.
-    /// @param params The parameters for this function found in IDeployNative interface.
-    function deployNative(Deploy memory params) external;
-
-
 }

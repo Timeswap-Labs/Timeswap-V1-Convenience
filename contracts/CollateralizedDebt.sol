@@ -64,7 +64,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function dueOf(uint256 id) external view override returns (IPair.Due memory) {
-        return pair.dueOf(maturity, convenience, id);
+        return pair.dueOf(maturity, address(convenience), id);
     }
 
     constructor(
