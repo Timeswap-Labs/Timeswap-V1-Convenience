@@ -6,7 +6,7 @@ import {IConvenience} from './IConvenience.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 
 /// @author Ricsson W. Ngo
-interface IDue is IERC721Permit{
+interface IDue is IERC721Permit {
     // VIEW
 
     function convenience() external returns (IConvenience);
@@ -20,5 +20,4 @@ interface IDue is IERC721Permit{
     // UPDATE
 
     function mint(address to, uint256 id) external;
-
 }

@@ -27,7 +27,7 @@ abstract contract ERC721Permit is IERC721Permit, ERC721, EIP712 {
         bytes32 r,
         bytes32 s
     ) external override {
-        address owner = ownerOf[tokenId];
+        address owner = _owners[tokenId];
 
         require(block.timestamp <= deadline, 'E602');
 
