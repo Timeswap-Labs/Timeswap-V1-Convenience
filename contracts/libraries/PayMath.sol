@@ -21,7 +21,7 @@ library PayMath {
         collateralsOut = new uint112[](length);
 
         for (uint256 i; i < length; ) {
-            IPair.Due memory due = pair.dueOf(maturity, address(collateralizedDebt), ids[i]);
+            IPair.Due memory due = pair.dueOf(maturity, address(this), ids[i]);
 
             if (assetsIn[i] > due.debt) assetsIn[i] = due.debt;
             if (msg.sender == collateralizedDebt.ownerOf(ids[i])) {
