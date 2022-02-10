@@ -98,8 +98,8 @@ library Pay {
         require(params.maturity > block.timestamp, 'E508');
         require(params.ids.length == params.maxAssetsIn.length, '520');
 
-        // IPair pair = ;
-        require(address(factory.getPair(params.asset, params.collateral)) != address(0), 'E501');
+        IPair pair = factory.getPair(params.asset, params.collateral);
+        require(address(pair) != address(0), 'E501');
 
         // IDue collateralizedDebt = ;
         require(
@@ -107,22 +107,20 @@ library Pay {
             'E502'
         );
 
-        (uint112[] memory assetsIn, uint112[] memory collateralsOut) = (
-            factory.getPair(params.asset, params.collateral)
-        ).givenMaxAssetsIn(
-                params.maturity,
-                natives[params.asset][params.collateral][params.maturity].collateralizedDebt,
-                params.ids,
-                params.maxAssetsIn
-            );
-        (assetIn, collateralOut) = (factory.getPair(params.asset, params.collateral)).pay(
+        (uint112[] memory assetsIn, uint112[] memory collateralsOut) = pair.givenMaxAssetsIn(
+            params.maturity,
+            natives[params.asset][params.collateral][params.maturity].collateralizedDebt,
+            params.ids,
+            params.maxAssetsIn
+        );
+        (assetIn, collateralOut) = pair.pay(
             params.maturity,
             params.collateralTo,
             address(this),
             params.ids,
             assetsIn,
             collateralsOut,
-            bytes(abi.encode(params.asset, params.collateral, params.from, params.maturity))
+            bytes(abi.encode(params.asset, params.collateral, params.from))
         );
     }
 }
