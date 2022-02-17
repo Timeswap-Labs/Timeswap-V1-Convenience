@@ -1061,10 +1061,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@timeswap-labs/timeswap-v1-core@1.0.24":
-  version "1.0.24"
-  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.24/8218840084038d7897f641c0dd26b19ccd3a2c6cc29840b0fa21d94f3ddb80b7#0c82590ea10423d804a61fc806efe13178548fd9"
-  integrity sha512-narzKYSC+iw+eYA6t61W89uy2oiitJLgx2GYrfUcPjRgZtxYxfJQ2Jw2VnHjLxazzUvWLn2dxM8tBabPbxAGLQ==
+"@timeswap-labs/timeswap-v1-core@1.0.26":
+  version "1.0.26"
+  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.26/6efbb2a60f3cdcd05f30c0f6ef795635aa2af4696bdaea0e8961b154e9216c62#d80a4c29fa3343865f2933e678ae75436f4829c2"
+  integrity sha512-akSHEvUn78EdbwAOqc/9Uy6oKn8cr49o677zTBVCQBhbB26rceNQVEtWQICYLZYQvtU+Dzb3YBXpU/C42Dq6ww==
   dependencies:
     "@openzeppelin/contracts" "^4.2.0"
     dotenv "^10.0.0"

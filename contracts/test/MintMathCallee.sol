@@ -10,7 +10,15 @@ contract MintMathCallee {
         uint112 assetIn,
         uint112 debtIn,
         uint112 collateralIn
-    ) public view returns (uint112, uint112) {
+    )
+        public
+        view
+        returns (
+            uint256,
+            uint112,
+            uint112
+        )
+    {
         return MintMath.givenNew(maturity, assetIn, debtIn, collateralIn);
     }
 
@@ -18,7 +26,15 @@ contract MintMathCallee {
         IPair pair,
         uint256 maturity,
         uint112 assetIn
-    ) public view returns (uint112, uint112) {
+    )
+        public
+        view
+        returns (
+            uint256,
+            uint112,
+            uint112
+        )
+    {
         return MintMath.givenAsset(pair, maturity, assetIn);
     }
 
@@ -30,7 +46,7 @@ contract MintMathCallee {
         public
         view
         returns (
-            uint112,
+            uint256,
             uint112,
             uint112
         )
@@ -46,7 +62,7 @@ contract MintMathCallee {
         public
         view
         returns (
-            uint112,
+            uint256,
             uint112,
             uint112
         )

@@ -77,12 +77,14 @@ interface IConvenience is
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
     function newLiquidity(NewLiquidity calldata params)
         external
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
@@ -94,6 +96,7 @@ interface IConvenience is
     /// @dev Msg.value is the assetIn amount.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
@@ -101,6 +104,7 @@ interface IConvenience is
         external
         payable
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
@@ -112,6 +116,7 @@ interface IConvenience is
     /// @dev Msg.value is the collateralIn amount.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
@@ -119,6 +124,7 @@ interface IConvenience is
         external
         payable
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
@@ -128,12 +134,14 @@ interface IConvenience is
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
     function liquidityGivenAsset(LiquidityGivenAsset calldata params)
         external
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
@@ -144,6 +152,7 @@ interface IConvenience is
     /// @dev Msg.value is the assetIn amount.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
@@ -151,6 +160,7 @@ interface IConvenience is
         external
         payable
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
@@ -162,6 +172,7 @@ interface IConvenience is
     /// @dev Msg.value is the maxCollateral amount. Any excess ETH will be returned to Msg.sender.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
@@ -169,6 +180,7 @@ interface IConvenience is
         external
         payable
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
@@ -178,15 +190,15 @@ interface IConvenience is
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
-    /// @return assetIn The amount of asset ERC20 lent by caller.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
     function liquidityGivenDebt(LiquidityGivenDebt calldata params)
         external
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         );
@@ -196,16 +208,16 @@ interface IConvenience is
     /// @dev Msg.value is the assetIn amount.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
-    /// @return assetIn The amount of asset ERC20 lent by caller.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
     function liquidityGivenDebtETHAsset(LiquidityGivenDebtETHAsset calldata params)
         external
         payable
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         );
@@ -216,16 +228,16 @@ interface IConvenience is
     /// @dev Msg.value is the maxCollateral amount. Any excess ETH will be returned to Msg.sender.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
-    /// @return assetIn The amount of asset ERC20 lent by caller.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
     function liquidityGivenDebtETHCollateral(LiquidityGivenDebtETHCollateral calldata params)
         external
         payable
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         );
@@ -234,15 +246,15 @@ interface IConvenience is
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
-    /// @return assetIn The amount of asset ERC20 lent by caller.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
     function liquidityGivenCollateral(LiquidityGivenCollateral calldata params)
         external
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         );
@@ -252,16 +264,16 @@ interface IConvenience is
     /// @dev Msg.value is the assetIn amount.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
-    /// @return assetIn The amount of asset ERC20 lent by caller.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
     function liquidityGivenCollateralETHAsset(LiquidityGivenCollateralETHAsset calldata params)
         external
         payable
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         );
@@ -272,119 +284,139 @@ interface IConvenience is
     /// @dev Msg.value is the maxCollateral amount. Any excess ETH will be returned to Msg.sender.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IMint interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
-    /// @return assetIn The amount of asset ERC20 lent by caller.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
     function liquidityGivenCollateralETHCollateral(LiquidityGivenCollateralETHCollateral calldata params)
         external
         payable
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         );
 
     /// @dev Calls the burn funtion and withdraw liquiidty from a pool.
     /// @param params The parameters for this function found in IBurn interface.
-    /// @return tokensOut The amount of asset ERC20 and collateral ERC20 received by assetTo and collateralTo.
-    function removeLiquidity(RemoveLiquidity calldata params) external returns (IPair.Tokens memory tokensOut);
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
+    /// @return collateralOut The amount of collateral ERC20 received by collateralTo.
+    function removeLiquidity(RemoveLiquidity calldata params)
+        external
+        returns (uint256 assetOut, uint128 collateralOut);
 
     /// @dev Calls the burn funtion and withdraw liquiidty from a pool.
     /// @dev The asset received is ETH which will be unwrapped from WETH.
     /// @param params The parameters for this function found in IBurn interface.
-    /// @return tokensOut The amount of asset ERC20 and collateral ERC20 received by assetTo and collateralTo.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
+    /// @return collateralOut The amount of collateral ERC20 received by collateralTo.
     function removeLiquidityETHAsset(RemoveLiquidityETHAsset calldata params)
         external
-        returns (IPair.Tokens memory tokensOut);
+        returns (uint256 assetOut, uint128 collateralOut);
 
     /// @dev Calls the burn funtion and withdraw liquiidty from a pool.
     /// @dev The collateral received is ETH which will be unwrapped from WETH.
     /// @param params The parameters for this function found in IBurn interface.
-    /// @return tokensOut The amount of asset ERC20 and collateral ERC20 received by assetTo and collateralTo.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
+    /// @return collateralOut The amount of collateral ERC20 received by collateralTo.
     function removeLiquidityETHCollateral(RemoveLiquidityETHCollateral calldata params)
         external
-        returns (IPair.Tokens memory tokensOut);
+        returns (uint256 assetOut, uint128 collateralOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given the bond received by bondTo.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenBond(LendGivenBond calldata params) external returns (IPair.Claims memory claimsOut);
+    function lendGivenBond(LendGivenBond calldata params)
+        external
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given the bond received by bondTo.
     /// @dev The asset deposited is ETH which will be wrapped as WETH.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
     function lendGivenBondETHAsset(LendGivenBondETHAsset calldata params)
         external
         payable
-        returns (IPair.Claims memory claimsOut);
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given the bond received by bondTo.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
     function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
         external
         payable
-        returns (IPair.Claims memory claimsOut);
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given the insurance received by insuranceTo.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenInsurance(LendGivenInsurance calldata params) external returns (IPair.Claims memory claimsOut);
+    function lendGivenInsurance(LendGivenInsurance calldata params)
+        external
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given the insurance received by insuranceTo.
     /// @dev The asset deposited is ETH which will be wrapped as WETH.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
     function lendGivenInsuranceETHAsset(LendGivenInsuranceETHAsset calldata params)
         external
         payable
-        returns (IPair.Claims memory claimsOut);
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given the insurance received by insuranceTo.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
     function lendGivenInsuranceETHCollateral(LendGivenInsuranceETHCollateral calldata params)
         external
-        returns (IPair.Claims memory claimsOut);
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given percentage ratio of bond and insurance.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenPercent(LendGivenPercent calldata params) external returns (IPair.Claims memory claimsOut);
+    function lendGivenPercent(LendGivenPercent calldata params)
+        external
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given percentage ratio of bond and insurance.
     /// @dev The asset deposited is ETH which will be wrapped as WETH.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
     function lendGivenPercentETHAsset(LendGivenPercentETHAsset calldata params)
         external
         payable
-        returns (IPair.Claims memory claimsOut);
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
     /// @dev Calls given percentage ratio of bond and insurance.
     /// @dev Must have the asset ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in ILend interface.
+    /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
     function lendGivenPercentETHCollateral(LendGivenPercentETHCollateral calldata params)
         external
-        returns (IPair.Claims memory claimsOut);
+        returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the withdraw function and withdraw asset and collateral from a pool.
     /// @param params The parameters for this function found in IWithdraw interface.
@@ -409,92 +441,139 @@ interface IConvenience is
     /// @dev Calls given the debt received by dueTo.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenDebt(BorrowGivenDebt calldata params) external returns (uint256 id, IPair.Due memory dueOut);
+    function borrowGivenDebt(BorrowGivenDebt calldata params)
+        external
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the borrow function and borrow asset from a pool and locking collateral into the pool.
     /// @dev Calls given the debt received by dueTo.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
     function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
         external
-        returns (uint256 id, IPair.Due memory dueOut);
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the borrow function and borrow asset from a pool and locking collateral into the pool.
     /// @dev Calls given the debt received by dueTo.
     /// @dev The collateral locked is ETH which will be wrapped as WETH.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
     function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
         external
         payable
-        returns (uint256 id, IPair.Due memory dueOut);
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the borrow function and borrow asset from a pool and locking collateral into the pool.
     /// @dev Calls given the collateral locked.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
     function borrowGivenCollateral(BorrowGivenCollateral calldata params)
         external
-        returns (uint256 id, IPair.Due memory dueOut);
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the borrow function and borrow asset from a pool and locking collateral into the pool.
     /// @dev Calls given the collateral locked.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
     function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
         external
-        returns (uint256 id, IPair.Due memory dueOut);
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the borrow function and borrow asset from a pool and locking collateral into the pool.
     /// @dev Calls given the collateral locked.
     /// @dev The collateral locked is ETH which will be wrapped as WETH.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
     function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
         external
         payable
-        returns (uint256 id, IPair.Due memory dueOut);
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the borrow function and borrow asset from a pool and locking collateral into the pool.
     /// @dev Calls given percentage ratio of debt and collateral.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
     function borrowGivenPercent(BorrowGivenPercent calldata params)
         external
-        returns (uint256 id, IPair.Due memory dueOut);
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the borrow function and borrow asset from a pool and locking collateral into the pool.
     /// @dev Calls given percentage ratio of debt and collateral.
     /// @dev Must have the collateral ERC20 approve this contract before calling this function.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
     function borrowGivenPercentETHAsset(BorrowGivenPercentETHAsset calldata params)
         external
-        returns (uint256 id, IPair.Due memory dueOut);
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the borrow function and borrow asset from a pool and locking collateral into the pool.
     /// @dev Calls given percentage ratio of debt and collateral.
     /// @dev The collateral locked is ETH which will be wrapped as WETH.
     /// @param params The parameters for this function found in IBorrow interface.
+    /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
     function borrowGivenPercentETHCollateral(BorrowGivenPercentETHCollateral calldata params)
         external
         payable
-        returns (uint256 id, IPair.Due memory dueOut);
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        );
 
     /// @dev Calls the pay function and withdraw collateral from a pool given debt is paid or being paid.
     /// @dev If there is debt being paid, must have the asset ERC20 approve this contract before calling this function.

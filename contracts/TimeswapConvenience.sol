@@ -90,12 +90,13 @@ contract TimeswapConvenience is IConvenience {
         external
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.newLiquidity(this, factory, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.newLiquidity(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
@@ -104,12 +105,13 @@ contract TimeswapConvenience is IConvenience {
         payable
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.newLiquidityETHAsset(this, factory, weth, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.newLiquidityETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -118,12 +120,13 @@ contract TimeswapConvenience is IConvenience {
         payable
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.newLiquidityETHCollateral(this, factory, weth, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.newLiquidityETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -131,12 +134,13 @@ contract TimeswapConvenience is IConvenience {
         external
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.liquidityGivenAsset(this, factory, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenAsset(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
@@ -145,12 +149,13 @@ contract TimeswapConvenience is IConvenience {
         payable
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.liquidityGivenAssetETHAsset(this, factory, weth, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenAssetETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -159,12 +164,13 @@ contract TimeswapConvenience is IConvenience {
         payable
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, id, dueOut) = natives.liquidityGivenAssetETHCollateral(this, factory, weth, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenAssetETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -172,13 +178,13 @@ contract TimeswapConvenience is IConvenience {
         external
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenDebt(this, factory, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenDebt(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
@@ -187,13 +193,13 @@ contract TimeswapConvenience is IConvenience {
         payable
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenDebtETHAsset(this, factory, weth, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenDebtETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -202,13 +208,13 @@ contract TimeswapConvenience is IConvenience {
         payable
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenDebtETHCollateral(this, factory, weth, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenDebtETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -216,13 +222,13 @@ contract TimeswapConvenience is IConvenience {
         external
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenCollateral(this, factory, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenCollateral(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
@@ -231,13 +237,13 @@ contract TimeswapConvenience is IConvenience {
         payable
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenCollateralETHAsset(this, factory, weth, params);
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenCollateralETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -246,13 +252,13 @@ contract TimeswapConvenience is IConvenience {
         payable
         override
         returns (
+            uint256 assetIn,
             uint256 liquidityOut,
-            uint112 assetIn,
             uint256 id,
             IPair.Due memory dueOut
         )
     {
-        (liquidityOut, assetIn, id, dueOut) = natives.liquidityGivenCollateralETHCollateral(
+        (assetIn, liquidityOut, id, dueOut) = natives.liquidityGivenCollateralETHCollateral(
             this,
             factory,
             weth,
@@ -264,32 +270,36 @@ contract TimeswapConvenience is IConvenience {
     function removeLiquidity(RemoveLiquidity calldata params)
         external
         override
-        returns (IPair.Tokens memory tokensOut)
+        returns (uint256 assetOut, uint128 collateralOut)
     {
-        tokensOut = natives.removeLiquidity(factory, params);
+        (assetOut, collateralOut) = natives.removeLiquidity(factory, params);
     }
 
     /// @inheritdoc IConvenience
     function removeLiquidityETHAsset(RemoveLiquidityETHAsset calldata params)
         external
         override
-        returns (IPair.Tokens memory tokensOut)
+        returns (uint256 assetOut, uint128 collateralOut)
     {
-        tokensOut = natives.removeLiquidityETHAsset(factory, weth, params);
+        (assetOut, collateralOut) = natives.removeLiquidityETHAsset(factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
     function removeLiquidityETHCollateral(RemoveLiquidityETHCollateral calldata params)
         external
         override
-        returns (IPair.Tokens memory tokensOut)
+        returns (uint256 assetOut, uint128 collateralOut)
     {
-        tokensOut = natives.removeLiquidityETHCollateral(factory, weth, params);
+        (assetOut, collateralOut) = natives.removeLiquidityETHCollateral(factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenBond(LendGivenBond calldata params) external override returns (IPair.Claims memory claimsOut) {
-        claimsOut = natives.lendGivenBond(this, factory, params);
+    function lendGivenBond(LendGivenBond calldata params)
+        external
+        override
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
+    {
+        (assetIn, claimsOut) = natives.lendGivenBond(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
@@ -297,9 +307,9 @@ contract TimeswapConvenience is IConvenience {
         external
         payable
         override
-        returns (IPair.Claims memory claimsOut)
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
-        claimsOut = natives.lendGivenBondETHAsset(this, factory, weth, params);
+        (assetIn, claimsOut) = natives.lendGivenBondETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -307,18 +317,18 @@ contract TimeswapConvenience is IConvenience {
         external
         payable
         override
-        returns (IPair.Claims memory claimsOut)
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
-        claimsOut = natives.lendGivenBondETHCollateral(this, factory, weth, params);
+        (assetIn, claimsOut) = natives.lendGivenBondETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
     function lendGivenInsurance(LendGivenInsurance calldata params)
         external
         override
-        returns (IPair.Claims memory claimsOut)
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
-        claimsOut = natives.lendGivenInsurance(this, factory, params);
+        (assetIn, claimsOut) = natives.lendGivenInsurance(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
@@ -326,27 +336,27 @@ contract TimeswapConvenience is IConvenience {
         external
         payable
         override
-        returns (IPair.Claims memory claimsOut)
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
-        claimsOut = natives.lendGivenInsuranceETHAsset(this, factory, weth, params);
+        (assetIn, claimsOut) = natives.lendGivenInsuranceETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
     function lendGivenInsuranceETHCollateral(LendGivenInsuranceETHCollateral calldata params)
         external
         override
-        returns (IPair.Claims memory claimsOut)
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
-        claimsOut = natives.lendGivenInsuranceETHCollateral(this, factory, weth, params);
+        (assetIn, claimsOut) = natives.lendGivenInsuranceETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
     function lendGivenPercent(LendGivenPercent calldata params)
         external
         override
-        returns (IPair.Claims memory claimsOut)
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
-        claimsOut = natives.lendGivenPercent(this, factory, params);
+        (assetIn, claimsOut) = natives.lendGivenPercent(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
@@ -354,18 +364,18 @@ contract TimeswapConvenience is IConvenience {
         external
         payable
         override
-        returns (IPair.Claims memory claimsOut)
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
-        claimsOut = natives.lendGivenPercentETHAsset(this, factory, weth, params);
+        (assetIn, claimsOut) = natives.lendGivenPercentETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
     function lendGivenPercentETHCollateral(LendGivenPercentETHCollateral calldata params)
         external
         override
-        returns (IPair.Claims memory claimsOut)
+        returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
-        claimsOut = natives.lendGivenPercentETHCollateral(this, factory, weth, params);
+        (assetIn, claimsOut) = natives.lendGivenPercentETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -395,18 +405,26 @@ contract TimeswapConvenience is IConvenience {
     function borrowGivenDebt(BorrowGivenDebt calldata params)
         external
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenDebt(this, factory, params);
+        (assetOut, id, dueOut) = natives.borrowGivenDebt(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
     function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
         external
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenDebtETHAsset(this, factory, weth, params);
+        (assetOut, id, dueOut) = natives.borrowGivenDebtETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -414,27 +432,39 @@ contract TimeswapConvenience is IConvenience {
         external
         payable
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenDebtETHCollateral(this, factory, weth, params);
+        (assetOut, id, dueOut) = natives.borrowGivenDebtETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
     function borrowGivenCollateral(BorrowGivenCollateral calldata params)
         external
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenCollateral(this, factory, params);
+        (assetOut, id, dueOut) = natives.borrowGivenCollateral(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
     function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
         external
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHAsset(this, factory, weth, params);
+        (assetOut, id, dueOut) = natives.borrowGivenCollateralETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -442,27 +472,39 @@ contract TimeswapConvenience is IConvenience {
         external
         payable
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenCollateralETHCollateral(this, factory, weth, params);
+        (assetOut, id, dueOut) = natives.borrowGivenCollateralETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
     function borrowGivenPercent(BorrowGivenPercent calldata params)
         external
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenPercent(this, factory, params);
+        (assetOut, id, dueOut) = natives.borrowGivenPercent(this, factory, params);
     }
 
     /// @inheritdoc IConvenience
     function borrowGivenPercentETHAsset(BorrowGivenPercentETHAsset calldata params)
         external
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenPercentETHAsset(this, factory, weth, params);
+        (assetOut, id, dueOut) = natives.borrowGivenPercentETHAsset(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -470,9 +512,13 @@ contract TimeswapConvenience is IConvenience {
         external
         payable
         override
-        returns (uint256 id, IPair.Due memory dueOut)
+        returns (
+            uint256 assetOut,
+            uint256 id,
+            IPair.Due memory dueOut
+        )
     {
-        (id, dueOut) = natives.borrowGivenPercentETHCollateral(this, factory, weth, params);
+        (assetOut, id, dueOut) = natives.borrowGivenPercentETHCollateral(this, factory, weth, params);
     }
 
     /// @inheritdoc IConvenience
@@ -501,7 +547,7 @@ contract TimeswapConvenience is IConvenience {
 
     /// @inheritdoc ITimeswapMintCallback
     function timeswapMintCallback(
-        uint112 assetIn,
+        uint256 assetIn,
         uint112 collateralIn,
         bytes calldata data
     ) external override {
@@ -531,7 +577,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc ITimeswapLendCallback
-    function timeswapLendCallback(uint112 assetIn, bytes calldata data) external override {
+    function timeswapLendCallback(uint256 assetIn, bytes calldata data) external override {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
 

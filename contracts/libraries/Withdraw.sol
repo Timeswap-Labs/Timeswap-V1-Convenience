@@ -15,7 +15,18 @@ library Withdraw {
         IFactory factory,
         IWithdraw.Collect calldata params
     ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = _collect(natives, factory, params);
+        tokensOut = _collect(
+            natives,
+            IWithdraw._Collect(
+                factory,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetTo,
+                params.collateralTo,
+                params.claimsIn
+            )
+        );
     }
 
     function collectETHAsset(
@@ -26,8 +37,8 @@ library Withdraw {
     ) external returns (IPair.Tokens memory tokensOut) {
         tokensOut = _collect(
             natives,
-            factory,
-            IWithdraw.Collect(
+            IWithdraw._Collect(
+                factory,
                 weth,
                 params.collateral,
                 params.maturity,
@@ -51,8 +62,15 @@ library Withdraw {
     ) external returns (IPair.Tokens memory tokensOut) {
         tokensOut = _collect(
             natives,
-            factory,
-            IWithdraw.Collect(params.asset, weth, params.maturity, params.assetTo, address(this), params.claimsIn)
+            IWithdraw._Collect(
+                factory,
+                params.asset,
+                weth,
+                params.maturity,
+                params.assetTo,
+                address(this),
+                params.claimsIn
+            )
         );
 
         if (tokensOut.collateral != 0) {
@@ -63,16 +81,17 @@ library Withdraw {
 
     function _collect(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IFactory factory,
-        IWithdraw.Collect memory params
+        IWithdraw._Collect memory params
     ) private returns (IPair.Tokens memory tokensOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
+        IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
 
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
         require(address(native.liquidity) != address(0), 'E502');
 
-        tokensOut = pair.withdraw(params.maturity, params.assetTo, params.collateralTo, params.claimsIn);
+        tokensOut = pair.withdraw(
+            IPair.WithdrawParam(params.maturity, params.assetTo, params.collateralTo, params.claimsIn)
+        );
 
         if (params.claimsIn.bondInterest != 0) native.bondInterest.burn(msg.sender, params.claimsIn.bondInterest);
         if (params.claimsIn.bondPrincipal != 0) native.bondPrincipal.burn(msg.sender, params.claimsIn.bondPrincipal);

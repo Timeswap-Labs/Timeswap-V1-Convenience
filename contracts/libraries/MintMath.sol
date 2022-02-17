@@ -16,17 +16,29 @@ library MintMath {
         uint112 assetIn,
         uint112 debtIn,
         uint112 collateralIn
-    ) internal view returns (uint112 yIncrease, uint112 zIncrease) {
+    )
+        internal
+        view
+        returns (
+            uint112 xIncrease,
+            uint112 yIncrease,
+            uint112 zIncrease
+        )
+    {
+        xIncrease = assetIn;
+
+        uint256 duration = maturity;
+        duration -= block.timestamp;
+
         uint256 _yIncrease = debtIn;
         _yIncrease -= assetIn;
         _yIncrease <<= 32;
-        _yIncrease /= maturity - block.timestamp;
+        _yIncrease /= duration;
         yIncrease = _yIncrease.toUint112();
 
         uint256 _zIncrease = collateralIn;
         _zIncrease <<= 25;
-        uint256 denominator = maturity;
-        denominator -= block.timestamp;
+        uint256 denominator = duration;
         denominator += 0x2000000;
         _zIncrease /= denominator;
         zIncrease = _zIncrease.toUint112();
@@ -36,8 +48,23 @@ library MintMath {
         IPair pair,
         uint256 maturity,
         uint112 assetIn
-    ) internal view returns (uint112 yIncrease, uint112 zIncrease) {
+    )
+        internal
+        view
+        returns (
+            uint112 xIncrease,
+            uint112 yIncrease,
+            uint112 zIncrease
+        )
+    {
         ConstantProduct.CP memory cp = pair.get(maturity);
+
+        uint256 _xIncrease = assetIn;
+        _xIncrease *= cp.x;
+        uint256 denominator = cp.x;
+        denominator += pair.feeStored(maturity);
+        _xIncrease /= denominator;
+        xIncrease = _xIncrease.toUint112();
 
         uint256 _yIncrease = cp.y;
         _yIncrease *= assetIn;

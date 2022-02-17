@@ -14,8 +14,19 @@ library Burn {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IBurn.RemoveLiquidity calldata params
-    ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = _removeLiquidity(natives, factory, params);
+    ) external returns (uint256 assetOut, uint128 collateralOut) {
+        (assetOut, collateralOut) = _removeLiquidity(
+            natives,
+            IBurn._RemoveLiquidity(
+                factory,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetTo,
+                params.collateralTo,
+                params.liquidityIn
+            )
+        );
     }
 
     function removeLiquidityETHAsset(
@@ -23,11 +34,11 @@ library Burn {
         IFactory factory,
         IWETH weth,
         IBurn.RemoveLiquidityETHAsset calldata params
-    ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = _removeLiquidity(
+    ) external returns (uint256 assetOut, uint128 collateralOut) {
+        (assetOut, collateralOut) = _removeLiquidity(
             natives,
-            factory,
-            IBurn.RemoveLiquidity(
+            IBurn._RemoveLiquidity(
+                factory,
                 weth,
                 params.collateral,
                 params.maturity,
@@ -37,9 +48,9 @@ library Burn {
             )
         );
 
-        if (tokensOut.asset != 0) {
-            weth.withdraw(tokensOut.asset);
-            ETH.transfer(params.assetTo, tokensOut.asset);
+        if (assetOut != 0) {
+            weth.withdraw(assetOut);
+            ETH.transfer(params.assetTo, assetOut);
         }
     }
 
@@ -48,11 +59,11 @@ library Burn {
         IFactory factory,
         IWETH weth,
         IBurn.RemoveLiquidityETHCollateral calldata params
-    ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = _removeLiquidity(
+    ) external returns (uint256 assetOut, uint128 collateralOut) {
+        (assetOut, collateralOut) = _removeLiquidity(
             natives,
-            factory,
-            IBurn.RemoveLiquidity(
+            IBurn._RemoveLiquidity(
+                factory,
                 params.asset,
                 weth,
                 params.maturity,
@@ -62,24 +73,25 @@ library Burn {
             )
         );
 
-        if (tokensOut.collateral != 0) {
-            weth.withdraw(tokensOut.collateral);
-            ETH.transfer(params.collateralTo, tokensOut.collateral);
+        if (collateralOut != 0) {
+            weth.withdraw(collateralOut);
+            ETH.transfer(params.collateralTo, collateralOut);
         }
     }
 
     function _removeLiquidity(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IFactory factory,
-        IBurn.RemoveLiquidity memory params
-    ) private returns (IPair.Tokens memory tokensOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
+        IBurn._RemoveLiquidity memory params
+    ) private returns (uint256 assetOut, uint128 collateralOut) {
+        IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
 
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
         require(address(native.liquidity) != address(0), 'E502');
 
-        tokensOut = pair.burn(params.maturity, params.assetTo, params.collateralTo, params.liquidityIn);
+        (assetOut, collateralOut) = pair.burn(
+            IPair.BurnParam(params.maturity, params.assetTo, params.collateralTo, params.liquidityIn)
+        );
 
         native.liquidity.burn(msg.sender, params.liquidityIn);
     }
