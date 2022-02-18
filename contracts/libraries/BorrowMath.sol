@@ -187,23 +187,36 @@ library BorrowMath {
         uint256 maturity,
         uint112 assetOut
     ) private view returns (uint112 xDecrease) {
-        uint256 duration = maturity;
-        duration -= block.timestamp;
+        // uint256 duration = maturity;
+        // duration -= block.timestamp;
 
-        uint256 numerator = duration;
-        numerator *= pair.fee();
+        uint256 totalFee = pair.fee();
+        totalFee += pair.protocolFee();
+
+        uint256 numerator = maturity;
+        numerator -= block.timestamp;
+        numerator *= totalFee;
         numerator += BASE;
 
         uint256 _xDecrease = assetOut;
         _xDecrease *= numerator;
         _xDecrease = _xDecrease.divUp(BASE);
-
-        numerator = duration;
-        numerator *= pair.protocolFee();
-        numerator += BASE;
-
-        _xDecrease *= numerator;
-        _xDecrease = _xDecrease.divUp(BASE);
         xDecrease = _xDecrease.toUint112();
+
+        // uint256 numerator = duration;
+        // numerator *= pair.fee();
+        // numerator += BASE;
+
+        // uint256 _xDecrease = assetOut;
+        // _xDecrease *= numerator;
+        // _xDecrease = _xDecrease.divUp(BASE);
+
+        // numerator = duration;
+        // numerator *= pair.protocolFee();
+        // numerator += BASE;
+
+        // _xDecrease *= numerator;
+        // _xDecrease = _xDecrease.divUp(BASE);
+        // xDecrease = _xDecrease.toUint112();
     }
 }
