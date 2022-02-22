@@ -40,6 +40,8 @@ export async function constructorFixture(
   await assetToken.approve(convenience.convenienceContract.address, assetValue)
   await collateralToken.approve(convenience.convenienceContract.address, collateralValue)
 
+  // await convenience.convenienceContract.deployPair( {asset: assetToken.address, collateral: collateralToken.address})
+  // await convenience.convenienceContract.deployNatives({asset: assetToken.address,collateral: collateralToken.address,maturity:maturity,deadline:maturity})
   return { convenience, assetToken, collateralToken, maturity }
 }
 export async function newLiquidityFixture(

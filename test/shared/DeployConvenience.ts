@@ -24,31 +24,46 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
 
   const deployLibraryContractAddresses: string[] = []
 
-  const deployERC20 = await ethers.getContractFactory('DeployERC20')
-  
-  const deployERC20contract = await deployERC20.deploy()
-  await deployERC20contract.deployTransaction.wait()
-  deployLibraryContractAddresses.push(deployERC20contract.address)
 
-  const deployERC721 = await ethers.getContractFactory('DeployERC721', {
+  const deployLiquidity = await ethers.getContractFactory('DeployLiquidity')
+  
+  const deployLiquidityContract = await deployLiquidity.deploy()
+  await deployLiquidityContract.deployTransaction.wait()
+  deployLibraryContractAddresses.push(deployLiquidityContract.address)
+
+
+  const deployBonds = await ethers.getContractFactory('DeployBonds')
+  
+  const deployBondsContract = await deployBonds.deploy()
+  await deployBondsContract.deployTransaction.wait()
+  deployLibraryContractAddresses.push(deployBondsContract.address)
+
+
+  const deployInsurances = await ethers.getContractFactory('DeployInsurances')
+  
+  const deployInsurancesContract = await deployInsurances.deploy()
+  await deployInsurancesContract.deployTransaction.wait()
+  deployLibraryContractAddresses.push(deployInsurancesContract.address)
+  
+  const deployCollateralizedDebt = await ethers.getContractFactory('DeployCollateralizedDebt', {
     libraries: {
       NFTTokenURIScaffold: nftTokenURIContract.address,
     },
   })
-  const deployERC721contract = await deployERC721.deploy()
-  await deployERC721contract.deployTransaction.wait()
-  deployLibraryContractAddresses.push(deployERC721contract.address)
+  const deployCollateralizedDebtContract = await deployCollateralizedDebt.deploy()
+  await deployCollateralizedDebtContract.deployTransaction.wait()
+  deployLibraryContractAddresses.push(deployCollateralizedDebtContract.address)
 
   const libraryNames1 = ['Borrow', 'Lend', 'Mint']
   const libraryContractAddresses1: string[] = []
 
   for (const library of libraryNames1) {
-    const name = await ethers.getContractFactory(library, {
-      libraries: {
-        DeployERC20: deployLibraryContractAddresses[0],
-        DeployERC721: deployLibraryContractAddresses[1],
-      },
-    })
+    const name = await ethers.getContractFactory(library,{libraries: {
+      DeployLiquidity: deployLibraryContractAddresses[0],
+      DeployBonds: deployLibraryContractAddresses[1],
+      DeployInsurances: deployLibraryContractAddresses[2],
+      DeployCollateralizedDebt: deployLibraryContractAddresses[3],
+    }})
     const contract = await name.deploy()
     await contract.deployTransaction.wait()
     libraryContractAddresses1.push(contract.address)
@@ -68,8 +83,10 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
   const Convenience = await ethers.getContractFactory('TimeswapConvenience', {
     libraries: {
       Borrow: libraryContractAddresses1[0],
-      DeployERC20: deployLibraryContractAddresses[0],
-      DeployERC721: deployLibraryContractAddresses[1],
+      DeployLiquidity: deployLibraryContractAddresses[0],
+      DeployBonds: deployLibraryContractAddresses[1],
+      DeployInsurances: deployLibraryContractAddresses[2],
+      DeployCollateralizedDebt: deployLibraryContractAddresses[3],
       Lend: libraryContractAddresses1[1],
       Mint: libraryContractAddresses1[2],
       Burn: libraryContractAddresses2[0],
