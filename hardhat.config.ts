@@ -35,11 +35,12 @@ const config: HardhatUserConfig = {
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
   },
-  // contractSizer: {
-  //   alphaSort: true,
-  //   runOnCompile: true,
-  //   disambiguatePaths: false,
-  // },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    // strict: true,
+  },
 }
 
 export default config
