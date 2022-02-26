@@ -160,7 +160,7 @@ library LendMath {
             uint256 zMid = cp.z;
             uint256 subtrahend = cp.z;
             subtrahend *= cp.z;
-            subtrahend = subtrahend.mulDivUp(cp.z, xReserve);
+            subtrahend = subtrahend.mulDivUp(cp.x, xReserve);
             subtrahend = subtrahend.sqrtUp();
             zMid -= subtrahend;
 
