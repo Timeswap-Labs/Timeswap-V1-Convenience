@@ -42,7 +42,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function tokenURI(uint256 id) external view override returns (string memory) {
-        require(ownerOf[id] != address(0), 'E404');
+        require(_owners[id] != address(0), 'E404');
         return NFTTokenURIScaffold.tokenURI(id, pair, pair.dueOf(maturity, address(convenience), id), maturity);
     }
 
@@ -52,6 +52,15 @@ contract CollateralizedDebt is IDue, ERC721Permit {
 
     function collateralDecimals() external view override returns (uint8) {
         return pair.collateral().safeDecimals();
+    }
+
+    function totalSupply() external view override returns (uint256) {
+        return pair.totalDuesOf(maturity, address(convenience));
+    }
+
+    function tokenByIndex(uint256 id) external view override returns (uint256) {
+        require(id < pair.totalDuesOf(maturity, address(convenience)), 'E614');
+        return id;
     }
 
     function dueOf(uint256 id) external view override returns (IPair.Due memory) {

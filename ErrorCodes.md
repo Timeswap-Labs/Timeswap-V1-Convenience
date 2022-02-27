@@ -150,6 +150,14 @@ Not approved to transfer
 
 Factory address should not be the weth address
 
+### E613
+
+`owner` is null address
+
+### E614
+
+Token does not exist
+
 ## Callback
 
 ### E701

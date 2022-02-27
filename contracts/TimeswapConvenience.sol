@@ -608,14 +608,10 @@ contract TimeswapConvenience is IConvenience {
 
     /// @inheritdoc ITimeswapPayCallback
     function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
-        (IERC20 asset, IERC20 collateral, address from, uint256 maturity) = abi.decode(
-            data,
-            (IERC20, IERC20, address, uint256)
-        );
+        (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
 
-        IDue collateralizedDebt = natives[asset][collateral][maturity].collateralizedDebt;
         IPair pair = factory.getPair(asset, collateral);
-        require(msg.sender == address(collateralizedDebt), 'E701');
+        require(msg.sender == address(pair), 'E701');
 
         if (from == address(this)) {
             weth.deposit{value: assetIn}();

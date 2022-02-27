@@ -507,7 +507,7 @@ library Mint {
         require(params.maturity > block.timestamp, 'E508');
         console.log('Enters _newLiquidity');
         IPair pair = params.factory.getPair(params.asset, params.collateral);
-        if(address(pair) == address(0)){pair = params.factory.createPair(params.asset,params.collateral);   }
+        if (address(pair) == address(0)) pair = params.factory.createPair(params.asset, params.collateral);
 
         require(pair.totalLiquidity(params.maturity) == 0, 'E506');
 

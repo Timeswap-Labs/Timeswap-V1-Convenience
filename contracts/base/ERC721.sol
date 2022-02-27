@@ -7,18 +7,54 @@ import {IERC721Receiver} from '@openzeppelin/contracts/token/ERC721/IERC721Recei
 abstract contract ERC721 is IERC721Extended {
     bytes4 private constant _INTERFACE_ID_ERC165 = 0x01ffc9a7;
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
+    bytes4 private constant _INTERFACE_ID_ERC721METADATA = 0x5b5e139f;
+    bytes4 private constant _INTERFACE_ID_ERC721ENUMERABLE = 0x780e9d63;
 
-    mapping(address => uint256) public override balanceOf;
-    mapping(uint256 => address) public override ownerOf;
-    mapping(uint256 => address) public override getApproved;
-    mapping(address => mapping(address => bool)) public override isApprovedForAll;
+    mapping(address => uint256) private _balances;
+    mapping(uint256 => address) internal _owners;
+    mapping(uint256 => address) private _tokenApprovals;
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
+    mapping(address => mapping(uint256 => uint256)) private _ownedTokens;
+    mapping(uint256 => uint256) private _ownedTokensIndex;
+
+    function balanceOf(address owner) external view override returns (uint256) {
+        require(owner != address(0), 'E613');
+        return _balances[owner];
+    }
+
+    function ownerOf(uint256 id) external view override returns (address) {
+        address owner = _owners[id];
+        require(owner != address(0), 'E613');
+        return owner;
+    }
+
+    function getApproved(uint256 id) external view override returns (address) {
+        require(_owners[id] != address(0), 'E614');
+        return _tokenApprovals[id];
+    }
+
+    function isApprovedForAll(address owner, address operator) external view override returns (bool) {
+        return _operatorApprovals[owner][operator];
+    }
+
+    function tokenOfOwnerByIndex(address owner, uint256 id) external view override returns (uint256) {
+        require(id < _balances[owner], 'E614');
+        return _ownedTokens[owner][id];
+    }
 
     function supportsInterface(bytes4 interfaceID) external pure override returns (bool) {
-        return interfaceID == _INTERFACE_ID_ERC165 || interfaceID == _INTERFACE_ID_ERC721;
+        return
+            interfaceID == _INTERFACE_ID_ERC165 ||
+            interfaceID == _INTERFACE_ID_ERC721 ||
+            interfaceID == _INTERFACE_ID_ERC721METADATA ||
+            interfaceID == _INTERFACE_ID_ERC721ENUMERABLE;
     }
 
     modifier isApproved(address owner, uint256 id) {
-        require(owner == msg.sender || getApproved[id] == msg.sender || isApprovedForAll[owner][msg.sender], '611');
+        require(
+            owner == msg.sender || _tokenApprovals[id] == msg.sender || _operatorApprovals[owner][msg.sender],
+            '611'
+        );
         _;
     }
 
@@ -48,8 +84,8 @@ abstract contract ERC721 is IERC721Extended {
     }
 
     function approve(address to, uint256 id) external override {
-        address owner = ownerOf[id];
-        require(owner == msg.sender || isApprovedForAll[owner][msg.sender], '609');
+        address owner = _owners[id];
+        require(owner == msg.sender || _operatorApprovals[owner][msg.sender], '609');
         require(to != owner, 'E605');
 
         _approve(to, id);
@@ -73,13 +109,13 @@ abstract contract ERC721 is IERC721Extended {
     }
 
     function _approve(address to, uint256 id) internal {
-        getApproved[id] = to;
+        _tokenApprovals[id] = to;
 
-        emit Approval(ownerOf[id], to, id);
+        emit Approval(_owners[id], to, id);
     }
 
     function _setApprovalForAll(address operator, bool approved) private {
-        isApprovedForAll[msg.sender][operator] = approved;
+        _operatorApprovals[msg.sender][operator] = approved;
 
         emit ApprovalForAll(msg.sender, operator, approved);
     }
@@ -92,10 +128,14 @@ abstract contract ERC721 is IERC721Extended {
 
     function _mint(address to, uint256 id) private {
         require(to != address(0), 'E601');
-        require(ownerOf[id] == address(0), 'E604');
+        require(_owners[id] == address(0), 'E604');
 
-        balanceOf[to]++;
-        ownerOf[id] = to;
+        uint256 length = _balances[to];
+        _ownedTokens[to][length] = id;
+        _ownedTokensIndex[id] = length;
+
+        _balances[to]++;
+        _owners[id] = to;
 
         emit Transfer(address(0), to, id);
     }
@@ -107,9 +147,27 @@ abstract contract ERC721 is IERC721Extended {
     ) private {
         require(to != address(0), 'E601');
 
-        ownerOf[id] = to;
-        balanceOf[from]--;
-        balanceOf[to]++;
+        if (from != to) {
+            uint256 lastTokenIndex = _balances[from] - 1;
+            uint256 tokenIndex = _ownedTokensIndex[id];
+
+            if (lastTokenIndex != tokenIndex) {
+                uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
+
+                _ownedTokens[from][tokenIndex] = lastTokenId;
+                _ownedTokensIndex[lastTokenId] = tokenIndex;
+            }
+
+            delete _ownedTokens[from][lastTokenIndex];
+
+            uint256 length = _balances[to];
+            _ownedTokens[to][length] = id;
+            _ownedTokensIndex[id] = length;
+        }
+
+        _owners[id] = to;
+        _balances[from]--;
+        _balances[to]++;
 
         _approve(address(0), id);
 
