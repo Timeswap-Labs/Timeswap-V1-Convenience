@@ -32,7 +32,7 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-describe('New Liquidity', () => {
+describe.only('New Liquidity', () => {
   it('Succeeded', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
@@ -232,13 +232,15 @@ async function newLiquidityProperties(
 ) {
   const result = await loadFixture(success)
   const newCurrentTime = currentTime + 5_000n
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getNewLiquidityParams(
+  const maybeParams = LiquidityMath.getNewLiquidityParams(
     data.assetIn,
     data.debtIn,
     data.collateralIn,
     newCurrentTime,
     maturity
   )
+  if(maybeParams!=false){
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = maybeParams
   const state = {
     x: data.assetIn,
     y: yIncreaseNewLiquidity,
@@ -303,4 +305,5 @@ async function newLiquidityProperties(
 
   expect(collateralBalanceContract).equalBigInt(collateral)
   expect(debtBalanceContract).equalBigInt(debt)
+  }
 }

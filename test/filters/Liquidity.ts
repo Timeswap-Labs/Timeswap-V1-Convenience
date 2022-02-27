@@ -18,6 +18,8 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
 
   if (
     !(
+      xIncreaseNewLiquidity >0n &&
+      xIncreaseNewLiquidity < MAXUINT112 &&
       yIncreaseNewLiquidity > 0n &&
       zIncreaseNewLiquidity > 0n &&
       yIncreaseNewLiquidity < MAXUINT112 &&
@@ -50,13 +52,15 @@ export function newLiquidityError(newLiquidityParams: NewLiquidityParams, curren
   if (newLiquidityParams.assetIn < 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
     return { data: newLiquidityParams, error: '' }
   }
-  const { xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getNewLiquidityParams(
+  const maybeNewLiquidityParams = LiquidityMath.getNewLiquidityParams(
     newLiquidityParams.assetIn,
     newLiquidityParams.debtIn,
     newLiquidityParams.collateralIn,
     currentTime,
     maturity
   )
+  if(maybeNewLiquidityParams!=false){
+  const { xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity } = maybeNewLiquidityParams
 
   if (!(yIncreaseNewLiquidity < MAXUINT112 && zIncreaseNewLiquidity < MAXUINT112)) {
     return { data: newLiquidityParams, error: '' }
@@ -65,8 +69,9 @@ export function newLiquidityError(newLiquidityParams: NewLiquidityParams, curren
   if (!(yIncreaseNewLiquidity > 0n && zIncreaseNewLiquidity > 0n)) {
     return { data: newLiquidityParams, error: '' }
   }
-
+  
   return { data: newLiquidityParams, error: '' }
+}
 }
 
 // export function addLiquiditySuccess(
