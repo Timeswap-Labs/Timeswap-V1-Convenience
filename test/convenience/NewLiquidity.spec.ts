@@ -32,7 +32,7 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-describe.only('New Liquidity', () => {
+describe('New Liquidity', () => {
   it('Succeeded', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()

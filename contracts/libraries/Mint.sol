@@ -31,7 +31,6 @@ library Mint {
             IPair.Due memory dueOut
         )
     {
-        console.log('Enters New Liquidity');
         (assetIn, liquidityOut, id, dueOut) = _newLiquidity(
             natives,
             IMint._NewLiquidity(
@@ -505,7 +504,6 @@ library Mint {
     {
         require(params.debtIn > params.assetIn, 'E516');
         require(params.maturity > block.timestamp, 'E508');
-        console.log('Enters _newLiquidity');
         IPair pair = params.factory.getPair(params.asset, params.collateral);
         if (address(pair) == address(0)) pair = params.factory.createPair(params.asset, params.collateral);
 
@@ -517,7 +515,6 @@ library Mint {
             params.debtIn,
             params.collateralIn
         );
-        console.log('Computed mintParams');
 
         (assetIn, liquidityOut, id, dueOut) = _mint(
             natives,
@@ -643,6 +640,7 @@ library Mint {
             params.maturity,
             params.collateralIn
         );
+        console.log('min liq in contract',params.minLiquidity);
 
         (assetIn, liquidityOut, id, dueOut) = _mint(
             natives,
@@ -662,7 +660,6 @@ library Mint {
                 params.deadline
             )
         );
-
         require(liquidityOut >= params.minLiquidity, 'E511');
         require(xIncrease <= params.maxAsset, 'E519');
         require(dueOut.debt <= params.maxDebt, 'E512');
@@ -680,14 +677,11 @@ library Mint {
             IPair.Due memory dueOut
         )
     {
-        console.log('enters _mint');
         require(params.deadline >= block.timestamp, 'E504');
         require(params.maturity > block.timestamp, 'E508');
-        console.log('finishes require');
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
             native.deploy(params.convenience, params.pair, params.asset, params.collateral, params.maturity);
-        console.log('getNative success');
         (assetIn, liquidityOut, id, dueOut) = params.pair.mint(
             IPair.MintParam(
                 params.maturity,

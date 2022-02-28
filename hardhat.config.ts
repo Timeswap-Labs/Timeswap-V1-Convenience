@@ -24,7 +24,7 @@ const config= {
   networks: {
     hardhat: {
       accounts: { accountsBalance: (1n << 256n).toString() },
-      gas: 12000000,
+      gas: 120000000,
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
       timeout: 1800000

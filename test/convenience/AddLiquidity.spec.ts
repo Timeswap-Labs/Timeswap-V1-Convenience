@@ -36,7 +36,7 @@ async function fixture(): Promise<Fixture> {
 }
 
 describe('Add Liquidity', () => {
-  it('Succeeded', async () => {
+  it.only('Succeeded', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
@@ -353,40 +353,52 @@ async function addLiquidityProperties(
   collateralAddress: string
 ) {
   const result = await loadFixture(success)
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+  let newLiquidityParams = { xIncreaseNewLiquidity: 0n,  yIncreaseNewLiquidity:0n, zIncreaseNewLiquidity:0n}
+
+  const maybeParams = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
     data.newLiquidityParams.collateralIn,
     currentTime + 5_000n,
     maturity
   )
+  if(maybeParams!=false){
+    newLiquidityParams.xIncreaseNewLiquidity = maybeParams.xIncreaseNewLiquidity
+    newLiquidityParams.yIncreaseNewLiquidity = maybeParams.yIncreaseNewLiquidity
+    newLiquidityParams.zIncreaseNewLiquidity = maybeParams.zIncreaseNewLiquidity
+  }
+     
+  
 
   const state = {
-    x: data.newLiquidityParams.assetIn,
-    y: yIncreaseNewLiquidity,
-    z: zIncreaseNewLiquidity,
+    x: newLiquidityParams.xIncreaseNewLiquidity,
+    y: newLiquidityParams.yIncreaseNewLiquidity,
+    z: newLiquidityParams.zIncreaseNewLiquidity,
   }
-  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
+  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getAddLiquidityGivenAssetParams(
     state,
-    data.addLiquidityParams.assetIn
+    data.addLiquidityParams.assetIn,
+    0n
   )
   const delState = {
     x: data.addLiquidityParams.assetIn,
     y: yIncreaseAddLiquidity,
     z: zIncreaseAddLiquidity,
   }
-  const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
-    state,
-    currentTime + 5_000n,
-    maturity
+  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(
+    state.x
   )
 
-  const liquidityBalanceAdd = LiquidityMath.liquidityCalculateAddLiquidity(
+  const maybeLiquidityBalanceAdd = LiquidityMath.getLiquidity(
     state,
     delState,
     currentTime + 10_000n,
     maturity
   )
+  let liquidityBalanceAdd 
+  if(typeof(maybeLiquidityBalanceAdd)!='string'){
+    liquidityBalanceAdd = maybeLiquidityBalanceAdd
+  }
   const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
 
   const debt = LiquidityMath.getDebtAddLiquidity(

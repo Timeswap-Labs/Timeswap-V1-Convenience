@@ -14,6 +14,7 @@ library DeployInsurances {
         IPair pair,
         uint256 maturity
     ) external {
+        
         native.insuranceInterest = new InsuranceInterest{salt: salt}(convenience, pair, maturity);
         native.insurancePrincipal = new InsurancePrincipal{salt: salt}(convenience, pair, maturity);
     }

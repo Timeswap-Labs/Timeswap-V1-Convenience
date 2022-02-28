@@ -79,7 +79,7 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
     libraryContractAddresses2.push(contract.address)
   }
 
-  const Factory = await ethers.getContractFactory('TimeswapFactory')
+
   const Convenience = await ethers.getContractFactory('TimeswapConvenience', {
     libraries: {
       Borrow: libraryContractAddresses1[0],
@@ -95,12 +95,23 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
     },
   })
   const WETH9 = await ethers.getContractFactory('WETH9')
+
+  const TimeswapMathFactory = await ethers.getContractFactory('TimeswapMath')
+  const TimeswapMath = await TimeswapMathFactory.deploy()
+
+  await TimeswapMath.deployTransaction.wait()
+  const Factory = await ethers.getContractFactory('TimeswapFactory', {
+    libraries: {
+      TimeswapMath: TimeswapMath.address
+    }
+  })
   let factoryContract
   if (factory!=undefined){
     factoryContract = factory
   }
   else{
-    factoryContract = (await Factory.deploy(accounts[0].address, 100, 50)) as TimeswapFactory
+    console.log(1)
+    factoryContract = (await Factory.deploy( accounts[0].address,100, 50) as TimeswapFactory)
     await factoryContract.deployTransaction.wait()
   }
 
@@ -112,7 +123,6 @@ const convenienceContract = (await Convenience.deploy(
   factoryContract.address,
   wethContract.address
 )) as ConvenienceContract
-
 await convenienceContract.deployTransaction.wait()
 const deployedContracts = {
   factory: factoryContract,
