@@ -246,9 +246,7 @@ async function newLiquidityProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  console.log()
   const liquidityBalance = LiquidityMath.getInitialLiquidity(state.x)
-  console.log('Liquidity Balance TS', liquidityBalance)
 
   const debt = LiquidityMath.getDebtAddLiquidity(
     { x: data.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity },

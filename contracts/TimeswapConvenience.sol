@@ -97,7 +97,6 @@ contract TimeswapConvenience is IConvenience {
             IPair.Due memory dueOut
         )
     {
-        console.log('Enters new Liquid');
         (assetIn, liquidityOut, id, dueOut) = natives.newLiquidity(this, factory, params);
     }
 

@@ -110,7 +110,6 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
     factoryContract = factory
   }
   else{
-    console.log(1)
     factoryContract = (await Factory.deploy( accounts[0].address,100, 50) as TimeswapFactory)
     await factoryContract.deployTransaction.wait()
   }

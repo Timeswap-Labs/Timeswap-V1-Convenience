@@ -399,6 +399,9 @@ async function addLiquidityProperties(
   if(typeof(maybeLiquidityBalanceAdd)!='string'){
     liquidityBalanceAdd = maybeLiquidityBalanceAdd
   }
+  else{
+    liquidityBalanceAdd=0n
+  }
   const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
 
   const debt = LiquidityMath.getDebtAddLiquidity(

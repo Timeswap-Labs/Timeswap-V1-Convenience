@@ -13,7 +13,6 @@ library DeployCollateralizedDebt {
         IPair pair,
         uint256 maturity
     ) external {
-        console.log('enters deploy collateralizedDebt');
         native.collateralizedDebt = new CollateralizedDebt{salt: salt}(convenience, pair, maturity);
     }
 }

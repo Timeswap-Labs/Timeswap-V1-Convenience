@@ -123,12 +123,15 @@ export function addLiquiditySuccess(
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
   const liquidityAdd = LiquidityMath.getLiquidity(state, delState, currentTimeAL, maturity)
 console.log('Min liq conv',addLiquidityParams.minLiquidity)
-  if (
+console.log(liquidityAdd)
+if (
+    typeof(liquidityAdd) == 'string' ||
     addLiquidityParams.maxDebt < debt ||
     addLiquidityParams.maxCollateral < collateral ||
     addLiquidityParams.minLiquidity >= liquidityAdd ||
     debt > MAXUINT112 ||
-    collateral > MAXUINT112
+    collateral > MAXUINT112 
+    
   )
     return false
 

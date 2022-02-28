@@ -31,7 +31,6 @@ denominator += 0x2000000n
 zIncrease /= denominator
 
 if(yIncrease >= MAXUINT256 || yIncrease <=0) return false
-console.log(xIncrease,yIncrease,zIncrease);
   return { xIncreaseNewLiquidity: xIncrease,yIncreaseNewLiquidity: yIncrease, zIncreaseNewLiquidity: zIncrease }
 }
 

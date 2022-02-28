@@ -553,6 +553,7 @@ library Mint {
         require(pair.totalLiquidity(params.maturity) != 0, 'E507');
 
         (uint112 xIncrease, uint112 yIncrease, uint112 zIncrease) = pair.givenAsset(params.maturity, params.assetIn);
+        console.log('min liq in contract',params.minLiquidity);
 
         (assetIn, liquidityOut, id, dueOut) = _mint(
             natives,
@@ -641,7 +642,6 @@ library Mint {
             params.collateralIn
         );
         console.log('min liq in contract',params.minLiquidity);
-
         (assetIn, liquidityOut, id, dueOut) = _mint(
             natives,
             IMint._Mint(
@@ -660,6 +660,7 @@ library Mint {
                 params.deadline
             )
         );
+        console.log('liq out contract',liquidityOut);
         require(liquidityOut >= params.minLiquidity, 'E511');
         require(xIncrease <= params.maxAsset, 'E519');
         require(dueOut.debt <= params.maxDebt, 'E512');
@@ -693,8 +694,9 @@ library Mint {
                 bytes(abi.encode(params.asset, params.collateral, params.assetFrom, params.collateralFrom))
             )
         );
-        console.log('mint success');
         native.liquidity.mint(params.liquidityTo, liquidityOut);
         native.collateralizedDebt.mint(params.dueTo, id);
+        console.log('liq out',liquidityOut);
+        console.log('mint success');  
     }
 }
