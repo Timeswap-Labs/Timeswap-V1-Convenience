@@ -65,9 +65,19 @@ describe('Liquidity Given Collateral', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const liquidityGivenCollateral = await liquidityGivenCollateralFixture(newLiquidity, signers[0], testCase.liquidityGivenCollateralParams)
+      const liquidityGivenCollateral = await liquidityGivenCollateralFixture(
+        newLiquidity,
+        signers[0],
+        testCase.liquidityGivenCollateralParams
+      )
 
-      await liquidityGivenCollateralProperties(testCase, currentTime, liquidityGivenCollateral, assetToken.address, collateralToken.address)
+      await liquidityGivenCollateralProperties(
+        testCase,
+        currentTime,
+        liquidityGivenCollateral,
+        assetToken.address,
+        collateralToken.address
+      )
     })
   })
 })
@@ -82,9 +92,19 @@ describe('Liquidity Given Collateral ETH Asset', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const liquidityGivenCollateral = await liquidityGivenCollateralETHAssetFixture(newLiquidity, signers[0], testCase.liquidityGivenCollateralParams)
+      const liquidityGivenCollateral = await liquidityGivenCollateralETHAssetFixture(
+        newLiquidity,
+        signers[0],
+        testCase.liquidityGivenCollateralParams
+      )
 
-      await liquidityGivenCollateralProperties(testCase, currentTime, liquidityGivenCollateral, assetToken.address, collateralToken.address)
+      await liquidityGivenCollateralProperties(
+        testCase,
+        currentTime,
+        liquidityGivenCollateral,
+        assetToken.address,
+        collateralToken.address
+      )
     })
   })
 })
@@ -99,9 +119,19 @@ describe('Liquidity Given Collateral ETH Collateral', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const liquidityGivenCollateral = await liquidityGivenCollateralETHCollateralFixture(newLiquidity, signers[0], testCase.liquidityGivenCollateralParams)
+      const liquidityGivenCollateral = await liquidityGivenCollateralETHCollateralFixture(
+        newLiquidity,
+        signers[0],
+        testCase.liquidityGivenCollateralParams
+      )
 
-      await liquidityGivenCollateralProperties(testCase, currentTime, liquidityGivenCollateral, assetToken.address, collateralToken.address)
+      await liquidityGivenCollateralProperties(
+        testCase,
+        currentTime,
+        liquidityGivenCollateral,
+        assetToken.address,
+        collateralToken.address
+      )
     })
   })
 })
@@ -150,12 +180,13 @@ async function liquidityGivenCollateralProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { xIncreaseAddLiquidity, yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getAddLiquidityGivenCollateralParams(
-    state,
-    data.liquidityGivenCollateralParams.collateralIn,
-    maturity,
-    currentTime
-  )
+  const { xIncreaseAddLiquidity, yIncreaseAddLiquidity, zIncreaseAddLiquidity } =
+    LiquidityMath.getAddLiquidityGivenCollateralParams(
+      state,
+      data.liquidityGivenCollateralParams.collateralIn,
+      maturity,
+      currentTime
+    )
   const delState = {
     x: xIncreaseAddLiquidity,
     y: yIncreaseAddLiquidity,

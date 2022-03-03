@@ -17,7 +17,14 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LendGivenInsuranceParams, NewLiquidityParams } from '../types'
-import { BondInterest__factory, BondPrincipal__factory, ERC20__factory, InsuranceInterest__factory, InsurancePrincipal__factory,TestToken } from '../../typechain'
+import {
+  BondInterest__factory,
+  BondPrincipal__factory,
+  ERC20__factory,
+  InsuranceInterest__factory,
+  InsurancePrincipal__factory,
+  TestToken,
+} from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
@@ -76,9 +83,19 @@ describe('Lend Given Insurance', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const lendGivenInsurance = await lendGivenInsuranceFixture(newLiquidity, signers[0], testCase.lendGivenInsuranceParams)
+      const lendGivenInsurance = await lendGivenInsuranceFixture(
+        newLiquidity,
+        signers[0],
+        testCase.lendGivenInsuranceParams
+      )
 
-      await lendGivenInsuranceProperties(testCase, currentTime, lendGivenInsurance, assetToken.address, collateralToken.address)
+      await lendGivenInsuranceProperties(
+        testCase,
+        currentTime,
+        lendGivenInsurance,
+        assetToken.address,
+        collateralToken.address
+      )
     })
   })
 })
@@ -279,7 +296,7 @@ describe('Lend Given Insurance', () => {
 //           ).to.be.revertedWith('')
 //         }
 //       ),
-//       { skipAllAfterTimeLimit: 50000, numRuns: 10 } 
+//       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
 //     )
 //   }).timeout(100000)
 // })
@@ -413,13 +430,11 @@ async function lendGivenInsuranceProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  
   const neededTime = (await now()) + 100n
-  
 
   // const result = await loadFixture(success)
   const result = fixture
-  
+
   let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
@@ -438,15 +453,16 @@ async function lendGivenInsuranceProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yDecrease: yDecreaseLendGivenInsurance, zDecrease: zDecreaseLendGivenInsurance } = LendMath.getLendGivenInsuranceParams(
-    state,
-    FEE,
-    PROTOCOL_FEE,
-    maturity,
-    currentTime + 10_000n,
-    data.lendGivenInsuranceParams.assetIn,
-    data.lendGivenInsuranceParams.insuranceOut
-  )
+  const { yDecrease: yDecreaseLendGivenInsurance, zDecrease: zDecreaseLendGivenInsurance } =
+    LendMath.getLendGivenInsuranceParams(
+      state,
+      FEE,
+      PROTOCOL_FEE,
+      maturity,
+      currentTime + 10_000n,
+      data.lendGivenInsuranceParams.assetIn,
+      data.lendGivenInsuranceParams.insuranceOut
+    )
 
   const delState = {
     x: data.lendGivenInsuranceParams.assetIn,
@@ -468,25 +484,4 @@ async function lendGivenInsuranceProperties(
   // expect(insuranceContractBalance).equalBigInt(insurance)
 
   // expect(insurance).gteBigInt(data.lendGivenInsuranceParams.insuranceOut)
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 }

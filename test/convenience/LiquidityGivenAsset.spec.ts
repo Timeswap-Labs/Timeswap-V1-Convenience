@@ -6,9 +6,11 @@ import {
   newLiquidityFixture,
   constructorFixture,
   Fixture,
-  liquidityGivenDebtFixture,
-  liquidityGivenDebtETHAssetFixture,
-  liquidityGivenDebtETHCollateralFixture,
+  liquidityGivenAssetFixture,
+  newLiquidityETHAssetFixture,
+  liquidityGivenAssetETHAssetFixture,
+  newLiquidityETHCollateralFixture,
+  liquidityGivenAssetETHCollateralFixture,
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
@@ -46,16 +48,16 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    liquidityGivenDebtParams: {
-      debtIn: 10000n,
+    addLiquidityParams: {
+      assetIn: 10000n,
       minLiquidity: 1000n,
-      maxAsset: 15000n,
+      maxDebt: 15000n,
       maxCollateral: 2000n,
     },
   },
 ]
 
-describe('Liquidity Given Debt', () => {
+describe('Liquidity Given Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
@@ -65,24 +67,14 @@ describe('Liquidity Given Debt', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const liquidityGivenDebt = await liquidityGivenDebtFixture(
-        newLiquidity,
-        signers[0],
-        testCase.liquidityGivenDebtParams
-      )
+      const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], testCase.addLiquidityParams)
 
-      await liquidityGivenDebtProperties(
-        testCase,
-        currentTime,
-        liquidityGivenDebt,
-        assetToken.address,
-        collateralToken.address
-      )
+      await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
     })
   })
 })
 
-describe('Liquidity Given Debt ETH Asset', () => {
+describe('Liquidity Given Asset ETH Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
@@ -92,24 +84,18 @@ describe('Liquidity Given Debt ETH Asset', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const liquidityGivenDebt = await liquidityGivenDebtETHAssetFixture(
+      const addLiquidity = await liquidityGivenAssetETHAssetFixture(
         newLiquidity,
         signers[0],
-        testCase.liquidityGivenDebtParams
+        testCase.addLiquidityParams
       )
 
-      await liquidityGivenDebtProperties(
-        testCase,
-        currentTime,
-        liquidityGivenDebt,
-        assetToken.address,
-        collateralToken.address
-      )
+      await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
     })
   })
 })
 
-describe('Liquidity Given Debt ETH Collateral', () => {
+describe('Liquidity Given Asset ETH Collateral', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
@@ -119,34 +105,28 @@ describe('Liquidity Given Debt ETH Collateral', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const liquidityGivenDebt = await liquidityGivenDebtETHCollateralFixture(
+      const addLiquidity = await liquidityGivenAssetETHCollateralFixture(
         newLiquidity,
         signers[0],
-        testCase.liquidityGivenDebtParams
+        testCase.addLiquidityParams
       )
 
-      await liquidityGivenDebtProperties(
-        testCase,
-        currentTime,
-        liquidityGivenDebt,
-        assetToken.address,
-        collateralToken.address
-      )
+      await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
     })
   })
 })
 
-async function liquidityGivenDebtProperties(
+async function addLiquidityProperties(
   data: {
     newLiquidityParams: {
       assetIn: bigint
       debtIn: bigint
       collateralIn: bigint
     }
-    liquidityGivenDebtParams: {
-      debtIn: bigint
+    addLiquidityParams: {
+      assetIn: bigint
       minLiquidity: bigint
-      maxAsset: bigint
+      maxDebt: bigint
       maxCollateral: bigint
     }
   },
@@ -180,15 +160,13 @@ async function liquidityGivenDebtProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { xIncreaseAddLiquidity, yIncreaseAddLiquidity, zIncreaseAddLiquidity } =
-    LiquidityMath.getIncreaseAddLiquidityGivenDebtParams(
-      state,
-      data.liquidityGivenDebtParams.debtIn,
-      maturity,
-      currentTime
-    )
+  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getAddLiquidityGivenAssetParams(
+    state,
+    data.addLiquidityParams.assetIn,
+    0n
+  )
   const delState = {
-    x: xIncreaseAddLiquidity,
+    x: data.addLiquidityParams.assetIn,
     y: yIncreaseAddLiquidity,
     z: zIncreaseAddLiquidity,
   }
@@ -202,12 +180,12 @@ async function liquidityGivenDebtProperties(
   const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
 
   const debt = LiquidityMath.getDebtAddLiquidity(
-    { x: xIncreaseAddLiquidity, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
     maturity,
     currentTime + 10_000n
   )
   const collateral = LiquidityMath.getCollateralAddLiquidity(
-    { x: xIncreaseAddLiquidity, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
     maturity,
     currentTime + 10_000n
   )
