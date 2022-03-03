@@ -4,6 +4,21 @@ export interface AddLiquidityGivenAssetParams {
   maxDebt: bigint
   maxCollateral: bigint
 }
+
+export interface LiquidityGivenDebtParams {
+  debtIn: bigint
+  minLiquidity: bigint
+  maxAsset: bigint
+  maxCollateral: bigint
+}
+
+export interface LiquidityGivenCollateralParams {
+  collateralIn: bigint
+  minLiquidity: bigint
+  maxDebt: bigint
+  maxAsset: bigint
+}
+
 export interface NewLiquidityParams {
   assetIn: bigint
   debtIn: bigint

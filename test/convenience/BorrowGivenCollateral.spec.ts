@@ -22,7 +22,7 @@ import * as LiquidityFilter from '../filters/Liquidity'
 import * as BorrowFilter from '../filters/Borrow'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
-import { type } from 'os'
+import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 
 const { loadFixture } = waffle
 
@@ -43,7 +43,7 @@ const testCases = [
   {
     newLiquidityParams: {
       assetIn: 100000n,
-      debt: 444n,
+      debtIn: 444n,
       collateralIn:1000n
     },
     borrowGivenCollateralParams: {
@@ -248,31 +248,31 @@ async function borrowGivenCollateralProperties(
     }
   },
   currentTime: bigint,
-  fixture:{
+  fixture: {
     convenience: Convenience
     assetToken: TestToken
     collateralToken: TestToken
     maturity: bigint
-},
+  },
   assetAddress: string,
   collateralAddress: string
 ) {
-  
   const neededTime = (await now()) + 100n
-  
 
+  // const result = await loadFixture(success)
   const result = fixture
-  let { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = { yIncreaseNewLiquidity: 0n, zIncreaseNewLiquidity: 0n }
-const maybeNewMintParams = LiquidityMath.getNewLiquidityParams(
+
+  let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
+  const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
     data.newLiquidityParams.collateralIn,
     currentTime + 5_000n,
     maturity
   )
-  if(maybeNewMintParams!=false){
-    yIncreaseNewLiquidity = maybeNewMintParams.yIncreaseNewLiquidity
-    zIncreaseNewLiquidity = maybeNewMintParams.zIncreaseNewLiquidity
+  if (maybeNewLiq !== false) {
+    yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+    zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
   }
 
   const state = {
@@ -280,20 +280,21 @@ const maybeNewMintParams = LiquidityMath.getNewLiquidityParams(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const borrowMath = BorrowMath.getBorrowGivenCollateralParams(
-    state,
-    100n*5000n,
-    50n*5000n,
-    data.borrowGivenCollateralParams.assetOut,
-    result.maturity,
-    currentTime + 10_000n,
-    data.borrowGivenCollateralParams.collateralIn
-  )
+  const { xDecrease, yIncrease, zIncrease } =
+    BorrowMath.getBorrowGivenCollateralParams(
+      state,
+      PROTOCOL_FEE,
+      FEE,
+      data.borrowGivenCollateralParams.assetOut,
+      result.maturity,
+      currentTime + 10_000n,
+      data.borrowGivenCollateralParams.collateralIn
+    )
 
   const delState = {
-    x: borrowMath.xDecrease,
-    y: borrowMath.yIncrease,
-    z: borrowMath.zIncrease,
+    x: xDecrease,
+    y: yIncrease,
+    z: zIncrease,
   }
 
   const debt = BorrowMath.getDebt(delState, maturity, currentTime + 10_000n)

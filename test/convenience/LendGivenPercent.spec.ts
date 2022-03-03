@@ -16,7 +16,14 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LendGivenPercentParams, NewLiquidityParams } from '../types'
-import { BondInterest__factory, BondPrincipal__factory, ERC20__factory, InsuranceInterest__factory, InsurancePrincipal__factory,TestToken } from '../../typechain'
+import {
+  BondInterest__factory,
+  BondPrincipal__factory,
+  ERC20__factory,
+  InsuranceInterest__factory,
+  InsurancePrincipal__factory,
+  TestToken,
+} from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
@@ -49,7 +56,59 @@ const testCases = [
       assetIn: 1000n,
       percent: 1n << 31n,
       minBond: 1000n,
-      minInsurance: 50n
+      minInsurance: 50n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 100000n,
+      percent: 2n << 31n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 500n,
+      percent: 4n << 30n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 1000000000n,
+      percent: 2n << 30n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 67900000000n,
+      percent: 1n << 31n,
+      minBond: 0n,
+      minInsurance: 0n,
     },
   },
 ]
@@ -66,7 +125,13 @@ describe('Lend Given Percent', () => {
       await setTime(Number(currentTime + 10000n))
       const lendGivenPercent = await lendGivenPercentFixture(newLiquidity, signers[0], testCase.lendGivenPercentParams)
 
-      await lendGivenPercentProperties(testCase, currentTime, lendGivenPercent, assetToken.address, collateralToken.address)
+      await lendGivenPercentProperties(
+        testCase,
+        currentTime,
+        lendGivenPercent,
+        assetToken.address,
+        collateralToken.address
+      )
     })
   })
 })
@@ -281,13 +346,11 @@ async function lendGivenPercentProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  
   const neededTime = (await now()) + 100n
-  
 
   // const result = await loadFixture(success)
   const result = fixture
-  
+
   let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
@@ -306,15 +369,16 @@ async function lendGivenPercentProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yDecrease: yDecreaseLendGivenPercent, zDecrease: zDecreaseLendGivenPercent } = LendMath.getLendGivenPercentParams(
-    state,
-    FEE,
-    PROTOCOL_FEE,
-    maturity,
-    currentTime + 10_000n,
-    data.lendGivenPercentParams.assetIn,
-    data.lendGivenPercentParams.percent
-  )
+  const { yDecrease: yDecreaseLendGivenPercent, zDecrease: zDecreaseLendGivenPercent } =
+    LendMath.getLendGivenPercentParams(
+      state,
+      FEE,
+      PROTOCOL_FEE,
+      maturity,
+      currentTime + 10_000n,
+      data.lendGivenPercentParams.assetIn,
+      data.lendGivenPercentParams.percent
+    )
 
   const delState = {
     x: data.lendGivenPercentParams.assetIn,
@@ -334,25 +398,4 @@ async function lendGivenPercentProperties(
 
   // expect(bondContractBalance).equalBigInt(bond)
   // expect(insuranceContractBalance).equalBigInt(insurance)
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 }

@@ -164,17 +164,19 @@ const testCases = [
 ]
 
 describe('Add Liquidity', () => {
-  it('Succeeded', async () => {
-    const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
-    let currentTime = await now()
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
 
-    const constructorFixture = await loadFixture(fixture)
-    await setTime(Number(currentTime+5000n))
-    const newLiquidity = await newLiquidityFixture(constructorFixture,signers[0],testCases[0].newLiquidityParams)
-    await setTime(Number(currentTime+10000n))
-    const addLiquidity = await liquidityGivenAssetFixture(newLiquidity,signers[0],testCases[0].addLiquidityParams)
-   
-    await addLiquidityProperties(testCases[0], currentTime, addLiquidity, assetToken.address, collateralToken.address)
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      await setTime(Number(currentTime + 10000n))
+      const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], testCase.addLiquidityParams)
+
+      await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
+    })
   })
 })
 

@@ -16,7 +16,14 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LendGivenBondParams, NewLiquidityParams } from '../types'
-import { BondInterest__factory, BondPrincipal__factory, ERC20__factory, InsuranceInterest__factory, InsurancePrincipal__factory,TestToken } from '../../typechain'
+import {
+  BondInterest__factory,
+  BondPrincipal__factory,
+  ERC20__factory,
+  InsuranceInterest__factory,
+  InsurancePrincipal__factory,
+  TestToken,
+} from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
@@ -48,7 +55,67 @@ const testCases = [
     lendGivenBondParams: {
       assetIn: 1000n,
       bondOut: 1010n,
-      minInsurance: 50n
+      minInsurance: 50n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenBondParams: {
+      assetIn: 1000n,
+      bondOut: 1087n,
+      minInsurance: 50n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenBondParams: {
+      assetIn: 500n,
+      bondOut: 591n,
+      minInsurance: 20n,
+    },
+  },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   lendGivenBondParams: {
+  //     assetIn: 1000000000n,
+  //     bondOut: 995719504n,
+  //     minInsurance: 50n,
+  //   },
+  // },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 990n,
+    },
+    lendGivenBondParams: {
+      assetIn: 1000n,
+      bondOut: 1010n,
+      minInsurance: 50n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 990n,
+    },
+    lendGivenBondParams: {
+      assetIn: 100n,
+      bondOut: 110n,
+      minInsurance: 2n,
     },
   },
 ]
@@ -411,13 +478,11 @@ async function lendGivenBondProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  
   const neededTime = (await now()) + 100n
-  
 
   // const result = await loadFixture(success)
   const result = fixture
-  
+
   let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
@@ -449,33 +514,32 @@ async function lendGivenBondProperties(
   const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
-  const bondPrincipalToken = ERC20__factory.connect(natives.bondPrincipal,ethers.provider)
-  const bondInterestToken = ERC20__factory.connect(natives.bondInterest,ethers.provider)
-  const insurancePrincipalToken = ERC20__factory.connect(natives.insurancePrincipal,ethers.provider)
-  const insuranceInterestToken = ERC20__factory.connect(natives.insuranceInterest,ethers.provider)
+  const bondPrincipalToken = ERC20__factory.connect(natives.bondPrincipal, ethers.provider)
+  const bondInterestToken = ERC20__factory.connect(natives.bondInterest, ethers.provider)
+  const insurancePrincipalToken = ERC20__factory.connect(natives.insurancePrincipal, ethers.provider)
+  const insuranceInterestToken = ERC20__factory.connect(natives.insuranceInterest, ethers.provider)
 
-  const assetToken = ERC20__factory.connect(assetAddress,ethers.provider)
-  const collateralToken = ERC20__factory.connect(collateralAddress,ethers.provider)
-//   const insuranceTokenName = await insuranceToken.name()
-//   const insuranceTokenSymbol = await insuranceToken.symbol()
-//   const insuranceTokenDecimals  = await insuranceToken.decimals()
-//   const bondTokenName = await bondToken.name()
-//   const bondTokenSymbol = await bondToken.symbol()
-//   const bondTokenDecimals = await bondToken.decimals()
+  const assetToken = ERC20__factory.connect(assetAddress, ethers.provider)
+  const collateralToken = ERC20__factory.connect(collateralAddress, ethers.provider)
+  //   const insuranceTokenName = await insuranceToken.name()
+  //   const insuranceTokenSymbol = await insuranceToken.symbol()
+  //   const insuranceTokenDecimals  = await insuranceToken.decimals()
+  //   const bondTokenName = await bondToken.name()
+  //   const bondTokenSymbol = await bondToken.symbol()
+  //   const bondTokenDecimals = await bondToken.decimals()
 
-//   const assetTokenSymbol = await assetToken.symbol()
-//   const assetTokenName = await assetToken.name()
-//   const collateralTokenSymbol = await collateralToken.symbol()
-//   const collateralTokenName = await collateralToken.name()
+  //   const assetTokenSymbol = await assetToken.symbol()
+  //   const assetTokenName = await assetToken.name()
+  //   const collateralTokenSymbol = await collateralToken.symbol()
+  //   const collateralTokenName = await collateralToken.name()
 
-//   expect(insuranceTokenSymbol).equals(`TS-INS-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
-//   expect(insuranceTokenName).equals(`Timeswap Insurance - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
-//   expect(insuranceTokenDecimals).equals(18)
-  
-  
-//   expect(bondTokenSymbol).equals(`TS-BND-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
-//   expect(bondTokenName).equals(`Timeswap Bond - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
-//   expect(bondTokenDecimals).equals(18)
+  //   expect(insuranceTokenSymbol).equals(`TS-INS-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
+  //   expect(insuranceTokenName).equals(`Timeswap Insurance - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
+  //   expect(insuranceTokenDecimals).equals(18)
+
+  //   expect(bondTokenSymbol).equals(`TS-BND-${assetTokenSymbol}-${collateralTokenSymbol}-${maturity}`)
+  //   expect(bondTokenName).equals(`Timeswap Bond - ${assetTokenName} - ${collateralTokenName} - ${maturity}`)
+  //   expect(bondTokenDecimals).equals(18)
 
   expect(bond).gteBigInt(data.lendGivenBondParams.bondOut)
 }
