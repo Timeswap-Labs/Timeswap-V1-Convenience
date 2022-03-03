@@ -2,27 +2,28 @@ import { ethers, waffle } from 'hardhat'
 import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import * as LiquidityMath from '../libraries/LiquidityMath'
-import * as BorrowMath from '../libraries/BorrowMath'
 import {
   newLiquidityFixture,
   constructorFixture,
   Fixture,
-  liquidityGivenAssetFixture,
-  borrowGivenPercentFixture,
+  liquidityGivenDebtFixture,
+  liquidityGivenDebtETHAssetFixture,
+  liquidityGivenDebtETHCollateralFixture,
   newLiquidityETHAssetFixture,
-  borrowGivenPercentETHAssetFixture,
   newLiquidityETHCollateralFixture,
-  borrowGivenPercentETHCollateralFixture,
 } from '../shared/Fixtures'
-
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
-import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
+import {
+  CollateralizedDebt__factory,
+  ERC20__factory,
+  TestToken,
+  TimeswapPair,
+  TimeswapPair__factory,
+} from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import * as BorrowFilter from '../filters/Borrow'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
-import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 
 const { loadFixture } = waffle
 
@@ -35,7 +36,7 @@ async function fixture(): Promise<Fixture> {
   maturity = (await now()) + 31536000n
   signers = await ethers.getSigners()
 
-  const constructor = await constructorFixture(1n << 150n, 1n << 150n, maturity, signers[0])
+  const constructor = await constructorFixture(1n << 255n, 1n << 255n, maturity, signers[0])
 
   return constructor
 }
@@ -47,11 +48,11 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    borrowGivenPercentParams: {
-      assetOut: 1000n,
-      percent: 1n << 31n,
-      maxDebt: 2000n,
-      maxCollateral: 1000n,
+    liquidityGivenDebtParams: {
+      debtIn: 10000n,
+      minLiquidity: 1000n,
+      maxAsset: 15000n,
+      maxCollateral: 2000n,
     },
   },
   {
@@ -60,42 +61,16 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    borrowGivenPercentParams: {
-      assetOut: 2000n,
-      percent: 2n << 30n,
-      maxDebt: 3000n,
-      maxCollateral: 5000n,
+    liquidityGivenDebtParams: {
+      debtIn: 100000n,
+      minLiquidity: 10000n,
+      maxAsset: 150000n,
+      maxCollateral: 20000n,
     },
   },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    borrowGivenPercentParams: {
-      assetOut: 5000n,
-      percent: 1n << 29n,
-      maxDebt: 10000n,
-      maxCollateral: 100000n,
-    },
-  },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   borrowGivenPercentParams: {
-  //     assetOut: 10000n,
-  //     percent: 4n << 30n,
-  //     maxDebt: 20000n,
-  //     maxCollateral: 40000n,
-  //   },
-  // },
 ]
 
-describe('Borrow Given Percent', () => {
+describe('Liquidity Given Debt', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
@@ -105,16 +80,16 @@ describe('Borrow Given Percent', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const borrowGivenPercent = await borrowGivenPercentFixture(
+      const liquidityGivenDebt = await liquidityGivenDebtFixture(
         newLiquidity,
         signers[0],
-        testCase.borrowGivenPercentParams
+        testCase.liquidityGivenDebtParams
       )
 
-      await borrowGivenPercentProperties(
+      await liquidityGivenDebtProperties(
         testCase,
         currentTime,
-        borrowGivenPercent,
+        liquidityGivenDebt,
         assetToken.address,
         collateralToken.address
       )
@@ -122,7 +97,7 @@ describe('Borrow Given Percent', () => {
   })
 })
 
-describe('Borrow Given Percent ETH Asset', () => {
+describe('Liquidity Given Debt ETH Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
@@ -136,16 +111,16 @@ describe('Borrow Given Percent ETH Asset', () => {
         testCase.newLiquidityParams
       )
       await setTime(Number(currentTime + 10000n))
-      const borrowGivenPercent = await borrowGivenPercentETHAssetFixture(
+      const liquidityGivenDebt = await liquidityGivenDebtETHAssetFixture(
         newLiquidity,
         signers[0],
-        testCase.borrowGivenPercentParams
+        testCase.liquidityGivenDebtParams
       )
 
-      await borrowGivenPercentProperties(
+      await liquidityGivenDebtProperties(
         testCase,
         currentTime,
-        borrowGivenPercent,
+        liquidityGivenDebt,
         convenience.wethContract.address,
         collateralToken.address
       )
@@ -153,7 +128,7 @@ describe('Borrow Given Percent ETH Asset', () => {
   })
 })
 
-describe('Borrow Given Percent ETH Collateral', () => {
+describe('Liquidity Given Debt ETH Collateral', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
@@ -167,16 +142,16 @@ describe('Borrow Given Percent ETH Collateral', () => {
         testCase.newLiquidityParams
       )
       await setTime(Number(currentTime + 10000n))
-      const borrowGivenPercent = await borrowGivenPercentETHCollateralFixture(
+      const liquidityGivenDebt = await liquidityGivenDebtETHCollateralFixture(
         newLiquidity,
         signers[0],
-        testCase.borrowGivenPercentParams
+        testCase.liquidityGivenDebtParams
       )
 
-      await borrowGivenPercentProperties(
+      await liquidityGivenDebtProperties(
         testCase,
         currentTime,
-        borrowGivenPercent,
+        liquidityGivenDebt,
         assetToken.address,
         convenience.wethContract.address
       )
@@ -184,17 +159,17 @@ describe('Borrow Given Percent ETH Collateral', () => {
   })
 })
 
-async function borrowGivenPercentProperties(
+async function liquidityGivenDebtProperties(
   data: {
     newLiquidityParams: {
       assetIn: bigint
       debtIn: bigint
       collateralIn: bigint
     }
-    borrowGivenPercentParams: {
-      assetOut: bigint
-      percent: bigint
-      maxDebt: bigint
+    liquidityGivenDebtParams: {
+      debtIn: bigint
+      minLiquidity: bigint
+      maxAsset: bigint
       maxCollateral: bigint
     }
   },
@@ -208,22 +183,19 @@ async function borrowGivenPercentProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  const neededTime = (await now()) + 100n
-
-  // const result = await loadFixture(success)
   const result = fixture
 
-  let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
-  const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
+  const maybeNewMintParams = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
     data.newLiquidityParams.collateralIn,
     currentTime + 5_000n,
     maturity
   )
-  if (maybeNewLiq !== false) {
-    yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
-    zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+  let { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = { yIncreaseNewLiquidity: 0n, zIncreaseNewLiquidity: 0n }
+  if (maybeNewMintParams != false) {
+    yIncreaseNewLiquidity = maybeNewMintParams.yIncreaseNewLiquidity
+    zIncreaseNewLiquidity = maybeNewMintParams.zIncreaseNewLiquidity
   }
 
   const state = {
@@ -231,33 +203,50 @@ async function borrowGivenPercentProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yIncrease: yIncreaseBorrowGivenPercent, zIncrease: zIncreaseBorrowGivenPercent } =
-    BorrowMath.getBorrowGivenPercentParams(
+  const { xIncreaseAddLiquidity, yIncreaseAddLiquidity, zIncreaseAddLiquidity } =
+    LiquidityMath.getIncreaseAddLiquidityGivenDebtParams(
       state,
-      PROTOCOL_FEE,
-      FEE,
-      data.borrowGivenPercentParams.assetOut,
+      data.liquidityGivenDebtParams.debtIn,
       maturity,
-      currentTime + 10_000n,
-      data.borrowGivenPercentParams.percent
+      currentTime
     )
-
   const delState = {
-    x: data.borrowGivenPercentParams.assetOut,
-    y: yIncreaseBorrowGivenPercent,
-    z: zIncreaseBorrowGivenPercent,
+    x: xIncreaseAddLiquidity,
+    y: yIncreaseAddLiquidity,
+    z: zIncreaseAddLiquidity,
   }
+  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(data.newLiquidityParams.assetIn)
 
-  const debt = BorrowMath.getDebt(delState, maturity, currentTime + 10_000n)
-  const collateral = BorrowMath.getCollateral(state, delState, maturity, currentTime + 10_000n)
+  const maybeLiquidityBalanceAdd = LiquidityMath.getLiquidity(state, delState, currentTime + 10_000n, maturity)
+  let liquidityBalanceAdd = 0n
+  if (typeof maybeLiquidityBalanceAdd != 'string') {
+    liquidityBalanceAdd = maybeLiquidityBalanceAdd
+  }
+  const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
+
+  const debt = LiquidityMath.getDebtAddLiquidity(
+    { x: xIncreaseAddLiquidity, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    maturity,
+    currentTime + 10_000n
+  )
+  const collateral = LiquidityMath.getCollateralAddLiquidity(
+    { x: xIncreaseAddLiquidity, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    maturity,
+    currentTime + 10_000n
+  )
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
-  const cdToken = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
 
-  const cdTokenBalance = await cdToken.dueOf(1)
-  const debtContract = cdTokenBalance.debt.toBigInt()
-  const collateralContract = cdTokenBalance.collateral.toBigInt()
+  // const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
+  // const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
+  // expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
-  // expect(debtContract).equalBigInt(debt)
-  // expect(collateralContract).equalBigInt(collateral)
+  const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
+  const collateralizedDebtToken = await collateralizedDebtContract.dueOf(1)
+
+  const collateralBalanceContract = collateralizedDebtToken.collateral.toBigInt()
+  const debtBalanceContract = collateralizedDebtToken.debt.toBigInt()
+
+  expect(collateralBalanceContract).equalBigInt(collateral)
+  expect(debtBalanceContract).equalBigInt(debt)
 }

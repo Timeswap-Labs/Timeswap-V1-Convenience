@@ -6,16 +6,20 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
   if (newLiquidityParams.assetIn <= 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
     return false
   }
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+  const maybeLiqudityParams = LiquidityMath.getNewLiquidityParams(
     newLiquidityParams.assetIn,
     newLiquidityParams.debtIn,
     newLiquidityParams.collateralIn,
     currentTime,
     maturity
   )
+  if(maybeLiqudityParams!=false){
+  const { xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity } =  maybeLiqudityParams
 
   if (
     !(
+      xIncreaseNewLiquidity >0n &&
+      xIncreaseNewLiquidity < MAXUINT112 &&
       yIncreaseNewLiquidity > 0n &&
       zIncreaseNewLiquidity > 0n &&
       yIncreaseNewLiquidity < MAXUINT112 &&
@@ -27,8 +31,7 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
   const collateral =LiquidityMath.getCollateralAddLiquidity(
     {x:newLiquidityParams.assetIn,y:yIncreaseNewLiquidity,z:zIncreaseNewLiquidity},
     maturity,currentTime)
-    console.log('collateral TS',collateral)
-  const debt = LiquidityMath.getDebtAddLiquidity(
+ const debt = LiquidityMath.getDebtAddLiquidity(
     {x:newLiquidityParams.assetIn,y:yIncreaseNewLiquidity,z:zIncreaseNewLiquidity},
     maturity,currentTime)
   if(!(
@@ -41,18 +44,22 @@ export function newLiquiditySuccess(newLiquidityParams: NewLiquidityParams, curr
   }
   return true
 }
+return false
+}
 
 export function newLiquidityError(newLiquidityParams: NewLiquidityParams, currentTime: bigint, maturity: bigint) {
   if (newLiquidityParams.assetIn < 0 || newLiquidityParams.debtIn - newLiquidityParams.assetIn <= 0) {
     return { data: newLiquidityParams, error: '' }
   }
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+  const maybeNewLiquidityParams = LiquidityMath.getNewLiquidityParams(
     newLiquidityParams.assetIn,
     newLiquidityParams.debtIn,
     newLiquidityParams.collateralIn,
     currentTime,
     maturity
   )
+  if(maybeNewLiquidityParams!=false){
+  const { xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity } = maybeNewLiquidityParams
 
   if (!(yIncreaseNewLiquidity < MAXUINT112 && zIncreaseNewLiquidity < MAXUINT112)) {
     return { data: newLiquidityParams, error: '' }
@@ -61,8 +68,9 @@ export function newLiquidityError(newLiquidityParams: NewLiquidityParams, curren
   if (!(yIncreaseNewLiquidity > 0n && zIncreaseNewLiquidity > 0n)) {
     return { data: newLiquidityParams, error: '' }
   }
-
+  
   return { data: newLiquidityParams, error: '' }
+}
 }
 
 export function addLiquiditySuccess(
@@ -81,17 +89,20 @@ export function addLiquiditySuccess(
   ) {
     return false
   }
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+  const maybeParams = LiquidityMath.getNewLiquidityParams(
     newLiquidityParams.assetIn,
     newLiquidityParams.debtIn,
     newLiquidityParams.collateralIn,
     currentTimeNL,
     maturity
   )
+  if(maybeParams !=false){
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = maybeParams
   const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
+  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getAddLiquidityGivenAssetParams(
     state,
-    addLiquidityParams.assetIn
+    addLiquidityParams.assetIn,
+    0n
   )
 
   if (
@@ -107,21 +118,26 @@ export function addLiquiditySuccess(
   }
 
   const delState = { x: addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity }
-  const liquidityNew = LiquidityMath.liquidityCalculateNewLiquidity(state, currentTimeNL, maturity)
+  const liquidityNew = LiquidityMath.getInitialLiquidity(state.x)
   const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
-  const liquidityAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL, maturity)
-
-  if (
+  const liquidityAdd = LiquidityMath.getLiquidity(state, delState, currentTimeAL, maturity)
+console.log('Min liq conv',addLiquidityParams.minLiquidity)
+console.log(liquidityAdd)
+if (
+    typeof(liquidityAdd) == 'string' ||
     addLiquidityParams.maxDebt < debt ||
     addLiquidityParams.maxCollateral < collateral ||
-    addLiquidityParams.minLiquidity > liquidityAdd ||
+    addLiquidityParams.minLiquidity >= liquidityAdd ||
     debt > MAXUINT112 ||
-    collateral > MAXUINT112
+    collateral > MAXUINT112 
+    
   )
     return false
 
   return true
+  }
+  return false
 }
 
 export function addLiquidityError(
@@ -140,17 +156,20 @@ export function addLiquidityError(
   ) {
     return { data: liquidityParams, error: '' }
   }
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+  const maybeParams = LiquidityMath.getNewLiquidityParams(
     newLiquidityParams.assetIn,
     newLiquidityParams.debtIn,
     newLiquidityParams.collateralIn,
     currentTimeNL,
     maturity
   )
-  const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getYandZIncreaseAddLiquidity(
+  if(maybeParams!=false){
+  const { xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity } = maybeParams
+  const state = { x: xIncreaseNewLiquidity, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getAddLiquidityGivenAssetParams(
     state,
-    addLiquidityParams.assetIn
+    addLiquidityParams.assetIn,
+    0n
   )
 
   if (
@@ -168,10 +187,10 @@ export function addLiquidityError(
   }
 
   const delState = { x: addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity }
-  const liquidityNew = LiquidityMath.liquidityCalculateNewLiquidity(state, currentTimeNL, maturity)
+  const liquidityNew = LiquidityMath.getInitialLiquidity(state.x)
   const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
-  const liquidityAdd = LiquidityMath.liquidityCalculateAddLiquidity(state, delState, currentTimeAL, maturity)
+  const liquidityAdd = LiquidityMath.getLiquidity(state, delState, currentTimeAL, maturity)
 
   if (debt > MAXUINT112 || collateral > MAXUINT112) {
     return { data: liquidityParams, error: '' }
@@ -191,54 +210,55 @@ export function addLiquidityError(
 
   return { data: liquidityParams, error: '' }
 }
-
-export function removeLiquiditySuccess(
-  liquidityParams: { newLiquidityParams: NewLiquidityParams; removeLiquidityParams: RemoveLiquidityParams },
-  currentTime: bigint,
-  maturity: bigint
-) {
-  const { newLiquidityParams, removeLiquidityParams } = liquidityParams
-  if (removeLiquidityParams.liquidityIn <= 0) return false
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
-    newLiquidityParams.assetIn,
-    newLiquidityParams.debtIn,
-    newLiquidityParams.collateralIn,
-    currentTime,
-    maturity
-  )
-  const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-  const liquidity = LiquidityMath.liquidityCalculateNewLiquidity(state, currentTime, maturity)
-  if (removeLiquidityParams.liquidityIn > liquidity) return false
-  return true
+return { data: liquidityParams, error: '' }
 }
+// export function removeLiquiditySuccess(
+//   liquidityParams: { newLiquidityParams: NewLiquidityParams; removeLiquidityParams: RemoveLiquidityParams },
+//   currentTime: bigint,
+//   maturity: bigint
+// ) {
+//   const { newLiquidityParams, removeLiquidityParams } = liquidityParams
+//   if (removeLiquidityParams.liquidityIn <= 0) return false
+//   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+//     newLiquidityParams.assetIn,
+//     newLiquidityParams.debtIn,
+//     newLiquidityParams.collateralIn,
+//     currentTime,
+//     maturity
+//   )
+//   const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+//   const liquidity = LiquidityMath.liquidityCalculateNewLiquidity(state, currentTime, maturity)
+//   if (removeLiquidityParams.liquidityIn > liquidity) return false
+//   return true
+// }
 
-export function removeLiquidityError(
-  liquidityParams: { newLiquidityParams: NewLiquidityParams; removeLiquidityParams: RemoveLiquidityParams },
-  currentTime: bigint,
-  maturity: bigint
-) {
-  const { newLiquidityParams, removeLiquidityParams } = liquidityParams
-  if (removeLiquidityParams.liquidityIn <= 0) {
-    return { data: liquidityParams, error: 'E205' }
-  }
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
-    newLiquidityParams.assetIn,
-    newLiquidityParams.debtIn,
-    newLiquidityParams.collateralIn,
-    currentTime,
-    maturity
-  )
-  const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
-  const liquidity = LiquidityMath.liquidityCalculateNewLiquidity(state, currentTime, maturity)
-  if (removeLiquidityParams.liquidityIn > liquidity) {
-    return { data: liquidityParams, error: '' }
-  }
+// export function removeLiquidityError(
+//   liquidityParams: { newLiquidityParams: NewLiquidityParams; removeLiquidityParams: RemoveLiquidityParams },
+//   currentTime: bigint,
+//   maturity: bigint
+// ) {
+//   const { newLiquidityParams, removeLiquidityParams } = liquidityParams
+//   if (removeLiquidityParams.liquidityIn <= 0) {
+//     return { data: liquidityParams, error: 'E205' }
+//   }
+//   const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+//     newLiquidityParams.assetIn,
+//     newLiquidityParams.debtIn,
+//     newLiquidityParams.collateralIn,
+//     currentTime,
+//     maturity
+//   )
+//   const state = { x: newLiquidityParams.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity }
+//   const liquidity = LiquidityMath.liquidityCalculateNewLiquidity(state, currentTime, maturity)
+//   if (removeLiquidityParams.liquidityIn > liquidity) {
+//     return { data: liquidityParams, error: '' }
+//   }
 
-  return { data: liquidityParams, error: '' }
-}
+//   return { data: liquidityParams, error: '' }
+// }
 
 export default {
   addLiquiditySuccess,
   newLiquiditySuccess,
-  removeLiquiditySuccess,
+  // removeLiquiditySuccess,
 }

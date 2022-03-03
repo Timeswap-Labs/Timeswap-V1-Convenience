@@ -11,7 +11,7 @@ dotenv.config()
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID
 const RINKEBY_PRIVATE_KEY = process.env.PRIVATE_KEY
 
-const config: HardhatUserConfig = {
+const config= {
   solidity: {
     version: '0.8.4',
     settings: {
@@ -24,6 +24,10 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       accounts: { accountsBalance: (1n << 256n).toString() },
+      gas: 120000000,
+      blockGasLimit: 0x1fffffffffffff,
+      allowUnlimitedContractSize: true,
+      timeout: 1800000
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
@@ -35,6 +39,8 @@ const config: HardhatUserConfig = {
     target: 'ethers-v5',
     alwaysGenerateOverloads: true,
   },
+  
+  allowUnlimitedContractSize: true
   // contractSizer: {
   //   alphaSort: true,
   //   runOnCompile: true,

@@ -15,7 +15,18 @@ library Withdraw {
         IFactory factory,
         IWithdraw.Collect calldata params
     ) external returns (IPair.Tokens memory tokensOut) {
-        tokensOut = _collect(natives, factory, params);
+        tokensOut = _collect(
+            natives,
+            IWithdraw._Collect(
+                factory,
+                params.asset,
+                params.collateral,
+                params.maturity,
+                params.assetTo,
+                params.collateralTo,
+                params.claimsIn
+            )
+        );
     }
 
     function collectETHAsset(
@@ -26,8 +37,8 @@ library Withdraw {
     ) external returns (IPair.Tokens memory tokensOut) {
         tokensOut = _collect(
             natives,
-            factory,
-            IWithdraw.Collect(
+            IWithdraw._Collect(
+                factory,
                 weth,
                 params.collateral,
                 params.maturity,
@@ -37,7 +48,7 @@ library Withdraw {
             )
         );
 
-        if (tokensOut.asset > 0) {
+        if (tokensOut.asset != 0) {
             weth.withdraw(tokensOut.asset);
             ETH.transfer(params.assetTo, tokensOut.asset);
         }
@@ -51,11 +62,18 @@ library Withdraw {
     ) external returns (IPair.Tokens memory tokensOut) {
         tokensOut = _collect(
             natives,
-            factory,
-            IWithdraw.Collect(params.asset, weth, params.maturity, params.assetTo, address(this), params.claimsIn)
+            IWithdraw._Collect(
+                factory,
+                params.asset,
+                weth,
+                params.maturity,
+                params.assetTo,
+                address(this),
+                params.claimsIn
+            )
         );
 
-        if (tokensOut.collateral > 0) {
+        if (tokensOut.collateral != 0) {
             weth.withdraw(tokensOut.collateral);
             ETH.transfer(params.collateralTo, tokensOut.collateral);
         }
@@ -63,18 +81,23 @@ library Withdraw {
 
     function _collect(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IFactory factory,
-        IWithdraw.Collect memory params
+        IWithdraw._Collect memory params
     ) private returns (IPair.Tokens memory tokensOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
+        IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
 
         IConvenience.Native memory native = natives[params.asset][params.collateral][params.maturity];
         require(address(native.liquidity) != address(0), 'E502');
 
-        if (params.claimsIn.bond > 0)
-            tokensOut.asset = native.bond.burn(msg.sender, params.assetTo, params.claimsIn.bond);
-        if (params.claimsIn.insurance > 0)
-            tokensOut.collateral = native.insurance.burn(msg.sender, params.collateralTo, params.claimsIn.insurance);
+        tokensOut = pair.withdraw(
+            IPair.WithdrawParam(params.maturity, params.assetTo, params.collateralTo, params.claimsIn)
+        );
+
+        if (params.claimsIn.bondInterest != 0) native.bondInterest.burn(msg.sender, params.claimsIn.bondInterest);
+        if (params.claimsIn.bondPrincipal != 0) native.bondPrincipal.burn(msg.sender, params.claimsIn.bondPrincipal);
+        if (params.claimsIn.insuranceInterest != 0)
+            native.insuranceInterest.burn(msg.sender, params.claimsIn.insuranceInterest);
+        if (params.claimsIn.insurancePrincipal != 0)
+            native.insurancePrincipal.burn(msg.sender, params.claimsIn.insurancePrincipal);
     }
 }

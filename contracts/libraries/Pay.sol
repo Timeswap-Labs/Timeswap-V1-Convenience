@@ -22,8 +22,8 @@ library Pay {
     ) external returns (uint128 assetIn, uint128 collateralOut) {
         (assetIn, collateralOut) = _pay(
             natives,
-            factory,
             IPay._Repay(
+                factory,
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -46,8 +46,8 @@ library Pay {
 
         (assetIn, collateralOut) = _pay(
             natives,
-            factory,
             IPay._Repay(
+                factory,
                 weth,
                 params.collateral,
                 params.maturity,
@@ -59,7 +59,13 @@ library Pay {
             )
         );
 
-        if (maxAssetIn > assetIn) ETH.transfer(payable(msg.sender), maxAssetIn - assetIn);
+        if (maxAssetIn > assetIn) {
+            uint256 excess = maxAssetIn;
+            unchecked {
+                excess -= assetIn;
+            }
+            ETH.transfer(payable(msg.sender), excess);
+        }
     }
 
     function payETHCollateral(
@@ -70,8 +76,8 @@ library Pay {
     ) external returns (uint128 assetIn, uint128 collateralOut) {
         (assetIn, collateralOut) = _pay(
             natives,
-            factory,
             IPay._Repay(
+                factory,
                 params.asset,
                 weth,
                 params.maturity,
@@ -83,7 +89,7 @@ library Pay {
             )
         );
 
-        if (collateralOut > 0) {
+        if (collateralOut != 0) {
             weth.withdraw(collateralOut);
             ETH.transfer(params.collateralTo, collateralOut);
         }
@@ -91,13 +97,13 @@ library Pay {
 
     function _pay(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IFactory factory,
         IPay._Repay memory params
     ) private returns (uint128 assetIn, uint128 collateralOut) {
         require(params.deadline >= block.timestamp, 'E504');
         require(params.maturity > block.timestamp, 'E508');
+        require(params.ids.length == params.maxAssetsIn.length, '520');
 
-        IPair pair = factory.getPair(params.asset, params.collateral);
+        IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
 
         IDue collateralizedDebt = natives[params.asset][params.collateral][params.maturity].collateralizedDebt;
@@ -110,12 +116,16 @@ library Pay {
             params.maxAssetsIn
         );
 
-        (assetIn, collateralOut) = collateralizedDebt.burn(
-            params.collateralTo,
-            params.ids,
-            assetsIn,
-            collateralsOut,
-            bytes(abi.encode(params.asset, params.collateral, params.from))
+        (assetIn, collateralOut) = pair.pay(
+            IPair.PayParam(
+                params.maturity,
+                params.collateralTo,
+                address(this),
+                params.ids,
+                assetsIn,
+                collateralsOut,
+                bytes(abi.encode(params.asset, params.collateral, params.from, params.maturity))
+            )
         );
     }
 }

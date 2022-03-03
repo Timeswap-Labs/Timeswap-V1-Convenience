@@ -88,6 +88,14 @@ Bond Out is less than or equal to Asset In.
 
 Debt In is less than or equal to Asset Out.
 
+### E519
+
+Asset In is greater than max Asset.
+
+### E520
+
+Ids length and maxAssetsIn length do not match.
+
 ### E521
 
 ETH transfer failed
@@ -125,6 +133,30 @@ Cannot approve to the caller
 ### E608
 
 Not safe transfer
+
+### E609
+
+Approve caller is not owner nor approved for all
+
+### E610
+
+Transfer to non ERC721Receiver implementer
+
+### E611
+
+Not approved to transfer
+
+### E612
+
+Factory address should not be the weth address
+
+### E613
+
+`owner` is null address
+
+### E614
+
+Token does not exist
 
 ## Callback
 

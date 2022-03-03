@@ -9,7 +9,7 @@ import {ERC20Permit} from './base/ERC20Permit.sol';
 import {SafeMetadata} from './libraries/SafeMetadata.sol';
 import {Strings} from '@openzeppelin/contracts/utils/Strings.sol';
 
-contract Insurance is IClaim, ERC20Permit {
+contract BondPrincipal is IClaim, ERC20Permit {
     using SafeMetadata for IERC20;
     using Strings for uint256;
 
@@ -22,29 +22,36 @@ contract Insurance is IClaim, ERC20Permit {
         string memory collateralName = pair.collateral().safeName();
         return
             string(
-                abi.encodePacked('Timeswap Insurance - ', assetName, ' - ', collateralName, ' - ', maturity.toString())
+                abi.encodePacked(
+                    'Timeswap Bond Principal - ',
+                    assetName,
+                    ' - ',
+                    collateralName,
+                    ' - ',
+                    maturity.toString()
+                )
             );
     }
 
     function symbol() external view override returns (string memory) {
         string memory assetSymbol = pair.asset().safeSymbol();
         string memory collateralSymbol = pair.collateral().safeSymbol();
-        return string(abi.encodePacked('TS-INS-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
+        return string(abi.encodePacked('TS-BND-PRI-', assetSymbol, '-', collateralSymbol, '-', maturity.toString()));
     }
 
     function decimals() external view override returns (uint8) {
-        return pair.collateral().safeDecimals();
+        return pair.asset().safeDecimals();
     }
 
     function totalSupply() external view override returns (uint256) {
-        return pair.claimsOf(maturity, address(this)).insurance;
+        return pair.claimsOf(maturity, address(convenience)).bondPrincipal;
     }
 
     constructor(
         IConvenience _convenience,
         IPair _pair,
         uint256 _maturity
-    ) ERC20Permit('Timeswap Insurance') {
+    ) ERC20Permit('Timeswap Bond Principal') {
         convenience = _convenience;
         pair = _pair;
         maturity = _maturity;
@@ -59,13 +66,7 @@ contract Insurance is IClaim, ERC20Permit {
         _mint(to, amount);
     }
 
-    function burn(
-        address from,
-        address to,
-        uint128 amount
-    ) external override onlyConvenience returns (uint128 tokenOut) {
+    function burn(address from, uint128 amount) external override onlyConvenience {
         _burn(from, amount);
-
-        tokenOut = pair.withdraw(maturity, to, to, IPair.Claims(0, amount)).collateral;
     }
 }

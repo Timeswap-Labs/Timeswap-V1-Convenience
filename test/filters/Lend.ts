@@ -424,6 +424,6 @@ export function collectSuccess(
   }
   const bond = LendMath.getBond(delState, maturity, currentTimeLGB)
   const insurance = LendMath.getInsurance(state, delState, maturity, currentTimeLGB)
-  if (collectParams.claims.bond > bond || collectParams.claims.insurance > insurance) return false
+  if ((collectParams.claims.bondInterest +collectParams.claims.bondPrincipal) > bond || (collectParams.claims.insuranceInterest + collectParams.claims.insurancePrincipal) > insurance) return false
   return true
 }

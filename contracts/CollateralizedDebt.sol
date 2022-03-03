@@ -42,8 +42,8 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     function tokenURI(uint256 id) external view override returns (string memory) {
-        require(ownerOf[id] != address(0), 'E404');
-        return NFTTokenURIScaffold.tokenURI(id, pair, dueOf(id), maturity);
+        require(_owners[id] != address(0), 'E404');
+        return NFTTokenURIScaffold.tokenURI(id, pair, pair.dueOf(maturity, address(convenience), id), maturity);
     }
 
     function assetDecimals() external view override returns (uint8) {
@@ -54,8 +54,17 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         return pair.collateral().safeDecimals();
     }
 
-    function dueOf(uint256 id) public view override returns (IPair.Due memory) {
-        return pair.dueOf(maturity, address(this), id);
+    function totalSupply() external view override returns (uint256) {
+        return pair.totalDuesOf(maturity, address(convenience));
+    }
+
+    function tokenByIndex(uint256 id) external view override returns (uint256) {
+        require(id < pair.totalDuesOf(maturity, address(convenience)), 'E614');
+        return id;
+    }
+
+    function dueOf(uint256 id) external view override returns (IPair.Due memory) {
+        return pair.dueOf(maturity, address(convenience), id);
     }
 
     constructor(
@@ -75,21 +84,5 @@ contract CollateralizedDebt is IDue, ERC721Permit {
 
     function mint(address to, uint256 id) external override onlyConvenience {
         _safeMint(to, id);
-    }
-
-    function burn(
-        address to,
-        uint256[] memory ids,
-        uint112[] memory assetsIn,
-        uint112[] memory collateralsOut,
-        bytes calldata data
-    ) external override onlyConvenience returns (uint128 assetIn, uint128 collateralOut) {
-        (assetIn, collateralOut) = pair.pay(maturity, to, address(this), ids, assetsIn, collateralsOut, data);
-    }
-
-    function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
-        require(msg.sender == address(pair), 'E401');
-
-        convenience.collateralizedDebtCallback(pair, maturity, assetIn, data);
     }
 }

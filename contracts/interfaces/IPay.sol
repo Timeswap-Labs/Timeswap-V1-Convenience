@@ -2,6 +2,7 @@
 pragma solidity =0.8.4;
 
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 
 interface IPay {
     struct Repay {
@@ -33,6 +34,7 @@ interface IPay {
     }
 
     struct _Repay {
+        IFactory factory;
         IERC20 asset;
         IERC20 collateral;
         uint256 maturity;

@@ -15,20 +15,26 @@ library PayMath {
         uint256[] memory ids,
         uint112[] memory maxAssetsIn
     ) internal view returns (uint112[] memory assetsIn, uint112[] memory collateralsOut) {
-        assetsIn = maxAssetsIn;
-        collateralsOut = new uint112[](ids.length);
+        uint256 length = ids.length;
 
-        for (uint256 i; i < ids.length; i++) {
-            IPair.Due memory due = pair.dueOf(maturity, address(collateralizedDebt), ids[i]);
+        assetsIn = maxAssetsIn;
+        collateralsOut = new uint112[](length);
+
+        for (uint256 i; i < length; ) {
+            IPair.Due memory due = pair.dueOf(maturity, address(this), ids[i]);
 
             if (assetsIn[i] > due.debt) assetsIn[i] = due.debt;
             if (msg.sender == collateralizedDebt.ownerOf(ids[i])) {
                 uint256 _collateralOut = due.collateral;
-                if (due.debt > 0) {
+                if (due.debt != 0) {
                     _collateralOut *= assetsIn[i];
                     _collateralOut /= due.debt;
                 }
                 collateralsOut[i] = _collateralOut.toUint112();
+            }
+
+            unchecked {
+                ++i;
             }
         }
     }

@@ -232,21 +232,21 @@ async function newLiquidityProperties(
 ) {
   const result = await loadFixture(success)
   const newCurrentTime = currentTime + 5_000n
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+  const maybeParams = LiquidityMath.getNewLiquidityParams(
     data.assetIn,
     data.debtIn,
     data.collateralIn,
     newCurrentTime,
     maturity
   )
+  if(maybeParams!=false){
+  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = maybeParams
   const state = {
     x: data.assetIn,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  console.log()
-  const liquidityBalance = LiquidityMath.liquidityCalculateNewLiquidity(state, newCurrentTime, maturity)
-  console.log('Liquidity Balance TS', liquidityBalance)
+  const liquidityBalance = LiquidityMath.getInitialLiquidity(state.x)
 
   const debt = LiquidityMath.getDebtAddLiquidity(
     { x: data.assetIn, y: yIncreaseNewLiquidity, z: zIncreaseNewLiquidity },
@@ -303,4 +303,5 @@ async function newLiquidityProperties(
 
   expect(collateralBalanceContract).equalBigInt(collateral)
   expect(debtBalanceContract).equalBigInt(debt)
+  }
 }

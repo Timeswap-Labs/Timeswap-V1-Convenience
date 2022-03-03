@@ -4,9 +4,8 @@ pragma solidity =0.8.4;
 import {IConvenience} from '../interfaces/IConvenience.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {CollateralizedDebt} from '../CollateralizedDebt.sol';
-
-library DeployERC721 {
-    function deployERC721(
+library DeployCollateralizedDebt {
+    function deployCollateralizedDebt(
         IConvenience.Native storage native,
         bytes32 salt,
         IConvenience convenience,

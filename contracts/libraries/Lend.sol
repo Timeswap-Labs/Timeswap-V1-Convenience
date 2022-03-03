@@ -20,12 +20,12 @@ library Lend {
         IConvenience convenience,
         IFactory factory,
         ILend.LendGivenBond calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = _lendGivenBond(
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        (assetIn, claimsOut) = _lendGivenBond(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenBond(
+                convenience,
+                factory,
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -46,21 +46,21 @@ library Lend {
         IFactory factory,
         IWETH weth,
         ILend.LendGivenBondETHAsset calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        uint112 assetIn = MsgValue.getUint112();
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        uint112 assetInETH = MsgValue.getUint112();
 
-        claimsOut = _lendGivenBond(
+        (assetIn, claimsOut) = _lendGivenBond(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenBond(
+                convenience,
+                factory,
                 weth,
                 params.collateral,
                 params.maturity,
                 address(this),
                 params.bondTo,
                 params.insuranceTo,
-                assetIn,
+                assetInETH,
                 params.bondOut,
                 params.minInsurance,
                 params.deadline
@@ -74,12 +74,12 @@ library Lend {
         IFactory factory,
         IWETH weth,
         ILend.LendGivenBondETHCollateral calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = _lendGivenBond(
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        (assetIn, claimsOut) = _lendGivenBond(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenBond(
+                convenience,
+                factory,
                 params.asset,
                 weth,
                 params.maturity,
@@ -99,12 +99,12 @@ library Lend {
         IConvenience convenience,
         IFactory factory,
         ILend.LendGivenInsurance calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = _lendGivenInsurance(
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        (assetIn, claimsOut) = _lendGivenInsurance(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenInsurance(
+                convenience,
+                factory,
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -125,21 +125,21 @@ library Lend {
         IFactory factory,
         IWETH weth,
         ILend.LendGivenInsuranceETHAsset calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        uint112 assetIn = MsgValue.getUint112();
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        uint112 assetInETH = MsgValue.getUint112();
 
-        claimsOut = _lendGivenInsurance(
+        (assetIn, claimsOut) = _lendGivenInsurance(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenInsurance(
+                convenience,
+                factory,
                 weth,
                 params.collateral,
                 params.maturity,
                 address(this),
                 params.bondTo,
                 params.insuranceTo,
-                assetIn,
+                assetInETH,
                 params.insuranceOut,
                 params.minBond,
                 params.deadline
@@ -153,12 +153,12 @@ library Lend {
         IFactory factory,
         IWETH weth,
         ILend.LendGivenInsuranceETHCollateral calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = _lendGivenInsurance(
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        (assetIn, claimsOut) = _lendGivenInsurance(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenInsurance(
+                convenience,
+                factory,
                 params.asset,
                 weth,
                 params.maturity,
@@ -178,12 +178,12 @@ library Lend {
         IConvenience convenience,
         IFactory factory,
         ILend.LendGivenPercent calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = _lendGivenPercent(
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        (assetIn, claimsOut) = _lendGivenPercent(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenPercent(
+                convenience,
+                factory,
                 params.asset,
                 params.collateral,
                 params.maturity,
@@ -205,21 +205,21 @@ library Lend {
         IFactory factory,
         IWETH weth,
         ILend.LendGivenPercentETHAsset calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        uint112 assetIn = MsgValue.getUint112();
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        uint112 assetInETH = MsgValue.getUint112();
 
-        claimsOut = _lendGivenPercent(
+        (assetIn, claimsOut) = _lendGivenPercent(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenPercent(
+                convenience,
+                factory,
                 weth,
                 params.collateral,
                 params.maturity,
                 address(this),
                 params.bondTo,
                 params.insuranceTo,
-                assetIn,
+                assetInETH,
                 params.percent,
                 params.minBond,
                 params.minInsurance,
@@ -234,12 +234,12 @@ library Lend {
         IFactory factory,
         IWETH weth,
         ILend.LendGivenPercentETHCollateral calldata params
-    ) external returns (IPair.Claims memory claimsOut) {
-        claimsOut = _lendGivenPercent(
+    ) external returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        (assetIn, claimsOut) = _lendGivenPercent(
             natives,
-            convenience,
-            factory,
             ILend._LendGivenPercent(
+                convenience,
+                factory,
                 params.asset,
                 weth,
                 params.maturity,
@@ -257,132 +257,136 @@ library Lend {
 
     function _lendGivenBond(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
         ILend._LendGivenBond memory params
-    ) private returns (IPair.Claims memory claimsOut) {
+    ) private returns (uint256 assetIn, IPair.Claims memory claimsOut) {
         require(params.bondOut > params.assetIn, 'E517');
 
-        IPair pair = factory.getPair(params.asset, params.collateral);
+        IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
-        (uint112 yDecrease, uint112 zDecrease) = pair.givenBond(params.maturity, params.assetIn, params.bondOut);
+        (uint112 xIncrease, uint112 yDecrease, uint112 zDecrease) = pair.givenBond(
+            params.maturity,
+            params.assetIn,
+            params.bondOut
+        );
 
-        claimsOut = _lend(
+        (assetIn, claimsOut) = _lend(
             natives,
-            convenience,
-            pair,
             ILend._Lend(
+                params.convenience,
+                pair,
                 params.asset,
                 params.collateral,
                 params.maturity,
                 params.from,
                 params.bondTo,
                 params.insuranceTo,
-                params.assetIn,
+                xIncrease,
                 yDecrease,
                 zDecrease,
                 params.deadline
             )
         );
 
-        require(claimsOut.insurance >= params.minInsurance, 'E515');
+        require(uint128(claimsOut.insuranceInterest) + claimsOut.insurancePrincipal >= params.minInsurance, 'E515');
     }
 
     function _lendGivenInsurance(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
         ILend._LendGivenInsurance memory params
-    ) private returns (IPair.Claims memory claimsOut) {
-        IPair pair = factory.getPair(params.asset, params.collateral);
+    ) private returns (uint256 assetIn, IPair.Claims memory claimsOut) {
+        IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
 
-        (uint112 yDecrease, uint112 zDecrease) = pair.givenInsurance(
+        (uint112 xIncrease, uint112 yDecrease, uint112 zDecrease) = pair.givenInsurance(
             params.maturity,
             params.assetIn,
             params.insuranceOut
         );
 
-        claimsOut = _lend(
+        (assetIn, claimsOut) = _lend(
             natives,
-            convenience,
-            pair,
             ILend._Lend(
+                params.convenience,
+                pair,
                 params.asset,
                 params.collateral,
                 params.maturity,
                 params.from,
                 params.bondTo,
                 params.insuranceTo,
-                params.assetIn,
+                xIncrease,
                 yDecrease,
                 zDecrease,
                 params.deadline
             )
         );
 
-        require(claimsOut.bond >= params.minBond, 'E514');
+        require(uint128(claimsOut.bondInterest) + claimsOut.bondPrincipal >= params.minBond, 'E514');
     }
 
     function _lendGivenPercent(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IFactory factory,
         ILend._LendGivenPercent memory params
-    ) private returns (IPair.Claims memory claimsOut) {
+    ) private returns (uint256 assetIn, IPair.Claims memory claimsOut) {
         require(params.percent <= 0x100000000, 'E505');
 
-        IPair pair = factory.getPair(params.asset, params.collateral);
+        IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
 
-        (uint112 yDecrease, uint112 zDecrease) = pair.givenPercent(params.maturity, params.assetIn, params.percent);
+        (uint112 xIncrease, uint112 yDecrease, uint112 zDecrease) = pair.givenPercent(
+            params.maturity,
+            params.assetIn,
+            params.percent
+        );
 
-        claimsOut = _lend(
+        (assetIn, claimsOut) = _lend(
             natives,
-            convenience,
-            pair,
             ILend._Lend(
+                params.convenience,
+                pair,
                 params.asset,
                 params.collateral,
                 params.maturity,
                 params.from,
                 params.bondTo,
                 params.insuranceTo,
-                params.assetIn,
+                xIncrease,
                 yDecrease,
                 zDecrease,
                 params.deadline
             )
         );
 
-        require(claimsOut.bond >= params.minBond, 'E514');
-        require(claimsOut.insurance >= params.minInsurance, 'E515');
+        require(uint128(claimsOut.bondInterest) + claimsOut.bondPrincipal >= params.minBond, 'E514');
+        require(uint128(claimsOut.insuranceInterest) + claimsOut.insurancePrincipal >= params.minInsurance, 'E515');
     }
 
     function _lend(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IConvenience convenience,
-        IPair pair,
         ILend._Lend memory params
-    ) private returns (IPair.Claims memory claimsOut) {
+    ) private returns (uint256 assetIn, IPair.Claims memory claimsOut) {
         require(params.deadline >= block.timestamp, 'E504');
         require(params.maturity > block.timestamp, 'E508');
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
-            native.deploy(convenience, pair, params.asset, params.collateral, params.maturity);
+            native.deploy(params.convenience, params.pair, params.asset, params.collateral, params.maturity);
 
-        claimsOut = pair.lend(
-            params.maturity,
-            address(native.bond),
-            address(native.insurance),
-            params.xIncrease,
-            params.yDecrease,
-            params.zDecrease,
-            bytes(abi.encode(params.asset, params.collateral, params.from))
+        (assetIn, claimsOut) = params.pair.lend(
+            IPair.LendParam(
+                params.maturity,
+                address(this),
+                address(this),
+                params.xIncrease,
+                params.yDecrease,
+                params.zDecrease,
+                bytes(abi.encode(params.asset, params.collateral, params.from))
+            )
         );
 
-        native.bond.mint(params.bondTo, claimsOut.bond);
-        native.insurance.mint(params.insuranceTo, claimsOut.insurance);
+        native.bondInterest.mint(params.bondTo, claimsOut.bondInterest);
+        native.bondPrincipal.mint(params.bondTo, claimsOut.bondPrincipal);
+        native.insuranceInterest.mint(params.insuranceTo, claimsOut.insuranceInterest);
+        native.insurancePrincipal.mint(params.insuranceTo, claimsOut.insurancePrincipal);
     }
 }
