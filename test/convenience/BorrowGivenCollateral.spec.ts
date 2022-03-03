@@ -42,34 +42,61 @@ async function fixture(): Promise<Fixture> {
 const testCases = [
   {
     newLiquidityParams: {
-      assetIn: 100000n,
-      debtIn: 444n,
-      collateralIn:1000n
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
     },
     borrowGivenCollateralParams: {
-      assetOut: 700n,
-      collateralIn:600n,
-      maxDebt: 13000n
+      assetOut: 500n,
+      collateralIn:917n,
+      maxDebt: 530n
+    }
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    borrowGivenCollateralParams: {
+      assetOut: 200n,
+      collateralIn:189n,
+      maxDebt: 240n
     }
   }
+  ,
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    borrowGivenCollateralParams: {
+      assetOut: 100n,
+      collateralIn:86n,
+      maxDebt: 1300n
+    }
+  },
   
 ]
 
 
 
 describe('Borrow Given Collateral',()=>{
+  testCases.forEach((testCase, index) => {
   it('Succeeded', async()=>{
+    
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
     let currentTime = await now()
 
     const constructorFixture = await loadFixture(fixture)
     await setTime(Number(currentTime+5000n))
-    const newLiquidity = await newLiquidityFixture(constructorFixture,signers[0],testCases[0].newLiquidityParams)
+    const newLiquidity = await newLiquidityFixture(constructorFixture,signers[0],testCase.newLiquidityParams)
     await setTime(Number(currentTime+10000n))
-    const borrow = await borrowGivenCollateralFixture(newLiquidity,signers[0],testCases[0].borrowGivenCollateralParams)
+    const borrow = await borrowGivenCollateralFixture(newLiquidity,signers[0],testCase.borrowGivenCollateralParams)
     
-    await borrowGivenCollateralProperties(testCases[0],currentTime,borrow,assetToken.address,collateralToken.address)
-
+    await borrowGivenCollateralProperties(testCase,currentTime,borrow,assetToken.address,collateralToken.address)
+  })
   })
 })
 
