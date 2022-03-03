@@ -81,12 +81,16 @@ describe('Borrow Given Debt', () => {
 describe('Borrow Given Debt ETH Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHAssetFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
       const borrowGivenDebt = await borrowGivenDebtETHAssetFixture(
         newLiquidity,
@@ -98,7 +102,7 @@ describe('Borrow Given Debt ETH Asset', () => {
         testCase,
         currentTime,
         borrowGivenDebt,
-        assetToken.address,
+        convenience.wethContract.address,
         collateralToken.address
       )
     })
@@ -108,12 +112,16 @@ describe('Borrow Given Debt ETH Asset', () => {
 describe('Borrow Given Debt ETH Collateral', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHCollateralFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
       const borrowGivenDebt = await borrowGivenDebtETHCollateralFixture(
         newLiquidity,
@@ -126,7 +134,7 @@ describe('Borrow Given Debt ETH Collateral', () => {
         currentTime,
         borrowGivenDebt,
         assetToken.address,
-        collateralToken.address
+        convenience.wethContract.address
       )
     })
   })

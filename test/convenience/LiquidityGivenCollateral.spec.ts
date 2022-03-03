@@ -9,6 +9,8 @@ import {
   liquidityGivenCollateralFixture,
   liquidityGivenCollateralETHCollateralFixture,
   liquidityGivenCollateralETHAssetFixture,
+  newLiquidityETHAssetFixture,
+  newLiquidityETHCollateralFixture,
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
@@ -85,12 +87,16 @@ describe('Liquidity Given Collateral', () => {
 describe('Liquidity Given Collateral ETH Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHAssetFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
       const liquidityGivenCollateral = await liquidityGivenCollateralETHAssetFixture(
         newLiquidity,
@@ -102,7 +108,7 @@ describe('Liquidity Given Collateral ETH Asset', () => {
         testCase,
         currentTime,
         liquidityGivenCollateral,
-        assetToken.address,
+        convenience.wethContract.address,
         collateralToken.address
       )
     })
@@ -112,12 +118,16 @@ describe('Liquidity Given Collateral ETH Asset', () => {
 describe('Liquidity Given Collateral ETH Collateral', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHCollateralFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
       const liquidityGivenCollateral = await liquidityGivenCollateralETHCollateralFixture(
         newLiquidity,
@@ -130,7 +140,7 @@ describe('Liquidity Given Collateral ETH Collateral', () => {
         currentTime,
         liquidityGivenCollateral,
         assetToken.address,
-        collateralToken.address
+        convenience.wethContract.address
       )
     })
   })
