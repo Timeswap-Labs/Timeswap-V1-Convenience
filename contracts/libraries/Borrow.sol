@@ -11,7 +11,6 @@ import {BorrowMath} from './BorrowMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import 'hardhat/console.sol';
 
 library Borrow {
     using BorrowMath for IPair;
@@ -477,9 +476,6 @@ library Borrow {
             )
         );
 
-        console.log('asset',params.assetOut);
-        console.log('debt',dueOut.debt);
-        console.log('collateral',dueOut.collateral);
 
         require(dueOut.debt <= params.maxDebt, 'E512');
         require(dueOut.collateral <= params.maxCollateral, 'E513');

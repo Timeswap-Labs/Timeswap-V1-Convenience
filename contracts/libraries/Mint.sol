@@ -11,7 +11,6 @@ import {MintMath} from './MintMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import 'hardhat/console.sol';
 
 library Mint {
     using MintMath for IPair;
@@ -553,7 +552,6 @@ library Mint {
         require(pair.totalLiquidity(params.maturity) != 0, 'E507');
 
         (uint112 xIncrease, uint112 yIncrease, uint112 zIncrease) = pair.givenAsset(params.maturity, params.assetIn);
-        console.log('min liq in contract',params.minLiquidity);
 
         (assetIn, liquidityOut, id, dueOut) = _mint(
             natives,
@@ -641,7 +639,6 @@ library Mint {
             params.maturity,
             params.collateralIn
         );
-        console.log('min liq in contract',params.minLiquidity);
         (assetIn, liquidityOut, id, dueOut) = _mint(
             natives,
             IMint._Mint(
@@ -660,7 +657,6 @@ library Mint {
                 params.deadline
             )
         );
-        console.log('liq out contract',liquidityOut);
         require(liquidityOut >= params.minLiquidity, 'E511');
         require(xIncrease <= params.maxAsset, 'E519');
         require(dueOut.debt <= params.maxDebt, 'E512');
@@ -696,7 +692,6 @@ library Mint {
         );
         native.liquidity.mint(params.liquidityTo, liquidityOut);
         native.collateralizedDebt.mint(params.dueTo, id);
-        console.log('liq out',liquidityOut);
-        console.log('mint success');  
+ 
     }
 }

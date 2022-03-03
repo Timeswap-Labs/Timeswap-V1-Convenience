@@ -10,7 +10,6 @@ import {ILend} from '../interfaces/ILend.sol';
 import {LendMath} from './LendMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
-import 'hardhat/console.sol';
 
 library Lend {
     using LendMath for IPair;
@@ -357,9 +356,7 @@ library Lend {
                 params.deadline
             )
         );
-        console.log('insurance out is',uint128(claimsOut.insuranceInterest) + claimsOut.insurancePrincipal );
-        console.log('bond out is', uint128(claimsOut.bondInterest) + claimsOut.bondPrincipal);
-        console.log('assetIn is', params.assetIn);
+
         require(uint128(claimsOut.bondInterest) + claimsOut.bondPrincipal >= params.minBond, 'E514');
         require(uint128(claimsOut.insuranceInterest) + claimsOut.insurancePrincipal >= params.minInsurance, 'E515');
     }

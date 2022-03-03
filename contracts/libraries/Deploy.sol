@@ -9,7 +9,7 @@ import {DeployLiquidity} from './DeployLiquidity.sol';
 import {DeployBonds} from './DeployBonds.sol';
 import {DeployInsurances} from './DeployInsurances.sol';
 import {DeployCollateralizedDebt} from './DeployCollateralizedDebt.sol';
-import 'hardhat/console.sol';
+
 library Deploy {
     using Strings for uint256;
     using DeployLiquidity for IConvenience.Native;
