@@ -49,112 +49,6 @@ const testCases = [
       maxCollateral: 10000n,
     }
   }
-  ,
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 100000n,
-      minLiquidity:3000000n,
-      maxDebt: 110000n,
-      maxCollateral: 90000n,
-    }
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 100000n,
-      debtIn: 130000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
-  }
-  ,{
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
-  }
-  ,{
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
-  }
-  ,
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
-  }
 ]
 
 
@@ -168,7 +62,7 @@ describe('Add Liquidity',()=>{
     await setTime(Number(currentTime+5000n))
     const newLiquidity = await newLiquidityFixture(constructorFixture,signers[0],testCases[0].newLiquidityParams)
     await setTime(Number(currentTime+10000n))
-    const addLiquidity = await liquidityGivenAssetFixture(newLiquidity,signers[0],testCases[0].addLiquidityParams)
+    const addLiquidity = await liquidityGivenAssetFixture(constructorFixture,signers[0],testCases[0].addLiquidityParams)
     
     await addLiquidityProperties(testCases[0],currentTime,addLiquidity,assetToken.address,collateralToken.address)
 
