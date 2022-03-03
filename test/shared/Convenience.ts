@@ -123,7 +123,7 @@ export class Convenience {
       deadline: maturity,
     })
   }
-  async liquidityGivenETHAsset(
+  async liquidityGivenAssetETHAsset(
     maturity: bigint,
     collateral: string,
     assetIn: bigint,
@@ -145,7 +145,7 @@ export class Convenience {
       { value: assetIn }
     )
   }
-  async liquidityGivenETHCollateral(
+  async liquidityGivenAssetETHCollateral(
     maturity: bigint,
     asset: string,
     assetIn: bigint,
@@ -165,6 +165,138 @@ export class Convenience {
         deadline: maturity,
       },
       { value: maxCollateral }
+    )
+  }
+  async liquidityGivenDebt(
+    maturity: bigint,
+    asset: string,
+    collateral: string,
+    debtIn: bigint,
+    minLiquidity: bigint,
+    maxAsset: bigint,
+    maxCollateral: bigint
+  ) {
+    return await this.convenienceContract.liquidityGivenDebt({
+      maturity: maturity,
+      asset: asset,
+      collateral: collateral,
+      debtIn: debtIn,
+      minLiquidity: minLiquidity,
+      maxCollateral: maxCollateral,
+      maxAsset: maxAsset,
+      dueTo: this.signer.address,
+      liquidityTo: this.signer.address,
+      deadline: maturity,
+    })
+  }
+  async liquidityGivenDebtETHAsset(
+    maturity: bigint,
+    collateral: string,
+    debtIn: bigint,
+    minLiquidity: bigint,
+    maxAsset: bigint,
+    maxCollateral: bigint
+  ) {
+    return await this.convenienceContract.liquidityGivenDebtETHAsset(
+      {
+        maturity: maturity,
+        collateral: collateral,
+        minLiquidity: minLiquidity,
+        debtIn: debtIn,
+        maxCollateral: maxCollateral,
+        dueTo: this.signer.address,
+        liquidityTo: this.signer.address,
+        deadline: maturity,
+      },
+      { value: maxAsset }
+    )
+  }
+  async liquidityGivenDebtETHCollateral(
+    maturity: bigint,
+    asset: string,
+    debtIn: bigint,
+    minLiquidity: bigint,
+    maxAsset: bigint,
+    maxCollateral: bigint
+  ) {
+    return await this.convenienceContract.liquidityGivenDebtETHCollateral(
+      {
+        maturity: maturity,
+        asset: asset,
+        debtIn: debtIn,
+        minLiquidity: minLiquidity,
+        maxAsset: maxAsset,
+        dueTo: this.signer.address,
+        liquidityTo: this.signer.address,
+        deadline: maturity,
+      },
+      { value: maxCollateral }
+    )
+  }
+  async liquidityGivenCollateral(
+    maturity: bigint,
+    asset: string,
+    collateral: string,
+    collateralIn: bigint,
+    minLiquidity: bigint,
+    maxDebt: bigint,
+    maxAsset: bigint
+  ) {
+    return await this.convenienceContract.liquidityGivenCollateral({
+      maturity: maturity,
+      asset: asset,
+      collateral: collateral,
+      collateralIn: collateralIn,
+      minLiquidity: minLiquidity,
+      maxDebt: maxDebt,
+      maxAsset: maxAsset,
+      dueTo: this.signer.address,
+      liquidityTo: this.signer.address,
+      deadline: maturity,
+    })
+  }
+  async liquidityGivenCollateralETHAsset(
+    maturity: bigint,
+    collateral: string,
+    collateralIn: bigint,
+    minLiquidity: bigint,
+    maxDebt: bigint,
+    maxAsset: bigint
+  ) {
+    return await this.convenienceContract.liquidityGivenCollateralETHAsset(
+      {
+        maturity: maturity,
+        collateral: collateral,
+        collateralIn: collateralIn,
+        minLiquidity: minLiquidity,
+        maxDebt: maxDebt,
+        dueTo: this.signer.address,
+        liquidityTo: this.signer.address,
+        deadline: maturity,
+      },
+      { value:  maxAsset }
+    )
+  }
+  async liquidityGivenCollateralETHCollateral(
+    maturity: bigint,
+    asset: string,
+    collateralIn: bigint,
+    minLiquidity: bigint,
+    maxDebt: bigint,
+    maxAsset: bigint
+  ) {
+    return await this.convenienceContract.liquidityGivenCollateralETHCollateral(
+      {
+        maturity: maturity,
+        asset: asset,
+        minLiquidity: minLiquidity,
+        maxDebt: maxDebt,
+        maxAsset: maxAsset,
+        dueTo: this.signer.address,
+        liquidityTo: this.signer.address,
+        deadline: maturity,
+      },
+      { value: collateralIn }
     )
   }
   async removeLiquidity(maturity: bigint, asset: string, collateral: string, liquidityIn: bigint) {
