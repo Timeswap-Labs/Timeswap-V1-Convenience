@@ -50,117 +50,115 @@ const testCases = [
     },
     addLiquidityParams: {
       assetIn: 10000n,
-      minLiquidity:5700000n,
+      minLiquidity: 5700000n,
       maxDebt: 12000n,
       maxCollateral: 10000n,
-    }
-  }
-  ,
+    },
+  },
   {
     newLiquidityParams: {
       assetIn: 10000n,
       debtIn: 12000n,
-      collateralIn:1000n
+      collateralIn: 1000n,
     },
     addLiquidityParams: {
       assetIn: 100000n,
-      minLiquidity:3000000n,
+      minLiquidity: 3000000n,
       maxDebt: 110000n,
       maxCollateral: 90000n,
-    }
+    },
   },
   {
     newLiquidityParams: {
       assetIn: 100000n,
       debtIn: 130000n,
-      collateralIn:1000n
+      collateralIn: 1000n,
     },
     addLiquidityParams: {
       assetIn: 10000n,
-      minLiquidity:5700000n,
+      minLiquidity: 5700000n,
       maxDebt: 12000n,
       maxCollateral: 10000n,
-    }
-  }
-  ,{
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
     },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
-  }
-  ,{
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn:1000n
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity:5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    }
   },
   {
     newLiquidityParams: {
       assetIn: 10000n,
       debtIn: 12000n,
-      collateralIn:1000n
+      collateralIn: 1000n,
     },
     addLiquidityParams: {
       assetIn: 10000n,
-      minLiquidity:5700000n,
+      minLiquidity: 5700000n,
       maxDebt: 12000n,
       maxCollateral: 10000n,
-    }
+    },
   },
   {
     newLiquidityParams: {
       assetIn: 10000n,
       debtIn: 12000n,
-      collateralIn:1000n
+      collateralIn: 1000n,
     },
     addLiquidityParams: {
       assetIn: 10000n,
-      minLiquidity:5700000n,
+      minLiquidity: 5700000n,
       maxDebt: 12000n,
       maxCollateral: 10000n,
-    }
+    },
   },
   {
     newLiquidityParams: {
       assetIn: 10000n,
       debtIn: 12000n,
-      collateralIn:1000n
+      collateralIn: 1000n,
     },
     addLiquidityParams: {
       assetIn: 10000n,
-      minLiquidity:5700000n,
+      minLiquidity: 5700000n,
       maxDebt: 12000n,
       maxCollateral: 10000n,
-    }
-  }
-  ,
+    },
+  },
   {
     newLiquidityParams: {
       assetIn: 10000n,
       debtIn: 12000n,
-      collateralIn:1000n
+      collateralIn: 1000n,
     },
     addLiquidityParams: {
       assetIn: 10000n,
-      minLiquidity:5700000n,
+      minLiquidity: 5700000n,
       maxDebt: 12000n,
       maxCollateral: 10000n,
-    }
-  }
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    addLiquidityParams: {
+      assetIn: 10000n,
+      minLiquidity: 5700000n,
+      maxDebt: 12000n,
+      maxCollateral: 10000n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    addLiquidityParams: {
+      assetIn: 10000n,
+      minLiquidity: 5700000n,
+      maxDebt: 12000n,
+      maxCollateral: 10000n,
+    },
+  },
 ]
 
 describe('Add Liquidity', () => {
@@ -506,11 +504,10 @@ async function addLiquidityProperties(
     currentTime + 5_000n,
     maturity
   )
-  let { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = { yIncreaseNewLiquidity:0n, zIncreaseNewLiquidity:0n }
-  if(maybeNewMintParams!=false){
+  let { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = { yIncreaseNewLiquidity: 0n, zIncreaseNewLiquidity: 0n }
+  if (maybeNewMintParams != false) {
     yIncreaseNewLiquidity = maybeNewMintParams.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewMintParams.zIncreaseNewLiquidity
-
   }
 
   const state = {

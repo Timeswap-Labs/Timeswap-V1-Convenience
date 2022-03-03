@@ -39,6 +39,7 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
+
 const testCases = [
   {
     newLiquidityParams: {
@@ -100,166 +101,63 @@ describe('Borrow Given Collateral',()=>{
   })
 })
 
-// describe('Borrow Given Collateral', () => {
-//   it('Succeeded', async () => {
-//     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
-//     let currentTime = await now()
+describe('Borrow Given Collateral ETH Asset', () => {
+  it('Succeeded', async () => {
+    const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
+    let currentTime = await now()
 
-//     await fc.assert(
-//       fc.asyncProperty(
-//         fc
-//           .record({
-//             newLiquidityParams: fc
-//               .record({
-//                 assetIn: fc.bigUintN(50),
-//                 debtIn: fc.bigUintN(50),
-//                 collateralIn: fc.bigUintN(50),
-//               })
-//               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             borrowGivenCollateralParams: fc.record({
-//               assetOut: fc.bigUintN(50),
-//               collateralIn: fc.bigUintN(50),
-//               maxDebt: fc.bigUintN(50),
-//             }),
-//           })
-//           .filter((x) =>
-//             BorrowFilter.borrowGivenCollateralSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)
-//           )
-//           .noShrink(),
-//         async (data) => {
-//           const success = async () => {
-//             const constructor = await loadFixture(fixture)
-//             await setTime(Number(currentTime + 5000n))
-//             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
-//             await setTime(Number(currentTime + 10000n))
-//             const borrowGivenCollateral = await borrowGivenCollateralFixture(
-//               newLiquidity,
-//               signers[0],
-//               data.borrowGivenCollateralParams
-//             )
-//             return borrowGivenCollateral
-//           }
+    const constructorFixture = await loadFixture(fixture)
+    await setTime(Number(currentTime + 5000n))
+    const newLiquidity = await newLiquidityETHAssetFixture(
+      constructorFixture,
+      signers[0],
+      testCases[0].newLiquidityParams
+    )
+    await setTime(Number(currentTime + 10000n))
+    const borrow = await borrowGivenCollateralETHAssetFixture(
+      newLiquidity,
+      signers[0],
+      testCases[0].borrowGivenCollateralParams
+    )
 
-//           await borrowGivenCollateralProperties(data, currentTime, success, assetToken.address, collateralToken.address)
-//         }
-//       ),
-//       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-//     )
-//   }).timeout(600000)
+    await borrowGivenCollateralProperties(
+      testCases[0],
+      currentTime,
+      borrow,
+      convenience.wethContract.address,
+      collateralToken.address
+    )
+  })
+})
 
-// })
+describe('Borrow Given Collateral ETH Collateral', () => {
+  it('Succeeded', async () => {
+    const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
+    let currentTime = await now()
 
-// describe('Borrow Given Collateral ETH Asset', () => {
-//   it('Succeeded', async () => {
-//     const { maturity, convenience, collateralToken } = await loadFixture(fixture)
-//     let currentTime = await now()
+    const constructorFixture = await loadFixture(fixture)
+    await setTime(Number(currentTime + 5000n))
+    const newLiquidity = await newLiquidityETHCollateralFixture(
+      constructorFixture,
+      signers[0],
+      testCases[0].newLiquidityParams
+    )
+    await setTime(Number(currentTime + 10000n))
+    const borrow = await borrowGivenCollateralETHCollateralFixture(
+      newLiquidity,
+      signers[0],
+      testCases[0].borrowGivenCollateralParams
+    )
 
-//     await fc.assert(
-//       fc.asyncProperty(
-//         fc
-//           .record({
-//             newLiquidityParams: fc
-//               .record({
-//                 assetIn: fc.bigUintN(50),
-//                 debtIn: fc.bigUintN(50),
-//                 collateralIn: fc.bigUintN(50),
-//               })
-//               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             borrowGivenCollateralParams: fc.record({
-//               assetOut: fc.bigUintN(50),
-//               collateralIn: fc.bigUintN(50),
-//               maxDebt: fc.bigUintN(50),
-//             }),
-//           })
-//           .filter((x) =>
-//             BorrowFilter.borrowGivenCollateralSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)
-//           )
-//           .noShrink(),
-//         async (data) => {
-//           const success = async () => {
-//             const constructor = await loadFixture(fixture)
-//             await setTime(Number(currentTime + 5000n))
-//             const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
-//             await setTime(Number(currentTime + 10000n))
-//             const borrowGivenCollateral = await borrowGivenCollateralETHAssetFixture(
-//               newLiquidity,
-//               signers[0],
-//               data.borrowGivenCollateralParams
-//             )
-//             return borrowGivenCollateral
-//           }
-
-//           await borrowGivenCollateralProperties(
-//             data,
-//             currentTime,
-//             success,
-//             convenience.wethContract.address,
-//             collateralToken.address
-//           )
-//         }
-//       ),
-//       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-//     )
-//   }).timeout(600000)
-// })
-
-// describe('Borrow Given Collateral ETH Collateral', () => {
-//   it('Succeeded', async () => {
-//     const { maturity, assetToken, convenience } = await loadFixture(fixture)
-//     let currentTime = await now()
-
-//     await fc.assert(
-//       fc.asyncProperty(
-//         fc
-//           .record({
-//             newLiquidityParams: fc
-//               .record({
-//                 assetIn: fc.bigUintN(50),
-//                 debtIn: fc.bigUintN(50),
-//                 collateralIn: fc.bigUintN(50),
-//               })
-//               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             borrowGivenCollateralParams: fc.record({
-//               assetOut: fc.bigUintN(50),
-//               collateralIn: fc.bigUintN(50),
-//               maxDebt: fc.bigUintN(50),
-//             }),
-//           })
-//           .filter((x) =>
-//             BorrowFilter.borrowGivenCollateralSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)
-//           )
-//           .noShrink(),
-//         async (data) => {
-//           const success = async () => {
-//             const constructor = await loadFixture(fixture)
-//             await setTime(Number(currentTime + 5000n))
-//             const newLiquidity = await newLiquidityETHCollateralFixture(
-//               constructor,
-//               signers[0],
-//               data.newLiquidityParams
-//             )
-//             await setTime(Number(currentTime + 10000n))
-//             const borrowGivenCollateral = await borrowGivenCollateralETHCollateralFixture(
-//               newLiquidity,
-//               signers[0],
-//               data.borrowGivenCollateralParams
-//             )
-//             return borrowGivenCollateral
-//           }
-
-//           await borrowGivenCollateralProperties(
-//             data,
-//             currentTime,
-//             success,
-//             assetToken.address,
-//             convenience.wethContract.address
-//           )
-//         }
-//       ),
-//       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-//     )
-//   }).timeout(600000)
-// })
+    await borrowGivenCollateralProperties(
+      testCases[0],
+      currentTime,
+      borrow,
+      assetToken.address,
+      convenience.wethContract.address
+    )
+  })
+})
 
 async function borrowGivenCollateralProperties(
   data: {
@@ -307,16 +205,15 @@ async function borrowGivenCollateralProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { xDecrease, yIncrease, zIncrease } =
-    BorrowMath.getBorrowGivenCollateralParams(
-      state,
-      PROTOCOL_FEE,
-      FEE,
-      data.borrowGivenCollateralParams.assetOut,
-      result.maturity,
-      currentTime + 10_000n,
-      data.borrowGivenCollateralParams.collateralIn
-    )
+  const { xDecrease, yIncrease, zIncrease } = BorrowMath.getBorrowGivenCollateralParams(
+    state,
+    PROTOCOL_FEE,
+    FEE,
+    data.borrowGivenCollateralParams.assetOut,
+    result.maturity,
+    currentTime + 10_000n,
+    data.borrowGivenCollateralParams.collateralIn
+  )
 
   const delState = {
     x: xDecrease,

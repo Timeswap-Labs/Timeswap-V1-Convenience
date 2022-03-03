@@ -125,12 +125,16 @@ describe('Borrow Given Percent', () => {
 describe('Borrow Given Percent ETH Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity, convenience,assetToken, collateralToken } = await loadFixture(fixture)
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityETHAssetFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHAssetFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
       const borrowGivenPercent = await borrowGivenPercentETHAssetFixture(
         newLiquidity,
@@ -152,12 +156,16 @@ describe('Borrow Given Percent ETH Asset', () => {
 describe('Borrow Given Percent ETH Collateral', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity, assetToken, convenience,collateralToken } = await loadFixture(fixture)
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityETHCollateralFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHCollateralFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
       const borrowGivenPercent = await borrowGivenPercentETHCollateralFixture(
         newLiquidity,
