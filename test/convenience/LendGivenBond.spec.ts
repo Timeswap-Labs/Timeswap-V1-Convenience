@@ -69,7 +69,38 @@ describe('Lend Given Bond', () => {
     })
   })
 })
+describe('Lend Given Bond ETH Asset', () => {
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, convenience, collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
 
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityETHAssetFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      await setTime(Number(currentTime + 10000n))
+      const lendGivenBond = await lendGivenBondETHAssetFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
+
+      await lendGivenBondProperties(testCase, currentTime, lendGivenBond, convenience.wethContract.address, collateralToken.address)
+    })
+  })
+})
+describe('Lend Given Bond Collateral', () => {
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, assetToken, convenience } = await loadFixture(fixture)
+      let currentTime = await now()
+
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityETHCollateralFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      await setTime(Number(currentTime + 10000n))
+      const lendGivenBond = await lendGivenBondETHCollateralFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
+
+      await lendGivenBondProperties(testCase, currentTime, lendGivenBond, assetToken.address, convenience.wethContract.address)
+    })
+  })
+})
 // describe('Lend Given Bond', () => {
 //   it('Succeeded', async () => {
 //     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)

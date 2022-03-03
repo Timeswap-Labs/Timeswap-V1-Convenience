@@ -59,8 +59,8 @@ const testCases = [
       collateralIn: 1000n,
     },
     lendGivenInsuranceParams: {
-      assetIn: 1000n,
-      insuranceOut: 5n,
+      assetIn: 100n,
+      insuranceOut: n,
       minBond: 1005n,
     },
   },
