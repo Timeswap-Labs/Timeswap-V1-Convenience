@@ -62,58 +62,6 @@ const testCases = [
       collateralIn: 1000n,
     },
     addLiquidityParams: {
-      assetIn: 100000n,
-      minLiquidity: 3000000n,
-      maxDebt: 110000n,
-      maxCollateral: 90000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 100000n,
-      debtIn: 130000n,
-      collateralIn: 1000n,
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    addLiquidityParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -177,7 +125,38 @@ describe('Add Liquidity', () => {
     })
   })
 })
+describe('Add Liquidity Given ETH Asset', () => {
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, assetToken, convenience,collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
 
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityETHAssetFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      await setTime(Number(currentTime + 10000n))
+      const addLiquidity = await liquidityGivenAssetETHAssetFixture(newLiquidity, signers[0], testCase.addLiquidityParams)
+
+      await addLiquidityProperties(testCase, currentTime, addLiquidity, convenience.wethContract.address, collateralToken.address)
+    })
+  })
+})
+describe('Add Liquidity ETH Collateral', () => {
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, assetToken,convenience, collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
+
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityETHCollateralFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      await setTime(Number(currentTime + 10000n))
+      const addLiquidity = await liquidityGivenAssetETHCollateralFixture(newLiquidity, signers[0], testCase.addLiquidityParams)
+
+      await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, convenience.wethContract.address)
+    })
+  })
+})
 // describe('Add Liquidity', () => {
 //   it('Succeeded', async () => {
 //     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)

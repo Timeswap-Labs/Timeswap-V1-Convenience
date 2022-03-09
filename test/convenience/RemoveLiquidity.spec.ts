@@ -326,23 +326,26 @@ async function removeLiquidityProperties(
   collateralAddress: string
 ) {
   const result = await loadFixture(success)
-  
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+  const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
     data.newLiquidityParams.collateralIn,
-    currentTime + 5000n,
+    currentTime + 5_000n,
     maturity
   )
+  if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
+    yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+    zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+  }
   const state = {
     x: data.newLiquidityParams.assetIn,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const liquidityBalanceNew = LiquidityMath.liquidityCalculateNewLiquidity(
-    state,
-    currentTime + 5000n,
-    maturity
+  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(
+    state.x
   )
   const liquidityBalance = liquidityBalanceNew - data.removeLiquidityParams.liquidityIn
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)

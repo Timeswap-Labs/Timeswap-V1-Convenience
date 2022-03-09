@@ -173,7 +173,7 @@ async function borrowGivenCollateralProperties(
     }
   },
   currentTime: bigint,
-  fixture: {
+  fixture:  {
     convenience: Convenience
     assetToken: TestToken
     collateralToken: TestToken
