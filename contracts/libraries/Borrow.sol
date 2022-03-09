@@ -119,7 +119,7 @@ library Borrow {
         );
 
         if (maxCollateral > dueOut.collateral) {
-            uint256 excess;
+            uint256 excess = maxCollateral;
             unchecked {
                 excess -= dueOut.collateral;
             }
@@ -475,7 +475,6 @@ library Borrow {
                 params.deadline
             )
         );
-
 
         require(dueOut.debt <= params.maxDebt, 'E512');
         require(dueOut.collateral <= params.maxCollateral, 'E513');
