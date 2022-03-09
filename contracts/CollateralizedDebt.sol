@@ -76,12 +76,8 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         maturity = _maturity;
     }
 
-    modifier onlyConvenience() {
+    function mint(address to, uint256 id) external override {
         require(msg.sender == address(convenience), 'E403');
-        _;
-    }
-
-    function mint(address to, uint256 id) external override onlyConvenience {
         _safeMint(to, id);
     }
 }
