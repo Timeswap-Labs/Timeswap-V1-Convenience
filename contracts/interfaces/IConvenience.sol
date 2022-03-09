@@ -353,7 +353,6 @@ interface IConvenience is
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
     function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
         external
-        payable
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.

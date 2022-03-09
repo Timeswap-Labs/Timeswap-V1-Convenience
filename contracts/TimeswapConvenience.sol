@@ -327,7 +327,6 @@ contract TimeswapConvenience is IConvenience {
     /// @inheritdoc IConvenience
     function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
         external
-        payable
         override
         returns (uint256 assetIn, IPair.Claims memory claimsOut)
     {
