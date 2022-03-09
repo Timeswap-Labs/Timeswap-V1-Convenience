@@ -158,6 +158,10 @@ Factory address should not be the weth address
 
 Token does not exist
 
+### E615
+
+Can only receive ETH from WETH contract
+
 ## Callback
 
 ### E701

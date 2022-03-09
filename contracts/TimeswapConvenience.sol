@@ -72,7 +72,7 @@ contract TimeswapConvenience is IConvenience {
     /* ===== UPDATE ===== */
 
     receive() external payable {
-        require(msg.sender == address(weth));
+        require(msg.sender == address(weth), 'E615');
     }
 
     /// @inheritdoc IConvenience
@@ -555,67 +555,48 @@ contract TimeswapConvenience is IConvenience {
             data,
             (IERC20, IERC20, address, address)
         );
-        IPair pair = factory.getPair(asset, collateral);
-
-        require(msg.sender == address(pair), 'E701');
-
-        IWETH _weth = weth;
-
-        if (assetFrom == address(this)) {
-            _weth.deposit{value: assetIn}();
-            asset.safeTransfer(pair, assetIn);
-        } else {
-            asset.safeTransferFrom(assetFrom, pair, assetIn);
-        }
-
-        if (collateralFrom == address(this)) {
-            _weth.deposit{value: collateralIn}();
-            collateral.safeTransfer(pair, collateralIn);
-        } else {
-            collateral.safeTransferFrom(collateralFrom, pair, collateralIn);
-        }
+        IPair pair = getPairAndVerify(asset, collateral);
+        callbackTransfer(asset, assetFrom, pair, assetIn);
+        callbackTransfer(collateral, collateralFrom, pair, collateralIn);
     }
 
     /// @inheritdoc ITimeswapLendCallback
     function timeswapLendCallback(uint256 assetIn, bytes calldata data) external override {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
-        IPair pair = factory.getPair(asset, collateral);
-
-        require(msg.sender == address(pair), 'E701');
-
-        if (from == address(this)) {
-            weth.deposit{value: assetIn}();
-            asset.safeTransfer(pair, assetIn);
-        } else {
-            asset.safeTransferFrom(from, pair, assetIn);
-        }
+        IPair pair = getPairAndVerify(asset, collateral);
+        callbackTransfer(asset, from, pair, assetIn);
     }
 
     /// @inheritdoc ITimeswapBorrowCallback
     function timeswapBorrowCallback(uint112 collateralIn, bytes calldata data) external override {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
-        IPair pair = factory.getPair(asset, collateral);
-        require(msg.sender == address(pair), 'E701');
-        if (from == address(this)) {
-            weth.deposit{value: collateralIn}();
-            collateral.safeTransfer(pair, collateralIn);
-        } else {
-            collateral.safeTransferFrom(from, pair, collateralIn);
-        }
+        IPair pair = getPairAndVerify(asset, collateral);
+        callbackTransfer(collateral, from, pair, collateralIn);
     }
 
     /// @inheritdoc ITimeswapPayCallback
     function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
+        IPair pair = getPairAndVerify(asset, collateral);
+        callbackTransfer(asset, from, pair, assetIn);
+    }
 
-        IPair pair = factory.getPair(asset, collateral);
+    function getPairAndVerify(IERC20 asset, IERC20 collateral) private view returns (IPair pair) {
+        pair = factory.getPair(asset, collateral);
         require(msg.sender == address(pair), 'E701');
+    }
 
+    function callbackTransfer(
+        IERC20 token,
+        address from,
+        IPair pair,
+        uint256 tokenIn
+    ) private {
         if (from == address(this)) {
-            weth.deposit{value: assetIn}();
-            asset.safeTransfer(pair, assetIn);
+            weth.deposit{value: tokenIn}();
+            token.safeTransfer(pair, tokenIn);
         } else {
-            asset.safeTransferFrom(from, pair, assetIn);
+            token.safeTransferFrom(from, pair, tokenIn);
         }
     }
 }
