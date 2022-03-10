@@ -109,13 +109,17 @@ abstract contract ERC721 is IERC721Extended {
     }
 
     function _approve(address to, uint256 id) internal {
-        _tokenApprovals[id] = to;
+        if (to == address(0)) {
+            delete _tokenApprovals[id];
+        } else _tokenApprovals[id] = to;
 
         emit Approval(_owners[id], to, id);
     }
 
     function _setApprovalForAll(address operator, bool approved) private {
-        _operatorApprovals[msg.sender][operator] = approved;
+        if (!approved) {
+            delete _operatorApprovals[msg.sender][operator];
+        } else _operatorApprovals[msg.sender][operator] = approved;
 
         emit ApprovalForAll(msg.sender, operator, approved);
     }
