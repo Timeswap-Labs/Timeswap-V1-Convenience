@@ -7,7 +7,7 @@ import {SquareRoot} from './SquareRoot.sol';
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
-
+import 'hardhat/console.sol';
 library BorrowMath {
     using Math for uint256;
     using SquareRoot for uint256;
@@ -35,30 +35,41 @@ library BorrowMath {
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         xDecrease = getX(pair, maturity, assetOut);
-
+        console.log('xDecrease',xDecrease);
         uint256 xReserve = cp.x;
         xReserve -= xDecrease;
-
+        console.log('xReserve',xReserve);
         uint256 _yIncrease = debtIn;
+        console.log('_yIncrease 1',_yIncrease);
         _yIncrease -= xDecrease;
         _yIncrease <<= 32;
+                console.log('_yIncrease 2',_yIncrease);
         uint256 denominator = maturity;
         denominator -= block.timestamp;
+                console.log('denominator',denominator);
+
         _yIncrease /= denominator;
         yIncrease = _yIncrease.toUint112();
 
         uint256 yReserve = cp.y;
         yReserve += _yIncrease;
+                console.log('yReserve',yReserve);
 
         uint256 zReserve = cp.x;
         zReserve *= cp.y;
+                console.log('zReserve 1',zReserve);
+
         denominator = xReserve;
         denominator *= yReserve;
         zReserve = zReserve.mulDivUp(cp.z, denominator);
+                console.log('zReserve 2',zReserve);
+
 
         uint256 _zIncrease = zReserve;
         _zIncrease -= cp.z;
         zIncrease = _zIncrease.toUint112();
+                console.log('zIncrease',_zIncrease);
+
     }
 
     function givenCollateral(
@@ -83,7 +94,7 @@ library BorrowMath {
         xReserve -= xDecrease;
 
         uint256 _zIncrease = collateralIn;
-        _zIncrease = xReserve;
+        _zIncrease *= xReserve;
         uint256 subtrahend = cp.z;
         subtrahend *= xDecrease;
         _zIncrease -= subtrahend;
