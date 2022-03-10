@@ -533,12 +533,12 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function repay(Repay memory params) external override returns (uint128 assetIn, uint128 collateralOut) {
+    function repay(Repay calldata params) external override returns (uint128 assetIn, uint128 collateralOut) {
         (assetIn, collateralOut) = Pay.pay(natives, factory, params);
     }
 
     /// @inheritdoc IConvenience
-    function repayETHAsset(RepayETHAsset memory params)
+    function repayETHAsset(RepayETHAsset calldata params)
         external
         payable
         override
@@ -548,7 +548,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function repayETHCollateral(RepayETHCollateral memory params)
+    function repayETHCollateral(RepayETHCollateral calldata params)
         external
         override
         returns (uint128 assetIn, uint128 collateralOut)
