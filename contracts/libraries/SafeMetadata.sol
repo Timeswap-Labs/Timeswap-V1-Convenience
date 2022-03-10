@@ -30,13 +30,19 @@ library SafeMetadata {
         if (data.length >= 64) {
             return abi.decode(data, (string));
         } else if (data.length == 32) {
-            uint8 i = 0;
+            uint8 i;
             while (i < 32 && data[i] != 0) {
-                i++;
+                unchecked {
+                    ++i;
+                }
             }
             bytes memory bytesArray = new bytes(i);
-            for (i = 0; i < 32 && data[i] != 0; i++) {
+            uint256 length = bytesArray.length;
+            for (i = 0; i < length; ) {
                 bytesArray[i] = data[i];
+                unchecked {
+                    ++i;
+                }
             }
             return string(bytesArray);
         } else {
