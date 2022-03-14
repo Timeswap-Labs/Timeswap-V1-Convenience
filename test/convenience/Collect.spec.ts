@@ -9,7 +9,7 @@ import * as fc from 'fast-check'
 import { LendGivenBondParams, NewLiquidityParams, CollectParams } from '../types'
 import { BondInterest__factory, BondPrincipal__factory, ERC20__factory, InsuranceInterest__factory, InsurancePrincipal__factory,TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import * as LendFilter from '../filters/Lend'
+// import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 

@@ -1,5 +1,4 @@
 import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime, divUp } from '../shared/Helper'
-
 const MAXUINT112 = 2 ** 112
 const MAXUINT256 = 2 ** 256
 
@@ -16,12 +15,14 @@ export const getNewLiquidityParams = (
 const xIncrease = assetIn
 
 const duration = maturity - currentTime
-
+console.log('dur', duration)
 
 let yIncrease = debtIn
 yIncrease -=assetIn
+console.log('_Yincrease 1',yIncrease)
 yIncrease <<=32n
 yIncrease /= duration
+console.log('_yIncrease 2',yIncrease)
 if(yIncrease >= MAXUINT256 || yIncrease <=0) return false
 
 let zIncrease = collateralIn

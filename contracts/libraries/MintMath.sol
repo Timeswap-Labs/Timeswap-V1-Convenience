@@ -5,6 +5,7 @@ import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.
 import {Math} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/Math.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
+import 'hardhat/console.sol';
 library MintMath {
     using Math for uint256;
     using ConstantProduct for IPair;
@@ -27,10 +28,13 @@ library MintMath {
         xIncrease = assetIn;
         uint256 duration = maturity;
         duration -= block.timestamp;
+        console.log('duration',duration);
         uint256 _yIncrease = debtIn;
         _yIncrease -= assetIn;
+        console.log('_yIncrease 1',_yIncrease);
         _yIncrease <<= 32;
         _yIncrease /= duration;
+        console.log('_yIncrease 2',_yIncrease);
         yIncrease = _yIncrease.toUint112();
         uint256 _zIncrease = collateralIn;
         _zIncrease <<= 25;

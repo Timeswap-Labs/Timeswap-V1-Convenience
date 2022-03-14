@@ -264,13 +264,9 @@ export const getX=(protocolFee:bigint, fee:bigint,maturity:bigint,currentTime:bi
 const duration = maturity - currentTime
 
 const BASE = 0x10000000000n
-let denominator = (duration * fee ) + BASE
+let denominator = (duration * (fee+protocolFee) ) + BASE
 
 let xIncrease = assetIn*BASE/denominator
 
-denominator = (duration * protocolFee )+BASE
-
-xIncrease *= BASE
-xIncrease/=denominator
 return xIncrease
 }

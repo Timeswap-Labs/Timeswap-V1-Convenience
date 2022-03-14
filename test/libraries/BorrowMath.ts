@@ -211,20 +211,14 @@ export const getX= (protocolFee:bigint,fee:bigint,maturity:bigint,currentTime:bi
 
     let duration = maturity- currentTime;
     let numerator = duration;
-    numerator *= fee;
+    numerator *= (fee+protocolFee);
     numerator += BASE;
 
     let _xDecrease = assetOut;
     _xDecrease *= numerator;
     _xDecrease = divUp(_xDecrease,BASE);
 
-    numerator = duration;
-    numerator *= protocolFee;
-    numerator += BASE;
-
-    _xDecrease *= numerator;
-    _xDecrease = divUp(_xDecrease,BASE)
-
+   
     return _xDecrease
 
 }
