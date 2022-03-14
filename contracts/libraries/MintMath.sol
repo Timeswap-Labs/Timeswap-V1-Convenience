@@ -28,13 +28,10 @@ library MintMath {
         xIncrease = assetIn;
         uint256 duration = maturity;
         duration -= block.timestamp;
-        console.log('duration',duration);
         uint256 _yIncrease = debtIn;
         _yIncrease -= assetIn;
-        console.log('_yIncrease 1',_yIncrease);
         _yIncrease <<= 32;
         _yIncrease /= duration;
-        console.log('_yIncrease 2',_yIncrease);
         yIncrease = _yIncrease.toUint112();
         uint256 _zIncrease = collateralIn;
         _zIncrease <<= 25;

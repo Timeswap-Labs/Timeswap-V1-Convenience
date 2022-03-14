@@ -7,7 +7,7 @@ import {SquareRoot} from './SquareRoot.sol';
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
-import 'hardhat/console.sol';
+
 library LendMath {
     using Math for uint256;
     using SquareRoot for uint256;
@@ -32,46 +32,27 @@ library LendMath {
             uint112 zDecrease
         )
     {
-        console.log('!!!!!!SMARTCONTRACT BEGINS!!!!!!!!!');
         ConstantProduct.CP memory cp = pair.get(maturity);
-        console.log('maturity',maturity);
-        console.log('currentTime',block.timestamp);
         xIncrease = getX(pair, maturity, assetIn);
-        console.log('xIncrease',xIncrease);
         uint256 xReserve = cp.x;
         xReserve += xIncrease;
-        console.log('xReserve',xReserve);
-          console.log('bond Out',bondOut);
         uint256 _yDecrease = bondOut;
-          console.log('_yDecrease 1',_yDecrease);
-
         _yDecrease -= xIncrease;
-          console.log('_yDecrease 2',_yDecrease);
-
         _yDecrease <<= 32;
-        console.log('yDecrease',_yDecrease);
         uint256 denominator = maturity;
         denominator -= block.timestamp;
-        console.log('denominator',denominator);
         _yDecrease = _yDecrease.divUp(denominator);
         yDecrease = _yDecrease.toUint112();
-        console.log('yDecreae',_yDecrease);
         uint256 yReserve = cp.y;
         yReserve -= _yDecrease;
-        console.log('yReserve',yReserve);
         uint256 zReserve = cp.x;
         zReserve *= cp.y;
-        console.log('zReserve',zReserve);
         denominator = xReserve;
         denominator *= yReserve;
-        console.log('denominator',denominator);
         zReserve = zReserve.mulDivUp(cp.z, denominator);
-        console.log('zReserve',zReserve);
         uint256 _zDecrease = cp.z;
         _zDecrease -= zReserve;
         zDecrease = _zDecrease.toUint112();
-        console.log('zDecrease',zDecrease);
-          console.log('!!!!!!!!!!!!SMARTCONTRAACT ENDS!!!!!!!!!!!!!!!!');
 
     }
 
@@ -92,7 +73,6 @@ library LendMath {
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         xIncrease = getX(pair, maturity, assetIn);
-        console.log('xIncrease',xIncrease);
         uint256 xReserve = cp.x;
         xReserve += xIncrease;
 
@@ -120,7 +100,6 @@ library LendMath {
         uint256 _yDecrease = cp.y;
         _yDecrease -= yReserve;
         yDecrease = _yDecrease.toUint112();
-        console.log(yDecrease,zDecrease);
     }
 
     function givenPercent(
