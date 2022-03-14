@@ -7,7 +7,7 @@ import {SquareRoot} from './SquareRoot.sol';
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
-
+import 'hardhat/console.sol';
 library BorrowMath {
     using Math for uint256;
     using SquareRoot for uint256;
@@ -35,15 +35,14 @@ library BorrowMath {
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         xDecrease = getX(pair, maturity, assetOut);
-
         uint256 xReserve = cp.x;
         xReserve -= xDecrease;
-
         uint256 _yIncrease = debtIn;
         _yIncrease -= xDecrease;
         _yIncrease <<= 32;
         uint256 denominator = maturity;
         denominator -= block.timestamp;
+
         _yIncrease /= denominator;
         yIncrease = _yIncrease.toUint112();
 
@@ -52,13 +51,16 @@ library BorrowMath {
 
         uint256 zReserve = cp.x;
         zReserve *= cp.y;
+
         denominator = xReserve;
         denominator *= yReserve;
         zReserve = zReserve.mulDivUp(cp.z, denominator);
 
+
         uint256 _zIncrease = zReserve;
         _zIncrease -= cp.z;
         zIncrease = _zIncrease.toUint112();
+
     }
 
     function givenCollateral(
@@ -83,7 +85,7 @@ library BorrowMath {
         xReserve -= xDecrease;
 
         uint256 _zIncrease = collateralIn;
-        _zIncrease = xReserve;
+        _zIncrease *= xReserve;
         uint256 subtrahend = cp.z;
         subtrahend *= xDecrease;
         _zIncrease -= subtrahend;

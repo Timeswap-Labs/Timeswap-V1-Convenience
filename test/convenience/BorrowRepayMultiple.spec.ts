@@ -2,7 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { ethers, waffle } from 'hardhat'
 import { CollateralizedDebt__factory, TestToken } from '../../typechain'
-import * as BorrowFilter from '../filters/Borrow'
+// import * as BorrowFilter from '../filters/Borrow'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as BorrowMath from '../libraries/BorrowMath'
 import * as LiquidityMath from '../libraries/LiquidityMath'
@@ -17,6 +17,7 @@ import {
 } from '../shared/Fixtures'
 import { testcases } from '../test-cases'
 import { now, setTime } from '../shared/Helper'
+import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 
 const { loadFixture } = waffle
 
@@ -92,31 +93,38 @@ async function borrowGivenDebtProperties(
 
   const result = await loadFixture(success)
 
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+  const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
     data.newLiquidityParams.collateralIn,
     currentTime + 5_000n,
     maturity
   )
-
+  if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
+    yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+    zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+  }
   const state = {
     x: data.newLiquidityParams.assetIn,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yIncreaseBorrowGivenDebt, zIncreaseBorrowGivenDebt } = BorrowMath.getYandZIncreaseBorrowGivenDebt(
+  const { xDecrease, yIncrease, zIncrease } = BorrowMath.getBorrowGivenDebtParams(
     state,
-    data.borrowGivenDebtParams.assetOut,
+    PROTOCOL_FEE,
+    FEE,
+    state.x,
     result.maturity,
     currentTime + 10_000n,
     data.borrowGivenDebtParams.debtIn
   )
 
   const delState = {
-    x: data.borrowGivenDebtParams.assetOut,
-    y: yIncreaseBorrowGivenDebt,
-    z: zIncreaseBorrowGivenDebt,
+    x: xDecrease,
+    y: yIncrease,
+    z: zIncrease,
   }
 
   const debt = BorrowMath.getDebt(delState, maturity, currentTime + 10_000n)

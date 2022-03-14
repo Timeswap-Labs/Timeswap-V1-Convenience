@@ -25,7 +25,7 @@ import {
   TestToken,
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import * as LendFilter from '../filters/Lend'
+// import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 
@@ -351,7 +351,7 @@ async function lendGivenPercentProperties(
   // const result = await loadFixture(success)
   const result = fixture
 
-  let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
+  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -360,6 +360,7 @@ async function lendGivenPercentProperties(
     maturity
   )
   if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
     yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
   }

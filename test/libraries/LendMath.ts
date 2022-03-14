@@ -15,29 +15,43 @@ export const getLendGivenBondParams = (
   assetIn: bigint,
   bondOut: bigint
 ) => {
+  console.log('!!!!!!!!!!!!TYPESCRIPT BEGINS!!!!!!!!!!!!!!!!')
+  console.log('maturity',maturity)
+  console.log('currentTime',currentTime)
   const xIncrease = getX(protocolFee, fee,maturity,currentTime, assetIn);
-
+  console.log('xIncrease',xIncrease);
   let xReserve = state.x;
   xReserve += xIncrease;
-
+  console.log('xReserve',xReserve);
+  console.log('bond Out',bondOut);
   let _yDecrease = bondOut;
+  console.log('_yDecrease 1',_yDecrease);
   _yDecrease -= xIncrease;
+  console.log('_yDecrease 2',_yDecrease)
   _yDecrease <<= 32n;
+  console.log('yDecrease',_yDecrease);
   let denominator = maturity;
   denominator -= currentTime;
+  console.log('denominator',denominator);
   _yDecrease = divUp(_yDecrease,denominator);
-
+  console.log('yDecrease',_yDecrease)
   let yReserve = state.y;
   yReserve -= _yDecrease;
-
+  console.log('yReserve',yReserve)
   let zReserve = state.x;
   zReserve *= state.y;
+  console.log('zReserve',zReserve)
   denominator = xReserve;
   denominator *= yReserve;
+  console.log('denominator',denominator);
   zReserve = mulDivUp(zReserve,state.z, denominator);
-
+  console.log('zReserve',zReserve);
   let _zDecrease = state.z;
   _zDecrease -= zReserve;
+  console.log('zDecrease',_zDecrease);
+  console.log('yDecreae',_yDecrease)
+  console.log('!!!!!!!!!!!!TYPESCRIPT ENDS!!!!!!!!!!!!!!!!')
+
   return {xIncrease: xIncrease, yDecrease: _yDecrease,zDecrease: _zDecrease}
 }
 export const getLendGivenInsuranceParams = (
@@ -51,7 +65,7 @@ export const getLendGivenInsuranceParams = (
 ) => {
 
   let xIncrease = getX(protocolFee, fee,maturity,currentTime, assetIn);
-
+  console.log('xIncrease',xIncrease)
   let xReserve = state.x;
   xReserve += xIncrease;
 
@@ -76,6 +90,7 @@ export const getLendGivenInsuranceParams = (
 
   let _yDecrease = state.y;
   _yDecrease -= yReserve;
+  console.log(_yDecrease,_zDecrease)
   return { xIncrease: xIncrease,yDecrease: _yDecrease, zDecrease: _zDecrease }
 }
 export const getLendGivenPercentParams = (
@@ -249,13 +264,9 @@ export const getX=(protocolFee:bigint, fee:bigint,maturity:bigint,currentTime:bi
 const duration = maturity - currentTime
 
 const BASE = 0x10000000000n
-let denominator = (duration * fee ) + BASE
+let denominator = (duration * (fee+protocolFee) ) + BASE
 
 let xIncrease = assetIn*BASE/denominator
 
-denominator = (duration * protocolFee )+BASE
-
-xIncrease *= BASE
-xIncrease/=denominator
 return xIncrease
 }

@@ -56,28 +56,32 @@ export const getBorrowGivenDebtParams = (
 ) => {
 
         const xDecrease = getX(protocolFee, fee, maturity, currentTime,assetOut);
-
+        console.log('xDecrease',xDecrease)
         let xReserve = state.x;
         xReserve -= xDecrease;
-
+        console.log('xReserve',xReserve);
         let _yIncrease = debtIn;
+        console.log('_yIncrease 1',_yIncrease)
         _yIncrease -= xDecrease;
         _yIncrease <<= 32n;
+        console.log('_yIncrease 2',_yIncrease)
         let denominator = maturity;
         denominator -= currentTime;
         _yIncrease /= denominator;
-
+        console.log('denominator',denominator)
         let yReserve = state.y;
         yReserve += _yIncrease;
-
+        console.log('yReserve',yReserve)
         let zReserve = state.x;
         zReserve *= state.y;
+        console.log('zReserve 1',zReserve)
         denominator = xReserve;
         denominator *= yReserve;
         zReserve = mulDivUp(zReserve,state.z, denominator);
-
+        console.log('zReserve 2',zReserve)
         let _zIncrease = zReserve;
         _zIncrease -= state.z;
+        console.log('zIncrease',_zIncrease)
   return {xDecrease: xDecrease ,yIncrease: _yIncrease, zIncrease: _zIncrease }
 }
 
@@ -95,7 +99,7 @@ export const getBorrowGivenCollateralParams = (  state: { x: bigint; y: bigint; 
     xReserve -= xDecrease;
 
     let _zIncrease = collateralIn;
-    _zIncrease = xReserve;
+    _zIncrease *= xReserve;
     let subtrahend = state.z;
     subtrahend *= xDecrease;
     _zIncrease -= subtrahend;
@@ -207,20 +211,14 @@ export const getX= (protocolFee:bigint,fee:bigint,maturity:bigint,currentTime:bi
 
     let duration = maturity- currentTime;
     let numerator = duration;
-    numerator *= fee;
+    numerator *= (fee+protocolFee);
     numerator += BASE;
 
     let _xDecrease = assetOut;
     _xDecrease *= numerator;
     _xDecrease = divUp(_xDecrease,BASE);
 
-    numerator = duration;
-    numerator *= protocolFee;
-    numerator += BASE;
-
-    _xDecrease *= numerator;
-    _xDecrease = divUp(_xDecrease,BASE)
-
+   
     return _xDecrease
 
 }

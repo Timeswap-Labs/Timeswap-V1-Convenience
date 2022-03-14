@@ -33,12 +33,9 @@ library LendMath {
         )
     {
         ConstantProduct.CP memory cp = pair.get(maturity);
-
         xIncrease = getX(pair, maturity, assetIn);
-
         uint256 xReserve = cp.x;
         xReserve += xIncrease;
-
         uint256 _yDecrease = bondOut;
         _yDecrease -= xIncrease;
         _yDecrease <<= 32;
@@ -46,19 +43,17 @@ library LendMath {
         denominator -= block.timestamp;
         _yDecrease = _yDecrease.divUp(denominator);
         yDecrease = _yDecrease.toUint112();
-
         uint256 yReserve = cp.y;
         yReserve -= _yDecrease;
-
         uint256 zReserve = cp.x;
         zReserve *= cp.y;
         denominator = xReserve;
         denominator *= yReserve;
         zReserve = zReserve.mulDivUp(cp.z, denominator);
-
         uint256 _zDecrease = cp.z;
         _zDecrease -= zReserve;
         zDecrease = _zDecrease.toUint112();
+
     }
 
     function givenInsurance(
@@ -78,7 +73,6 @@ library LendMath {
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         xIncrease = getX(pair, maturity, assetIn);
-
         uint256 xReserve = cp.x;
         xReserve += xIncrease;
 

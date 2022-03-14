@@ -25,7 +25,7 @@ import {
   TestToken,
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import * as LendFilter from '../filters/Lend'
+// import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 
