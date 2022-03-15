@@ -253,10 +253,12 @@ export const getInsurance = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  const addend = (state.z * delState.x) << 32n
+  console.log(maturity-currentTime)
   const _insuranceOut = ((maturity - currentTime) * delState.z)>>25n
   const denominator = (delState.x + state.x) 
   const minimum = (state.z*delState.x)/denominator
+  console.log('_insuranceOut', _insuranceOut)
+  console.log('minimum',minimum);
   return (_insuranceOut + minimum)
 }
 
@@ -266,7 +268,7 @@ const duration = maturity - currentTime
 const BASE = 0x10000000000n
 let denominator = (duration * (fee+protocolFee) ) + BASE
 
-let xIncrease = assetIn*BASE/denominator
+let xIncrease = (assetIn*BASE)/denominator
 
 return xIncrease
 }
