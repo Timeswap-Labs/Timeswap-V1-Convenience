@@ -19,6 +19,7 @@ import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
 import {DeployNative} from './libraries/DeployNative.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
+import 'hardhat/console.sol';
 
 /// @title Timeswap Convenience
 /// @author Timeswap Labs
@@ -559,17 +560,17 @@ contract TimeswapConvenience is IConvenience {
 
         require(msg.sender == address(pair), 'E701');
 
-        IWETH _weth = weth;
+        // IWETH _weth = weth; TODO: is it required?
 
         if (assetFrom == address(this)) {
-            _weth.deposit{value: assetIn}();
+            weth.deposit{value: assetIn}();
             asset.safeTransfer(pair, assetIn);
         } else {
             asset.safeTransferFrom(assetFrom, pair, assetIn);
         }
 
         if (collateralFrom == address(this)) {
-            _weth.deposit{value: collateralIn}();
+            weth.deposit{value: collateralIn}();
             collateral.safeTransfer(pair, collateralIn);
         } else {
             collateral.safeTransferFrom(collateralFrom, pair, collateralIn);
@@ -595,7 +596,9 @@ contract TimeswapConvenience is IConvenience {
     function timeswapBorrowCallback(uint112 collateralIn, bytes calldata data) external override {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
         IPair pair = factory.getPair(asset, collateral);
+
         require(msg.sender == address(pair), 'E701');
+
         if (from == address(this)) {
             weth.deposit{value: collateralIn}();
             collateral.safeTransfer(pair, collateralIn);
@@ -607,8 +610,8 @@ contract TimeswapConvenience is IConvenience {
     /// @inheritdoc ITimeswapPayCallback
     function timeswapPayCallback(uint128 assetIn, bytes calldata data) external override {
         (IERC20 asset, IERC20 collateral, address from) = abi.decode(data, (IERC20, IERC20, address));
-
         IPair pair = factory.getPair(asset, collateral);
+
         require(msg.sender == address(pair), 'E701');
 
         if (from == address(this)) {

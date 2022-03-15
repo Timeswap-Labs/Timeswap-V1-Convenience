@@ -48,10 +48,10 @@ const testCases = [
       collateralIn: 1000n,
     },
     borrowGivenCollateralParams: {
-      assetOut: 500n,
-      collateralIn:917n,
-      maxDebt: 530n
-    }
+      assetOut: 1000n,
+      collateralIn: 90n,
+      maxDebt: 2000n,
+    },
   },
   {
     newLiquidityParams: {
@@ -60,12 +60,11 @@ const testCases = [
       collateralIn: 1000n,
     },
     borrowGivenCollateralParams: {
-      assetOut: 200n,
-      collateralIn:189n,
-      maxDebt: 240n
-    }
-  }
-  ,
+      assetOut: 2000n,
+      collateralIn: 190n,
+      maxDebt: 3000n,
+    },
+  },
   {
     newLiquidityParams: {
       assetIn: 10000n,
@@ -73,89 +72,89 @@ const testCases = [
       collateralIn: 1000n,
     },
     borrowGivenCollateralParams: {
-      assetOut: 100n,
-      collateralIn:86n,
-      maxDebt: 1300n
-    }
+      assetOut: 5000n,
+      collateralIn: 920n,
+      maxDebt: 10000n,
+    },
   },
-  
 ]
 
-
-
-describe('Borrow Given Collateral',()=>{
+describe('Borrow Given Collateral', () => {
   testCases.forEach((testCase, index) => {
-  it('Succeeded', async()=>{
-    
-    const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
-    let currentTime = await now()
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
 
-    const constructorFixture = await loadFixture(fixture)
-    await setTime(Number(currentTime+5000n))
-    const newLiquidity = await newLiquidityFixture(constructorFixture,signers[0],testCase.newLiquidityParams)
-    await setTime(Number(currentTime+10000n))
-    const borrow = await borrowGivenCollateralFixture(newLiquidity,signers[0],testCase.borrowGivenCollateralParams)
-    
-    await borrowGivenCollateralProperties(testCase,currentTime,borrow,assetToken.address,collateralToken.address)
-  })
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      await setTime(Number(currentTime + 10000n))
+      const borrow = await borrowGivenCollateralFixture(newLiquidity, signers[0], testCase.borrowGivenCollateralParams)
+
+      await borrowGivenCollateralProperties(testCase, currentTime, borrow, assetToken.address, collateralToken.address)
+    })
   })
 })
 
 describe('Borrow Given Collateral ETH Asset', () => {
-  it('Succeeded', async () => {
-    const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
-    let currentTime = await now()
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
 
-    const constructorFixture = await loadFixture(fixture)
-    await setTime(Number(currentTime + 5000n))
-    const newLiquidity = await newLiquidityETHAssetFixture(
-      constructorFixture,
-      signers[0],
-      testCases[0].newLiquidityParams
-    )
-    await setTime(Number(currentTime + 10000n))
-    const borrow = await borrowGivenCollateralETHAssetFixture(
-      newLiquidity,
-      signers[0],
-      testCases[0].borrowGivenCollateralParams
-    )
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityETHAssetFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
+      await setTime(Number(currentTime + 10000n))
+      const borrow = await borrowGivenCollateralETHAssetFixture(
+        newLiquidity,
+        signers[0],
+        testCase.borrowGivenCollateralParams
+      )
 
-    await borrowGivenCollateralProperties(
-      testCases[0],
-      currentTime,
-      borrow,
-      convenience.wethContract.address,
-      collateralToken.address
-    )
+      await borrowGivenCollateralProperties(
+        testCase,
+        currentTime,
+        borrow,
+        convenience.wethContract.address,
+        collateralToken.address
+      )
+    })
   })
 })
 
 describe('Borrow Given Collateral ETH Collateral', () => {
-  it('Succeeded', async () => {
-    const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
-    let currentTime = await now()
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
 
-    const constructorFixture = await loadFixture(fixture)
-    await setTime(Number(currentTime + 5000n))
-    const newLiquidity = await newLiquidityETHCollateralFixture(
-      constructorFixture,
-      signers[0],
-      testCases[0].newLiquidityParams
-    )
-    await setTime(Number(currentTime + 10000n))
-    const borrow = await borrowGivenCollateralETHCollateralFixture(
-      newLiquidity,
-      signers[0],
-      testCases[0].borrowGivenCollateralParams
-    )
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityETHCollateralFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
+      await setTime(Number(currentTime + 10000n))
+      const borrow = await borrowGivenCollateralETHCollateralFixture(
+        newLiquidity,
+        signers[0],
+        testCase.borrowGivenCollateralParams
+      )
 
-    await borrowGivenCollateralProperties(
-      testCases[0],
-      currentTime,
-      borrow,
-      assetToken.address,
-      convenience.wethContract.address
-    )
+      await borrowGivenCollateralProperties(
+        testCase,
+        currentTime,
+        borrow,
+        assetToken.address,
+        convenience.wethContract.address
+      )
+    })
   })
 })
 
@@ -187,7 +186,7 @@ async function borrowGivenCollateralProperties(
   // const result = await loadFixture(success)
   const result = fixture
 
-  let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -196,12 +195,13 @@ async function borrowGivenCollateralProperties(
     maturity
   )
   if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
     yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
   }
 
   const state = {
-    x: data.newLiquidityParams.assetIn,
+    x: xIncreaseNewLiquidity,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }

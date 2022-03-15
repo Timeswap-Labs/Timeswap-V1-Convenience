@@ -83,7 +83,7 @@ library BorrowMath {
         xReserve -= xDecrease;
 
         uint256 _zIncrease = collateralIn;
-        _zIncrease = xReserve;
+        _zIncrease *= xReserve;
         uint256 subtrahend = cp.z;
         subtrahend *= xDecrease;
         _zIncrease -= subtrahend;

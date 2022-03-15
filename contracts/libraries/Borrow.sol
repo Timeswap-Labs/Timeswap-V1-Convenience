@@ -476,7 +476,6 @@ library Borrow {
             )
         );
 
-
         require(dueOut.debt <= params.maxDebt, 'E512');
         require(dueOut.collateral <= params.maxCollateral, 'E513');
     }
