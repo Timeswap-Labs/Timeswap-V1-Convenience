@@ -303,7 +303,7 @@ library Mint {
                 weth,
                 params.collateral,
                 params.maturity,
-                msg.sender,
+                address(this),
                 msg.sender,
                 params.liquidityTo,
                 params.dueTo,
@@ -350,7 +350,7 @@ library Mint {
                 weth,
                 params.maturity,
                 msg.sender,
-                msg.sender,
+                address(this),
                 params.liquidityTo,
                 params.dueTo,
                 params.debtIn,
@@ -430,7 +430,7 @@ library Mint {
                 weth,
                 params.collateral,
                 params.maturity,
-                msg.sender,
+                address(this),
                 msg.sender,
                 params.liquidityTo,
                 params.dueTo,
@@ -477,7 +477,7 @@ library Mint {
                 weth,
                 params.maturity,
                 msg.sender,
-                msg.sender,
+                address(this),
                 params.liquidityTo,
                 params.dueTo,
                 collateralIn,
@@ -548,7 +548,9 @@ library Mint {
         )
     {
         IPair pair = params.factory.getPair(params.asset, params.collateral);
-        if(address(pair)==address(0)){pair=params.factory.createPair(params.asset,params.collateral);}
+        if (address(pair) == address(0)) {
+            pair = params.factory.createPair(params.asset, params.collateral);
+        }
         require(pair.totalLiquidity(params.maturity) != 0, 'E507');
 
         (uint112 xIncrease, uint112 yIncrease, uint112 zIncrease) = pair.givenAsset(params.maturity, params.assetIn);
@@ -692,6 +694,5 @@ library Mint {
         );
         native.liquidity.mint(params.liquidityTo, liquidityOut);
         native.collateralizedDebt.mint(params.dueTo, id);
- 
     }
 }

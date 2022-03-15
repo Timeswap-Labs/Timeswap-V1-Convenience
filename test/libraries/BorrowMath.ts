@@ -47,8 +47,8 @@ export const checkError = (
 }
 export const getBorrowGivenDebtParams = (
   state: { x: bigint; y: bigint; z: bigint },
-  protocolFee:bigint,
-  fee:bigint,
+  protocolFee: bigint,
+  fee: bigint,
   assetOut: bigint,
   maturity: bigint,
   currentTime: bigint,
@@ -85,9 +85,10 @@ export const getBorrowGivenDebtParams = (
   return {xDecrease: xDecrease ,yIncrease: _yIncrease, zIncrease: _zIncrease }
 }
 
-export const getBorrowGivenCollateralParams = (  state: { x: bigint; y: bigint; z: bigint },
-  protocolFee:bigint,
-  fee:bigint,
+export const getBorrowGivenCollateralParams = (
+  state: { x: bigint; y: bigint; z: bigint },
+  protocolFee: bigint,
+  fee: bigint,
   assetOut: bigint,
   maturity: bigint,
   currentTime: bigint,
@@ -124,72 +125,67 @@ export const getBorrowGivenCollateralParams = (  state: { x: bigint; y: bigint; 
   }
 export const getBorrowGivenPercentParams = (
   state: { x: bigint; y: bigint; z: bigint },
-  protocolFee:bigint,
-  fee:bigint,
+  protocolFee: bigint,
+  fee: bigint,
   assetOut: bigint,
   maturity: bigint,
   currentTime: bigint,
   percent: bigint
 ) => {
-  const xDecrease = getX(protocolFee, fee, maturity, currentTime,assetOut);
+  const xDecrease = getX(protocolFee, fee, maturity, currentTime, assetOut)
 
-  let xReserve = state.x;
-  xReserve -= xDecrease;
-
+  let xReserve = state.x
+  xReserve -= xDecrease
 
   if (percent <= 0x80000000) {
-    let yMid = state.y;
-    yMid *= state.y;
-    yMid = mulDivUp(yMid,state.x, xReserve);
-    yMid = sqrtUp(yMid);
-    yMid -= state.y;
+    let yMid = state.y
+    yMid *= state.y
+    yMid = mulDivUp(yMid, state.x, xReserve)
+    yMid = sqrtUp(yMid)
+    yMid -= state.y
 
-    let _yIncrease = yMid;
-    _yIncrease *= percent;
-    _yIncrease = shiftRightUp(_yIncrease,31n);
+    let _yIncrease = yMid
+    _yIncrease *= percent
+    _yIncrease = shiftRightUp(_yIncrease, 31n)
 
-    let yReserve = state.y;
-    yReserve += _yIncrease;
+    let yReserve = state.y
+    yReserve += _yIncrease
 
-    let zReserve = state.x;
-    zReserve *= state.y;
-    let denominator = xReserve;
-    denominator *= yReserve;
-    zReserve = mulDivUp(zReserve
-      ,state.z, denominator);
+    let zReserve = state.x
+    zReserve *= state.y
+    let denominator = xReserve
+    denominator *= yReserve
+    zReserve = mulDivUp(zReserve, state.z, denominator)
 
-    let _zIncrease = zReserve;
-    _zIncrease -= state.z;
-    return {xDecrease: xDecrease ,yIncrease: _yIncrease, zIncrease: _zIncrease }
+    let _zIncrease = zReserve
+    _zIncrease -= state.z
+    return { xDecrease: xDecrease, yIncrease: _yIncrease, zIncrease: _zIncrease }
+  } else {
+    percent = 0x100000000n - percent
 
-} else {
-    percent = 0x100000000n - percent;
+    let zMid = state.z
+    zMid *= state.z
+    zMid = mulDivUp(zMid, state.x, xReserve)
+    zMid = sqrtUp(zMid)
+    zMid -= state.z
 
-    let zMid = state.z;
-    zMid *= state.z;
-    zMid = mulDivUp(zMid,state.x, xReserve);
-    zMid = sqrtUp(zMid);
-    zMid -= state.z;
+    let _zIncrease = zMid
+    _zIncrease *= percent
+    _zIncrease = shiftRightUp(_zIncrease, 31n)
 
-    let _zIncrease = zMid;
-    _zIncrease *= percent;
-    _zIncrease = shiftRightUp(_zIncrease,31n);
+    let zReserve = state.z
+    zReserve += _zIncrease
 
-    let zReserve = state.z;
-    zReserve += _zIncrease;
+    let yReserve = state.x
+    yReserve *= state.z
+    let denominator = xReserve
+    denominator *= zReserve
+    yReserve = mulDivUp(yReserve, state.y, denominator)
 
-    let yReserve = state.x;
-    yReserve *= state.z;
-    let denominator = xReserve;
-    denominator *= zReserve;
-    yReserve = mulDivUp(yReserve,state.y, denominator);
-
-    let _yIncrease = yReserve;
-    _yIncrease -= state.y;
-    return {xDecrease: xDecrease ,yIncrease: _yIncrease, zIncrease: _zIncrease }
-
-}
-
+    let _yIncrease = yReserve
+    _yIncrease -= state.y
+    return { xDecrease: xDecrease, yIncrease: _yIncrease, zIncrease: _zIncrease }
+  }
 }
 
 export const getDebt = (delState: { x: bigint; y: bigint; z: bigint }, maturity: bigint, currentTime: bigint) => {
@@ -206,19 +202,7 @@ export const getCollateral = (
   return shiftRightUp((maturity - currentTime) * delState.z, 25n) + divUp(state.z * delState.x, state.x - delState.x)
 }
 
-export const getX= (protocolFee:bigint,fee:bigint,maturity:bigint,currentTime:bigint,assetOut:bigint)=>{
-    const BASE = 0x10000000000n
-
-    let duration = maturity- currentTime;
-    let numerator = duration;
-    numerator *= (fee+protocolFee);
-    numerator += BASE;
-
-    let _xDecrease = assetOut;
-    _xDecrease *= numerator;
-    _xDecrease = divUp(_xDecrease,BASE);
-
-   
-    return _xDecrease
-
+export const getX = (protocolFee: bigint, fee: bigint, maturity: bigint, currentTime: bigint, assetOut: bigint) => {
+  const BASE = 0x10000000000n   
+  return divUp(assetOut * ((maturity - currentTime) * (fee + protocolFee) + BASE), BASE)
 }
