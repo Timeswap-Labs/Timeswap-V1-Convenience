@@ -14,7 +14,7 @@ import {
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
-import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
+import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import {
   CollateralizedDebt__factory,
   ERC20__factory,
@@ -48,7 +48,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -61,7 +61,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -74,7 +74,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -87,7 +87,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -100,7 +100,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -119,7 +119,7 @@ describe('Add Liquidity', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], testCase.addLiquidityParams)
+      const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], testCase.liquidityGivenAssetParams)
 
       await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
     })
@@ -135,7 +135,7 @@ describe('Add Liquidity Given ETH Asset', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityETHAssetFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const addLiquidity = await liquidityGivenAssetETHAssetFixture(newLiquidity, signers[0], testCase.addLiquidityParams)
+      const addLiquidity = await liquidityGivenAssetETHAssetFixture(newLiquidity, signers[0], testCase.liquidityGivenAssetParams)
 
       await addLiquidityProperties(testCase, currentTime, addLiquidity, convenience.wethContract.address, collateralToken.address)
     })
@@ -151,7 +151,7 @@ describe('Add Liquidity ETH Collateral', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityETHCollateralFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const addLiquidity = await liquidityGivenAssetETHCollateralFixture(newLiquidity, signers[0], testCase.addLiquidityParams)
+      const addLiquidity = await liquidityGivenAssetETHCollateralFixture(newLiquidity, signers[0], testCase.liquidityGivenAssetParams)
 
       await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, convenience.wethContract.address)
     })
@@ -173,7 +173,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //                 collateralIn: fc.bigUintN(112),
 //               })
 //               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             addLiquidityParams: fc.record({
+//             liquidityGivenAssetParams: fc.record({
 //               assetIn: fc.bigUintN(112),
 //               minLiquidity: fc.bigUintN(256),
 //               maxDebt: fc.bigUintN(112),
@@ -187,7 +187,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //             await setTime(Number(currentTime + 5000n))
 //             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
 //             await setTime(Number(currentTime + 10000n))
-//             const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], data.addLiquidityParams)
+//             const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], data.liquidityGivenAssetParams)
 //             return addLiquidity
 //           }
 
@@ -213,7 +213,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //                 collateralIn: fc.bigUintN(112),
 //               })
 //               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             addLiquidityParams: fc.record({
+//             liquidityGivenAssetParams: fc.record({
 //               assetIn: fc.bigUintN(112),
 //               minLiquidity: fc.bigUintN(256),
 //               maxDebt: fc.bigUintN(112),
@@ -235,10 +235,10 @@ describe('Add Liquidity ETH Collateral', () => {
 //               maturity,
 //               liquidityTo: signers[0].address,
 //               dueTo: signers[0].address,
-//               assetIn: data.addLiquidityParams.assetIn,
-//               minLiquidity: data.addLiquidityParams.minLiquidity,
-//               maxDebt: data.addLiquidityParams.maxDebt,
-//               maxCollateral: data.addLiquidityParams.maxCollateral,
+//               assetIn: data.liquidityGivenAssetParams.assetIn,
+//               minLiquidity: data.liquidityGivenAssetParams.minLiquidity,
+//               maxDebt: data.liquidityGivenAssetParams.maxDebt,
+//               maxCollateral: data.liquidityGivenAssetParams.maxCollateral,
 //               deadline: maturity,
 //             })
 //           ).to.be.revertedWith(error)
@@ -265,7 +265,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //                 collateralIn: fc.bigUintN(112),
 //               })
 //               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             addLiquidityParams: fc.record({
+//             liquidityGivenAssetParams: fc.record({
 //               assetIn: fc.bigUintN(112),
 //               minLiquidity: fc.bigUintN(256),
 //               maxDebt: fc.bigUintN(112),
@@ -279,7 +279,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //             await setTime(Number(currentTime + 5000n))
 //             const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
 //             await setTime(Number(currentTime + 10000n))
-//             const addLiquidity = await liquidityGivenAssetETHAssetFixture(newLiquidity, signers[0], data.addLiquidityParams)
+//             const addLiquidity = await liquidityGivenAssetETHAssetFixture(newLiquidity, signers[0], data.liquidityGivenAssetParams)
 //             return addLiquidity
 //           }
 
@@ -311,7 +311,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //                 collateralIn: fc.bigUintN(112),
 //               })
 //               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             addLiquidityParams: fc.record({
+//             liquidityGivenAssetParams: fc.record({
 //               assetIn: fc.bigUintN(112),
 //               minLiquidity: fc.bigUintN(256),
 //               maxDebt: fc.bigUintN(112),
@@ -333,12 +333,12 @@ describe('Add Liquidity ETH Collateral', () => {
 //                 maturity,
 //                 liquidityTo: signers[0].address,
 //                 dueTo: signers[0].address,
-//                 minLiquidity: data.addLiquidityParams.minLiquidity,
-//                 maxDebt: data.addLiquidityParams.maxDebt,
-//                 maxCollateral: data.addLiquidityParams.maxCollateral,
+//                 minLiquidity: data.liquidityGivenAssetParams.minLiquidity,
+//                 maxDebt: data.liquidityGivenAssetParams.maxDebt,
+//                 maxCollateral: data.liquidityGivenAssetParams.maxCollateral,
 //                 deadline: maturity,
 //               },
-//               { value: data.addLiquidityParams.assetIn }
+//               { value: data.liquidityGivenAssetParams.assetIn }
 //             )
 //           ).to.be.revertedWith(error)
 //         }
@@ -364,7 +364,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //                 collateralIn: fc.bigUintN(112),
 //               })
 //               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             addLiquidityParams: fc.record({
+//             liquidityGivenAssetParams: fc.record({
 //               assetIn: fc.bigUintN(112),
 //               minLiquidity: fc.bigUintN(256),
 //               maxDebt: fc.bigUintN(112),
@@ -385,7 +385,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //             const addLiquidity = await liquidityGivenAssetETHCollateralFixture(
 //               newLiquidity,
 //               signers[0],
-//               data.addLiquidityParams
+//               data.liquidityGivenAssetParams
 //             )
 //             return addLiquidity
 //           }
@@ -412,7 +412,7 @@ describe('Add Liquidity ETH Collateral', () => {
 //                 collateralIn: fc.bigUintN(112),
 //               })
 //               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             addLiquidityParams: fc.record({
+//             liquidityGivenAssetParams: fc.record({
 //               assetIn: fc.bigUintN(112),
 //               minLiquidity: fc.bigUintN(256),
 //               maxDebt: fc.bigUintN(112),
@@ -435,12 +435,12 @@ describe('Add Liquidity ETH Collateral', () => {
 //                 maturity,
 //                 liquidityTo: signers[0].address,
 //                 dueTo: signers[0].address,
-//                 assetIn: data.addLiquidityParams.assetIn,
-//                 minLiquidity: data.addLiquidityParams.minLiquidity,
-//                 maxDebt: data.addLiquidityParams.maxDebt,
+//                 assetIn: data.liquidityGivenAssetParams.assetIn,
+//                 minLiquidity: data.liquidityGivenAssetParams.minLiquidity,
+//                 maxDebt: data.liquidityGivenAssetParams.maxDebt,
 //                 deadline: maturity,
 //               },
-//               { value: data.addLiquidityParams.maxCollateral }
+//               { value: data.liquidityGivenAssetParams.maxCollateral }
 //             )
 //           ).to.be.reverted
 //         }
@@ -457,7 +457,7 @@ async function addLiquidityProperties(
       debtIn: bigint
       collateralIn: bigint
     }
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: bigint
       minLiquidity: bigint
       maxDebt: bigint
@@ -494,13 +494,13 @@ async function addLiquidityProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getAddLiquidityGivenAssetParams(
+  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getLiquidityGivenAssetParams(
     state,
-    data.addLiquidityParams.assetIn,
+    data.liquidityGivenAssetParams.assetIn,
     0n
   )
   const delState = {
-    x: data.addLiquidityParams.assetIn,
+    x: data.liquidityGivenAssetParams.assetIn,
     y: yIncreaseAddLiquidity,
     z: zIncreaseAddLiquidity,
   }
@@ -514,12 +514,12 @@ async function addLiquidityProperties(
   const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
 
   const debt = LiquidityMath.getDebtAddLiquidity(
-    { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    { x: data.liquidityGivenAssetParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
     maturity,
     currentTime + 10_000n
   )
   const collateral = LiquidityMath.getCollateralAddLiquidity(
-    { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    { x: data.liquidityGivenAssetParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
     maturity,
     currentTime + 10_000n
   )

@@ -10,7 +10,7 @@ import type {TimeswapPairCallee} from '../../typechain/TimeswapPairCallee'
 import { ethers } from 'hardhat'
 import {
   NewLiquidityParams,
-  AddLiquidityGivenAssetParams,
+  LiquidityGivenAssetParams,
   LiquidityGivenDebtParams,
   LiquidityGivenCollateralParams,
   RemoveLiquidityParams,
@@ -101,17 +101,17 @@ export async function newLiquidityETHCollateralFixture(
 export async function liquidityGivenAssetFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: AddLiquidityGivenAssetParams
+  liquidityGivenAssetParams: LiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenAsset(
     fixture.maturity,
     fixture.assetToken.address,
     fixture.collateralToken.address,
-    addLiquidityParams.assetIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxDebt,
-    addLiquidityParams.maxCollateral
+    liquidityGivenAssetParams.assetIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxDebt,
+    liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
 
@@ -120,16 +120,16 @@ export async function liquidityGivenAssetFixture(
 export async function liquidityGivenAssetETHAssetFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: AddLiquidityGivenAssetParams
+  liquidityGivenAssetParams: LiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenAssetETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
-    addLiquidityParams.assetIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxDebt,
-    addLiquidityParams.maxCollateral
+    liquidityGivenAssetParams.assetIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxDebt,
+    liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
 
@@ -138,16 +138,16 @@ export async function liquidityGivenAssetETHAssetFixture(
 export async function liquidityGivenAssetETHCollateralFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: AddLiquidityGivenAssetParams
+  liquidityGivenAssetParams: LiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenAssetETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
-    addLiquidityParams.assetIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxDebt,
-    addLiquidityParams.maxCollateral
+    liquidityGivenAssetParams.assetIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxDebt,
+    liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
 
@@ -156,17 +156,17 @@ export async function liquidityGivenAssetETHCollateralFixture(
 export async function liquidityGivenDebtFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: LiquidityGivenDebtParams
+  liquidityGivenAssetParams: LiquidityGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenDebt(
     fixture.maturity,
     fixture.assetToken.address,
     fixture.collateralToken.address,
-    addLiquidityParams.debtIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxAsset,
-    addLiquidityParams.maxCollateral
+    liquidityGivenAssetParams.debtIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxAsset,
+    liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
 
@@ -175,16 +175,16 @@ export async function liquidityGivenDebtFixture(
 export async function liquidityGivenDebtETHAssetFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: LiquidityGivenDebtParams
+  liquidityGivenAssetParams: LiquidityGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenDebtETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
-    addLiquidityParams.debtIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxAsset,
-    addLiquidityParams.maxCollateral
+    liquidityGivenAssetParams.debtIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxAsset,
+    liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
 
@@ -193,16 +193,16 @@ export async function liquidityGivenDebtETHAssetFixture(
 export async function liquidityGivenDebtETHCollateralFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: LiquidityGivenDebtParams
+  liquidityGivenAssetParams: LiquidityGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenDebtETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
-    addLiquidityParams.debtIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxAsset,
-    addLiquidityParams.maxCollateral
+    liquidityGivenAssetParams.debtIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxAsset,
+    liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
 
@@ -211,17 +211,17 @@ export async function liquidityGivenDebtETHCollateralFixture(
 export async function liquidityGivenCollateralFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: LiquidityGivenCollateralParams
+  liquidityGivenAssetParams: LiquidityGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenCollateral(
     fixture.maturity,
     fixture.assetToken.address,
     fixture.collateralToken.address,
-    addLiquidityParams.collateralIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxDebt,
-    addLiquidityParams.maxAsset
+    liquidityGivenAssetParams.collateralIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxDebt,
+    liquidityGivenAssetParams.maxAsset
   )
   await txn.wait()
 
@@ -230,16 +230,16 @@ export async function liquidityGivenCollateralFixture(
 export async function liquidityGivenCollateralETHAssetFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: LiquidityGivenCollateralParams
+  liquidityGivenAssetParams: LiquidityGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenCollateralETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
-    addLiquidityParams.collateralIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxDebt,
-    addLiquidityParams.maxAsset
+    liquidityGivenAssetParams.collateralIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxDebt,
+    liquidityGivenAssetParams.maxAsset
   )
   await txn.wait()
 
@@ -248,16 +248,16 @@ export async function liquidityGivenCollateralETHAssetFixture(
 export async function liquidityGivenCollateralETHCollateralFixture(
   fixture: Fixture,
   signer: SignerWithAddress,
-  addLiquidityParams: LiquidityGivenCollateralParams
+  liquidityGivenAssetParams: LiquidityGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
   const txn = await fixture.convenience.liquidityGivenCollateralETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
-    addLiquidityParams.collateralIn,
-    addLiquidityParams.minLiquidity,
-    addLiquidityParams.maxDebt,
-    addLiquidityParams.maxAsset
+    liquidityGivenAssetParams.collateralIn,
+    liquidityGivenAssetParams.minLiquidity,
+    liquidityGivenAssetParams.maxDebt,
+    liquidityGivenAssetParams.maxAsset
   )
   await txn.wait()
 
@@ -721,12 +721,28 @@ export async function mintMathCalleeGivenNewFixture(fixture:Fixture, signer:Sign
   const txn = await mintMathCalleeContract.givenNew(maturity,newLiqudityParams.assetIn,newLiqudityParams.debtIn,newLiqudityParams.collateralIn);
   return txn
 }
-export async function mintMathCalleeGivenAssetFixture(fixture:Fixture, signer:SignerWithAddress,addLiquidityParams: AddLiquidityGivenAssetParams){
+export async function mintMathCalleeGivenAssetFixture(fixture:Fixture, signer:SignerWithAddress,liquidityGivenAssetParams: LiquidityGivenAssetParams){
   const {convenience, assetToken, collateralToken, maturity} = fixture
   const mintMathCalleeFactory =await  ethers.getContractFactory('MintMathCallee')
   const mintMathCalleeContract = (await (mintMathCalleeFactory).deploy()) as MintMathCallee
   const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
-  const txn = await mintMathCalleeContract.givenAsset(pair,maturity,addLiquidityParams.assetIn);
+  const txn = await mintMathCalleeContract.givenAsset(pair,maturity,liquidityGivenAssetParams.assetIn);
+  return txn
+}
+export async function mintMathCalleeGivenDebtFixture(fixture:Fixture, signer:SignerWithAddress,liquidityGivenDebtParams: LiquidityGivenDebtParams){
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const mintMathCalleeFactory =await  ethers.getContractFactory('MintMathCallee')
+  const mintMathCalleeContract = (await (mintMathCalleeFactory).deploy()) as MintMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await mintMathCalleeContract.givenDebt(pair,maturity,liquidityGivenDebtParams.debtIn);
+  return txn
+}
+export async function mintMathCalleeGivenCollateralFixture(fixture:Fixture, signer:SignerWithAddress,liquidityGivenCollateralParams: LiquidityGivenCollateralParams){
+  const {convenience, assetToken, collateralToken, maturity} = fixture
+  const mintMathCalleeFactory =await  ethers.getContractFactory('MintMathCallee')
+  const mintMathCalleeContract = (await (mintMathCalleeFactory).deploy()) as MintMathCallee
+  const pair = (await convenience.factoryContract.getPair(assetToken.address,collateralToken.address))
+  const txn = await mintMathCalleeContract.givenAsset(pair,maturity,liquidityGivenCollateralParams.collateralIn);
   return txn
 }
 export async function lendMathGivenBondFixture(fixture:Fixture,signer:SignerWithAddress,lendGivenBondParams: LendGivenBondParams) {

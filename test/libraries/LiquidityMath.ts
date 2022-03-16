@@ -35,7 +35,7 @@ if(yIncrease >= MAXUINT256 || yIncrease <=0) return false
   return { xIncreaseNewLiquidity: xIncrease,yIncreaseNewLiquidity: yIncrease, zIncreaseNewLiquidity: zIncrease }
 }
 
-export const getAddLiquidityGivenAssetParams = (state: { x: bigint; y: bigint; z: bigint }, assetIn: bigint, feeStored: bigint) => {
+export const getLiquidityGivenAssetParams = (state: { x: bigint; y: bigint; z: bigint }, assetIn: bigint, feeStored: bigint) => {
   const xIncrease = assetIn*state.x/(state.x+feeStored)
   const yIncrease = (state.y * assetIn) / state.x
   const zIncrease = (state.z * assetIn) / state.x
@@ -56,7 +56,7 @@ export const getIncreaseAddLiquidityGivenDebtParams = (state: { x: bigint; y: bi
   return { xIncreaseAddLiquidity: xIncrease,yIncreaseAddLiquidity: yIncrease, zIncreaseAddLiquidity: zIncrease }
 }
 
-
+//TODO: change names of getIncreaseAddLiquidityGivenDebtParams, getAddLiquidityGivenCollateralParams
 
 
 export const getDebtAddLiquidity = (

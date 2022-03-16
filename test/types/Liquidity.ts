@@ -1,4 +1,4 @@
-export interface AddLiquidityGivenAssetParams {
+export interface LiquidityGivenAssetParams {
   assetIn: bigint
   minLiquidity: bigint
   maxDebt: bigint

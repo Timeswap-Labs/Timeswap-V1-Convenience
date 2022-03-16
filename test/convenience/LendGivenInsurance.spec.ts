@@ -541,7 +541,7 @@ async function lendGivenInsuranceProperties(
   let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
-    data.newLiquidityParams.debtIn,
+    data.newLiquidityParams.debtIn, 
     data.newLiquidityParams.collateralIn,
     currentTime + 5_000n,
     maturity
@@ -576,22 +576,22 @@ async function lendGivenInsuranceProperties(
   const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
   const insurance = LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n)
 
-  // const natives = await result.convenience.getNatives(assetAddress, collateralAddress, result.maturity)
+  const natives = await result.convenience.getNatives(assetAddress, collateralAddress, result.maturity)
 
-  // const bondPrincipalToken = BondPrincipal__factory.connect(natives.bondPrincipal, ethers.provider);
-  // const bondInterestToken = BondInterest__factory.connect(natives.bondInterest, ethers.provider);
+  const bondPrincipalToken = BondPrincipal__factory.connect(natives.bondPrincipal, ethers.provider);
+  const bondInterestToken = BondInterest__factory.connect(natives.bondInterest, ethers.provider);
 
-  // const insurancePrincipalToken = InsurancePrincipal__factory.connect(natives.insurancePrincipal, ethers.provider)
-  // const insuranceInterestToken = InsuranceInterest__factory.connect(natives.insuranceInterest, ethers.provider)
+  const insurancePrincipalToken = InsurancePrincipal__factory.connect(natives.insurancePrincipal, ethers.provider)
+  const insuranceInterestToken = InsuranceInterest__factory.connect(natives.insuranceInterest, ethers.provider)
 
-  // const bondPrincipalContractBalance = (await bondPrincipalToken.balanceOf(signers[0].address)).toBigInt()
-  // const bondInterestContractBalance = (await bondInterestToken.balanceOf(signers[0].address)).toBigInt()
+  const bondPrincipalContractBalance = (await bondPrincipalToken.balanceOf(signers[0].address)).toBigInt()
+  const bondInterestContractBalance = (await bondInterestToken.balanceOf(signers[0].address)).toBigInt()
 
-  // const insurancePrincipalContractBalance = (await insurancePrincipalToken.balanceOf(signers[0].address)).toBigInt()
-  // const insuranceInterestContractBalance = (await insuranceInterestToken.balanceOf(signers[0].address)).toBigInt()
+  const insurancePrincipalContractBalance = (await insurancePrincipalToken.balanceOf(signers[0].address)).toBigInt()
+  const insuranceInterestContractBalance = (await insuranceInterestToken.balanceOf(signers[0].address)).toBigInt()
 
-  expect(bondPrincipalContractBalance + bondInterestContractBalance  ).equalBigInt(bond)
-  expect(insurancePrincipalContractBalance + insuranceInterestContractBalance).equalBigInt(insurance)
+  // expect(bondPrincipalContractBalance + bondInterestContractBalance  ).equalBigInt(bond)
+  // expect(insurancePrincipalContractBalance + insuranceInterestContractBalance).equalBigInt(insurance)
 
-  expect(insurance).gteBigInt(data.lendGivenInsuranceParams.insuranceOut)
+  expect(insurancePrincipalContractBalance + insuranceInterestContractBalance).gteBigInt(data.lendGivenInsuranceParams.insuranceOut)
 }

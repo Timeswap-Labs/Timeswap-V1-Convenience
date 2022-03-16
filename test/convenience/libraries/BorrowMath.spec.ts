@@ -88,10 +88,10 @@ const borrowGivenCollateralTestCases = [
       collateralIn: 1000n,
     },
     borrowGivenCollateralParams: {
-      assetOut: 500n,
-      collateralIn:917n,
-      maxDebt: 530n
-    }
+      assetOut: 1000n,
+      collateralIn: 90n,
+      maxDebt: 2000n,
+    },
   },
   {
     newLiquidityParams: {
@@ -100,12 +100,11 @@ const borrowGivenCollateralTestCases = [
       collateralIn: 1000n,
     },
     borrowGivenCollateralParams: {
-      assetOut: 200n,
-      collateralIn:189n,
-      maxDebt: 240n
-    }
-  }
-  ,
+      assetOut: 2000n,
+      collateralIn: 190n,
+      maxDebt: 3000n,
+    },
+  },
   {
     newLiquidityParams: {
       assetIn: 10000n,
@@ -113,12 +112,11 @@ const borrowGivenCollateralTestCases = [
       collateralIn: 1000n,
     },
     borrowGivenCollateralParams: {
-      assetOut: 100n,
-      collateralIn:86n,
-      maxDebt: 1300n
-    }
+      assetOut: 5000n,
+      collateralIn: 920n,
+      maxDebt: 10000n,
+    },
   },
-  
 ]
 
 const borrowGivenPercentTestCases = [
