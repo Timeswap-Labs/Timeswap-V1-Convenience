@@ -53,7 +53,6 @@ library LendMath {
         uint256 _zDecrease = cp.z;
         _zDecrease -= zReserve;
         zDecrease = _zDecrease.toUint112();
-
     }
 
     function givenInsurance(
@@ -183,9 +182,6 @@ library LendMath {
         uint256 maturity,
         uint112 assetIn
     ) private view returns (uint112 xIncrease) {
-        // uint256 duration = maturity;
-        // duration -= block.timestamp;
-
         uint256 totalFee = pair.fee();
         totalFee += pair.protocolFee();
 
@@ -198,21 +194,5 @@ library LendMath {
         _xIncrease *= BASE;
         _xIncrease /= denominator;
         xIncrease = _xIncrease.toUint112();
-
-        // uint256 denominator = duration;
-        // denominator *= pair.fee();
-        // denominator += BASE;
-
-        // uint256 _xIncrease = assetIn;
-        // _xIncrease *= BASE;
-        // _xIncrease /= denominator;
-
-        // denominator = duration;
-        // denominator *= pair.protocolFee();
-        // denominator += BASE;
-
-        // _xIncrease *= BASE;
-        // _xIncrease /= denominator;
-        // xIncrease = _xIncrease.toUint112();
     }
 }
