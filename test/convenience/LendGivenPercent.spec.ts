@@ -25,7 +25,7 @@ import {
   TestToken,
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import * as LendFilter from '../filters/Lend'
+// import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 
@@ -351,7 +351,7 @@ async function lendGivenPercentProperties(
   // const result = await loadFixture(success)
   const result = fixture
 
-  let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
+  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -360,6 +360,7 @@ async function lendGivenPercentProperties(
     maturity
   )
   if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
     yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
   }
@@ -385,16 +386,16 @@ async function lendGivenPercentProperties(
     y: yDecreaseLendGivenPercent,
     z: zDecreaseLendGivenPercent,
   }
-  // const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
-  // const insurance = LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n)
+  // // const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
+  // // const insurance = LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n)
 
-  // const natives = await result.convenience.getNatives(assetAddress, collateralAddress, result.maturity)
+  // // const natives = await result.convenience.getNatives(assetAddress, collateralAddress, result.maturity)
 
-  // const bondToken = Bond__factory.connect(natives.bond, ethers.provider)
-  // const insuranceToken = Insurance__factory.connect(natives.insurance, ethers.provider)
+  // // const bondToken = Bond__factory.connect(natives.bond, ethers.provider)
+  // // const insuranceToken = Insurance__factory.connect(natives.insurance, ethers.provider)
 
-  // const bondContractBalance = (await bondToken.balanceOf(signers[0].address)).toBigInt()
-  // const insuranceContractBalance = (await insuranceToken.balanceOf(signers[0].address)).toBigInt()
+  // // const bondContractBalance = (await bondToken.balanceOf(signers[0].address)).toBigInt()
+  // // const insuranceContractBalance = (await insuranceToken.balanceOf(signers[0].address)).toBigInt()
 
   // expect(bondContractBalance).equalBigInt(bond)
   // expect(insuranceContractBalance).equalBigInt(insurance)

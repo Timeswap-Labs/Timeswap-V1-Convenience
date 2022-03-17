@@ -16,10 +16,10 @@ import {
 } from '../shared/Fixtures'
 
 import * as fc from 'fast-check'
-import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
+import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
-import * as LiquidityFilter from '../filters/Liquidity'
-import * as BorrowFilter from '../filters/Borrow'
+// import * as LiquidityFilter from '../filters/Liquidity'
+// import * as BorrowFilter from '../filters/Borrow'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
@@ -117,12 +117,16 @@ describe('Borrow Given Debt', () => {
 describe('Borrow Given Debt ETH Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity, convenience,assetToken, collateralToken } = await loadFixture(fixture)
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityETHAssetFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHAssetFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
       const borrowGivenDebt = await borrowGivenDebtETHAssetFixture(
         newLiquidity,
@@ -144,12 +148,16 @@ describe('Borrow Given Debt ETH Asset', () => {
 describe('Borrow Given Debt ETH Collateral', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity,convenience, assetToken, collateralToken } = await loadFixture(fixture)
+      const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityETHCollateralFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHCollateralFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
       const borrowGivenDebt = await borrowGivenDebtETHCollateralFixture(
         newLiquidity,
@@ -196,7 +204,7 @@ async function borrowGivenDebtProperties(
   // const result = await loadFixture(success)
   const result = fixture
 
-  let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -205,28 +213,32 @@ async function borrowGivenDebtProperties(
     maturity
   )
   if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
     yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
   }
 
   const state = {
-    x: data.newLiquidityParams.assetIn,
+    x: xIncreaseNewLiquidity,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yIncrease: yIncreaseBorrowGivenDebt, zIncrease: zIncreaseBorrowGivenDebt } =
-    BorrowMath.getBorrowGivenDebtParams(
-      state,
-      PROTOCOL_FEE,
-      FEE,
-      data.borrowGivenDebtParams.assetOut,
-      result.maturity,
-      currentTime + 10_000n,
-      data.borrowGivenDebtParams.debtIn
-    )
+  const {
+    xDecrease: xDecreaseBorrowGivenDebt,
+    yIncrease: yIncreaseBorrowGivenDebt,
+    zIncrease: zIncreaseBorrowGivenDebt,
+  } = BorrowMath.getBorrowGivenDebtParams(
+    state,
+    PROTOCOL_FEE,
+    FEE,
+    data.borrowGivenDebtParams.assetOut,
+    result.maturity,
+    currentTime + 10_000n,
+    data.borrowGivenDebtParams.debtIn
+  )
 
   const delState = {
-    x: data.borrowGivenDebtParams.assetOut,
+    x: xDecreaseBorrowGivenDebt,
     y: yIncreaseBorrowGivenDebt,
     z: zIncreaseBorrowGivenDebt,
   }
@@ -241,6 +253,8 @@ async function borrowGivenDebtProperties(
   const debtContract = cdTokenBalance.debt.toBigInt()
   const collateralContract = cdTokenBalance.collateral.toBigInt()
 
-  // expect(debtContract).equalBigInt(debt)
-  // expect(collateralContract).equalBigInt(collateral)
+  expect(debtContract).equalBigInt(debt)
+  expect(collateralContract).equalBigInt(collateral)
+
+  expect(data.borrowGivenDebtParams.debtIn).gteBigInt(debt)
 }

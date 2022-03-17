@@ -9,7 +9,7 @@ import * as fc from 'fast-check'
 import { LendGivenBondParams, NewLiquidityParams, CollectParams } from '../types'
 import { BondInterest__factory, BondPrincipal__factory, ERC20__factory, InsuranceInterest__factory, InsurancePrincipal__factory,TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import * as LendFilter from '../filters/Lend'
+// import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 
@@ -42,7 +42,7 @@ const testCases = [
     },
     collectParams: {
       claims: {
-        bondPrincipal: 1000n,
+        bondPrincipal: 10n,
         bondInterest: 5n,
         insurancePrincipal: 40n,
         insuranceInterest: 4n,
@@ -69,7 +69,42 @@ describe('Collect', () => {
     })
   })
 })
-
+describe('Collect ETH Asset', () => {
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, convenience,assetToken, collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
+  
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityETHAssetFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      await setTime(Number(currentTime + 10000n))
+      const lendGivenBond = await lendGivenBondETHAssetFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
+      await setTime(Number(maturity+1n))
+      const collect = await collectETHAssetFixture(lendGivenBond,signers[0], testCase.collectParams)
+  
+      await collectProperties(testCase, currentTime, collect, convenience.wethContract.address, collateralToken.address)
+    })
+  })
+})
+describe('Collect ETH Collateral', () => {
+  testCases.forEach((testCase, index) => {
+    it(`Succeeded ${index}`, async () => {
+      const { maturity, convenience,assetToken, collateralToken } = await loadFixture(fixture)
+      let currentTime = await now()
+  
+      const constructorFixture = await loadFixture(fixture)
+      await setTime(Number(currentTime + 5000n))
+      const newLiquidity = await newLiquidityETHCollateralFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      await setTime(Number(currentTime + 10000n))
+      const lendGivenBond = await lendGivenBondETHCollateralFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
+      await setTime(Number(maturity+1n))
+      const collect = await collectETHCollateralFixture(lendGivenBond,signers[0], testCase.collectParams)
+  
+      await collectProperties(testCase, currentTime, collect, assetToken.address, convenience.wethContract.address)
+    })
+  })
+})
 // describe('Collect', () => {
 
 

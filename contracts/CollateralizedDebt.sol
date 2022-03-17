@@ -2,7 +2,6 @@
 pragma solidity =0.8.4;
 
 import {IDue} from './interfaces/IDue.sol';
-import {IERC721Receiver} from '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
@@ -77,12 +76,8 @@ contract CollateralizedDebt is IDue, ERC721Permit {
         maturity = _maturity;
     }
 
-    modifier onlyConvenience() {
+    function mint(address to, uint256 id) external override {
         require(msg.sender == address(convenience), 'E403');
-        _;
-    }
-
-    function mint(address to, uint256 id) external override onlyConvenience {
         _safeMint(to, id);
     }
 }

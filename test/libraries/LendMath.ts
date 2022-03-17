@@ -5,151 +5,160 @@ import { divUp, mulDiv, mulDivUp, sqrtUp } from '../shared/Helper'
 const MAXUINT112: bigint = 2n ** 112n
 const MAXUINT256 = 1n << 256n
 
-
 export const getLendGivenBondParams = (
   state: { x: bigint; y: bigint; z: bigint },
-  fee:bigint,
+  fee: bigint,
   protocolFee: bigint,
   maturity: bigint,
   currentTime: bigint,
   assetIn: bigint,
   bondOut: bigint
 ) => {
-  const xIncrease = getX(protocolFee, fee,maturity,currentTime, assetIn);
+  console.log('!!!!!!!!!!!!TYPESCRIPT BEGINS!!!!!!!!!!!!!!!!')
+  console.log('maturity', maturity)
+  console.log('currentTime', currentTime)
+  const xIncrease = getX(protocolFee, fee, maturity, currentTime, assetIn)
+  console.log('xIncrease', xIncrease)
+  let xReserve = state.x
+  xReserve += xIncrease
+  console.log('xReserve', xReserve)
+  console.log('bond Out', bondOut)
+  let _yDecrease = bondOut
+  console.log('_yDecrease 1', _yDecrease)
+  _yDecrease -= xIncrease
+  console.log('_yDecrease 2', _yDecrease)
+  _yDecrease <<= 32n
+  console.log('yDecrease', _yDecrease)
+  let denominator = maturity
+  denominator -= currentTime
+  console.log('denominator', denominator)
+  _yDecrease = divUp(_yDecrease, denominator)
+  console.log('yDecrease', _yDecrease)
+  let yReserve = state.y
+  yReserve -= _yDecrease
+  console.log('yReserve', yReserve)
+  let zReserve = state.x
+  zReserve *= state.y
+  console.log('zReserve', zReserve)
+  denominator = xReserve
+  denominator *= yReserve
+  console.log('denominator', denominator)
+  zReserve = mulDivUp(zReserve, state.z, denominator)
+  console.log('zReserve', zReserve)
+  let _zDecrease = state.z
+  _zDecrease -= zReserve
+  console.log('zDecrease', _zDecrease)
+  console.log('yDecreae', _yDecrease)
+  console.log('!!!!!!!!!!!!TYPESCRIPT ENDS!!!!!!!!!!!!!!!!')
 
-  let xReserve = state.x;
-  xReserve += xIncrease;
-
-  let _yDecrease = bondOut;
-  _yDecrease -= xIncrease;
-  _yDecrease <<= 32n;
-  let denominator = maturity;
-  denominator -= currentTime;
-  _yDecrease = divUp(_yDecrease,denominator);
-
-  let yReserve = state.y;
-  yReserve -= _yDecrease;
-
-  let zReserve = state.x;
-  zReserve *= state.y;
-  denominator = xReserve;
-  denominator *= yReserve;
-  zReserve = mulDivUp(zReserve,state.z, denominator);
-
-  let _zDecrease = state.z;
-  _zDecrease -= zReserve;
-  return {xIncrease: xIncrease, yDecrease: _yDecrease,zDecrease: _zDecrease}
+  return { xIncrease: xIncrease, yDecrease: _yDecrease, zDecrease: _zDecrease }
 }
 export const getLendGivenInsuranceParams = (
   state: { x: bigint; y: bigint; z: bigint },
   maturity: bigint,
-  fee:bigint,
+  fee: bigint,
   protocolFee: bigint,
   currentTime: bigint,
   assetIn: bigint,
   insuranceOut: bigint
 ) => {
+  let xIncrease = getX(protocolFee, fee, maturity, currentTime, assetIn)
+  console.log('xIncrease', xIncrease)
+  let xReserve = state.x
+  xReserve += xIncrease
 
-  let xIncrease = getX(protocolFee, fee,maturity,currentTime, assetIn);
+  let _zDecrease = insuranceOut
+  _zDecrease++
+  _zDecrease *= xReserve
+  let subtrahend = state.z
+  subtrahend *= xIncrease
+  _zDecrease -= subtrahend
+  _zDecrease <<= 25n
+  let denominator = maturity - currentTime
+  denominator *= xReserve
+  _zDecrease = divUp(_zDecrease, denominator)
 
-  let xReserve = state.x;
-  xReserve += xIncrease;
+  let zReserve = state.z
+  zReserve -= _zDecrease
 
-  let _zDecrease = insuranceOut;
-  _zDecrease *= xReserve;
-  let subtrahend = state.z;
-  subtrahend *= xIncrease;
-  _zDecrease -= subtrahend;
-  _zDecrease <<= 25n;
-  let denominator = maturity-currentTime
-  denominator *= xReserve;
-  _zDecrease = divUp(_zDecrease,denominator);
+  let yReserve = state.x
+  yReserve *= state.z
+  denominator = xReserve
+  denominator *= zReserve
+  yReserve = mulDivUp(yReserve, state.y, denominator)
 
-  let zReserve = state.z;
-  zReserve -= _zDecrease;
-
-  let yReserve = state.x;
-  yReserve *= state.z;
-  denominator = xReserve;
-  denominator *= zReserve;
-  yReserve = mulDivUp(yReserve,state.y, denominator);
-
-  let _yDecrease = state.y;
-  _yDecrease -= yReserve;
-  return { xIncrease: xIncrease,yDecrease: _yDecrease, zDecrease: _zDecrease }
+  let _yDecrease = state.y
+  _yDecrease -= yReserve
+  console.log(_yDecrease, _zDecrease)
+  return { xIncrease: xIncrease, yDecrease: _yDecrease, zDecrease: _zDecrease }
 }
 export const getLendGivenPercentParams = (
   state: { x: bigint; y: bigint; z: bigint },
   maturity: bigint,
   currentTime: bigint,
-  fee:bigint,
-  protocolFee:bigint,
+  fee: bigint,
+  protocolFee: bigint,
   assetIn: bigint,
   percent: bigint
 ) => {
-  let xIncrease = getX(fee, protocolFee,maturity,currentTime, assetIn);
+  let xIncrease = getX(fee, protocolFee, maturity, currentTime, assetIn)
 
-        let xReserve = state.x;
-        xReserve += xIncrease;
+  let xReserve = state.x
+  xReserve += xIncrease
 
-        if (percent <= 0x80000000) {
-            let yMid = state.y;
-            let subtrahend = state.y;
-            subtrahend *= state.y;
-            subtrahend = mulDivUp(subtrahend,state.x, xReserve);
-            subtrahend = sqrtUp(subtrahend);
-            yMid -= subtrahend;
+  if (percent <= 0x80000000) {
+    let yMid = state.y
+    let subtrahend = state.y
+    subtrahend *= state.y
+    subtrahend = mulDivUp(subtrahend, state.x, xReserve)
+    subtrahend = sqrtUp(subtrahend)
+    yMid -= subtrahend
 
-            let _yDecrease = yMid;
-            _yDecrease *= percent;
-            _yDecrease >>= 31n;
+    let _yDecrease = yMid
+    _yDecrease *= percent
+    _yDecrease >>= 31n
 
-            let yReserve = state.y;
-            yReserve -= _yDecrease;
+    let yReserve = state.y
+    yReserve -= _yDecrease
 
-            let zReserve = state.x;
-            zReserve *= state.y;
-            let denominator = xReserve;
-            denominator *= yReserve;
-            zReserve = mulDivUp(zReserve,state.z, denominator);
+    let zReserve = state.x
+    zReserve *= state.y
+    let denominator = xReserve
+    denominator *= yReserve
+    zReserve = mulDivUp(zReserve, state.z, denominator)
 
-            let _zDecrease = state.z;
-            _zDecrease -= zReserve;
+    let _zDecrease = state.z
+    _zDecrease -= zReserve
 
-            return { xIncrease: xIncrease,yDecrease: _yDecrease, zDecrease: _zDecrease }
+    return { xIncrease: xIncrease, yDecrease: _yDecrease, zDecrease: _zDecrease }
+  } else {
+    percent = 0x100000000n - percent
 
-        } else {
-            percent = 0x100000000n - percent;
+    let zMid = state.z
+    let subtrahend = state.z
+    subtrahend *= state.z
+    subtrahend = mulDivUp(subtrahend, state.z, xReserve)
+    subtrahend = sqrtUp(subtrahend)
+    zMid -= subtrahend
 
-            let zMid = state.z;
-            let subtrahend = state.z;
-            subtrahend *= state.z;
-            subtrahend = mulDivUp(subtrahend,state.z, xReserve);
-            subtrahend = sqrtUp(subtrahend);
-            zMid -= subtrahend;
+    let _zDecrease = zMid
+    _zDecrease *= percent
+    _zDecrease >>= 31n
 
-            let _zDecrease = zMid;
-            _zDecrease *= percent;
-            _zDecrease >>= 31n;
+    let zReserve = state.z
+    zReserve -= _zDecrease
 
-            let zReserve = state.z;
-            zReserve -= _zDecrease;
+    let yReserve = state.x
+    yReserve *= state.z
+    let denominator = xReserve
+    denominator *= zReserve
+    yReserve = mulDivUp(yReserve, state.y, denominator)
 
-            let yReserve = state.x;
-            yReserve *= state.z;
-            let denominator = xReserve;
-            denominator *= zReserve;
-            yReserve = mulDivUp(yReserve,state.y, denominator);
+    let _yDecrease = state.y
+    _yDecrease -= yReserve
 
-            let _yDecrease = state.y;
-            _yDecrease -= yReserve;
-            
-            return { xIncrease: xIncrease,yDecrease: _yDecrease, zDecrease: _zDecrease }
-
-
-        }
-
-
+    return { xIncrease: xIncrease, yDecrease: _yDecrease, zDecrease: _zDecrease }
+  }
 }
 const adjust = (reserve: bigint, decrease: bigint, feeBase: bigint) => {
   return (reserve << 16n) - feeBase * decrease
@@ -238,24 +247,38 @@ export const getInsurance = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  const addend = (state.z * delState.x) << 32n
-  const _insuranceOut = ((maturity - currentTime) * delState.z)>>25n
-  const denominator = (delState.x + state.x) 
-  const minimum = (state.z*delState.x)/denominator
-  return (_insuranceOut + minimum)
+  console.log(maturity - currentTime)
+  const _insuranceOut = ((maturity - currentTime) * delState.z) >> 25n
+  const denominator = delState.x + state.x
+  const minimum = (state.z * delState.x) / denominator
+  console.log('_insuranceOut', _insuranceOut)
+  console.log('minimum', minimum)
+  return _insuranceOut + minimum
 }
 
-export const getX=(protocolFee:bigint, fee:bigint,maturity:bigint,currentTime:bigint,assetIn: bigint)=>{
-const duration = maturity - currentTime
+export const getInsurancePrincipal = (
+  state: { x: bigint; y: bigint; z: bigint },
+  delState: { x: bigint; y: bigint; z: bigint }
+): bigint => {
+  return (state.z * delState.x) / (state.x + delState.x)
+}
 
-const BASE = 0x10000000000n
-let denominator = (duration * fee ) + BASE
+export const getInsuranceInterest = (
+  delState: { x: bigint; y: bigint; z: bigint },
+  maturity: bigint,
+  currentTime: bigint
+): bigint => {
+  return ((maturity - currentTime) * delState.z) >> 25n
+}
 
-let xIncrease = assetIn*BASE/denominator
+export const getX = (protocolFee: bigint, fee: bigint, maturity: bigint, currentTime: bigint, assetIn: bigint) => {
+  const duration = maturity - currentTime
 
-denominator = (duration * protocolFee )+BASE
+  const BASE = 0x10000000000n
+  let denominator = duration * (fee + protocolFee) + BASE
+  console.log('assetIn den', assetIn, assetIn * BASE, denominator)
 
-xIncrease *= BASE
-xIncrease/=denominator
-return xIncrease
+  let xIncrease = (assetIn * BASE) / denominator
+
+  return xIncrease
 }

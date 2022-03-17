@@ -16,10 +16,10 @@ import {
 } from '../shared/Fixtures'
 
 import * as fc from 'fast-check'
-import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
+import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import * as BorrowFilter from '../filters/Borrow'
+// import * as BorrowFilter from '../filters/Borrow'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
@@ -213,7 +213,7 @@ async function borrowGivenPercentProperties(
   // const result = await loadFixture(success)
   const result = fixture
 
-  let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -222,28 +222,32 @@ async function borrowGivenPercentProperties(
     maturity
   )
   if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
     yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
   }
 
   const state = {
-    x: data.newLiquidityParams.assetIn,
+    x: xIncreaseNewLiquidity,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yIncrease: yIncreaseBorrowGivenPercent, zIncrease: zIncreaseBorrowGivenPercent } =
-    BorrowMath.getBorrowGivenPercentParams(
-      state,
-      PROTOCOL_FEE,
-      FEE,
-      data.borrowGivenPercentParams.assetOut,
-      maturity,
-      currentTime + 10_000n,
-      data.borrowGivenPercentParams.percent
-    )
+  const {
+    xDecrease: xDecreaseBorrowGivenPercent,
+    yIncrease: yIncreaseBorrowGivenPercent,
+    zIncrease: zIncreaseBorrowGivenPercent,
+  } = BorrowMath.getBorrowGivenPercentParams(
+    state,
+    PROTOCOL_FEE,
+    FEE,
+    data.borrowGivenPercentParams.assetOut,
+    maturity,
+    currentTime + 10_000n,
+    data.borrowGivenPercentParams.percent
+  )
 
   const delState = {
-    x: data.borrowGivenPercentParams.assetOut,
+    x: xDecreaseBorrowGivenPercent,
     y: yIncreaseBorrowGivenPercent,
     z: zIncreaseBorrowGivenPercent,
   }
@@ -258,6 +262,8 @@ async function borrowGivenPercentProperties(
   const debtContract = cdTokenBalance.debt.toBigInt()
   const collateralContract = cdTokenBalance.collateral.toBigInt()
 
-  // expect(debtContract).equalBigInt(debt)
-  // expect(collateralContract).equalBigInt(collateral)
+  console.log('DC CC', debtContract, collateralContract)
+
+  expect(debtContract).equalBigInt(debt)
+  expect(collateralContract).equalBigInt(collateral)
 }

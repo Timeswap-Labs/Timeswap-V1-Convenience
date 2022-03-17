@@ -7,15 +7,230 @@ import { ethers, waffle } from 'hardhat'
 import { now, setTime } from '../../shared/Helper'
 import * as LiquidityFilter from '../../filters/Liquidity'
 import * as LiquidityMath from '../../libraries/LiquidityMath'
-import * as LendFilter from '../../filters/Lend'
+// import * as LendFilter from '../../filters/Lend'
 import * as LendMath from '../../libraries/LendMath'
 import { expect } from '../../shared/Expect'
-
+import { FEE, PROTOCOL_FEE } from '../../shared/Constants'
 const { loadFixture } = waffle
 
 let maturity = 0n
 let signers: SignerWithAddress[] = []
 
+const lendGivenBondTestCases = [
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenBondParams: {
+      assetIn: 1000n,
+      bondOut: 1010n,
+      minInsurance: 50n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenBondParams: {
+      assetIn: 1000n,
+      bondOut: 1087n,
+      minInsurance: 50n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenBondParams: {
+      assetIn: 500n,
+      bondOut: 591n,
+      minInsurance: 20n,
+    },
+  },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   lendGivenBondParams: {
+  //     assetIn: 1000000000n,
+  //     bondOut: 995719504n,
+  //     minInsurance: 50n,
+  //   },
+  // },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 990n,
+    },
+    lendGivenBondParams: {
+      assetIn: 1000n,
+      bondOut: 1010n,
+      minInsurance: 50n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 990n,
+    },
+    lendGivenBondParams: {
+      assetIn: 100n,
+      bondOut: 110n,
+      minInsurance: 2n,
+    },
+  },
+]
+const lendGivenInsuranceTestCases = [
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   lendGivenInsuranceParams: {
+  //     assetIn: 1000n,
+  //     insuranceOut: 8n,
+  //     minBond: 1005n,
+  //   },
+  // },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenInsuranceParams: {
+      assetIn: 1000n,
+      insuranceOut: 67n,
+      minBond: 1050n,
+    },
+  },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   lendGivenInsuranceParams: {
+  //     assetIn: 100000n,
+  //     insuranceOut: 467n,
+  //     minBond: 100010n,
+  //   },
+  // },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   lendGivenInsuranceParams: {
+  //     assetIn: 500n,
+  //     insuranceOut: 24n,
+  //     minBond: 550n,
+  //   },
+  // },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenInsuranceParams: {
+      assetIn: 1000000000n,
+      insuranceOut: 995n,
+      minBond: 1050n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenInsuranceParams: {
+      assetIn: 1000n,
+      insuranceOut: 67n,
+      minBond: 1050n,
+    },
+  },
+]
+const lendGivenPercentTestCases = [
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 1000n,
+      percent: 1n << 31n,
+      minBond: 1000n,
+      minInsurance: 50n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 100000n,
+      percent: 2n << 31n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 500n,
+      percent: 4n << 30n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 1000000000n,
+      percent: 2n << 30n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 67900000000n,
+      percent: 1n << 31n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+]
 const MAXUINT112: bigint = 2n ** 112n
 async function fixture(): Promise<Fixture> {
   maturity = (await now()) + 31536000n
@@ -26,92 +241,56 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 describe('Lend Math Given Bond', () => {
+  lendGivenBondTestCases.forEach((testCase, index) => {
     it('Succeeded', async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
   
-      await fc.assert(
-        fc.asyncProperty(
-          fc
-            .record({
-              newLiquidityParams: fc
-                .record({
-                  assetIn: fc.bigUintN(112),
-                  debtIn: fc.bigUintN(112),
-                  collateralIn: fc.bigUintN(112),
-                })
-                .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-              lendGivenBondParams: fc.record({
-                assetIn: fc.bigUintN(112),
-                bondOut: fc.bigUintN(112),
-                minInsurance: fc.bigUintN(112),
-              }),
-            })
-            .filter((x) => LendFilter.lendGivenBondSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
-          async (data) => {
+      
             const success = async () => {
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
-              const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+              const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
               await setTime(Number(currentTime + 10000n))
-              const lendGivenBond = await lendMathGivenBondFixture(newLiquidity, signers[0], data.lendGivenBondParams)
+              const lendGivenBond = await lendMathGivenBondFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
               return lendGivenBond
             }
-            const [yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-            await lendMathGivenBondProperties(data, currentTime, maturity,yDecrease,zDecrease)
-          }
-        ),
-        { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-      )
+            const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
+          console.log('fix',await loadFixture(success))
+          
+            await lendMathGivenBondProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
+          
     }).timeout(100000)
   
-
+  })
   })
   describe('Lend Math Given Insurance', () => {
+    lendGivenInsuranceTestCases.forEach((testCase, index) => {
     it('Succeeded', async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
   
-      await fc.assert(
-        fc.asyncProperty(
-          fc
-            .record({
-              newLiquidityParams: fc
-                .record({
-                  assetIn: fc.bigUintN(112),
-                  debtIn: fc.bigUintN(112),
-                  collateralIn: fc.bigUintN(112),
-                })
-                .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-              lendGivenInsuranceParams: fc.record({
-                assetIn: fc.bigUintN(112),
-                insuranceOut: fc.bigUintN(112),
-                minBond: fc.bigUintN(112),
-              }),
-            })
-            .filter((x) => LendFilter.lendGivenInsuranceSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
-            .noShrink(),
-          async (data) => {
+    
             const success = async () => {
               const constructor = await loadFixture(fixture)
               await setTime(Number(currentTime + 5000n))
-              const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+              const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
               await setTime(Number(currentTime + 10000n))
               const lendGivenBond = await lendMathGivenInsuranceFixture(
                 newLiquidity,
                 signers[0],
-                data.lendGivenInsuranceParams
+                testCase.lendGivenInsuranceParams
               )
               return lendGivenBond
             }
   
-            const [yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-            await lendMathGivenInsuranceProperties(data, currentTime, maturity,yDecrease,zDecrease)
-          }
-        ),
-        { skipAllAfterTimeLimit: 50000, numRuns: 5 }
-      )
+            
+          const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
+          console.log('fix',await loadFixture(success))
+          await lendMathGivenInsuranceProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
+          
     }).timeout(100000)
+  })
 })
 describe('Lend Math Given Percent', () => {
   async function fixture(): Promise<Fixture> {
@@ -122,51 +301,33 @@ describe('Lend Math Given Percent', () => {
 
     return constructor
   }
+  lendGivenPercentTestCases.forEach((testCase, index) => {
 
   it('Succeeded', async () => {
     const { maturity } = await loadFixture(fixture)
     let currentTime = await now()
 
-    await fc.assert(
-      fc.asyncProperty(
-        fc
-          .record({
-            newLiquidityParams: fc
-              .record({
-                assetIn: fc.bigUintN(112),
-                debtIn: fc.bigUintN(112),
-                collateralIn: fc.bigUintN(112),
-              })
-              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-            lendGivenPercentParams: fc.record({
-              assetIn: fc.bigUintN(50),
-              percent: fc.bigUint(1n<<32n),
-              minInsurance: fc.bigUintN(50),
-              minBond: fc.bigUintN(50)
-            }),
-          })
-          .filter((x) => LendFilter.lendGivenPercentSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
-          .noShrink(),
-        async (data) => {
+    
+      
           const success = async () => {
             const constructor = await loadFixture(fixture)
             await setTime(Number(currentTime + 5000n))
-            const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
+            const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
             await setTime(Number(currentTime + 10000n))
-            const lendGivenBond = await lendMathGivenPercentFixture(newLiquidity, signers[0], data.lendGivenPercentParams)
+            const lendGivenBond = await lendMathGivenPercentFixture(newLiquidity, signers[0], testCase.lendGivenPercentParams)
             return lendGivenBond
           }
           
           
           
-          const [yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-          await lendMathGivenPercentProperties(data, currentTime, maturity,yDecrease,zDecrease)
+          const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
+          console.log('fix',await loadFixture(success))
+          await lendMathGivenPercentProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
 
           
-        }),
-      { skipAllAfterTimeLimit: 50000, numRuns:10 }
-    )
+     
   }).timeout(100000)
+})
 })
   async function lendMathGivenBondProperties(
     data: {
@@ -190,28 +351,39 @@ describe('Lend Math Given Percent', () => {
     const neededTime = (await now()) + 100n
     
   
-    
-    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
+    console.log('maturity 1',maturity)
+    console.log('current time 1',currentTime)
+  
+    let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+    const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
       data.newLiquidityParams.assetIn,
       data.newLiquidityParams.debtIn,
       data.newLiquidityParams.collateralIn,
       currentTime + 5_000n,
       maturity
     )
+    if (maybeNewLiq !== false) {
+      xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
+      yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+      zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+    }
     const state = {
-      x: data.newLiquidityParams.assetIn,
+      x: xIncreaseNewLiquidity,
       y: yIncreaseNewLiquidity,
       z: zIncreaseNewLiquidity,
     }
-    const { yDecreaseLendGivenBond, zDecreaseLendGivenBond } = LendMath.calcYAndZDecreaseLendGivenBond(
+    const lendGivenBondParamsFromConv = LendMath.getLendGivenBondParams(
       state,
+      FEE,
+      PROTOCOL_FEE,
       maturity,
       currentTime + 10_000n,
       data.lendGivenBondParams.assetIn,
       data.lendGivenBondParams.bondOut
     )
-    expect(yDecrease).equalBigInt(yDecreaseLendGivenBond)
-    expect(zDecrease).equalBigInt(zDecreaseLendGivenBond)
+    console.log(lendGivenBondParamsFromConv);
+    expect(yDecrease).equalBigInt(lendGivenBondParamsFromConv.yDecrease)
+    expect(zDecrease).equalBigInt(lendGivenBondParamsFromConv.zDecrease)
   }
   
 async function lendMathGivenInsuranceProperties(
@@ -236,28 +408,39 @@ async function lendMathGivenInsuranceProperties(
     const neededTime = (await now()) + 100n
     
     
-    const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
-      data.newLiquidityParams.assetIn,
-      data.newLiquidityParams.debtIn,
-      data.newLiquidityParams.collateralIn,
-      currentTime + 5_000n,
-      maturity
-    )
+   
+  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+  const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
+    data.newLiquidityParams.assetIn,
+    data.newLiquidityParams.debtIn,
+    data.newLiquidityParams.collateralIn,
+    currentTime + 5_000n,
+    maturity
+  )
+  if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
+    yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+    zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+  }
   
     const state = {
-      x: data.newLiquidityParams.assetIn,
+      x: xIncreaseNewLiquidity,
       y: yIncreaseNewLiquidity,
       z: zIncreaseNewLiquidity,
     }
-    const { yDecreaseLendGivenInsurance, zDecreaseLendGivenInsurance } = LendMath.calcYAndZDecreaseLendGivenInsurance(
+    const lendGivenInsuranceParamsFromConv = LendMath.getLendGivenInsuranceParams(
       state,
       maturity,
+
+      FEE,
+      PROTOCOL_FEE,
       currentTime + 10_000n,
+
       data.lendGivenInsuranceParams.assetIn,
       data.lendGivenInsuranceParams.insuranceOut
     )
-    expect(yDecrease).equalBigInt(yDecreaseLendGivenInsurance)
-    expect(zDecrease).equalBigInt(zDecreaseLendGivenInsurance)
+    expect(yDecrease).equalBigInt(lendGivenInsuranceParamsFromConv.yDecrease)
+    expect(zDecrease).equalBigInt(lendGivenInsuranceParamsFromConv.zDecrease)
   }
   async function lendMathGivenPercentProperties(
     data: {
@@ -278,27 +461,37 @@ async function lendMathGivenInsuranceProperties(
     yDecrease: bigint,
     zDecrease: bigint
   ) {
-  
-  const { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = LiquidityMath.getYandZIncreaseNewLiquidity(
-    data.newLiquidityParams.assetIn,
-    data.newLiquidityParams.debtIn,
-    data.newLiquidityParams.collateralIn,
-    currentTime + 5_000n,
-    maturity
-  )
+
+    let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+    const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
+      data.newLiquidityParams.assetIn,
+      data.newLiquidityParams.debtIn,
+      data.newLiquidityParams.collateralIn,
+      currentTime + 5_000n,
+      maturity
+    )
+    if (maybeNewLiq !== false) {
+      xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
+      yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+      zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+    }
 
   const state = {
-    x: data.newLiquidityParams.assetIn,
+    x: xIncreaseNewLiquidity,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yDecreaseLendGivenPercent, zDecreaseLendGivenPercent } = LendMath.calcYAndZDecreaseLendGivenPercent(
+  const lendGivenPercentParamsFromConv = LendMath.getLendGivenPercentParams(
     state,
     maturity,
     currentTime + 10_000n,
+
+    FEE,
+    PROTOCOL_FEE,
+
     data.lendGivenPercentParams.assetIn,
     data.lendGivenPercentParams.percent
   )
-  expect(yDecrease).equalBigInt(yDecreaseLendGivenPercent)
-  expect(zDecrease).equalBigInt(zDecreaseLendGivenPercent)
+  expect(yDecrease).equalBigInt(lendGivenPercentParamsFromConv.yDecrease)
+  expect(zDecrease).equalBigInt(lendGivenPercentParamsFromConv.zDecrease)
 }

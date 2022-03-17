@@ -14,7 +14,7 @@ import {
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
-import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
+import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import {
   CollateralizedDebt__factory,
   ERC20__factory,
@@ -48,7 +48,20 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
+      assetIn: 10000n,
+      minLiquidity: 5700000n,
+      maxDebt: 120000n,
+      maxCollateral: 10000n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -61,20 +74,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
-      assetIn: 100000n,
-      minLiquidity: 3000000n,
-      maxDebt: 110000n,
-      maxCollateral: 90000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 100000n,
-      debtIn: 130000n,
-      collateralIn: 1000n,
-    },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -87,7 +87,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -100,7 +100,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -113,7 +113,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -126,33 +126,7 @@ const testCases = [
       debtIn: 12000n,
       collateralIn: 1000n,
     },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    addLiquidityParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
@@ -171,7 +145,7 @@ describe('Liquidity Given Asset', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], testCase.addLiquidityParams)
+      const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], testCase.liquidityGivenAssetParams)
 
       await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
     })
@@ -195,7 +169,7 @@ describe('Liquidity Given Asset ETH Asset', () => {
       const addLiquidity = await liquidityGivenAssetETHAssetFixture(
         newLiquidity,
         signers[0],
-        testCase.addLiquidityParams
+        testCase.liquidityGivenAssetParams
       )
 
       await addLiquidityProperties(
@@ -226,7 +200,7 @@ describe('Liquidity Given Asset ETH Collateral', () => {
       const addLiquidity = await liquidityGivenAssetETHCollateralFixture(
         newLiquidity,
         signers[0],
-        testCase.addLiquidityParams
+        testCase.liquidityGivenAssetParams
       )
 
       await addLiquidityProperties(
@@ -247,7 +221,7 @@ async function addLiquidityProperties(
       debtIn: bigint
       collateralIn: bigint
     }
-    addLiquidityParams: {
+    liquidityGivenAssetParams: {
       assetIn: bigint
       minLiquidity: bigint
       maxDebt: bigint
@@ -273,52 +247,51 @@ async function addLiquidityProperties(
     currentTime + 5_000n,
     maturity
   )
-  let { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = { yIncreaseNewLiquidity: 0n, zIncreaseNewLiquidity: 0n }
+  let { xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity } = { xIncreaseNewLiquidity: 0n,yIncreaseNewLiquidity: 0n, zIncreaseNewLiquidity: 0n }
   if (maybeNewMintParams != false) {
+    xIncreaseNewLiquidity = maybeNewMintParams.xIncreaseNewLiquidity
     yIncreaseNewLiquidity = maybeNewMintParams.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewMintParams.zIncreaseNewLiquidity
   }
 
   const state = {
-    x: data.newLiquidityParams.assetIn,
+    x: xIncreaseNewLiquidity,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getAddLiquidityGivenAssetParams(
+  const { xIncreaseAddLiqudity,yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getLiquidityGivenAssetParams(
     state,
-    data.addLiquidityParams.assetIn,
+    data.liquidityGivenAssetParams.assetIn,
     0n
   )
   const delState = {
-    x: data.addLiquidityParams.assetIn,
+    x: xIncreaseAddLiqudity,
     y: yIncreaseAddLiquidity,
     z: zIncreaseAddLiquidity,
   }
-  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(data.newLiquidityParams.assetIn)
+  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(xIncreaseNewLiquidity)
 
   const maybeLiquidityBalanceAdd = LiquidityMath.getLiquidity(state, delState, currentTime + 10_000n, maturity)
   let liquidityBalanceAdd = 0n
+  console.log(maybeLiquidityBalanceAdd)
   if (typeof maybeLiquidityBalanceAdd != 'string') {
     liquidityBalanceAdd = maybeLiquidityBalanceAdd
   }
   const liquidityBalance = liquidityBalanceNew + liquidityBalanceAdd
 
   const debt = LiquidityMath.getDebtAddLiquidity(
-    { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    { x: xIncreaseAddLiqudity, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
     maturity,
     currentTime + 10_000n
   )
   const collateral = LiquidityMath.getCollateralAddLiquidity(
-    { x: data.addLiquidityParams.assetIn, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
+    { x: xIncreaseAddLiqudity, y: yIncreaseAddLiquidity, z: zIncreaseAddLiquidity },
     maturity,
     currentTime + 10_000n
   )
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
-  // const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
-  // const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
   const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
   const collateralizedDebtToken = await collateralizedDebtContract.dueOf(1)

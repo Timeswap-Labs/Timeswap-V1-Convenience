@@ -33,12 +33,9 @@ library LendMath {
         )
     {
         ConstantProduct.CP memory cp = pair.get(maturity);
-
         xIncrease = getX(pair, maturity, assetIn);
-
         uint256 xReserve = cp.x;
         xReserve += xIncrease;
-
         uint256 _yDecrease = bondOut;
         _yDecrease -= xIncrease;
         _yDecrease <<= 32;
@@ -46,16 +43,13 @@ library LendMath {
         denominator -= block.timestamp;
         _yDecrease = _yDecrease.divUp(denominator);
         yDecrease = _yDecrease.toUint112();
-
         uint256 yReserve = cp.y;
         yReserve -= _yDecrease;
-
         uint256 zReserve = cp.x;
         zReserve *= cp.y;
         denominator = xReserve;
         denominator *= yReserve;
         zReserve = zReserve.mulDivUp(cp.z, denominator);
-
         uint256 _zDecrease = cp.z;
         _zDecrease -= zReserve;
         zDecrease = _zDecrease.toUint112();
@@ -78,11 +72,11 @@ library LendMath {
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         xIncrease = getX(pair, maturity, assetIn);
-
         uint256 xReserve = cp.x;
         xReserve += xIncrease;
 
         uint256 _zDecrease = insuranceOut;
+        _zDecrease++;
         _zDecrease *= xReserve;
         uint256 subtrahend = cp.z;
         subtrahend *= xIncrease;
@@ -189,9 +183,6 @@ library LendMath {
         uint256 maturity,
         uint112 assetIn
     ) private view returns (uint112 xIncrease) {
-        // uint256 duration = maturity;
-        // duration -= block.timestamp;
-
         uint256 totalFee = pair.fee();
         totalFee += pair.protocolFee();
 
@@ -204,21 +195,5 @@ library LendMath {
         _xIncrease *= BASE;
         _xIncrease /= denominator;
         xIncrease = _xIncrease.toUint112();
-
-        // uint256 denominator = duration;
-        // denominator *= pair.fee();
-        // denominator += BASE;
-
-        // uint256 _xIncrease = assetIn;
-        // _xIncrease *= BASE;
-        // _xIncrease /= denominator;
-
-        // denominator = duration;
-        // denominator *= pair.protocolFee();
-        // denominator += BASE;
-
-        // _xIncrease *= BASE;
-        // _xIncrease /= denominator;
-        // xIncrease = _xIncrease.toUint112();
     }
 }

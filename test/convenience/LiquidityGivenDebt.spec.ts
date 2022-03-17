@@ -14,7 +14,7 @@ import {
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
-import { AddLiquidityGivenAssetParams, NewLiquidityParams } from '../types'
+import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import {
   CollateralizedDebt__factory,
   ERC20__factory,
@@ -101,6 +101,9 @@ describe('Liquidity Given Debt ETH Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
+
+      console.log(assetToken.address, collateralToken.address, convenience.wethContract.address, signers[0].address)
+      console.log(convenience.convenienceContract.address)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
@@ -110,6 +113,8 @@ describe('Liquidity Given Debt ETH Asset', () => {
         signers[0],
         testCase.newLiquidityParams
       )
+      console.log('Ts collateral balance', (await collateralToken.balanceOf(signers[0].address)).toString())
+      console.log('TS provider balance', (await ethers.provider.getBalance(signers[0].address)).toString())
       await setTime(Number(currentTime + 10000n))
       const liquidityGivenDebt = await liquidityGivenDebtETHAssetFixture(
         newLiquidity,
@@ -192,14 +197,19 @@ async function liquidityGivenDebtProperties(
     currentTime + 5_000n,
     maturity
   )
-  let { yIncreaseNewLiquidity, zIncreaseNewLiquidity } = { yIncreaseNewLiquidity: 0n, zIncreaseNewLiquidity: 0n }
+  let { xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity } = {
+    xIncreaseNewLiquidity: 0n,
+    yIncreaseNewLiquidity: 0n,
+    zIncreaseNewLiquidity: 0n,
+  }
   if (maybeNewMintParams != false) {
+    xIncreaseNewLiquidity = maybeNewMintParams.xIncreaseNewLiquidity
     yIncreaseNewLiquidity = maybeNewMintParams.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewMintParams.zIncreaseNewLiquidity
   }
 
   const state = {
-    x: data.newLiquidityParams.assetIn,
+    x: xIncreaseNewLiquidity,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
@@ -208,14 +218,14 @@ async function liquidityGivenDebtProperties(
       state,
       data.liquidityGivenDebtParams.debtIn,
       maturity,
-      currentTime
+      currentTime + 10_000n
     )
   const delState = {
     x: xIncreaseAddLiquidity,
     y: yIncreaseAddLiquidity,
     z: zIncreaseAddLiquidity,
   }
-  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(data.newLiquidityParams.assetIn)
+  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(xIncreaseNewLiquidity)
 
   const maybeLiquidityBalanceAdd = LiquidityMath.getLiquidity(state, delState, currentTime + 10_000n, maturity)
   let liquidityBalanceAdd = 0n

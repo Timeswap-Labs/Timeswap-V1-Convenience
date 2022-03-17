@@ -35,15 +35,14 @@ library BorrowMath {
         ConstantProduct.CP memory cp = pair.get(maturity);
 
         xDecrease = getX(pair, maturity, assetOut);
-
         uint256 xReserve = cp.x;
         xReserve -= xDecrease;
-
         uint256 _yIncrease = debtIn;
         _yIncrease -= xDecrease;
         _yIncrease <<= 32;
         uint256 denominator = maturity;
         denominator -= block.timestamp;
+
         _yIncrease /= denominator;
         yIncrease = _yIncrease.toUint112();
 
@@ -52,6 +51,7 @@ library BorrowMath {
 
         uint256 zReserve = cp.x;
         zReserve *= cp.y;
+
         denominator = xReserve;
         denominator *= yReserve;
         zReserve = zReserve.mulDivUp(cp.z, denominator);
@@ -83,7 +83,8 @@ library BorrowMath {
         xReserve -= xDecrease;
 
         uint256 _zIncrease = collateralIn;
-        _zIncrease = xReserve;
+        _zIncrease--;
+        _zIncrease *= xReserve;
         uint256 subtrahend = cp.z;
         subtrahend *= xDecrease;
         _zIncrease -= subtrahend;
@@ -187,9 +188,6 @@ library BorrowMath {
         uint256 maturity,
         uint112 assetOut
     ) private view returns (uint112 xDecrease) {
-        // uint256 duration = maturity;
-        // duration -= block.timestamp;
-
         uint256 totalFee = pair.fee();
         totalFee += pair.protocolFee();
 
@@ -202,21 +200,5 @@ library BorrowMath {
         _xDecrease *= numerator;
         _xDecrease = _xDecrease.divUp(BASE);
         xDecrease = _xDecrease.toUint112();
-
-        // uint256 numerator = duration;
-        // numerator *= pair.fee();
-        // numerator += BASE;
-
-        // uint256 _xDecrease = assetOut;
-        // _xDecrease *= numerator;
-        // _xDecrease = _xDecrease.divUp(BASE);
-
-        // numerator = duration;
-        // numerator *= pair.protocolFee();
-        // numerator += BASE;
-
-        // _xDecrease *= numerator;
-        // _xDecrease = _xDecrease.divUp(BASE);
-        // xDecrease = _xDecrease.toUint112();
     }
 }

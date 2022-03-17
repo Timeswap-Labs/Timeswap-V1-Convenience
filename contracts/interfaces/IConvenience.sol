@@ -353,7 +353,6 @@ interface IConvenience is
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
     function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
         external
-        payable
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the lend function and deposit asset into a pool.
@@ -581,7 +580,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IPay interface.
     /// @return assetIn The total amount of asset ERC20 paid.
     /// @return collateralOut The total amount of collateral ERC20 receceived by to;
-    function repay(Repay memory params) external returns (uint128 assetIn, uint128 collateralOut);
+    function repay(Repay calldata params) external returns (uint128 assetIn, uint128 collateralOut);
 
     /// @dev Calls the pay function and withdraw collateral from a pool given debt is paid or being paid.
     //// @dev The asset being paid is ETH which will be wrapped as WETH.
@@ -589,7 +588,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IPay interface.
     /// @return assetIn The total amount of asset ERC20 paid.
     /// @return collateralOut The total amount of collateral ERC20 receceived by to;
-    function repayETHAsset(RepayETHAsset memory params)
+    function repayETHAsset(RepayETHAsset calldata params)
         external
         payable
         returns (uint128 assetIn, uint128 collateralOut);
@@ -601,7 +600,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IPay interface.
     /// @return assetIn The total amount of asset ERC20 paid.
     /// @return collateralOut The total amount of collateral ERC20 receceived by to;
-    function repayETHCollateral(RepayETHCollateral memory params)
+    function repayETHCollateral(RepayETHCollateral calldata params)
         external
         returns (uint128 assetIn, uint128 collateralOut);
 }
