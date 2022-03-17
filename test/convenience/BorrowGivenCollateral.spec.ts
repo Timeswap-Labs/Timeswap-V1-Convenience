@@ -172,7 +172,7 @@ async function borrowGivenCollateralProperties(
     }
   },
   currentTime: bigint,
-  fixture:  {
+  fixture: {
     convenience: Convenience
     assetToken: TestToken
     collateralToken: TestToken
@@ -233,4 +233,8 @@ async function borrowGivenCollateralProperties(
 
   expect(debtContract).equalBigInt(debt)
   expect(collateralContract).equalBigInt(collateral)
+
+  console.log(data.borrowGivenCollateralParams.collateralIn)
+  console.log(collateral)
+  expect(data.borrowGivenCollateralParams.collateralIn).gteBigInt(collateral)
 }

@@ -68,6 +68,7 @@ export const getLendGivenInsuranceParams = (
   xReserve += xIncrease
 
   let _zDecrease = insuranceOut
+  _zDecrease++
   _zDecrease *= xReserve
   let subtrahend = state.z
   subtrahend *= xIncrease

@@ -100,6 +100,7 @@ export const getBorrowGivenCollateralParams = (
     xReserve -= xDecrease;
 
     let _zIncrease = collateralIn;
+    _zIncrease--
     _zIncrease *= xReserve;
     let subtrahend = state.z;
     subtrahend *= xDecrease;

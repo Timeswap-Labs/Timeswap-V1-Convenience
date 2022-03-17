@@ -7,7 +7,7 @@ import {SquareRoot} from './SquareRoot.sol';
 import {FullMath} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/FullMath.sol';
 import {ConstantProduct} from './ConstantProduct.sol';
 import {SafeCast} from '@timeswap-labs/timeswap-v1-core/contracts/libraries/SafeCast.sol';
-import 'hardhat/console.sol';
+
 library BorrowMath {
     using Math for uint256;
     using SquareRoot for uint256;
@@ -56,11 +56,9 @@ library BorrowMath {
         denominator *= yReserve;
         zReserve = zReserve.mulDivUp(cp.z, denominator);
 
-
         uint256 _zIncrease = zReserve;
         _zIncrease -= cp.z;
         zIncrease = _zIncrease.toUint112();
-
     }
 
     function givenCollateral(
@@ -85,6 +83,7 @@ library BorrowMath {
         xReserve -= xDecrease;
 
         uint256 _zIncrease = collateralIn;
+        _zIncrease--;
         _zIncrease *= xReserve;
         uint256 subtrahend = cp.z;
         subtrahend *= xDecrease;
@@ -189,9 +188,6 @@ library BorrowMath {
         uint256 maturity,
         uint112 assetOut
     ) private view returns (uint112 xDecrease) {
-        // uint256 duration = maturity;
-        // duration -= block.timestamp;
-
         uint256 totalFee = pair.fee();
         totalFee += pair.protocolFee();
 
@@ -204,21 +200,5 @@ library BorrowMath {
         _xDecrease *= numerator;
         _xDecrease = _xDecrease.divUp(BASE);
         xDecrease = _xDecrease.toUint112();
-
-        // uint256 numerator = duration;
-        // numerator *= pair.fee();
-        // numerator += BASE;
-
-        // uint256 _xDecrease = assetOut;
-        // _xDecrease *= numerator;
-        // _xDecrease = _xDecrease.divUp(BASE);
-
-        // numerator = duration;
-        // numerator *= pair.protocolFee();
-        // numerator += BASE;
-
-        // _xDecrease *= numerator;
-        // _xDecrease = _xDecrease.divUp(BASE);
-        // xDecrease = _xDecrease.toUint112();
     }
 }

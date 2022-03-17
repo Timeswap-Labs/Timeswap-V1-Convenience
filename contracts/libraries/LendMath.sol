@@ -76,6 +76,7 @@ library LendMath {
         xReserve += xIncrease;
 
         uint256 _zDecrease = insuranceOut;
+        _zDecrease++;
         _zDecrease *= xReserve;
         uint256 subtrahend = cp.z;
         subtrahend *= xIncrease;
