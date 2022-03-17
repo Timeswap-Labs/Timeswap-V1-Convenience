@@ -1020,11 +1020,6 @@
     "@types/sinon-chai" "^3.2.3"
     "@types/web3" "1.0.19"
 
-"@openzeppelin/contracts@^4.2.0":
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.3.2.tgz#ff80affd6d352dbe1bbc5b4e1833c41afd6283b6"
-  integrity sha512-AybF1cesONZStg5kWf6ao9OlqTZuPqddvprc0ky7lrUVOjXeKpmQ2Y9FK+6ygxasb+4aic4O5pneFBfwVsRRRg==
-
 "@openzeppelin/contracts@^4.5.0":
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.5.0.tgz#3fd75d57de172b3743cdfc1206883f56430409cc"
@@ -1168,13 +1163,13 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@timeswap-labs/timeswap-v1-core@^1.0.32":
-  version "1.0.32"
-  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.32/226d0c22921f180d3d917e94db87ea7ec56ea1eeb633741a00ad2d1152ef8328#9139285596bbd6500f6d1b53a80d01d7a1cbc685"
-  integrity sha512-ifI3lo54RBDl3C21W/npEN+7QZrl/e0sQW64Jp4oUTbjh0Z1PEm+PVImzkua6dojAQrEkeeznJgd/Tp2GpgwkQ==
+"@timeswap-labs/timeswap-v1-core@^1.0.33":
+  version "1.0.33"
+  resolved "https://npm.pkg.github.com/download/@timeswap-labs/timeswap-v1-core/1.0.33/290fbe1407c404162875974621ab157999383e9b24754147dd5faf765deb95be#9240a58d85d562a171aa5ab6377117319a19921e"
+  integrity sha512-ghn2SRmbn3JJOYnZWVLTRhgCke8wIE/AtMbqfwxZtSt+ahKm/+ZFpoZS2y6uZDj/J0BdKfOsLvI2544oMk1XJA==
   dependencies:
-    "@openzeppelin/contracts" "^4.2.0"
-    dotenv "^10.0.0"
+    "@openzeppelin/contracts" "^4.5.0"
+    dotenv "^16.0.0"
 
 "@truffle/error@^0.0.14":
   version "0.0.14"
@@ -3495,11 +3490,6 @@ dom-walk@^0.1.0:
   version "0.1.2"
   resolved "https://registry.npmjs.org/dom-walk/-/dom-walk-0.1.2.tgz"
   integrity sha512-6QvTW9mrGeIegrFXdtQi9pk7O/nSK6lSdXW2eqUspN5LWD7UTji2Fqw5V2YLjBpHEoU9Xl/eUWNpDeZvoyOv2w==
-
-dotenv@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.npmjs.org/dotenv/-/dotenv-10.0.0.tgz"
-  integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
 
 dotenv@^16.0.0:
   version "16.0.0"
