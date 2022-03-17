@@ -67,14 +67,38 @@ const testCases = [
   },
   {
     newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
+      assetIn: 10000000000000000000000n,
+      debtIn: 12000000000000000000000n,
+      collateralIn: 990000000000000000000n,
     },
     borrowGivenCollateralParams: {
-      assetOut: 5000n,
-      collateralIn: 920n,
-      maxDebt: 10000n,
+      assetOut: 1000000000000000000000n,
+      collateralIn: 110103527586059978031n,
+      maxDebt: 1210000000000000000000n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000000000000000000000n,
+      debtIn: 12000000000000000000000n,
+      collateralIn: 990000000000000000000n,
+    },
+    borrowGivenCollateralParams: {
+      assetOut: 100000000000000000000n,
+      collateralIn: 7735517334998637254n,
+      maxDebt: 110000000000000000000n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000000000000000000000n,
+      debtIn: 12000000000000000000000n,
+      collateralIn: 990000000000000000000n,
+    },
+    borrowGivenCollateralParams: {
+      assetOut: 1000n,
+      collateralIn: 85n,
+      maxDebt: 1200n,
     },
   },
 ]

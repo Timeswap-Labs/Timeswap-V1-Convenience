@@ -68,8 +68,8 @@ const testCases = [
     lendGivenPercentParams: {
       assetIn: 100000n,
       percent: 2n << 31n,
-      minBond: 0n,
-      minInsurance: 0n,
+      minBond: 100000n,
+      minInsurance: 400n,
     },
   },
   {
@@ -81,8 +81,8 @@ const testCases = [
     lendGivenPercentParams: {
       assetIn: 500n,
       percent: 4n << 30n,
-      minBond: 0n,
-      minInsurance: 0n,
+      minBond: 500n,
+      minInsurance: 20n,
     },
   },
   {
@@ -94,8 +94,8 @@ const testCases = [
     lendGivenPercentParams: {
       assetIn: 1000000000n,
       percent: 2n << 30n,
-      minBond: 0n,
-      minInsurance: 0n,
+      minBond: 800000000n,
+      minInsurance: 500n,
     },
   },
   {
@@ -107,8 +107,21 @@ const testCases = [
     lendGivenPercentParams: {
       assetIn: 67900000000n,
       percent: 1n << 31n,
-      minBond: 0n,
-      minInsurance: 0n,
+      minBond: 65000000000n,
+      minInsurance: 500n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000000000000000000000n,
+      debtIn: 12000000000000000000000n,
+      collateralIn: 990000000000000000000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 100000000000000000000n,
+      percent: 1n << 31n,
+      minBond: 100000000000000000000n,
+      minInsurance: 1000000000000000000n,
     },
   },
 ]
