@@ -80,19 +80,32 @@ const testCases = [
       maxCollateral: 100000n,
     },
   },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   borrowGivenPercentParams: {
-  //     assetOut: 10000n,
-  //     percent: 4n << 30n,
-  //     maxDebt: 20000n,
-  //     maxCollateral: 40000n,
-  //   },
-  // },
+  {
+    newLiquidityParams: {
+      assetIn: 100000000n,
+      debtIn: 120000000n,
+      collateralIn: 10000000n,
+    },
+    borrowGivenPercentParams: {
+      assetOut: 500000n,
+      percent: 1n << 29n,
+      maxDebt: 1000000n,
+      maxCollateral: 10000000n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 10000000000000000000000n,
+      debtIn: 12000000000000000000000n,
+      collateralIn: 1000000000000000000000n,
+    },
+    borrowGivenPercentParams: {
+      assetOut: 1000000000000000000000n,
+      percent: 1n << 29n,
+      maxDebt: 1510000000000000000000n,
+      maxCollateral: 5000000000000000000000n,
+    },
+  },
 ]
 
 describe('Borrow Given Percent', () => {
