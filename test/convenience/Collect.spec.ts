@@ -49,6 +49,26 @@ const testCases = [
       }
     }
   },
+  {
+    newLiquidityParams: {
+      assetIn: 10000n,
+      debtIn: 12000n,
+      collateralIn: 1000n,
+    },
+    lendGivenBondParams: {
+      assetIn: 500n,
+      bondOut: 591n,
+      minInsurance: 20n,
+    },
+    collectParams: {
+      claims: {
+        bondPrincipal: 1n,
+        bondInterest: 1n,
+        insurancePrincipal: 0n,
+        insuranceInterest: 0n,
+      }
+    }
+  },
 ]
 
 describe('Collect', () => {
@@ -306,7 +326,7 @@ describe('Collect ETH Collateral', () => {
         // const result = await loadFixture(success)
         const result = fixture
       
-        let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
+        let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
         const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
           data.newLiquidityParams.assetIn,
           data.newLiquidityParams.debtIn,
@@ -315,16 +335,17 @@ describe('Collect ETH Collateral', () => {
           maturity
         )
         if (maybeNewLiq !== false) {
+          xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
           yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
           zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
         }
       
         const state = {
-          x: data.newLiquidityParams.assetIn,
+          x: xIncreaseNewLiquidity,
           y: yIncreaseNewLiquidity,
           z: zIncreaseNewLiquidity,
         }
-        const { yDecrease: yDecreaseLendGivenBond, zDecrease: zDecreaseLendGivenBond } = LendMath.getLendGivenBondParams(
+        const { xIncrease:xIncreaseLendGivenBond,yDecrease: yDecreaseLendGivenBond, zDecrease: zDecreaseLendGivenBond } = LendMath.getLendGivenBondParams(
           state,
           FEE,
           PROTOCOL_FEE,
@@ -335,26 +356,31 @@ describe('Collect ETH Collateral', () => {
         )
       
         const delState = {
-          x: data.lendGivenBondParams.assetIn,
+          x: xIncreaseLendGivenBond,
           y: yDecreaseLendGivenBond,
           z: zDecreaseLendGivenBond,
         }
       
-        // const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n) - data.collectParams.claims.bond
-        // const insurance =LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n) - data.collectParams.claims.insurance
+        const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
+        const insurance = LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n)
+        const insurancePrincipal = LendMath.getInsurancePrincipal(state, delState)
+        const insuranceInterest = LendMath.getInsuranceInterest(delState, maturity, currentTime + 10_000n)
       
-        // const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
-        // const bondInterestToken = BondInterest__factory.connect(natives.bondInterest, ethers.provider)
-        // const bondPrincipalToken = BondPrincipal__factory.connect(natives.bondPrincipal, ethers.provider)
-
-        // const insuranceInterestToken = InsuranceInterest__factory.connect(natives.insuranceInterest,ethers.provider)
-        // const insurancePrincipalToken = InsurancePrincipal__factory.connect(natives.insurancePrincipal,ethers.provider)
-
-        
-        // const bondBalance = await bondInterestToken.balanceOf(signers[0].address)) + await bondPrincipalToken.balanceOf(signers[0].address)
-        // const insuranceBalance = await insuranceToken.balanceOf(signers[0].address)
+        const natives = await result.convenience.getNatives(assetAddress, collateralAddress, result.maturity)
       
-        // expect(bondBalance).equalBigInt(bond)
-        // expect(insuranceBalance).equalBigInt(insurance)
+        const bondPrincipalToken = BondPrincipal__factory.connect(natives.bondPrincipal, ethers.provider)
+        const bondInterestToken = BondInterest__factory.connect(natives.bondInterest, ethers.provider)
+      
+        const insurancePrincipalToken = InsurancePrincipal__factory.connect(natives.insurancePrincipal, ethers.provider)
+        const insuranceInterestToken = InsuranceInterest__factory.connect(natives.insuranceInterest, ethers.provider)
+      
+        const bondPrincipalContractBalance = (await bondPrincipalToken.balanceOf(signers[0].address)).toBigInt()
+        const bondInterestContractBalance = (await bondInterestToken.balanceOf(signers[0].address)).toBigInt()
+      
+        const insurancePrincipalContractBalance = (await insurancePrincipalToken.balanceOf(signers[0].address)).toBigInt()
+        const insuranceInterestContractBalance = (await insuranceInterestToken.balanceOf(signers[0].address)).toBigInt()
+      
+        expect(bondPrincipalContractBalance+bondInterestContractBalance).equalBigInt(bond-(data.collectParams.claims.bondPrincipal+data.collectParams.claims.bondInterest))
+        expect(insurancePrincipalContractBalance+insuranceInterestContractBalance).equalBigInt(insurance-(data.collectParams.claims.insurancePrincipal+data.collectParams.claims.insuranceInterest))
       }
       
