@@ -22,7 +22,7 @@ import * as fc from 'fast-check'
 import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import * as BorrowFilter from '../filters/Borrow'
+// import * as BorrowFilter from '../filters/Borrow'
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
@@ -45,19 +45,19 @@ async function fixture(): Promise<Fixture> {
 }
 
 const testCases = [
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    borrowGivenPercentParams: {
-      assetOut: 1000n,
-      percent: 1n << 31n,
-      maxDebt: 2000n,
-      maxCollateral: 1000n,
-    },
-  },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   borrowGivenPercentParams: {
+  //     assetOut: 1000n,
+  //     percent: 1n << 31n,
+  //     maxDebt: 2000n,
+  //     maxCollateral: 1000n,
+  //   },
+  // },
   {
     newLiquidityParams: {
       assetIn: 10000n,

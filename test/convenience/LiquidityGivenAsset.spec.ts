@@ -51,33 +51,7 @@ const testCases = [
     liquidityGivenAssetParams: {
       assetIn: 10000n,
       minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 100000n,
-      minLiquidity: 3000000n,
-      maxDebt: 110000n,
-      maxCollateral: 90000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 100000n,
-      debtIn: 130000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
+      maxDebt: 120000n,
       maxCollateral: 10000n,
     },
   },
@@ -318,9 +292,6 @@ async function addLiquidityProperties(
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
-  const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
-  const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
   const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
   const collateralizedDebtToken = await collateralizedDebtContract.dueOf(1)
