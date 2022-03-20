@@ -7,7 +7,7 @@ import { now, setTime } from '../../shared/Helper'
 import * as LiquidityFilter from '../../filters/Liquidity'
 import * as LiquidityMath from '../../libraries/LiquidityMath'
 import { expect } from '../../shared/Expect'
-import { testcases } from '../../test-cases'
+// import { testcases } from '../../test-cases'
 
 const { loadFixture } = waffle
 
@@ -333,7 +333,7 @@ newLiquiditytestCases.forEach((testCase,index) => {
         xIncreaseNewLiquidity = maybeNewMintParams.xIncreaseNewLiquidity
         yIncreaseNewLiquidity = maybeNewMintParams.yIncreaseNewLiquidity
         zIncreaseNewLiquidity = maybeNewMintParams.zIncreaseNewLiquidity
-        console.log(xIncrease,yIncrease,zIncrease,maybeNewMintParams)
+        
       }
     
       expect(xIncrease).equalBigInt(xIncreaseNewLiquidity)

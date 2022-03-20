@@ -14,42 +14,42 @@ export const getLendGivenBondParams = (
   assetIn: bigint,
   bondOut: bigint
 ) => {
-  console.log('!!!!!!!!!!!!TYPESCRIPT BEGINS!!!!!!!!!!!!!!!!')
-  console.log('maturity', maturity)
-  console.log('currentTime', currentTime)
+  
+  
+  
   const xIncrease = getX(protocolFee, fee, maturity, currentTime, assetIn)
-  console.log('xIncrease', xIncrease)
+  
   let xReserve = state.x
   xReserve += xIncrease
-  console.log('xReserve', xReserve)
-  console.log('bond Out', bondOut)
+  
+  
   let _yDecrease = bondOut
-  console.log('_yDecrease 1', _yDecrease)
+  
   _yDecrease -= xIncrease
-  console.log('_yDecrease 2', _yDecrease)
+  
   _yDecrease <<= 32n
-  console.log('yDecrease', _yDecrease)
+  
   let denominator = maturity
   denominator -= currentTime
-  console.log('denominator', denominator)
+  
   _yDecrease = divUp(_yDecrease, denominator)
-  console.log('yDecrease', _yDecrease)
+  
   let yReserve = state.y
   yReserve -= _yDecrease
-  console.log('yReserve', yReserve)
+  
   let zReserve = state.x
   zReserve *= state.y
-  console.log('zReserve', zReserve)
+  
   denominator = xReserve
   denominator *= yReserve
-  console.log('denominator', denominator)
+  
   zReserve = mulDivUp(zReserve, state.z, denominator)
-  console.log('zReserve', zReserve)
+  
   let _zDecrease = state.z
   _zDecrease -= zReserve
-  console.log('zDecrease', _zDecrease)
-  console.log('yDecreae', _yDecrease)
-  console.log('!!!!!!!!!!!!TYPESCRIPT ENDS!!!!!!!!!!!!!!!!')
+  
+  
+  
 
   return { xIncrease: xIncrease, yDecrease: _yDecrease, zDecrease: _zDecrease }
 }
@@ -63,7 +63,7 @@ export const getLendGivenInsuranceParams = (
   insuranceOut: bigint
 ) => {
   let xIncrease = getX(protocolFee, fee, maturity, currentTime, assetIn)
-  console.log('xIncrease', xIncrease)
+  
   let xReserve = state.x
   xReserve += xIncrease
 
@@ -89,7 +89,7 @@ export const getLendGivenInsuranceParams = (
 
   let _yDecrease = state.y
   _yDecrease -= yReserve
-  console.log(_yDecrease, _zDecrease)
+  
   return { xIncrease: xIncrease, yDecrease: _yDecrease, zDecrease: _zDecrease }
 }
 export const getLendGivenPercentParams = (
@@ -247,12 +247,12 @@ export const getInsurance = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  console.log(maturity - currentTime)
+  
   const _insuranceOut = ((maturity - currentTime) * delState.z) >> 25n
   const denominator = delState.x + state.x
   const minimum = (state.z * delState.x) / denominator
-  console.log('_insuranceOut', _insuranceOut)
-  console.log('minimum', minimum)
+  
+  
   return _insuranceOut + minimum
 }
 
@@ -276,7 +276,7 @@ export const getX = (protocolFee: bigint, fee: bigint, maturity: bigint, current
 
   const BASE = 0x10000000000n
   let denominator = duration * (fee + protocolFee) + BASE
-  console.log('assetIn den', assetIn, assetIn * BASE, denominator)
+  
 
   let xIncrease = (assetIn * BASE) / denominator
 

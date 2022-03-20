@@ -10,6 +10,7 @@ import { LendGivenBondParams, NewLiquidityParams, CollectParams } from '../types
 import { BondInterest__factory, BondPrincipal__factory, ERC20__factory, InsuranceInterest__factory, InsurancePrincipal__factory,TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 // import * as LendFilter from '../filters/Lend'
+import {collectTestCases as testCases} from '../test-cases/index'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
 
@@ -28,48 +29,7 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-const testCases = [
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    lendGivenBondParams: {
-      assetIn: 1000n,
-      bondOut: 1010n,
-      minInsurance: 50n
-    },
-    collectParams: {
-      claims: {
-        bondPrincipal: 10n,
-        bondInterest: 5n,
-        insurancePrincipal: 40n,
-        insuranceInterest: 4n,
-      }
-    }
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    lendGivenBondParams: {
-      assetIn: 500n,
-      bondOut: 591n,
-      minInsurance: 20n,
-    },
-    collectParams: {
-      claims: {
-        bondPrincipal: 1n,
-        bondInterest: 1n,
-        insurancePrincipal: 0n,
-        insuranceInterest: 0n,
-      }
-    }
-  },
-]
+
 
 describe('Collect', () => {
   testCases.forEach((testCase, index) => {

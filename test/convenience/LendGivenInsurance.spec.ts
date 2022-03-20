@@ -29,7 +29,7 @@ import * as LiquidityFilter from '../filters/Liquidity'
 // import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
-
+import {lendGivenInsuranceTestCases as testCases} from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -46,104 +46,6 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-const testCases = [
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   lendGivenInsuranceParams: {
-  //     assetIn: 1000n,
-  //     insuranceOut: 8n,
-  //     minBond: 1005n,
-  //   },
-  // },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    lendGivenInsuranceParams: {
-      assetIn: 1000n,
-      insuranceOut: 67n,
-      minBond: 1050n,
-    },
-  },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   lendGivenInsuranceParams: {
-  //     assetIn: 100000n,
-  //     insuranceOut: 467n,
-  //     minBond: 100010n,
-  //   },
-  // },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   lendGivenInsuranceParams: {
-  //     assetIn: 500n,
-  //     insuranceOut: 24n,
-  //     minBond: 550n,
-  //   },
-  // },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    lendGivenInsuranceParams: {
-      assetIn: 1000000000n,
-      insuranceOut: 995n,
-      minBond: 1050n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    lendGivenInsuranceParams: {
-      assetIn: 1000n,
-      insuranceOut: 67n,
-      minBond: 1050n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000000000000000000000n,
-      debtIn: 12000000000000000000000n,
-      collateralIn: 1000000000000000000000n,
-    },
-    lendGivenInsuranceParams: {
-      assetIn: 1000000000000000000000n,
-      insuranceOut: 67000000000000000000n,
-      minBond: 1050000000000000000000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000000000000000000000n,
-      debtIn: 12000000000000000000000n,
-      collateralIn: 1000000000000000000000n,
-    },
-    lendGivenInsuranceParams: {
-      assetIn: 1000000000000000000000000000n,
-      insuranceOut: 995000000000000000000n,
-      minBond: 1050000000000000000000n,
-    },
-  },
-]
 
 describe('Lend Given Insurance', () => {
   testCases.forEach((testCase, index) => {
@@ -626,13 +528,5 @@ async function lendGivenInsuranceProperties(
   const insurancePrincipalContractBalance = (await insurancePrincipalToken.balanceOf(signers[0].address)).toBigInt()
   const insuranceInterestContractBalance = (await insuranceInterestToken.balanceOf(signers[0].address)).toBigInt()
 
-  // expect(bondPrincipalContractBalance + bondInterestContractBalance).equalBigInt(bond)
-  // expect(insurancePrincipalContractBalance + insuranceInterestContractBalance).equalBigInt(insurance)
-
-  // expect(insurancePrincipalContractBalance).equalBigInt(insurancePrincipal)
-  // expect(insuranceInterestContractBalance).equalBigInt(insuranceInterest)
-
-  console.log(insurance, insurancePrincipal, insuranceInterest)
-  console.log(data.lendGivenInsuranceParams.insuranceOut)
   expect(insurance).gteBigInt(data.lendGivenInsuranceParams.insuranceOut)
 }

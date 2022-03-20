@@ -24,7 +24,7 @@ import {
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
-
+import { liquidityGivenAssetTestCases as testCases}  from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -41,99 +41,6 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-const testCases = [
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 120000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-]
 
 describe('Liquidity Given Asset', () => {
   testCases.forEach((testCase, index) => {
@@ -273,7 +180,7 @@ async function addLiquidityProperties(
 
   const maybeLiquidityBalanceAdd = LiquidityMath.getLiquidity(state, delState, currentTime + 10_000n, maturity)
   let liquidityBalanceAdd = 0n
-  console.log(maybeLiquidityBalanceAdd)
+  
   if (typeof maybeLiquidityBalanceAdd != 'string') {
     liquidityBalanceAdd = maybeLiquidityBalanceAdd
   }

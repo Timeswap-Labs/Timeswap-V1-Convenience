@@ -24,7 +24,7 @@ import {
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
-
+import {liquidityGivenCollateralTestCases as testCases} from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -40,22 +40,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
-const testCases = [
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenCollateralParams: {
-      collateralIn: 999n,
-      minLiquidity: 100n,
-      maxDebt: 13000n,
-      maxAsset: 13000n,
-    },
-  },
-]
 
 describe('Liquidity Given Collateral', () => {
   testCases.forEach((testCase, index) => {

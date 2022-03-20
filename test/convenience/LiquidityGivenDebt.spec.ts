@@ -24,6 +24,7 @@ import {
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
+import {liquidityGivenDebtTestCases as testCases} from '../test-cases/index'
 
 const { loadFixture } = waffle
 
@@ -41,34 +42,6 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-const testCases = [
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenDebtParams: {
-      debtIn: 10000n,
-      minLiquidity: 1000n,
-      maxAsset: 15000n,
-      maxCollateral: 2000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenDebtParams: {
-      debtIn: 100000n,
-      minLiquidity: 10000n,
-      maxAsset: 150000n,
-      maxCollateral: 20000n,
-    },
-  },
-]
 
 describe('Liquidity Given Debt', () => {
   testCases.forEach((testCase, index) => {
@@ -102,8 +75,8 @@ describe('Liquidity Given Debt ETH Asset', () => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
 
-      console.log(assetToken.address, collateralToken.address, convenience.wethContract.address, signers[0].address)
-      console.log(convenience.convenienceContract.address)
+      
+      
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
@@ -113,8 +86,8 @@ describe('Liquidity Given Debt ETH Asset', () => {
         signers[0],
         testCase.newLiquidityParams
       )
-      console.log('Ts collateral balance', (await collateralToken.balanceOf(signers[0].address)).toString())
-      console.log('TS provider balance', (await ethers.provider.getBalance(signers[0].address)).toString())
+      
+      
       await setTime(Number(currentTime + 10000n))
       const liquidityGivenDebt = await liquidityGivenDebtETHAssetFixture(
         newLiquidity,

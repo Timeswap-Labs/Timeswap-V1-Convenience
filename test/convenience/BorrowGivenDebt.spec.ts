@@ -23,7 +23,7 @@ import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../ty
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
-
+import { borrowGivenDebtTestCases as testCases } from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -39,93 +39,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
-const testCases = [
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    borrowGivenDebtParams: {
-      assetOut: 1000n,
-      debtIn: 1010n,
-      maxCollateral: 5000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    borrowGivenDebtParams: {
-      assetOut: 2000n,
-      debtIn: 2247n,
-      maxCollateral: 200n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    borrowGivenDebtParams: {
-      assetOut: 5000n,
-      debtIn: 5231n,
-      maxCollateral: 1000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    borrowGivenDebtParams: {
-      assetOut: 1000n,
-      debtIn: 1114n,
-      maxCollateral: 100n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000000000000000000000n,
-      debtIn: 12000000000000000000000n,
-      collateralIn: 990000000000000000000n,
-    },
-    borrowGivenDebtParams: {
-      assetOut: 100000000000000000000n,
-      debtIn: 110000000000000000000n,
-      maxCollateral: 200000000000000000000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000000000000000000000n,
-      debtIn: 12000000000000000000000n,
-      collateralIn: 1000000000000000000000n,
-    },
-    borrowGivenDebtParams: {
-      assetOut: 1000000000000000000000n,
-      debtIn: 1010000000000000000000n,
-      maxCollateral: 5000000000000000000000n,
-    },
-  },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   borrowGivenDebtParams: {
-  //     assetOut: 1000n,
-  //     debtIn: 1114n,
-  //     maxCollateral: 100n,
-  //   },
-  // },
-]
 
 describe('Borrow Given Debt', () => {
   testCases.forEach((testCase, index) => {
