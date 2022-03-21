@@ -25,10 +25,9 @@ import {
   TestToken,
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-// import * as LendFilter from '../filters/Lend'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
-import {lendGivenPercentTestCases as testCases} from '../test-cases/index'
+import { lendGivenPercentTestCases as testCases } from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -44,8 +43,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
-
 
 describe('Lend Given Percent', () => {
   testCases.forEach((testCase, index) => {
@@ -131,159 +128,6 @@ describe('Lend Given Percent ETH Collateral', () => {
   })
 })
 
-// describe('Lend Given Percent', () => {
-//   it('Succeeded', async () => {
-//     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
-//     let currentTime = await now()
-
-//     await fc.assert(
-//       fc.asyncProperty(
-//         fc
-//           .record({
-//             newLiquidityParams: fc
-//               .record({
-//                 assetIn: fc.bigUintN(112),
-//                 debtIn: fc.bigUintN(112),
-//                 collateralIn: fc.bigUintN(112),
-//               })
-//               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             lendGivenPercentParams: fc.record({
-//               assetIn: fc.bigUintN(50),
-//               percent: fc.bigUint(1n << 32n),
-//               minInsurance: fc.bigUintN(50),
-//               minBond: fc.bigUintN(50),
-//             }),
-//           })
-//           .filter((x) => LendFilter.lendGivenPercentSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
-//           .noShrink(),
-//         async (data) => {
-//           const success = async () => {
-//             const constructor = await loadFixture(fixture)
-//             await setTime(Number(currentTime + 5000n))
-//             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
-//             await setTime(Number(currentTime + 10000n))
-//             const lendGivenBond = await lendGivenPercentFixture(newLiquidity, signers[0], data.lendGivenPercentParams)
-//             return lendGivenBond
-//           }
-
-//           await lendGivenPercentProperties(data, currentTime, success, assetToken.address, collateralToken.address)
-//         }
-//       ),
-//       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-//     )
-//   }).timeout(100000)
-// })
-
-// describe('Lend Given Percent ETH Asset', () => {
-//   it('Succeeded', async () => {
-//     const { maturity, convenience, collateralToken } = await loadFixture(fixture)
-//     let currentTime = await now()
-
-//     await fc.assert(
-//       fc.asyncProperty(
-//         fc
-//           .record({
-//             newLiquidityParams: fc
-//               .record({
-//                 assetIn: fc.bigUintN(112),
-//                 debtIn: fc.bigUintN(112),
-//                 collateralIn: fc.bigUintN(112),
-//               })
-//               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             lendGivenPercentParams: fc.record({
-//               assetIn: fc.bigUintN(50),
-//               percent: fc.bigUint(1n << 32n),
-//               minInsurance: fc.bigUintN(50),
-//               minBond: fc.bigUintN(50),
-//             }),
-//           })
-//           .filter((x) => LendFilter.lendGivenPercentSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
-//           .noShrink(),
-//         async (data) => {
-//           const success = async () => {
-//             const constructor = await loadFixture(fixture)
-//             await setTime(Number(currentTime + 5000n))
-//             const newLiquidity = await newLiquidityETHAssetFixture(constructor, signers[0], data.newLiquidityParams)
-//             await setTime(Number(currentTime + 10000n))
-//             const lendGivenBond = await lendGivenPercentETHAssetFixture(
-//               newLiquidity,
-//               signers[0],
-//               data.lendGivenPercentParams
-//             )
-//             return lendGivenBond
-//           }
-
-//           await lendGivenPercentProperties(
-//             data,
-//             currentTime,
-//             success,
-//             convenience.wethContract.address,
-//             collateralToken.address
-//           )
-//         }
-//       ),
-//       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-//     )
-//   }).timeout(100000)
-// })
-
-// describe('Lend Given Percent ETH Collateral', () => {
-//   it('Succeeded', async () => {
-//     const { maturity, assetToken, convenience } = await loadFixture(fixture)
-//     let currentTime = await now()
-
-//     await fc.assert(
-//       fc.asyncProperty(
-//         fc
-//           .record({
-//             newLiquidityParams: fc
-//               .record({
-//                 assetIn: fc.bigUintN(112),
-//                 debtIn: fc.bigUintN(112),
-//                 collateralIn: fc.bigUintN(112),
-//               })
-//               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-//             lendGivenPercentParams: fc.record({
-//               assetIn: fc.bigUintN(50),
-//               percent: fc.bigUint(1n << 32n),
-//               minInsurance: fc.bigUintN(50),
-//               minBond: fc.bigUintN(50),
-//             }),
-//           })
-//           .filter((x) => LendFilter.lendGivenPercentSuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity))
-//           .noShrink(),
-//         async (data) => {
-//           const success = async () => {
-//             const constructor = await loadFixture(fixture)
-//             await setTime(Number(currentTime + 5000n))
-//             const newLiquidity = await newLiquidityETHCollateralFixture(
-//               constructor,
-//               signers[0],
-//               data.newLiquidityParams
-//             )
-//             await setTime(Number(currentTime + 10000n))
-//             const lendGivenBond = await lendGivenPercentETHCollateralFixture(
-//               newLiquidity,
-//               signers[0],
-//               data.lendGivenPercentParams
-//             )
-//             return lendGivenBond
-//           }
-
-//           await lendGivenPercentProperties(
-//             data,
-//             currentTime,
-//             success,
-//             assetToken.address,
-//             convenience.wethContract.address
-//           )
-//         }
-//       ),
-//       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-//     )
-//   }).timeout(100000)
-// })
-
 async function lendGivenPercentProperties(
   data: {
     newLiquidityParams: {
@@ -310,7 +154,6 @@ async function lendGivenPercentProperties(
 ) {
   const neededTime = (await now()) + 100n
 
-  // const result = await loadFixture(success)
   const result = fixture
 
   let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]

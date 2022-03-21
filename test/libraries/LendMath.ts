@@ -14,42 +14,35 @@ export const getLendGivenBondParams = (
   assetIn: bigint,
   bondOut: bigint
 ) => {
-  
-  
-  
   const xIncrease = getX(protocolFee, fee, maturity, currentTime, assetIn)
-  
+
   let xReserve = state.x
   xReserve += xIncrease
-  
-  
+
   let _yDecrease = bondOut
-  
+
   _yDecrease -= xIncrease
-  
+
   _yDecrease <<= 32n
-  
+
   let denominator = maturity
   denominator -= currentTime
-  
+
   _yDecrease = divUp(_yDecrease, denominator)
-  
+
   let yReserve = state.y
   yReserve -= _yDecrease
-  
+
   let zReserve = state.x
   zReserve *= state.y
-  
+
   denominator = xReserve
   denominator *= yReserve
-  
+
   zReserve = mulDivUp(zReserve, state.z, denominator)
-  
+
   let _zDecrease = state.z
   _zDecrease -= zReserve
-  
-  
-  
 
   return { xIncrease: xIncrease, yDecrease: _yDecrease, zDecrease: _zDecrease }
 }
@@ -63,7 +56,7 @@ export const getLendGivenInsuranceParams = (
   insuranceOut: bigint
 ) => {
   let xIncrease = getX(protocolFee, fee, maturity, currentTime, assetIn)
-  
+
   let xReserve = state.x
   xReserve += xIncrease
 
@@ -89,7 +82,7 @@ export const getLendGivenInsuranceParams = (
 
   let _yDecrease = state.y
   _yDecrease -= yReserve
-  
+
   return { xIncrease: xIncrease, yDecrease: _yDecrease, zDecrease: _zDecrease }
 }
 export const getLendGivenPercentParams = (
@@ -247,12 +240,10 @@ export const getInsurance = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  
   const _insuranceOut = ((maturity - currentTime) * delState.z) >> 25n
   const denominator = delState.x + state.x
   const minimum = (state.z * delState.x) / denominator
-  
-  
+
   return _insuranceOut + minimum
 }
 
@@ -276,7 +267,6 @@ export const getX = (protocolFee: bigint, fee: bigint, maturity: bigint, current
 
   const BASE = 0x10000000000n
   let denominator = duration * (fee + protocolFee) + BASE
-  
 
   let xIncrease = (assetIn * BASE) / denominator
 

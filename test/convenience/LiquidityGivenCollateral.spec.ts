@@ -24,7 +24,7 @@ import {
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
-import {liquidityGivenCollateralTestCases as testCases} from '../test-cases/index'
+import { liquidityGivenCollateralTestCases as testCases } from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -208,10 +208,6 @@ async function liquidityGivenCollateralProperties(
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
-  // const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
-  // const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
-
   const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
   const collateralizedDebtToken = await collateralizedDebtContract.dueOf(1)
 
@@ -219,6 +215,4 @@ async function liquidityGivenCollateralProperties(
   const debtBalanceContract = collateralizedDebtToken.debt.toBigInt()
 
   expect(collateralBalanceContract).gteBigInt(collateral)
-  // expect(debtBalanceContract).equalBigInt(debt)
-
 }

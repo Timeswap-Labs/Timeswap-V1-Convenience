@@ -7,4 +7,3 @@ export interface Claims {
 export interface CollectParams {
   claims: Claims
 }
-  

@@ -24,7 +24,7 @@ import {
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
-import {liquidityGivenDebtTestCases as testCases} from '../test-cases/index'
+import { liquidityGivenDebtTestCases as testCases } from '../test-cases/index'
 
 const { loadFixture } = waffle
 
@@ -41,7 +41,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
 
 describe('Liquidity Given Debt', () => {
   testCases.forEach((testCase, index) => {
@@ -75,8 +74,6 @@ describe('Liquidity Given Debt ETH Asset', () => {
     it(`Succeeded ${index}`, async () => {
       const { maturity, convenience, assetToken, collateralToken } = await loadFixture(fixture)
 
-      
-      
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
@@ -86,8 +83,7 @@ describe('Liquidity Given Debt ETH Asset', () => {
         signers[0],
         testCase.newLiquidityParams
       )
-      
-      
+
       await setTime(Number(currentTime + 10000n))
       const liquidityGivenDebt = await liquidityGivenDebtETHAssetFixture(
         newLiquidity,
@@ -219,10 +215,6 @@ async function liquidityGivenDebtProperties(
   )
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
-
-  // const liquidityToken = ERC20__factory.connect(natives.liquidity, ethers.provider)
-  // const liquidityBalanceContract = (await liquidityToken.balanceOf(signers[0].address)).toBigInt()
-  // expect(liquidityBalanceContract).equalBigInt(liquidityBalance)
 
   const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
   const collateralizedDebtToken = await collateralizedDebtContract.dueOf(1)

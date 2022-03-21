@@ -18,8 +18,6 @@ import {
 import * as fc from 'fast-check'
 import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
-// import * as LiquidityFilter from '../filters/Liquidity'
-// import * as BorrowFilter from '../filters/Borrow'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
@@ -39,8 +37,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
-
 
 describe('Borrow Given Collateral', () => {
   testCases.forEach((testCase, index) => {
@@ -146,7 +142,6 @@ async function borrowGivenCollateralProperties(
 ) {
   const neededTime = (await now()) + 100n
 
-  // const result = await loadFixture(success)
   const result = fixture
 
   let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
@@ -197,7 +192,5 @@ async function borrowGivenCollateralProperties(
   expect(debtContract).equalBigInt(debt)
   expect(collateralContract).equalBigInt(collateral)
 
-  
-  
   expect(data.borrowGivenCollateralParams.collateralIn).gteBigInt(collateral)
 }

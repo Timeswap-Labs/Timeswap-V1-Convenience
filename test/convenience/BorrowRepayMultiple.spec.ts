@@ -2,7 +2,6 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { ethers, waffle } from 'hardhat'
 import { CollateralizedDebt__factory, TestToken } from '../../typechain'
-// import * as BorrowFilter from '../filters/Borrow'
 import * as LiquidityFilter from '../filters/Liquidity'
 import * as BorrowMath from '../libraries/BorrowMath'
 import * as LiquidityMath from '../libraries/LiquidityMath'
@@ -46,7 +45,6 @@ const testcases = {
   }),
 }
 
-
 describe('Borrow Given Debt', () => {
   it('Succeeded', async () => {
     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
@@ -68,11 +66,10 @@ describe('Borrow Given Debt', () => {
         )
       }
       const repay = await repayFixture(currentFixture, signers[0], { ids: [1n], maxAssetsIn: [10n] })
-      
+
       return repay
     }
     await loadFixture(success)
-    
   }).timeout(600000)
 })
 
@@ -99,13 +96,11 @@ async function borrowGivenDebtProperties(
   assetAddress: string,
   collateralAddress: string
 ) {
-  
   const neededTime = (await now()) + 100n
-  
 
   const result = await loadFixture(success)
 
-  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
