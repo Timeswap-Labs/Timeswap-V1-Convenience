@@ -29,10 +29,6 @@ const config = {
       allowUnlimitedContractSize: true,
       timeout: 1800000,
     },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${INFURA_PROJECT_ID}`,
-      accounts: [`0x${RINKEBY_PRIVATE_KEY}`],
-    },
   },
   typechain: {
     outDir: 'typechain',
