@@ -7,7 +7,6 @@ import { ethers, waffle } from 'hardhat'
 import { now, setTime } from '../../shared/Helper'
 import * as LiquidityFilter from '../../filters/Liquidity'
 import * as LiquidityMath from '../../libraries/LiquidityMath'
-// import * as BorrowFilter from '../../filters/Borrow'
 import * as BorrowMath from '../../libraries/BorrowMath'
 import { expect } from '../../shared/Expect'
 import { FEE, PROTOCOL_FEE } from '../../shared/Constants'
@@ -159,19 +158,7 @@ const borrowGivenPercentTestCases = [
       maxCollateral: 100000n,
     },
   },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   borrowGivenPercentParams: {
-  //     assetOut: 10000n,
-  //     percent: 4n << 30n,
-  //     maxDebt: 20000n,
-  //     maxCollateral: 40000n,
-  //   },
-  // },
+
 ]
 describe('Borrow Math Given Debt', () => {
   borrowGivenDebtTestCases.forEach((testCase, index) => {

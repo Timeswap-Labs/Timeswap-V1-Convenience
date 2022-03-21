@@ -72,18 +72,6 @@ const testCases = [
         maxCollateral: 5000000000000000000000n,
       },
     },
-    // {
-    //   newLiquidityParams: {
-    //     assetIn: 10000n,
-    //     debtIn: 12000n,
-    //     collateralIn: 1000n,
-    //   },
-    //   borrowGivenDebtParams: {
-    //     assetOut: 1000n,
-    //     debtIn: 1114n,
-    //     maxCollateral: 100n,
-    //   },
-    // },
   ]
 
   export default testCases

@@ -7,7 +7,6 @@ import { now, setTime } from '../../shared/Helper'
 import * as LiquidityFilter from '../../filters/Liquidity'
 import * as LiquidityMath from '../../libraries/LiquidityMath'
 import { expect } from '../../shared/Expect'
-// import { testcases } from '../../test-cases'
 
 const { loadFixture } = waffle
 
@@ -265,49 +264,6 @@ newLiquiditytestCases.forEach((testCase,index) => {
       })
     })
   })
-    // describe('Mint Math Given Asset', () => {
-    //   it('Succeeded', async () => {
-    //     const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
-    //     let currentTime = await now()
-    
-    //     await fc.assert(
-    //       fc.asyncProperty(
-    //         fc
-    //           .record({
-    //             newLiquidityParams: fc
-    //               .record({
-    //                 assetIn: fc.bigUintN(112),
-    //                 debtIn: fc.bigUintN(112),
-    //                 collateralIn: fc.bigUintN(112),
-    //               })
-    //               .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5_000n, maturity)),
-    //             liquidityGivenAssetParams: fc.record({
-    //               assetIn: fc.bigUintN(112),
-    //               minLiquidity: fc.bigUintN(256),
-    //               maxDebt: fc.bigUintN(112),
-    //               maxCollateral: fc.bigUintN(112),
-    //             }),
-    //           })
-    //           .filter((x) => LiquidityFilter.addLiquiditySuccess(x, currentTime + 5_000n, currentTime + 10_000n, maturity)),
-    //         async (data) => {
-    //           const success = async () => {
-    //             const constructor = await loadFixture(fixture)
-    //             await setTime(Number(currentTime + 5000n))
-    //             const newLiquidity = await newLiquidityFixture(constructor, signers[0], data.newLiquidityParams)
-    //             await setTime(Number(currentTime + 10000n))
-    //             const mintMathGivenAdd = await mintMathCalleeGivenAssetFixture(newLiquidity, signers[0], data.liquidityGivenAssetParams)
-    //             return mintMathGivenAdd
-    //           }
-
-    //           const [yIncrease,zIncrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-    
-    //           await mintMathGivenAssetProperties(data, currentTime,maturity, yIncrease,zIncrease)
-    //         }
-    //       ),
-    //       { skipAllAfterTimeLimit: 50000, numRuns: 10 }
-    //     )
-    //   }).timeout(100000)
-    // })
 
     function mintMathNewProperties(
       data: {

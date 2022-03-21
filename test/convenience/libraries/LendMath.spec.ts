@@ -7,7 +7,6 @@ import { ethers, waffle } from 'hardhat'
 import { now, setTime } from '../../shared/Helper'
 import * as LiquidityFilter from '../../filters/Liquidity'
 import * as LiquidityMath from '../../libraries/LiquidityMath'
-// import * as LendFilter from '../../filters/Lend'
 import * as LendMath from '../../libraries/LendMath'
 import { expect } from '../../shared/Expect'
 import { FEE, PROTOCOL_FEE } from '../../shared/Constants'
@@ -53,18 +52,6 @@ const lendGivenBondTestCases = [
       minInsurance: 20n,
     },
   },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   lendGivenBondParams: {
-  //     assetIn: 1000000000n,
-  //     bondOut: 995719504n,
-  //     minInsurance: 50n,
-  //   },
-  // },
   {
     newLiquidityParams: {
       assetIn: 10000n,
@@ -91,18 +78,7 @@ const lendGivenBondTestCases = [
   },
 ]
 const lendGivenInsuranceTestCases = [
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   lendGivenInsuranceParams: {
-  //     assetIn: 1000n,
-  //     insuranceOut: 8n,
-  //     minBond: 1005n,
-  //   },
-  // },
+
   {
     newLiquidityParams: {
       assetIn: 10000n,
@@ -115,30 +91,6 @@ const lendGivenInsuranceTestCases = [
       minBond: 1050n,
     },
   },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   lendGivenInsuranceParams: {
-  //     assetIn: 100000n,
-  //     insuranceOut: 467n,
-  //     minBond: 100010n,
-  //   },
-  // },
-  // {
-  //   newLiquidityParams: {
-  //     assetIn: 10000n,
-  //     debtIn: 12000n,
-  //     collateralIn: 1000n,
-  //   },
-  //   lendGivenInsuranceParams: {
-  //     assetIn: 500n,
-  //     insuranceOut: 24n,
-  //     minBond: 550n,
-  //   },
-  // },
   {
     newLiquidityParams: {
       assetIn: 10000n,

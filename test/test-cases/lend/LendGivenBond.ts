@@ -1,7 +1,7 @@
 const testCases = [
     {
       newLiquidityParams: {
-        assetIn: 10000n, // 000000000000000000
+        assetIn: 10000n, 
         debtIn: 12000n,
         collateralIn: 1000n,
       },
@@ -35,18 +35,6 @@ const testCases = [
         minInsurance: 20n,
       },
     },
-    // {
-    //   newLiquidityParams: {
-    //     assetIn: 10000n,
-    //     debtIn: 12000n,
-    //     collateralIn: 1000n,
-    //   },
-    //   lendGivenBondParams: {
-    //     assetIn: 1000000000n,
-    //     bondOut: 995719504n,
-    //     minInsurance: 50n,
-    //   },
-    // },
     {
       newLiquidityParams: {
         assetIn: 10000n,

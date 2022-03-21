@@ -18,8 +18,6 @@ import {
 import * as fc from 'fast-check'
 import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
-// import * as LiquidityFilter from '../filters/Liquidity'
-// import * as BorrowFilter from '../filters/Borrow'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
@@ -150,7 +148,6 @@ async function borrowGivenDebtProperties(
 ) {
   const neededTime = (await now()) + 100n
 
-  // const result = await loadFixture(success)
   const result = fixture
 
   let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]

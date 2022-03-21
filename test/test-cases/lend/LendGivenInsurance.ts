@@ -1,16 +1,5 @@
 const testCases = [
-    // {
-    //   newLiquidityParams: {
-    //     assetIn: 10000n,
-    //     debtIn: 12000n,
-    //     collateralIn: 1000n,
-    //   },
-    //   lendGivenInsuranceParams: {
-    //     assetIn: 1000n,
-    //     insuranceOut: 8n,
-    //     minBond: 1005n,
-    //   },
-    // },
+
     {
       newLiquidityParams: {
         assetIn: 10000n,
@@ -23,30 +12,6 @@ const testCases = [
         minBond: 1050n,
       },
     },
-    // {
-    //   newLiquidityParams: {
-    //     assetIn: 10000n,
-    //     debtIn: 12000n,
-    //     collateralIn: 1000n,
-    //   },
-    //   lendGivenInsuranceParams: {
-    //     assetIn: 100000n,
-    //     insuranceOut: 467n,
-    //     minBond: 100010n,
-    //   },
-    // },
-    // {
-    //   newLiquidityParams: {
-    //     assetIn: 10000n,
-    //     debtIn: 12000n,
-    //     collateralIn: 1000n,
-    //   },
-    //   lendGivenInsuranceParams: {
-    //     assetIn: 500n,
-    //     insuranceOut: 24n,
-    //     minBond: 550n,
-    //   },
-    // },
     {
       newLiquidityParams: {
         assetIn: 10000n,

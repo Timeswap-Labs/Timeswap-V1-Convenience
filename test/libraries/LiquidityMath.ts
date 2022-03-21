@@ -56,7 +56,6 @@ export const getIncreaseAddLiquidityGivenDebtParams = (state: { x: bigint; y: bi
   return { xIncreaseAddLiquidity: xIncrease,yIncreaseAddLiquidity: yIncrease, zIncreaseAddLiquidity: zIncrease }
 }
 
-//TODO: change names of getIncreaseAddLiquidityGivenDebtParams, getAddLiquidityGivenCollateralParams
 
 
 export const getDebtAddLiquidity = (
