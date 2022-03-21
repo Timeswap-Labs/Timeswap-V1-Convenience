@@ -15,14 +15,14 @@ export const getNewLiquidityParams = (
 const xIncrease = assetIn
 
 const duration = maturity - currentTime
-console.log('dur', duration)
+
 
 let yIncrease = debtIn
 yIncrease -=assetIn
-console.log('_Yincrease 1',yIncrease)
+
 yIncrease <<=32n
 yIncrease /= duration
-console.log('_yIncrease 2',yIncrease)
+
 if(yIncrease >= MAXUINT256 || yIncrease <=0) return false
 
 let zIncrease = collateralIn
@@ -90,7 +90,7 @@ export const getLiquidity = (
   const fromY =  mulDiv(initialTotalLiquidity, mintParams.y, state.y)
   const fromZ =  mulDiv(initialTotalLiquidity, mintParams.z, state.z)
   
-  console.log('TS',fromX,fromY,fromZ)
+  
   if(fromX>= fromY || fromX >= fromZ){
     return 'E215/E214'
   }

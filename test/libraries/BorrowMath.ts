@@ -56,32 +56,32 @@ export const getBorrowGivenDebtParams = (
 ) => {
 
         const xDecrease = getX(protocolFee, fee, maturity, currentTime,assetOut);
-        console.log('xDecrease',xDecrease)
+        
         let xReserve = state.x;
         xReserve -= xDecrease;
-        console.log('xReserve',xReserve);
+        
         let _yIncrease = debtIn;
-        console.log('_yIncrease 1',_yIncrease)
+        
         _yIncrease -= xDecrease;
         _yIncrease <<= 32n;
-        console.log('_yIncrease 2',_yIncrease)
+        
         let denominator = maturity;
         denominator -= currentTime;
         _yIncrease /= denominator;
-        console.log('denominator',denominator)
+        
         let yReserve = state.y;
         yReserve += _yIncrease;
-        console.log('yReserve',yReserve)
+        
         let zReserve = state.x;
         zReserve *= state.y;
-        console.log('zReserve 1',zReserve)
+        
         denominator = xReserve;
         denominator *= yReserve;
         zReserve = mulDivUp(zReserve,state.z, denominator);
-        console.log('zReserve 2',zReserve)
+        
         let _zIncrease = zReserve;
         _zIncrease -= state.z;
-        console.log('zIncrease',_zIncrease)
+        
   return {xDecrease: xDecrease ,yIncrease: _yIncrease, zIncrease: _zIncrease }
 }
 
@@ -199,7 +199,7 @@ export const getCollateral = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  console.log('Ts', state.x, state.z, delState.x, delState.z)
+  
   return shiftRightUp((maturity - currentTime) * delState.z, 25n) + divUp(state.z * delState.x, state.x - delState.x)
 }
 

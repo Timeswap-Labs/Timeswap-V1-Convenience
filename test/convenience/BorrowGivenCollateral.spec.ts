@@ -23,7 +23,7 @@ import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../ty
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
-
+import { borrowGivenCollateralTestCases as testCases } from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -40,68 +40,7 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-const testCases = [
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    borrowGivenCollateralParams: {
-      assetOut: 1000n,
-      collateralIn: 90n,
-      maxDebt: 2000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    borrowGivenCollateralParams: {
-      assetOut: 2000n,
-      collateralIn: 190n,
-      maxDebt: 3000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000000000000000000000n,
-      debtIn: 12000000000000000000000n,
-      collateralIn: 990000000000000000000n,
-    },
-    borrowGivenCollateralParams: {
-      assetOut: 1000000000000000000000n,
-      collateralIn: 110103527586059978031n,
-      maxDebt: 1210000000000000000000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000000000000000000000n,
-      debtIn: 12000000000000000000000n,
-      collateralIn: 990000000000000000000n,
-    },
-    borrowGivenCollateralParams: {
-      assetOut: 100000000000000000000n,
-      collateralIn: 7735517334998637254n,
-      maxDebt: 110000000000000000000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000000000000000000000n,
-      debtIn: 12000000000000000000000n,
-      collateralIn: 990000000000000000000n,
-    },
-    borrowGivenCollateralParams: {
-      assetOut: 1000n,
-      collateralIn: 85n,
-      maxDebt: 1200n,
-    },
-  },
-]
+
 
 describe('Borrow Given Collateral', () => {
   testCases.forEach((testCase, index) => {
@@ -258,7 +197,7 @@ async function borrowGivenCollateralProperties(
   expect(debtContract).equalBigInt(debt)
   expect(collateralContract).equalBigInt(collateral)
 
-  console.log(data.borrowGivenCollateralParams.collateralIn)
-  console.log(collateral)
+  
+  
   expect(data.borrowGivenCollateralParams.collateralIn).gteBigInt(collateral)
 }

@@ -256,7 +256,7 @@ describe('Lend Math Given Bond', () => {
               return lendGivenBond
             }
             const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-          console.log('fix',await loadFixture(success))
+          
           
             await lendMathGivenBondProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
           
@@ -286,7 +286,7 @@ describe('Lend Math Given Bond', () => {
   
             
           const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-          console.log('fix',await loadFixture(success))
+          
           await lendMathGivenInsuranceProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
           
     }).timeout(100000)
@@ -321,7 +321,7 @@ describe('Lend Math Given Percent', () => {
           
           
           const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-          console.log('fix',await loadFixture(success))
+          
           await lendMathGivenPercentProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
 
           
@@ -351,8 +351,8 @@ describe('Lend Math Given Percent', () => {
     const neededTime = (await now()) + 100n
     
   
-    console.log('maturity 1',maturity)
-    console.log('current time 1',currentTime)
+    
+    
   
     let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
     const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
@@ -381,7 +381,7 @@ describe('Lend Math Given Percent', () => {
       data.lendGivenBondParams.assetIn,
       data.lendGivenBondParams.bondOut
     )
-    console.log(lendGivenBondParamsFromConv);
+    
     expect(yDecrease).equalBigInt(lendGivenBondParamsFromConv.yDecrease)
     expect(zDecrease).equalBigInt(lendGivenBondParamsFromConv.zDecrease)
   }

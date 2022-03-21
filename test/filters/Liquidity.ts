@@ -122,8 +122,8 @@ export function addLiquiditySuccess(
   const debt = LiquidityMath.getDebtAddLiquidity(delState, maturity, currentTimeAL)
   const collateral = LiquidityMath.getCollateralAddLiquidity(delState, maturity, currentTimeAL)
   const liquidityAdd = LiquidityMath.getLiquidity(state, delState, currentTimeAL, maturity)
-console.log('Min liq conv',liquidityGivenAssetParams.minLiquidity)
-console.log(liquidityAdd)
+
+
 if (
     typeof(liquidityAdd) == 'string' ||
     liquidityGivenAssetParams.maxDebt < debt ||
