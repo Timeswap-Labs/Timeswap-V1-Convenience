@@ -46,6 +46,7 @@ async function fixture(): Promise<Fixture> {
 }
 
 
+
 describe('Lend Given Percent', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
