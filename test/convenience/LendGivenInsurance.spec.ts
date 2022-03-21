@@ -528,5 +528,11 @@ async function lendGivenInsuranceProperties(
   const insurancePrincipalContractBalance = (await insurancePrincipalToken.balanceOf(signers[0].address)).toBigInt()
   const insuranceInterestContractBalance = (await insuranceInterestToken.balanceOf(signers[0].address)).toBigInt()
 
+  expect(bondPrincipalContractBalance + bondInterestContractBalance).equalBigInt(bond)
+  expect(insurancePrincipalContractBalance + insuranceInterestContractBalance).equalBigInt(insurance)
+
+  expect(insurancePrincipalContractBalance).equalBigInt(insurancePrincipal)
+  expect(insuranceInterestContractBalance).equalBigInt(insuranceInterest)
+
   expect(insurance).gteBigInt(data.lendGivenInsuranceParams.insuranceOut)
 }

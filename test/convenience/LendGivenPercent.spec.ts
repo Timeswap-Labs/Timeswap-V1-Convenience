@@ -46,7 +46,6 @@ async function fixture(): Promise<Fixture> {
 }
 
 
-
 describe('Lend Given Percent', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
@@ -78,11 +77,25 @@ describe('Lend Given Percent ETH Asset', () => {
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityETHAssetFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHAssetFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
-      const lendGivenPercent = await lendGivenPercentETHAssetFixture(newLiquidity, signers[0], testCase.lendGivenPercentParams)
+      const lendGivenPercent = await lendGivenPercentETHAssetFixture(
+        newLiquidity,
+        signers[0],
+        testCase.lendGivenPercentParams
+      )
 
-      await lendGivenPercentProperties(testCase, currentTime, lendGivenPercent, convenience.wethContract.address, collateralToken.address)
+      await lendGivenPercentProperties(
+        testCase,
+        currentTime,
+        lendGivenPercent,
+        convenience.wethContract.address,
+        collateralToken.address
+      )
     })
   })
 })
@@ -94,11 +107,25 @@ describe('Lend Given Percent ETH Collateral', () => {
 
       const constructorFixture = await loadFixture(fixture)
       await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityETHCollateralFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
+      const newLiquidity = await newLiquidityETHCollateralFixture(
+        constructorFixture,
+        signers[0],
+        testCase.newLiquidityParams
+      )
       await setTime(Number(currentTime + 10000n))
-      const lendGivenPercent = await lendGivenPercentETHCollateralFixture(newLiquidity, signers[0], testCase.lendGivenPercentParams)
+      const lendGivenPercent = await lendGivenPercentETHCollateralFixture(
+        newLiquidity,
+        signers[0],
+        testCase.lendGivenPercentParams
+      )
 
-      await lendGivenPercentProperties(testCase, currentTime, lendGivenPercent, assetToken.address, convenience.wethContract.address)
+      await lendGivenPercentProperties(
+        testCase,
+        currentTime,
+        lendGivenPercent,
+        assetToken.address,
+        convenience.wethContract.address
+      )
     })
   })
 })
@@ -285,7 +312,7 @@ async function lendGivenPercentProperties(
   // const result = await loadFixture(success)
   const result = fixture
 
-  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -300,37 +327,46 @@ async function lendGivenPercentProperties(
   }
 
   const state = {
-    x: data.newLiquidityParams.assetIn,
+    x: xIncreaseNewLiquidity,
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { yDecrease: yDecreaseLendGivenPercent, zDecrease: zDecreaseLendGivenPercent } =
-    LendMath.getLendGivenPercentParams(
-      state,
-      FEE,
-      PROTOCOL_FEE,
-      maturity,
-      currentTime + 10_000n,
-      data.lendGivenPercentParams.assetIn,
-      data.lendGivenPercentParams.percent
-    )
+  const {
+    xIncrease: xIncreaseLendGivenPercent,
+    yDecrease: yDecreaseLendGivenPercent,
+    zDecrease: zDecreaseLendGivenPercent,
+  } = LendMath.getLendGivenPercentParams(
+    state,
+    maturity,
+    currentTime + 10_000n,
+    FEE,
+    PROTOCOL_FEE,
+    data.lendGivenPercentParams.assetIn,
+    data.lendGivenPercentParams.percent
+  )
 
   const delState = {
-    x: data.lendGivenPercentParams.assetIn,
+    x: xIncreaseLendGivenPercent,
     y: yDecreaseLendGivenPercent,
     z: zDecreaseLendGivenPercent,
   }
-  // // const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
-  // // const insurance = LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n)
+  const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
+  const insurance = LendMath.getInsurance(state, delState, maturity, currentTime + 10_000n)
 
-  // // const natives = await result.convenience.getNatives(assetAddress, collateralAddress, result.maturity)
+  const natives = await result.convenience.getNatives(assetAddress, collateralAddress, result.maturity)
 
-  // // const bondToken = Bond__factory.connect(natives.bond, ethers.provider)
-  // // const insuranceToken = Insurance__factory.connect(natives.insurance, ethers.provider)
+  const bondPrincipalToken = BondPrincipal__factory.connect(natives.bondPrincipal, ethers.provider)
+  const bondInterestToken = BondInterest__factory.connect(natives.bondInterest, ethers.provider)
 
-  // // const bondContractBalance = (await bondToken.balanceOf(signers[0].address)).toBigInt()
-  // // const insuranceContractBalance = (await insuranceToken.balanceOf(signers[0].address)).toBigInt()
+  const insurancePrincipalToken = InsurancePrincipal__factory.connect(natives.insurancePrincipal, ethers.provider)
+  const insuranceInterestToken = InsuranceInterest__factory.connect(natives.insuranceInterest, ethers.provider)
 
-  // expect(bondContractBalance).equalBigInt(bond)
-  // expect(insuranceContractBalance).equalBigInt(insurance)
+  const bondPrincipalContractBalance = (await bondPrincipalToken.balanceOf(signers[0].address)).toBigInt()
+  const bondInterestContractBalance = (await bondInterestToken.balanceOf(signers[0].address)).toBigInt()
+
+  const insurancePrincipalContractBalance = (await insurancePrincipalToken.balanceOf(signers[0].address)).toBigInt()
+  const insuranceInterestContractBalance = (await insuranceInterestToken.balanceOf(signers[0].address)).toBigInt()
+
+  expect(bondPrincipalContractBalance + bondInterestContractBalance).equalBigInt(bond)
+  expect(insurancePrincipalContractBalance + insuranceInterestContractBalance).equalBigInt(insurance)
 }
