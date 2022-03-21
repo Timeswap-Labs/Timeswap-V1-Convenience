@@ -11,12 +11,14 @@ This repository contains the convenience smart contracts of the Timeswap-V1 prot
 - Run yarn to download the required dependncies
 
 # Steps to build & deploy the factory
+
 ## On Hardhat Network
 
 - Run `npx hardhat node` in one shell
 - Run `npx hardhat --network localhost run scripts/deploy.js `
 
 # Steps to run the tests
+
 ## On Hardhat Network
 
 - Run `npx hardhat test `
