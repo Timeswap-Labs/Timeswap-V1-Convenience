@@ -54,35 +54,34 @@ export const getBorrowGivenDebtParams = (
   currentTime: bigint,
   debtIn: bigint
 ) => {
+  const xDecrease = getX(protocolFee, fee, maturity, currentTime, assetOut)
 
-        const xDecrease = getX(protocolFee, fee, maturity, currentTime,assetOut);
-        
-        let xReserve = state.x;
-        xReserve -= xDecrease;
-        
-        let _yIncrease = debtIn;
-        
-        _yIncrease -= xDecrease;
-        _yIncrease <<= 32n;
-        
-        let denominator = maturity;
-        denominator -= currentTime;
-        _yIncrease /= denominator;
-        
-        let yReserve = state.y;
-        yReserve += _yIncrease;
-        
-        let zReserve = state.x;
-        zReserve *= state.y;
-        
-        denominator = xReserve;
-        denominator *= yReserve;
-        zReserve = mulDivUp(zReserve,state.z, denominator);
-        
-        let _zIncrease = zReserve;
-        _zIncrease -= state.z;
-        
-  return {xDecrease: xDecrease ,yIncrease: _yIncrease, zIncrease: _zIncrease }
+  let xReserve = state.x
+  xReserve -= xDecrease
+
+  let _yIncrease = debtIn
+
+  _yIncrease -= xDecrease
+  _yIncrease <<= 32n
+
+  let denominator = maturity
+  denominator -= currentTime
+  _yIncrease /= denominator
+
+  let yReserve = state.y
+  yReserve += _yIncrease
+
+  let zReserve = state.x
+  zReserve *= state.y
+
+  denominator = xReserve
+  denominator *= yReserve
+  zReserve = mulDivUp(zReserve, state.z, denominator)
+
+  let _zIncrease = zReserve
+  _zIncrease -= state.z
+
+  return { xDecrease: xDecrease, yIncrease: _yIncrease, zIncrease: _zIncrease }
 }
 
 export const getBorrowGivenCollateralParams = (
@@ -92,38 +91,38 @@ export const getBorrowGivenCollateralParams = (
   assetOut: bigint,
   maturity: bigint,
   currentTime: bigint,
-  collateralIn: bigint)=>{
+  collateralIn: bigint
+) => {
+  const xDecrease = getX(protocolFee, fee, maturity, currentTime, assetOut)
 
-    const xDecrease = getX(protocolFee, fee, maturity, currentTime,assetOut);
+  let xReserve = state.x
+  xReserve -= xDecrease
 
-    let xReserve = state.x;
-    xReserve -= xDecrease;
+  let _zIncrease = collateralIn
+  _zIncrease--
+  _zIncrease *= xReserve
+  let subtrahend = state.z
+  subtrahend *= xDecrease
+  _zIncrease -= subtrahend
+  _zIncrease <<= 25n
+  let denominator = maturity - currentTime
+  denominator *= xReserve
+  _zIncrease /= denominator
 
-    let _zIncrease = collateralIn;
-    _zIncrease--
-    _zIncrease *= xReserve;
-    let subtrahend = state.z;
-    subtrahend *= xDecrease;
-    _zIncrease -= subtrahend;
-    _zIncrease <<= 25n;
-    let denominator = maturity - currentTime
-    denominator *= xReserve;
-    _zIncrease /= denominator;
+  let zReserve = state.z
+  zReserve += _zIncrease
 
-    let zReserve = state.z;
-    zReserve += _zIncrease;
+  let yReserve = state.x
+  yReserve *= state.z
+  denominator = xReserve
+  denominator *= zReserve
+  yReserve = mulDivUp(yReserve, state.y, denominator)
 
-    let yReserve = state.x;
-    yReserve *= state.z;
-    denominator = xReserve;
-    denominator *= zReserve;
-    yReserve = mulDivUp(yReserve,state.y, denominator);
+  let _yIncrease = yReserve
+  _yIncrease -= state.y
 
-    let _yIncrease = yReserve
-    _yIncrease-=state.y
-
-    return {xDecrease: xDecrease ,yIncrease: _yIncrease, zIncrease: _zIncrease }
-  }
+  return { xDecrease: xDecrease, yIncrease: _yIncrease, zIncrease: _zIncrease }
+}
 export const getBorrowGivenPercentParams = (
   state: { x: bigint; y: bigint; z: bigint },
   protocolFee: bigint,
@@ -199,11 +198,10 @@ export const getCollateral = (
   maturity: bigint,
   currentTime: bigint
 ) => {
-  
   return shiftRightUp((maturity - currentTime) * delState.z, 25n) + divUp(state.z * delState.x, state.x - delState.x)
 }
 
 export const getX = (protocolFee: bigint, fee: bigint, maturity: bigint, currentTime: bigint, assetOut: bigint) => {
-  const BASE = 0x10000000000n   
+  const BASE = 0x10000000000n
   return divUp(assetOut * ((maturity - currentTime) * (fee + protocolFee) + BASE), BASE)
 }

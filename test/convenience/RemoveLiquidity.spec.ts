@@ -56,7 +56,8 @@ describe('Remove Liquidity', () => {
               liquidityIn: fc.bigUintN(50),
             }),
           })
-          .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity)).noShrink(),
+          .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity))
+          .noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
@@ -138,7 +139,8 @@ describe('Remove Liquidity ETH Asset', () => {
               liquidityIn: fc.bigUintN(50),
             }),
           })
-          .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity)).noShrink(),
+          .filter((x) => LiquidityFilter.removeLiquiditySuccess(x, currentTime + 5000n, maturity))
+          .noShrink(),
         async (data) => {
           const success = async () => {
             const constructor = await loadFixture(fixture)
@@ -224,7 +226,8 @@ describe('Remove Liquidity ETH Collateral', () => {
                 debtIn: fc.bigUintN(112),
                 collateralIn: fc.bigUintN(112),
               })
-              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5000n, maturity)).noShrink(),
+              .filter((x) => LiquidityFilter.newLiquiditySuccess(x, currentTime + 5000n, maturity))
+              .noShrink(),
             removeLiquidityParams: fc.record({
               liquidityIn: fc.bigUintN(112),
             }),
@@ -326,7 +329,7 @@ async function removeLiquidityProperties(
   collateralAddress: string
 ) {
   const result = await loadFixture(success)
-  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -344,9 +347,7 @@ async function removeLiquidityProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(
-    state.x
-  )
+  const liquidityBalanceNew = LiquidityMath.getInitialLiquidity(state.x)
   const liquidityBalance = liquidityBalanceNew - data.removeLiquidityParams.liquidityIn
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
 
@@ -358,6 +359,6 @@ async function removeLiquidityProperties(
     await result.convenience.factoryContract.getPair(assetAddress, collateralAddress),
     ethers.provider
   ).totalLiquidity(maturity)
-  const totalLiquidityBalance = (state.x <<16n)- data.removeLiquidityParams.liquidityIn
+  const totalLiquidityBalance = (state.x << 16n) - data.removeLiquidityParams.liquidityIn
   expect(totalLiquidityBalanceContract).equalBigInt(totalLiquidityBalance)
 }

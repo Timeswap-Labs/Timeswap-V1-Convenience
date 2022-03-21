@@ -28,7 +28,7 @@ import {
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
-import {lendGivenInsuranceTestCases as testCases} from '../test-cases/index'
+import { lendGivenInsuranceTestCases as testCases } from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -44,7 +44,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
 
 describe('Lend Given Insurance', () => {
   testCases.forEach((testCase, index) => {

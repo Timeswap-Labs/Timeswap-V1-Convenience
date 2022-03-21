@@ -27,7 +27,7 @@ import {
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
-import {lendGivenPercentTestCases as testCases} from '../test-cases/index'
+import { lendGivenPercentTestCases as testCases } from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -43,8 +43,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
-
 
 describe('Lend Given Percent', () => {
   testCases.forEach((testCase, index) => {
@@ -129,7 +127,6 @@ describe('Lend Given Percent ETH Collateral', () => {
     })
   })
 })
-
 
 async function lendGivenPercentProperties(
   data: {

@@ -50,7 +50,7 @@ declare global {
   export namespace Chai {
     interface Assertion {
       equalBigInt(expected: bigint): Assertion
-      gteBigInt(expected:bigint): Assertion
+      gteBigInt(expected: bigint): Assertion
     }
   }
 }

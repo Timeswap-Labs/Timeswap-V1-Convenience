@@ -274,7 +274,7 @@ export class Convenience {
         liquidityTo: this.signer.address,
         deadline: maturity,
       },
-      { value:  maxAsset }
+      { value: maxAsset }
     )
   }
   async liquidityGivenCollateralETHCollateral(
@@ -468,21 +468,24 @@ export class Convenience {
   async lendGivenPercentETHAsset(
     maturity: bigint,
     collateral: string,
-    assetIn:bigint,
+    assetIn: bigint,
     minInsurance: bigint,
     minBond: bigint,
     percent: bigint
   ) {
-    return await this.convenienceContract.lendGivenPercentETHAsset({
-      maturity: maturity,
-      collateral: collateral,
-      bondTo: this.signer.address,
-      insuranceTo: this.signer.address,
-      percent: percent,
-      minInsurance: minInsurance,
-      minBond: minBond,
-      deadline: maturity,
-    },{value: assetIn})
+    return await this.convenienceContract.lendGivenPercentETHAsset(
+      {
+        maturity: maturity,
+        collateral: collateral,
+        bondTo: this.signer.address,
+        insuranceTo: this.signer.address,
+        percent: percent,
+        minInsurance: minInsurance,
+        minBond: minBond,
+        deadline: maturity,
+      },
+      { value: assetIn }
+    )
   }
   async lendGivenPercentETHCollateral(
     maturity: bigint,
@@ -504,7 +507,7 @@ export class Convenience {
       deadline: maturity,
     })
   }
-  async collectETHAsset(maturity: bigint,  collateral: string, claims: Claims) {
+  async collectETHAsset(maturity: bigint, collateral: string, claims: Claims) {
     return await this.convenienceContract.collectETHAsset({
       maturity: maturity,
       collateral: collateral,
@@ -513,7 +516,7 @@ export class Convenience {
       claimsIn: claims,
     })
   }
-  async collectETHCollateral(maturity: bigint,  asset: string, claims: Claims) {
+  async collectETHCollateral(maturity: bigint, asset: string, claims: Claims) {
     return await this.convenienceContract.collectETHCollateral({
       maturity: maturity,
       asset: asset,
@@ -721,32 +724,33 @@ export class Convenience {
       ids: ids,
       maxAssetsIn: maxAssetsIn,
       deadline: maturity,
-    }
-    )
+    })
   }
   async repayETHAsset(maturity: bigint, collateral: string, ids: bigint[], maxAssetsIn: bigint[]) {
     return await this.convenienceContract.repayETHAsset(
       {
-      maturity: maturity,
-      collateral: collateral,
-      collateralTo: this.signer.address,
-      ids: ids,
-      maxAssetsIn: maxAssetsIn,
-      deadline: maturity,
-    },{
-      value: maxAssetsIn.reduce((a, b) => a + b, 0n)
-    }
-    )}
-    async repayETHCollateral(maturity: bigint, asset: string, ids: bigint[], maxAssetsIn: bigint[]) {
-      return await this.convenienceContract.repayETHCollateral({
         maturity: maturity,
-        asset: asset,
+        collateral: collateral,
         collateralTo: this.signer.address,
         ids: ids,
         maxAssetsIn: maxAssetsIn,
         deadline: maturity,
-      })
-}
+      },
+      {
+        value: maxAssetsIn.reduce((a, b) => a + b, 0n),
+      }
+    )
+  }
+  async repayETHCollateral(maturity: bigint, asset: string, ids: bigint[], maxAssetsIn: bigint[]) {
+    return await this.convenienceContract.repayETHCollateral({
+      maturity: maturity,
+      asset: asset,
+      collateralTo: this.signer.address,
+      ids: ids,
+      maxAssetsIn: maxAssetsIn,
+      deadline: maturity,
+    })
+  }
 }
 
 export async function convenienceInit(

@@ -41,7 +41,6 @@ const config = {
   },
 
   allowUnlimitedContractSize: true,
-
 }
 
 export default config

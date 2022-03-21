@@ -6,8 +6,12 @@ import type { TimeswapFactory as FactoryContract, TimeswapFactory } from '../../
 import type { WETH9 as WethContract } from '../../typechain/WETH9'
 import { Convenience } from './Convenience'
 
-
-export async function deploy(assetToken: TestToken, collateralToken: TestToken, maturity: bigint, factory?: TimeswapFactory) {
+export async function deploy(
+  assetToken: TestToken,
+  collateralToken: TestToken,
+  maturity: bigint,
+  factory?: TimeswapFactory
+) {
   const accounts = await ethers.getSigners()
 
   const nftSVG = await ethers.getContractFactory('NFTSVG')
@@ -24,27 +28,24 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
 
   const deployLibraryContractAddresses: string[] = []
 
-
   const deployLiquidity = await ethers.getContractFactory('DeployLiquidity')
-  
+
   const deployLiquidityContract = await deployLiquidity.deploy()
   await deployLiquidityContract.deployTransaction.wait()
   deployLibraryContractAddresses.push(deployLiquidityContract.address)
 
-
   const deployBonds = await ethers.getContractFactory('DeployBonds')
-  
+
   const deployBondsContract = await deployBonds.deploy()
   await deployBondsContract.deployTransaction.wait()
   deployLibraryContractAddresses.push(deployBondsContract.address)
 
-
   const deployInsurances = await ethers.getContractFactory('DeployInsurances')
-  
+
   const deployInsurancesContract = await deployInsurances.deploy()
   await deployInsurancesContract.deployTransaction.wait()
   deployLibraryContractAddresses.push(deployInsurancesContract.address)
-  
+
   const deployCollateralizedDebt = await ethers.getContractFactory('DeployCollateralizedDebt', {
     libraries: {
       NFTTokenURIScaffold: nftTokenURIContract.address,
@@ -58,12 +59,14 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
   const libraryContractAddresses1: string[] = []
 
   for (const library of libraryNames1) {
-    const name = await ethers.getContractFactory(library,{libraries: {
-      DeployLiquidity: deployLibraryContractAddresses[0],
-      DeployBonds: deployLibraryContractAddresses[1],
-      DeployInsurances: deployLibraryContractAddresses[2],
-      DeployCollateralizedDebt: deployLibraryContractAddresses[3],
-    }})
+    const name = await ethers.getContractFactory(library, {
+      libraries: {
+        DeployLiquidity: deployLibraryContractAddresses[0],
+        DeployBonds: deployLibraryContractAddresses[1],
+        DeployInsurances: deployLibraryContractAddresses[2],
+        DeployCollateralizedDebt: deployLibraryContractAddresses[3],
+      },
+    })
     const contract = await name.deploy()
     await contract.deployTransaction.wait()
     libraryContractAddresses1.push(contract.address)
@@ -78,7 +81,6 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
     await contract.deployTransaction.wait()
     libraryContractAddresses2.push(contract.address)
   }
-
 
   const Convenience = await ethers.getContractFactory('TimeswapConvenience', {
     libraries: {
@@ -102,31 +104,29 @@ export async function deploy(assetToken: TestToken, collateralToken: TestToken, 
   await TimeswapMath.deployTransaction.wait()
   const Factory = await ethers.getContractFactory('TimeswapFactory', {
     libraries: {
-      TimeswapMath: TimeswapMath.address
-    }
+      TimeswapMath: TimeswapMath.address,
+    },
   })
   let factoryContract
-  if (factory!=undefined){
+  if (factory != undefined) {
     factoryContract = factory
-  }
-  else{
-    factoryContract = (await Factory.deploy( accounts[0].address,100, 50) as TimeswapFactory)
+  } else {
+    factoryContract = (await Factory.deploy(accounts[0].address, 100, 50)) as TimeswapFactory
     await factoryContract.deployTransaction.wait()
   }
 
   const wethContract = (await WETH9.deploy()) as WethContract
   await wethContract.deployTransaction.wait()
-  
 
-const convenienceContract = (await Convenience.deploy(
-  factoryContract.address,
-  wethContract.address
-)) as ConvenienceContract
-await convenienceContract.deployTransaction.wait()
-const deployedContracts = {
-  factory: factoryContract,
-  convenience: convenienceContract,
-  weth: wethContract,
-}
-return deployedContracts
+  const convenienceContract = (await Convenience.deploy(
+    factoryContract.address,
+    wethContract.address
+  )) as ConvenienceContract
+  await convenienceContract.deployTransaction.wait()
+  const deployedContracts = {
+    factory: factoryContract,
+    convenience: convenienceContract,
+    weth: wethContract,
+  }
+  return deployedContracts
 }
