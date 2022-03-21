@@ -23,7 +23,6 @@ This repository contains the convenience smart contracts of the Timeswap-V1 prot
 
 - Run `npx hardhat test `
 
-
 ## Licensing
 
 The primary license for Timeswap V1 Convenience is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE).
