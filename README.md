@@ -10,12 +10,11 @@ This repository contains the convenience smart contracts of the Timeswap-V1 prot
 - Ensure yarn, npx and node.js is installed, if not install the same
 - Run yarn to download the required dependencies
 
-
 # Steps to run the tests
 
 ## On Hardhat Network
-- Run `yarn hardhat test `
 
+- Run `yarn hardhat test `
 
 ## Licensing
 
@@ -27,5 +26,3 @@ The primary license for Timeswap V1 Convenience is the Business Source License 1
 - Some files in `contracts/libraries/` are licensed under `GPL-2.0-or-later` (as indicated in their SPDX headers), see [`contracts/libraries/LICENSE_GPL`](contracts/libraries/LICENSE)
 - Most files in `contracts/test` remain unlicensed.
 - All files in `contracts/base` are licensed under `GPL-2.0-or-later` (as indicated in their SPDX headers), see [`contracts/libraries/LICENSE_GPL`](contracts/libraries/LICENSE)
-
-
