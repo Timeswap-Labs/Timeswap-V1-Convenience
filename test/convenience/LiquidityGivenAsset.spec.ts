@@ -52,6 +52,7 @@ describe('Liquidity Given Asset', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
+      
       const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], testCase.liquidityGivenAssetParams)
 
       await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
