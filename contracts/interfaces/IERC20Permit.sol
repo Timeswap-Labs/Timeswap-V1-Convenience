@@ -49,4 +49,4 @@ interface IERC20Permit is IERC20Metadata {
      */
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view returns (bytes32);
-    }
+}

@@ -24,7 +24,7 @@ import {
 } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
-import { liquidityGivenAssetTestCases as testCases}  from '../test-cases/index'
+import { liquidityGivenAssetTestCases as testCases } from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -41,7 +41,6 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-
 describe('Liquidity Given Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
@@ -52,8 +51,12 @@ describe('Liquidity Given Asset', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
-      
-      const addLiquidity = await liquidityGivenAssetFixture(newLiquidity, signers[0], testCase.liquidityGivenAssetParams)
+
+      const addLiquidity = await liquidityGivenAssetFixture(
+        newLiquidity,
+        signers[0],
+        testCase.liquidityGivenAssetParams
+      )
 
       await addLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
     })
@@ -155,7 +158,11 @@ async function addLiquidityProperties(
     currentTime + 5_000n,
     maturity
   )
-  let { xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity } = { xIncreaseNewLiquidity: 0n,yIncreaseNewLiquidity: 0n, zIncreaseNewLiquidity: 0n }
+  let { xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity } = {
+    xIncreaseNewLiquidity: 0n,
+    yIncreaseNewLiquidity: 0n,
+    zIncreaseNewLiquidity: 0n,
+  }
   if (maybeNewMintParams != false) {
     xIncreaseNewLiquidity = maybeNewMintParams.xIncreaseNewLiquidity
     yIncreaseNewLiquidity = maybeNewMintParams.yIncreaseNewLiquidity
@@ -167,11 +174,8 @@ async function addLiquidityProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const { xIncreaseAddLiqudity,yIncreaseAddLiquidity, zIncreaseAddLiquidity } = LiquidityMath.getLiquidityGivenAssetParams(
-    state,
-    data.liquidityGivenAssetParams.assetIn,
-    0n
-  )
+  const { xIncreaseAddLiqudity, yIncreaseAddLiquidity, zIncreaseAddLiquidity } =
+    LiquidityMath.getLiquidityGivenAssetParams(state, data.liquidityGivenAssetParams.assetIn, 0n)
   const delState = {
     x: xIncreaseAddLiqudity,
     y: yIncreaseAddLiquidity,
@@ -181,7 +185,7 @@ async function addLiquidityProperties(
 
   const maybeLiquidityBalanceAdd = LiquidityMath.getLiquidity(state, delState, currentTime + 10_000n, maturity)
   let liquidityBalanceAdd = 0n
-  
+
   if (typeof maybeLiquidityBalanceAdd != 'string') {
     liquidityBalanceAdd = maybeLiquidityBalanceAdd
   }
@@ -199,7 +203,6 @@ async function addLiquidityProperties(
   )
 
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
-
 
   const collateralizedDebtContract = CollateralizedDebt__factory.connect(natives.collateralizedDebt, ethers.provider)
   const collateralizedDebtToken = await collateralizedDebtContract.dueOf(1)

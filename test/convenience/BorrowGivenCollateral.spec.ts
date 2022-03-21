@@ -38,8 +38,6 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-
-
 describe('Borrow Given Collateral', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
@@ -194,7 +192,5 @@ async function borrowGivenCollateralProperties(
   expect(debtContract).equalBigInt(debt)
   expect(collateralContract).equalBigInt(collateral)
 
-  
-  
   expect(data.borrowGivenCollateralParams.collateralIn).gteBigInt(collateral)
 }

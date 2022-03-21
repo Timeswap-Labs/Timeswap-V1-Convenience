@@ -22,7 +22,7 @@ import * as fc from 'fast-check'
 import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import { CollateralizedDebt__factory, ERC20__factory, TestToken } from '../../typechain'
 import * as LiquidityFilter from '../filters/Liquidity'
-import {repayTestCases as testCases} from '../test-cases/index'
+import { repayTestCases as testCases } from '../test-cases/index'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
@@ -42,8 +42,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
-
 
 describe('Repay', () => {
   testCases.forEach((testCase, index) => {
@@ -144,7 +142,6 @@ describe('Repay ETH Collateral', () => {
     })
   })
 })
-
 
 async function repayProperties(
   data: {
