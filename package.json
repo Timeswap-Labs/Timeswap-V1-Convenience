@@ -1,6 +1,7 @@
 {
-  "version": "1.0.66",
   "name": "@timeswap-labs/timeswap-v1-convenience",
+  "license": "BUSL-1.1",
+  "version": "1.0.66",
   "files": [
     "contracts/interfaces",
     "contracts/libraries",
@@ -70,4 +71,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   }
+  
 }
