@@ -1,6 +1,20 @@
 {
-  "version": "1.0.65",
   "name": "@timeswap-labs/timeswap-v1-convenience",
+  "license": "BUSL-1.1",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "version": "1.1.0",
+  "homepage": "https://timeswap.io",
+  "keywords": [
+    "timeswap",
+    "convenience",
+    "v1"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Timeswap-Labs/Timeswap-V1-Convenience"
+  },
   "files": [
     "contracts/interfaces",
     "contracts/libraries",
@@ -24,15 +38,23 @@
     "!artifacts/contracts/libraries/**/*.dbg.json"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=14"
   },
-  "scripts": {
-    "compile": "hardhat compile",
-    "test": "hardhat test",
-    "test:hardhat": "hardhat test --network hardhat",
-    "test:parallel": "TS_NODE_PROJECT=./tsconfig.json mocha --require hardhat/register --recursive --parallel --exit --extension ts",
-    "coverage": "hardhat coverage",
-    "prepare": "hardhat compile"
+  "volta": {
+    "node": "16.14.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.5.0",
+    "dotenv": "^16.0.0",
+    "eslint": "^8.11.0",
+    "fast-check": "^2.23.0",
+    "hardhat-deploy": "^0.10.6",
+    "hardhat-gas-reporter": "^1.0.8",
+    "prettier": "^2.5.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.19",
+    "solhint": "^3.3.7",
+    "solhint-plugin-prettier": "^0.0.5",
+    "solidity-coverage": "^0.7.20"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
@@ -53,21 +75,12 @@
     "typechain": "^7.0.1",
     "typescript": "^4.6.2"
   },
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.5.0",
-    "dotenv": "^16.0.0",
-    "eslint": "^8.11.0",
-    "fast-check": "^2.23.0",
-    "hardhat-deploy": "^0.10.6",
-    "hardhat-gas-reporter": "^1.0.8",
-    "prettier": "^2.5.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.19",
-    "solhint": "^3.3.7",
-    "solhint-plugin-prettier": "^0.0.5",
-    "solidity-coverage": "^0.7.20"
-  },
-  "repository": "git://github.com/Timeswap-Labs/Timeswap-V1-Convenience.git",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:hardhat": "hardhat test --network hardhat",
+    "test:parallel": "TS_NODE_PROJECT=./tsconfig.json mocha --require hardhat/register --recursive --parallel --exit --extension ts",
+    "coverage": "hardhat coverage",
+    "prepare": "hardhat compile"
   }
 }

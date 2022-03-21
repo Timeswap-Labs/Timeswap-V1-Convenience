@@ -22,12 +22,12 @@ jobs:
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
+          path: ~/.yarn
+          key: yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-
 
-      - name: Install Dependecies
-        run: npm ci
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Run prettier
         run: npx prettier --write .

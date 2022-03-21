@@ -1,24 +1,27 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 pragma solidity =0.8.4;
 
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {IERC20Metadata} from '@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol';
 
 library SafeMetadata {
-function isSafeString(string memory str) public pure returns (bool) {
-    bytes memory b = bytes(str);
+    function isSafeString(string memory str) public pure returns (bool) {
+        bytes memory b = bytes(str);
 
-    for(uint i; i<b.length; i++) {
-        bytes1 char = b[i];
-        if( !(char >= 0x30 && char <= 0x39) && //9-0
-            !(char >= 0x41 && char <= 0x5A) && //A-Z
-            !(char >= 0x61 && char <= 0x7A) && //a-z
-            !(char == 0x2E) && !(char == 0x20) // ." "
-        )
-        return false;
+        for (uint256 i; i < b.length; i++) {
+            bytes1 char = b[i];
+            if (
+                !(char >= 0x30 && char <= 0x39) && //9-0
+                !(char >= 0x41 && char <= 0x5A) && //A-Z
+                !(char >= 0x61 && char <= 0x7A) && //a-z
+                !(char == 0x2E) &&
+                !(char == 0x20) // ." "
+            ) return false;
+        }
+        return true;
     }
-    return true;
-}
+
     function safeName(IERC20 token) internal view returns (string memory) {
         (bool success, bytes memory data) = address(token).staticcall(
             abi.encodeWithSelector(IERC20Metadata.name.selector)
@@ -33,9 +36,8 @@ function isSafeString(string memory str) public pure returns (bool) {
         string memory tokenSymbol = _success ? returnDataToString(data) : 'TKN';
 
         bool success = isSafeString(tokenSymbol);
-        return success ? tokenSymbol: 'TKN';
+        return success ? tokenSymbol : 'TKN';
     }
-
 
     function safeDecimals(IERC20 token) internal view returns (uint8) {
         (bool success, bytes memory data) = address(token).staticcall(

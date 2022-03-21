@@ -27,7 +27,7 @@ import {
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../shared/Constants'
-import {lendGivenBondTestCases as testCases} from '../test-cases/index'
+import { lendGivenBondTestCases as testCases } from '../test-cases/index'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -43,7 +43,6 @@ async function fixture(): Promise<Fixture> {
 
   return constructor
 }
-
 
 describe('Lend Given Bond', () => {
   testCases.forEach((testCase, index) => {
@@ -175,8 +174,6 @@ async function lendGivenBondProperties(
   const delState = { x: data.lendGivenBondParams.assetIn, y: yDecreaseLendGivenBond, z: zDecreaseLendGivenBond }
   const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
   const natives = await result.convenience.getNatives(assetAddress, collateralAddress, maturity)
-
-
 
   expect(bond).gteBigInt(data.lendGivenBondParams.bondOut)
 }

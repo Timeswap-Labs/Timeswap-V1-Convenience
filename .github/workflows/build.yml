@@ -25,12 +25,12 @@ jobs:
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
+          path: ~/.yarn
+          key: yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-
 
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Run unit tests
         run: |

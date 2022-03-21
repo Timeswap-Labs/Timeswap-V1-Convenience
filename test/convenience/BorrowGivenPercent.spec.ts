@@ -40,7 +40,6 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-
 describe('Borrow Given Percent', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
@@ -206,8 +205,6 @@ async function borrowGivenPercentProperties(
   const cdTokenBalance = await cdToken.dueOf(1)
   const debtContract = cdTokenBalance.debt.toBigInt()
   const collateralContract = cdTokenBalance.collateral.toBigInt()
-
-  
 
   expect(debtContract).equalBigInt(debt)
   expect(collateralContract).equalBigInt(collateral)

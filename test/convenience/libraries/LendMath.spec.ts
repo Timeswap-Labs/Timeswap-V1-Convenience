@@ -1,5 +1,13 @@
-
-import { constructorFixture, Fixture, lendMathGivenBondFixture, lendMathGivenInsuranceFixture, lendMathGivenPercentFixture, mintMathCalleeGivenAssetFixture, mintMathCalleeGivenNewFixture, newLiquidityFixture } from '../../shared/Fixtures'
+import {
+  constructorFixture,
+  Fixture,
+  lendMathGivenBondFixture,
+  lendMathGivenInsuranceFixture,
+  lendMathGivenPercentFixture,
+  mintMathCalleeGivenAssetFixture,
+  mintMathCalleeGivenNewFixture,
+  newLiquidityFixture,
+} from '../../shared/Fixtures'
 import * as fc from 'fast-check'
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
@@ -78,7 +86,6 @@ const lendGivenBondTestCases = [
   },
 ]
 const lendGivenInsuranceTestCases = [
-
   {
     newLiquidityParams: {
       assetIn: 10000n,
@@ -189,7 +196,7 @@ async function fixture(): Promise<Fixture> {
   signers = await ethers.getSigners()
 
   const constructor = await constructorFixture(1n << 255n, 1n << 255n, maturity, signers[0])
- 
+
   return constructor
 }
 describe('Lend Math Given Bond', () => {
@@ -197,50 +204,43 @@ describe('Lend Math Given Bond', () => {
     it('Succeeded', async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
-  
-      
-            const success = async () => {
-              const constructor = await loadFixture(fixture)
-              await setTime(Number(currentTime + 5000n))
-              const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
-              await setTime(Number(currentTime + 10000n))
-              const lendGivenBond = await lendMathGivenBondFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
-              return lendGivenBond
-            }
-            const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-          
-          
-            await lendMathGivenBondProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
-          
+
+      const success = async () => {
+        const constructor = await loadFixture(fixture)
+        await setTime(Number(currentTime + 5000n))
+        const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
+        await setTime(Number(currentTime + 10000n))
+        const lendGivenBond = await lendMathGivenBondFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
+        return lendGivenBond
+      }
+      const [xIncrease, yDecrease, zDecrease] = (await loadFixture(success)).map((x) => x.toBigInt())
+
+      await lendMathGivenBondProperties(testCase, currentTime, maturity, yDecrease, zDecrease)
     }).timeout(100000)
-  
   })
-  })
-  describe('Lend Math Given Insurance', () => {
-    lendGivenInsuranceTestCases.forEach((testCase, index) => {
+})
+describe('Lend Math Given Insurance', () => {
+  lendGivenInsuranceTestCases.forEach((testCase, index) => {
     it('Succeeded', async () => {
       const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
       let currentTime = await now()
-  
-    
-            const success = async () => {
-              const constructor = await loadFixture(fixture)
-              await setTime(Number(currentTime + 5000n))
-              const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
-              await setTime(Number(currentTime + 10000n))
-              const lendGivenBond = await lendMathGivenInsuranceFixture(
-                newLiquidity,
-                signers[0],
-                testCase.lendGivenInsuranceParams
-              )
-              return lendGivenBond
-            }
-  
-            
-          const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-          
-          await lendMathGivenInsuranceProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
-          
+
+      const success = async () => {
+        const constructor = await loadFixture(fixture)
+        await setTime(Number(currentTime + 5000n))
+        const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
+        await setTime(Number(currentTime + 10000n))
+        const lendGivenBond = await lendMathGivenInsuranceFixture(
+          newLiquidity,
+          signers[0],
+          testCase.lendGivenInsuranceParams
+        )
+        return lendGivenBond
+      }
+
+      const [xIncrease, yDecrease, zDecrease] = (await loadFixture(success)).map((x) => x.toBigInt())
+
+      await lendMathGivenInsuranceProperties(testCase, currentTime, maturity, yDecrease, zDecrease)
     }).timeout(100000)
   })
 })
@@ -254,114 +254,50 @@ describe('Lend Math Given Percent', () => {
     return constructor
   }
   lendGivenPercentTestCases.forEach((testCase, index) => {
+    it('Succeeded', async () => {
+      const { maturity } = await loadFixture(fixture)
+      let currentTime = await now()
 
-  it('Succeeded', async () => {
-    const { maturity } = await loadFixture(fixture)
-    let currentTime = await now()
+      const success = async () => {
+        const constructor = await loadFixture(fixture)
+        await setTime(Number(currentTime + 5000n))
+        const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
+        await setTime(Number(currentTime + 10000n))
+        const lendGivenBond = await lendMathGivenPercentFixture(
+          newLiquidity,
+          signers[0],
+          testCase.lendGivenPercentParams
+        )
+        return lendGivenBond
+      }
 
-    
-      
-          const success = async () => {
-            const constructor = await loadFixture(fixture)
-            await setTime(Number(currentTime + 5000n))
-            const newLiquidity = await newLiquidityFixture(constructor, signers[0], testCase.newLiquidityParams)
-            await setTime(Number(currentTime + 10000n))
-            const lendGivenBond = await lendMathGivenPercentFixture(newLiquidity, signers[0], testCase.lendGivenPercentParams)
-            return lendGivenBond
-          }
-          
-          
-          
-          const [xIncrease,yDecrease,zDecrease] = (await loadFixture(success)).map((x)=>x.toBigInt())
-          
-          await lendMathGivenPercentProperties(testCase, currentTime, maturity,yDecrease,zDecrease)
+      const [xIncrease, yDecrease, zDecrease] = (await loadFixture(success)).map((x) => x.toBigInt())
 
-          
-     
-  }).timeout(100000)
+      await lendMathGivenPercentProperties(testCase, currentTime, maturity, yDecrease, zDecrease)
+    }).timeout(100000)
+  })
 })
-})
-  async function lendMathGivenBondProperties(
-    data: {
-      newLiquidityParams: {
-        assetIn: bigint
-        debtIn: bigint
-        collateralIn: bigint
-      }
-      lendGivenBondParams: {
-        assetIn: bigint
-        bondOut: bigint
-        minInsurance: bigint
-      }
-    },
-    currentTime: bigint,
-    maturity:bigint,
-    yDecrease: bigint,
-    zDecrease: bigint
-  ) {
-    
-    const neededTime = (await now()) + 100n
-    
-  
-    
-    
-  
-    let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
-    const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
-      data.newLiquidityParams.assetIn,
-      data.newLiquidityParams.debtIn,
-      data.newLiquidityParams.collateralIn,
-      currentTime + 5_000n,
-      maturity
-    )
-    if (maybeNewLiq !== false) {
-      xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
-      yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
-      zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+async function lendMathGivenBondProperties(
+  data: {
+    newLiquidityParams: {
+      assetIn: bigint
+      debtIn: bigint
+      collateralIn: bigint
     }
-    const state = {
-      x: xIncreaseNewLiquidity,
-      y: yIncreaseNewLiquidity,
-      z: zIncreaseNewLiquidity,
+    lendGivenBondParams: {
+      assetIn: bigint
+      bondOut: bigint
+      minInsurance: bigint
     }
-    const lendGivenBondParamsFromConv = LendMath.getLendGivenBondParams(
-      state,
-      FEE,
-      PROTOCOL_FEE,
-      maturity,
-      currentTime + 10_000n,
-      data.lendGivenBondParams.assetIn,
-      data.lendGivenBondParams.bondOut
-    )
-    
-    expect(yDecrease).equalBigInt(lendGivenBondParamsFromConv.yDecrease)
-    expect(zDecrease).equalBigInt(lendGivenBondParamsFromConv.zDecrease)
-  }
-  
-async function lendMathGivenInsuranceProperties(
-    data: {
-      newLiquidityParams: {
-        assetIn: bigint
-        debtIn: bigint
-        collateralIn: bigint
-      }
-      lendGivenInsuranceParams: {
-        assetIn: bigint
-        insuranceOut: bigint
-        minBond: bigint
-      }
-    },
-    currentTime: bigint,
-    maturity:bigint,
-    yDecrease: bigint,
-    zDecrease: bigint
-  ) {
-    
-    const neededTime = (await now()) + 100n
-    
-    
-   
-  let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
+  },
+  currentTime: bigint,
+  maturity: bigint,
+  yDecrease: bigint,
+  zDecrease: bigint
+) {
+  const neededTime = (await now()) + 100n
+
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
   const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
     data.newLiquidityParams.assetIn,
     data.newLiquidityParams.debtIn,
@@ -374,59 +310,110 @@ async function lendMathGivenInsuranceProperties(
     yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
   }
-  
-    const state = {
-      x: xIncreaseNewLiquidity,
-      y: yIncreaseNewLiquidity,
-      z: zIncreaseNewLiquidity,
-    }
-    const lendGivenInsuranceParamsFromConv = LendMath.getLendGivenInsuranceParams(
-      state,
-      maturity,
-
-      FEE,
-      PROTOCOL_FEE,
-      currentTime + 10_000n,
-
-      data.lendGivenInsuranceParams.assetIn,
-      data.lendGivenInsuranceParams.insuranceOut
-    )
-    expect(yDecrease).equalBigInt(lendGivenInsuranceParamsFromConv.yDecrease)
-    expect(zDecrease).equalBigInt(lendGivenInsuranceParamsFromConv.zDecrease)
+  const state = {
+    x: xIncreaseNewLiquidity,
+    y: yIncreaseNewLiquidity,
+    z: zIncreaseNewLiquidity,
   }
-  async function lendMathGivenPercentProperties(
-    data: {
-      newLiquidityParams: {
-        assetIn: bigint
-        debtIn: bigint
-        collateralIn: bigint
-      }
-      lendGivenPercentParams: {
-        assetIn: bigint
-        percent: bigint
-        minBond: bigint
-        minInsurance: bigint
-      }
-    },
-    currentTime: bigint,
-    maturity:bigint,
-    yDecrease: bigint,
-    zDecrease: bigint
-  ) {
+  const lendGivenBondParamsFromConv = LendMath.getLendGivenBondParams(
+    state,
+    FEE,
+    PROTOCOL_FEE,
+    maturity,
+    currentTime + 10_000n,
+    data.lendGivenBondParams.assetIn,
+    data.lendGivenBondParams.bondOut
+  )
 
-    let [xIncreaseNewLiquidity,yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n,0n, 0n]
-    const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
-      data.newLiquidityParams.assetIn,
-      data.newLiquidityParams.debtIn,
-      data.newLiquidityParams.collateralIn,
-      currentTime + 5_000n,
-      maturity
-    )
-    if (maybeNewLiq !== false) {
-      xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
-      yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
-      zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+  expect(yDecrease).equalBigInt(lendGivenBondParamsFromConv.yDecrease)
+  expect(zDecrease).equalBigInt(lendGivenBondParamsFromConv.zDecrease)
+}
+
+async function lendMathGivenInsuranceProperties(
+  data: {
+    newLiquidityParams: {
+      assetIn: bigint
+      debtIn: bigint
+      collateralIn: bigint
     }
+    lendGivenInsuranceParams: {
+      assetIn: bigint
+      insuranceOut: bigint
+      minBond: bigint
+    }
+  },
+  currentTime: bigint,
+  maturity: bigint,
+  yDecrease: bigint,
+  zDecrease: bigint
+) {
+  const neededTime = (await now()) + 100n
+
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
+  const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
+    data.newLiquidityParams.assetIn,
+    data.newLiquidityParams.debtIn,
+    data.newLiquidityParams.collateralIn,
+    currentTime + 5_000n,
+    maturity
+  )
+  if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
+    yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+    zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+  }
+
+  const state = {
+    x: xIncreaseNewLiquidity,
+    y: yIncreaseNewLiquidity,
+    z: zIncreaseNewLiquidity,
+  }
+  const lendGivenInsuranceParamsFromConv = LendMath.getLendGivenInsuranceParams(
+    state,
+    maturity,
+
+    FEE,
+    PROTOCOL_FEE,
+    currentTime + 10_000n,
+
+    data.lendGivenInsuranceParams.assetIn,
+    data.lendGivenInsuranceParams.insuranceOut
+  )
+  expect(yDecrease).equalBigInt(lendGivenInsuranceParamsFromConv.yDecrease)
+  expect(zDecrease).equalBigInt(lendGivenInsuranceParamsFromConv.zDecrease)
+}
+async function lendMathGivenPercentProperties(
+  data: {
+    newLiquidityParams: {
+      assetIn: bigint
+      debtIn: bigint
+      collateralIn: bigint
+    }
+    lendGivenPercentParams: {
+      assetIn: bigint
+      percent: bigint
+      minBond: bigint
+      minInsurance: bigint
+    }
+  },
+  currentTime: bigint,
+  maturity: bigint,
+  yDecrease: bigint,
+  zDecrease: bigint
+) {
+  let [xIncreaseNewLiquidity, yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n, 0n]
+  const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
+    data.newLiquidityParams.assetIn,
+    data.newLiquidityParams.debtIn,
+    data.newLiquidityParams.collateralIn,
+    currentTime + 5_000n,
+    maturity
+  )
+  if (maybeNewLiq !== false) {
+    xIncreaseNewLiquidity = maybeNewLiq.xIncreaseNewLiquidity
+    yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+    zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+  }
 
   const state = {
     x: xIncreaseNewLiquidity,
