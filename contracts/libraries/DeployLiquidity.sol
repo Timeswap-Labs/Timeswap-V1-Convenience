@@ -14,6 +14,6 @@ library DeployLiquidity {
         IPair pair,
         uint256 maturity
     ) external {
-        native.liquidity = new Liquidity{salt: salt}(convenience, pair, maturity);
+        native.liquidity = new Liquidity{salt: salt}(address(convenience), pair, maturity);
     }
 }

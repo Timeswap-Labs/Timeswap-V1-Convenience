@@ -14,7 +14,7 @@ contract BondInterest is IClaim, ERC20Permit {
     using SafeMetadata for IERC20;
     using Strings for uint256;
 
-    IConvenience public immutable override convenience;
+    address public immutable override convenience;
     IPair public immutable override pair;
     uint256 public immutable override maturity;
 
@@ -49,7 +49,7 @@ contract BondInterest is IClaim, ERC20Permit {
     }
 
     constructor(
-        IConvenience _convenience,
+        address _convenience,
         IPair _pair,
         uint256 _maturity
     ) ERC20Permit('Timeswap Bond Interest') {

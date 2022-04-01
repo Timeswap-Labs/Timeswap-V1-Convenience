@@ -3,7 +3,6 @@
 pragma solidity =0.8.4;
 
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import {IConvenience} from '../interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 
@@ -42,7 +41,7 @@ interface IBorrow {
     }
 
     struct _BorrowGivenDebt {
-        IConvenience convenience;
+        address convenience;
         IFactory factory;
         IERC20 asset;
         IERC20 collateral;
@@ -89,7 +88,7 @@ interface IBorrow {
     }
 
     struct _BorrowGivenCollateral {
-        IConvenience convenience;
+        address convenience;
         IFactory factory;
         IERC20 asset;
         IERC20 collateral;
@@ -140,7 +139,7 @@ interface IBorrow {
     }
 
     struct _BorrowGivenPercent {
-        IConvenience convenience;
+        address convenience;
         IFactory factory;
         IERC20 asset;
         IERC20 collateral;
@@ -156,7 +155,7 @@ interface IBorrow {
     }
 
     struct _Borrow {
-        IConvenience convenience;
+        address convenience;
         IPair pair;
         IERC20 asset;
         IERC20 collateral;

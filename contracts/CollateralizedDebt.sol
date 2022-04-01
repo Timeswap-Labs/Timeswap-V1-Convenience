@@ -15,7 +15,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     using Strings for uint256;
     using SafeMetadata for IERC20;
 
-    IConvenience public immutable override convenience;
+    address public immutable override convenience;
     IPair public immutable override pair;
     uint256 public immutable override maturity;
 
@@ -68,7 +68,7 @@ contract CollateralizedDebt is IDue, ERC721Permit {
     }
 
     constructor(
-        IConvenience _convenience,
+        address _convenience,
         IPair _pair,
         uint256 _maturity
     ) ERC721Permit('Timeswap Collateralized Debt') {

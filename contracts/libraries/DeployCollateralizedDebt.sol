@@ -14,6 +14,6 @@ library DeployCollateralizedDebt {
         IPair pair,
         uint256 maturity
     ) external {
-        native.collateralizedDebt = new CollateralizedDebt{salt: salt}(convenience, pair, maturity);
+        native.collateralizedDebt = new CollateralizedDebt{salt: salt}(address(convenience), pair, maturity);
     }
 }

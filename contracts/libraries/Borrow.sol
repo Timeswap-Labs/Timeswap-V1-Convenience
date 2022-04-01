@@ -33,7 +33,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenDebt(
             natives,
             IBorrow._BorrowGivenDebt(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -66,7 +66,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenDebt(
             natives,
             IBorrow._BorrowGivenDebt(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -104,7 +104,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenDebt(
             natives,
             IBorrow._BorrowGivenDebt(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -144,7 +144,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenCollateral(
             natives,
             IBorrow._BorrowGivenCollateral(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -177,7 +177,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenCollateral(
             natives,
             IBorrow._BorrowGivenCollateral(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -215,7 +215,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenCollateral(
             natives,
             IBorrow._BorrowGivenCollateral(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -255,7 +255,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenPercent(
             natives,
             IBorrow._BorrowGivenPercent(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -289,7 +289,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenPercent(
             natives,
             IBorrow._BorrowGivenPercent(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -328,7 +328,7 @@ library Borrow {
         (assetOut, id, dueOut) = _borrowGivenPercent(
             natives,
             IBorrow._BorrowGivenPercent(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -497,7 +497,7 @@ library Borrow {
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
-            native.deploy(params.convenience, params.pair, params.asset, params.collateral, params.maturity);
+            native.deploy(IConvenience(params.convenience), params.pair, params.asset, params.collateral, params.maturity);
 
         (assetOut, id, dueOut) = params.pair.borrow(
             IPair.BorrowParam(

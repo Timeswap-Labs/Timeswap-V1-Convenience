@@ -34,7 +34,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _newLiquidity(
             natives,
             IMint._NewLiquidity(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -71,7 +71,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _newLiquidity(
             natives,
             IMint._NewLiquidity(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -108,7 +108,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _newLiquidity(
             natives,
             IMint._NewLiquidity(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -142,7 +142,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenAsset(
             natives,
             IMint._LiquidityGivenAsset(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -180,7 +180,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenAsset(
             natives,
             IMint._LiquidityGivenAsset(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -218,7 +218,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenAsset(
             natives,
             IMint._LiquidityGivenAsset(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -261,7 +261,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenDebt(
             natives,
             IMint._LiquidityGivenDebt(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -299,7 +299,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenDebt(
             natives,
             IMint._LiquidityGivenDebt(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -345,7 +345,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenDebt(
             natives,
             IMint._LiquidityGivenDebt(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -388,7 +388,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenCollateral(
             natives,
             IMint._LiquidityGivenCollateral(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -426,7 +426,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenCollateral(
             natives,
             IMint._LiquidityGivenCollateral(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -472,7 +472,7 @@ library Mint {
         (assetIn, liquidityOut, id, dueOut) = _liquidityGivenCollateral(
             natives,
             IMint._LiquidityGivenCollateral(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -681,7 +681,7 @@ library Mint {
         require(params.maturity > block.timestamp, 'E508');
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
-            native.deploy(params.convenience, params.pair, params.asset, params.collateral, params.maturity);
+            native.deploy(IConvenience(params.convenience), params.pair, params.asset, params.collateral, params.maturity);
         (assetIn, liquidityOut, id, dueOut) = params.pair.mint(
             IPair.MintParam(
                 params.maturity,

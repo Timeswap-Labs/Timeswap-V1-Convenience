@@ -25,7 +25,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenBond(
             natives,
             ILend._LendGivenBond(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -53,7 +53,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenBond(
             natives,
             ILend._LendGivenBond(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -79,7 +79,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenBond(
             natives,
             ILend._LendGivenBond(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -104,7 +104,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenInsurance(
             natives,
             ILend._LendGivenInsurance(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -132,7 +132,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenInsurance(
             natives,
             ILend._LendGivenInsurance(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -158,7 +158,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenInsurance(
             natives,
             ILend._LendGivenInsurance(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -183,7 +183,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenPercent(
             natives,
             ILend._LendGivenPercent(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 params.collateral,
@@ -212,7 +212,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenPercent(
             natives,
             ILend._LendGivenPercent(
-                convenience,
+                address(convenience),
                 factory,
                 weth,
                 params.collateral,
@@ -239,7 +239,7 @@ library Lend {
         (assetIn, claimsOut) = _lendGivenPercent(
             natives,
             ILend._LendGivenPercent(
-                convenience,
+                address(convenience),
                 factory,
                 params.asset,
                 weth,
@@ -371,7 +371,7 @@ library Lend {
 
         IConvenience.Native storage native = natives[params.asset][params.collateral][params.maturity];
         if (address(native.liquidity) == address(0))
-            native.deploy(params.convenience, params.pair, params.asset, params.collateral, params.maturity);
+            native.deploy(IConvenience(params.convenience), params.pair, params.asset, params.collateral, params.maturity);
 
         (assetIn, claimsOut) = params.pair.lend(
             IPair.LendParam(

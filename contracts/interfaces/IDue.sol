@@ -3,14 +3,13 @@
 pragma solidity =0.8.4;
 
 import {IERC721Permit} from './IERC721Permit.sol';
-import {IConvenience} from './IConvenience.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
 
 /// @author Ricsson W. Ngo
 interface IDue is IERC721Permit {
     // VIEW
 
-    function convenience() external returns (IConvenience);
+    function convenience() external returns (address);
 
     function pair() external returns (IPair);
 

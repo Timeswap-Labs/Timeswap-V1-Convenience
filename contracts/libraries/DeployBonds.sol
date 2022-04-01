@@ -15,7 +15,7 @@ library DeployBonds {
         IPair pair,
         uint256 maturity
     ) external {
-        native.bondInterest = new BondInterest{salt: salt}(convenience, pair, maturity);
-        native.bondPrincipal = new BondPrincipal{salt: salt}(convenience, pair, maturity);
+        native.bondInterest = new BondInterest{salt: salt}(address(convenience), pair, maturity);
+        native.bondPrincipal = new BondPrincipal{salt: salt}(address(convenience), pair, maturity);
     }
 }
