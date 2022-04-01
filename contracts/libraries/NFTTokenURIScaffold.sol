@@ -50,16 +50,17 @@ library NFTTokenURIScaffold {
                 description,
                 '\\n\\nAsset Address: ',
                 addressToString(address(pair.asset())),
-                '\\nCollateral Address: ',
+                '\\n\\nCollateral Address: ',
                 addressToString(address(pair.collateral())),
-                '\\nDebt Required: ',
+                '\\n\\nTotal Debt: ',
                 weiToPrecisionLongString(due.debt, pair.asset().safeDecimals()),
                 ' ',
                 IERC20(pair.asset()).safeSymbol(),
-                '\\nCollateral Locked: ',
+                '\\n\\nCollateral Locked: ',
                 weiToPrecisionLongString(due.collateral, pair.collateral().safeDecimals()),
                 ' ',
-                IERC20(pair.collateral()).safeSymbol()
+                IERC20(pair.collateral()).safeSymbol(),
+                '\\n\\nWarning: Even if a debt has been repaid, the repayment will not be reflected in the NFT, hence please cross check on chain before buying an NFT if you are buying it to repay the debt and claim the collateral'
             )
         );
 
