@@ -65,12 +65,12 @@ library MintMath {
         xIncrease = _xIncrease.toUint112();
 
         uint256 _yIncrease = cp.y;
-        _yIncrease *= assetIn;
+        _yIncrease *= xIncrease;
         _yIncrease /= cp.x;
         yIncrease = _yIncrease.toUint112();
 
         uint256 _zIncrease = cp.z;
-        _zIncrease *= assetIn;
+        _zIncrease *= xIncrease;
         _zIncrease /= cp.x;
         zIncrease = _zIncrease.toUint112();
     }
