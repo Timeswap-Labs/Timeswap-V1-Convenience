@@ -272,3 +272,38 @@ export const getX = (protocolFee: bigint, fee: bigint, maturity: bigint, current
 
   return xIncrease
 }
+
+export const getLendFee= (
+   maturity:bigint,
+   currentTime:bigint,
+   xIncrease:bigint,
+   fee:bigint,
+   protocolFee:bigint
+)=>{
+  const BASE = 0x10000000000n
+
+
+let totalFee = fee;
+totalFee += protocolFee;
+
+let numerator = maturity;
+numerator -= currentTime;
+numerator *= totalFee;
+numerator += BASE;
+
+let adjusted = xIncrease;
+adjusted *= numerator;
+adjusted = divUp(adjusted,BASE);
+let totalFeeStoredIncrease = adjusted;
+totalFeeStoredIncrease -= xIncrease; 
+
+let feeStoredIncrease = totalFeeStoredIncrease;
+feeStoredIncrease *= fee;
+feeStoredIncrease /= totalFee;
+let protocolFeeStoredIncrease = totalFeeStoredIncrease;
+ protocolFeeStoredIncrease -= feeStoredIncrease; 
+ return {
+   feeStoredIncrease,
+   protocolFeeStoredIncrease
+ }
+}

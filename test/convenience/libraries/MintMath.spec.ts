@@ -15,6 +15,7 @@ import { now, setTime } from '../../shared/Helper'
 import * as LiquidityFilter from '../../filters/Liquidity'
 import * as LiquidityMath from '../../libraries/LiquidityMath'
 import { expect } from '../../shared/Expect'
+import { PROTOCOL_FEE } from '../../shared/Constants'
 
 const { loadFixture } = waffle
 
@@ -33,7 +34,7 @@ async function fixture(): Promise<Fixture> {
 
 const newLiquiditytestCases = [
   {
-    assetIn: 10000n,
+    assetIn: 9999n,
     debtIn: 12000n,
     collateralIn: 1000n,
   },
@@ -46,116 +47,116 @@ const liquidityGivenAssetTestCases = [
       collateralIn: 1000n,
     },
     liquidityGivenAssetParams: {
-      assetIn: 10000n,
+      assetIn: 9000n,
       minLiquidity: 5700000n,
       maxDebt: 12000n,
       maxCollateral: 10000n,
     },
   },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 100000n,
-      minLiquidity: 3000000n,
-      maxDebt: 110000n,
-      maxCollateral: 90000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 100000n,
-      debtIn: 130000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
-  {
-    newLiquidityParams: {
-      assetIn: 10000n,
-      debtIn: 12000n,
-      collateralIn: 1000n,
-    },
-    liquidityGivenAssetParams: {
-      assetIn: 10000n,
-      minLiquidity: 5700000n,
-      maxDebt: 12000n,
-      maxCollateral: 10000n,
-    },
-  },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   liquidityGivenAssetParams: {
+  //     assetIn: 100000n,
+  //     minLiquidity: 3000000n,
+  //     maxDebt: 110000n,
+  //     maxCollateral: 90000n,
+  //   },
+  // },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 100000n,
+  //     debtIn: 130000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   liquidityGivenAssetParams: {
+  //     assetIn: 10000n,
+  //     minLiquidity: 5700000n,
+  //     maxDebt: 12000n,
+  //     maxCollateral: 10000n,
+  //   },
+  // },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   liquidityGivenAssetParams: {
+  //     assetIn: 10000n,
+  //     minLiquidity: 5700000n,
+  //     maxDebt: 12000n,
+  //     maxCollateral: 10000n,
+  //   },
+  // },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   liquidityGivenAssetParams: {
+  //     assetIn: 10000n,
+  //     minLiquidity: 5700000n,
+  //     maxDebt: 12000n,
+  //     maxCollateral: 10000n,
+  //   },
+  // },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   liquidityGivenAssetParams: {
+  //     assetIn: 10000n,
+  //     minLiquidity: 5700000n,
+  //     maxDebt: 12000n,
+  //     maxCollateral: 10000n,
+  //   },
+  // },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   liquidityGivenAssetParams: {
+  //     assetIn: 10000n,
+  //     minLiquidity: 5700000n,
+  //     maxDebt: 12000n,
+  //     maxCollateral: 10000n,
+  //   },
+  // },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   liquidityGivenAssetParams: {
+  //     assetIn: 10000n,
+  //     minLiquidity: 5700000n,
+  //     maxDebt: 12000n,
+  //     maxCollateral: 10000n,
+  //   },
+  // },
+  // {
+  //   newLiquidityParams: {
+  //     assetIn: 10000n,
+  //     debtIn: 12000n,
+  //     collateralIn: 1000n,
+  //   },
+  //   liquidityGivenAssetParams: {
+  //     assetIn: 10000n,
+  //     minLiquidity: 5700000n,
+  //     maxDebt: 12000n,
+  //     maxCollateral: 10000n,
+  //   },
+  // },
 ]
 
 const liquidityGivenDebtTestCases = [

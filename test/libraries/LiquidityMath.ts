@@ -37,8 +37,9 @@ export const getLiquidityGivenAssetParams = (
   feeStored: bigint
 ) => {
   const xIncrease = (assetIn * state.x) / (state.x + feeStored)
-  const yIncrease = (state.y * assetIn) / state.x
-  const zIncrease = (state.z * assetIn) / state.x
+  const yIncrease = (state.y * xIncrease) / state.x
+  const zIncrease = (state.z * xIncrease) / state.x
+
 
   return { xIncreaseAddLiqudity: xIncrease, yIncreaseAddLiquidity: yIncrease, zIncreaseAddLiquidity: zIncrease }
 }

@@ -1,4 +1,5 @@
 import liquidityGivenAssetTestCases from './LiquidityGivenAsset'
 import liquidityGivenDebtTestCases from './LiquidityGivenDebt'
 import liquidityGivenCollateralTestCases from './LiquidityGivenCollateral'
-export { liquidityGivenAssetTestCases, liquidityGivenCollateralTestCases, liquidityGivenDebtTestCases }
+import liquidityGivenAssetAfterLendTestCases from './LiquidityGivenAssetAfterLend'
+export { liquidityGivenAssetTestCases, liquidityGivenCollateralTestCases, liquidityGivenDebtTestCases , liquidityGivenAssetAfterLendTestCases}
