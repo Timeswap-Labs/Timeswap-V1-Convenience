@@ -132,6 +132,11 @@ library BorrowMath {
         xReserve -= xDecrease;
 
         if (percent <= 0x80000000) {
+            uint256 yMin = assetOut;
+            yMin *= cp.y;
+            yMin = yMin.divUp(xReserve);
+            yMin = yMin.shiftRightUp(4);
+
             uint256 yMid = cp.y;
             yMid *= cp.y;
             yMid = yMid.mulDivUp(cp.x, xReserve);
@@ -139,8 +144,10 @@ library BorrowMath {
             yMid -= cp.y;
 
             uint256 _yIncrease = yMid;
+            _yIncrease -= yMin;
             _yIncrease *= percent;
             _yIncrease = _yIncrease.shiftRightUp(31);
+            _yIncrease += yMin;
             yIncrease = _yIncrease.toUint112();
 
             uint256 yReserve = cp.y;
