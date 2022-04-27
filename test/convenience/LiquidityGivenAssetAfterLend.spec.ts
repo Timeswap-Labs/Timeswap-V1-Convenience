@@ -56,9 +56,9 @@ describe('Liquidity Given Asset', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 7500n))
-      const lendGivenBond = await lendGivenBondFixture(newLiquidity,signers[0],testCase.lendGivenBondParams)
-       await setTime(Number(currentTime + 10000n))
-       const addLiquidity = await liquidityGivenAssetFixture(
+      const lendGivenBond = await lendGivenBondFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
+      await setTime(Number(currentTime + 10000n))
+      const addLiquidity = await liquidityGivenAssetFixture(
         newLiquidity,
         signers[0],
         testCase.liquidityGivenAssetParams
@@ -83,7 +83,7 @@ describe('Liquidity Given Asset ETH Asset', () => {
         testCase.newLiquidityParams
       )
       await setTime(Number(currentTime + 7500n))
-      const lendGivenBond = await lendGivenBondETHAssetFixture(newLiquidity,signers[0],testCase.lendGivenBondParams)
+      const lendGivenBond = await lendGivenBondETHAssetFixture(newLiquidity, signers[0], testCase.lendGivenBondParams)
       await setTime(Number(currentTime + 10000n))
       const addLiquidity = await liquidityGivenAssetETHAssetFixture(
         newLiquidity,
@@ -117,7 +117,11 @@ describe('Liquidity Given Asset ETH Collateral', () => {
       )
       await setTime(Number(currentTime + 10000n))
       await setTime(Number(currentTime + 7500n))
-      const lendGivenBond = await lendGivenBondETHCollateralFixture(newLiquidity,signers[0],testCase.lendGivenBondParams)
+      const lendGivenBond = await lendGivenBondETHCollateralFixture(
+        newLiquidity,
+        signers[0],
+        testCase.lendGivenBondParams
+      )
       const addLiquidity = await liquidityGivenAssetETHCollateralFixture(
         newLiquidity,
         signers[0],
@@ -141,12 +145,12 @@ async function addLiquidityProperties(
       assetIn: bigint
       debtIn: bigint
       collateralIn: bigint
-    },
+    }
     lendGivenBondParams: {
       assetIn: bigint
       bondOut: bigint
       minInsurance: bigint
-    },
+    }
     liquidityGivenAssetParams: {
       assetIn: bigint
       minLiquidity: bigint
@@ -189,13 +193,21 @@ async function addLiquidityProperties(
     y: yIncreaseNewLiquidity,
     z: zIncreaseNewLiquidity,
   }
-  const {xIncrease,yDecrease,zDecrease} = LendMath.getLendGivenBondParams(state,FEE,PROTOCOL_FEE,maturity,currentTime + 7_500n,data.lendGivenBondParams.assetIn,data.lendGivenBondParams.bondOut)
-  const state1 ={
-    x: xIncrease+xIncreaseNewLiquidity,
-    y: yIncreaseNewLiquidity-yDecrease,
-    z: zIncreaseNewLiquidity-zDecrease
+  const { xIncrease, yDecrease, zDecrease } = LendMath.getLendGivenBondParams(
+    state,
+    FEE,
+    PROTOCOL_FEE,
+    maturity,
+    currentTime + 7_500n,
+    data.lendGivenBondParams.assetIn,
+    data.lendGivenBondParams.bondOut
+  )
+  const state1 = {
+    x: xIncrease + xIncreaseNewLiquidity,
+    y: yIncreaseNewLiquidity - yDecrease,
+    z: zIncreaseNewLiquidity - zDecrease,
   }
-  const  {feeStoredIncrease} = LendMath.getLendFee(maturity,currentTime+7500n,xIncrease,FEE,PROTOCOL_FEE)
+  const { feeStoredIncrease } = LendMath.getLendFee(maturity, currentTime + 7500n, xIncrease, FEE, PROTOCOL_FEE)
   const { xIncreaseAddLiqudity, yIncreaseAddLiquidity, zIncreaseAddLiquidity } =
     LiquidityMath.getLiquidityGivenAssetParams(state1, data.liquidityGivenAssetParams.assetIn, feeStoredIncrease)
   const delState = {

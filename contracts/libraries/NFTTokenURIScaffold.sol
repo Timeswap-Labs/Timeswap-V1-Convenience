@@ -135,7 +135,7 @@ library NFTTokenURIScaffold {
         if (decimal == 0) {
             return string(abi.encodePacked(weiAmt.toString(), '.00'));
         }
-        require(decimal >= 4, "Should have either greater than or equal to 4 decimal places or 0 decimal places");
+        require(decimal >= 4, 'Should have either greater than or equal to 4 decimal places or 0 decimal places');
 
         uint256 significantDigits = weiAmt / (10**decimal);
         uint256 precisionDigits = weiAmt % (10**(decimal));
@@ -160,7 +160,7 @@ library NFTTokenURIScaffold {
         if (decimal == 0) {
             return string(abi.encodePacked(weiAmt.toString(), '.00'));
         }
-        require(decimal >= 4, "Should have either greater than or equal to 4 decimal places or 0 decimal places");
+        require(decimal >= 4, 'Should have either greater than or equal to 4 decimal places or 0 decimal places');
 
         uint256 significantDigits = weiAmt / (10**decimal);
         if (significantDigits > 1e9) {

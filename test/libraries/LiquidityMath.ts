@@ -40,7 +40,6 @@ export const getLiquidityGivenAssetParams = (
   const yIncrease = (state.y * xIncrease) / state.x
   const zIncrease = (state.z * xIncrease) / state.x
 
-
   return { xIncreaseAddLiqudity: xIncrease, yIncreaseAddLiquidity: yIncrease, zIncreaseAddLiquidity: zIncrease }
 }
 export const getAddLiquidityGivenCollateralParams = (
