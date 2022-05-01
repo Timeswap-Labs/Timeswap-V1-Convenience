@@ -125,7 +125,7 @@ library LendMath {
         xReserve += xIncrease;
 
         if (percent <= 0x80000000) {
-            uint256 yMin = assetIn;
+            uint256 yMin = assetIn; //BUG: this should be xIncrease
             yMin *= cp.y;
             yMin /= xReserve;
             yMin >>= 4;
