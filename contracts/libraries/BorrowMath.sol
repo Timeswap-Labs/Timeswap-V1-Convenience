@@ -132,7 +132,7 @@ library BorrowMath {
         xReserve -= xDecrease;
 
         if (percent <= 0x80000000) {
-            uint256 yMin = assetOut; //BUG: this should be xDecrease
+            uint256 yMin = xDecrease;
             yMin *= cp.y;
             yMin = yMin.divUp(xReserve);
             yMin = yMin.shiftRightUp(4);
