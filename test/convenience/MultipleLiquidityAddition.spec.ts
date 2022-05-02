@@ -18,10 +18,12 @@ import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import {
   CollateralizedDebt__factory,
   ERC20__factory,
+  Liquidity__factory,
   TestToken,
   TimeswapPair,
   TimeswapPair__factory,
 } from '../../typechain'
+import * as fs from "fs"
 import * as LiquidityFilter from '../filters/Liquidity'
 import { Convenience } from '../shared/Convenience'
 import { multipleLiquidityAddition as testCases } from '../test-cases/index'
@@ -53,21 +55,57 @@ describe.only('Multiple Liquidity Given Asset', () => {
       await setTime(Number(currentTime + 5000n))
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
       await setTime(Number(currentTime + 10000n))
+      const pair = await newLiquidity.convenience.factoryContract.getPair(newLiquidity.assetToken.address, newLiquidity.collateralToken.address)
+      const pairContract = TimeswapPair__factory.connect(pair, ethers.provider);
+      
+      const percent = []
+
+      let beforeLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
       let addLiquidity = await liquidityGivenAssetFixture(
         newLiquidity,
         signers[0],
         testCase.addLiquidityParams[0]
       )
+      let afterLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
+    //   percent.push(Number(((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000);
      for(let i=1;i<testCase.addLiquidityParams.length;i++){
+        beforeLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
        addLiquidity = await liquidityGivenAssetFixture(
         newLiquidity,
         signers[i],
         testCase.addLiquidityParams[i]
       )
-      await addMultipleLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
+      afterLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
+      const liqTokenContract = Liquidity__factory.connect((await addLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,maturity)).liquidity,ethers.provider)
+        // console.log(assetToken.address)
+        // console.log(collateralToken.address)
+        // console.log(await pairContract.asset())
+        // console.log(await pairContract.collateral())
+        const liqConv = await pairContract.liquidityOf(maturity,addLiquidity.convenience.convenienceContract.address)
+      const liqIssued =  await liqTokenContract.balanceOf(signers[i].address)
+      const totalLiqSupplied = await liqTokenContract.totalSupply()
+      percent.push({
+          "Asset In": testCase.addLiquidityParams[i].assetIn.toString(),
+          "Min Liquidity": testCase.addLiquidityParams[i].minLiquidity.toString(),
+          "Max Debt": testCase.addLiquidityParams[i].maxDebt.toString(),
+          "Max Collateral": testCase.addLiquidityParams[i].maxCollateral.toString(),
+         "Percent Liquidity Issued": ((((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000n).toString(),
+         "Total Liquidity": afterLiq.toString(),
+         "User Address": signers[i].address,
+         "Liq Issued": liqIssued.toString(),
+         "Total liq supplied": totalLiqSupplied.toString(),
+         "Total liq on conv": liqConv.toString()
+      }
+          );
+    //   await addMultipleLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
 
      }
-     console.log(addLiquidity)
+    //  console.log(addLiquidity)
+     console.log(percent)
+     fs.writeFile('multipleLiq.json', JSON.stringify(percent),function(err) {
+        if (err) throw err;
+        console.log('complete');
+        })
     })
   })
 })
