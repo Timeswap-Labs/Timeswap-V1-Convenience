@@ -36,7 +36,7 @@ contract Liquidity is ILiquidity, ERC20Permit {
     }
 
     function totalSupply() external view override returns (uint256) {
-        return pair.liquidityOf(maturity, address(this));
+        return pair.liquidityOf(maturity, address(convenience));
     }
 
     constructor(

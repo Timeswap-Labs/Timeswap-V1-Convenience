@@ -25,22 +25,27 @@ import {
 } from '../types'
 import { BorrowMathCallee, ERC20__factory, LendMathCallee, MintMathCallee, TimeswapPair } from '../../typechain'
 import { deploy } from './DeployConvenience'
+import { sign } from 'crypto'
 
-let assetValue = 100000n ** 100000n
-let collateralValue = 100000n ** 100000n
-
+let assetValue = 2n**256n -1n
+let collateralValue = 2n**256n -1n
 export async function constructorFixture(
   assetValue: bigint,
   collateralValue: bigint,
   maturity: bigint,
-  signerWithAddress: SignerWithAddress
+  signerWithAddresses: SignerWithAddress[]
 ) {
-  const assetToken = await testTokenNew('DAI', 'DAI', assetValue)
-  const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
+  const assetToken = await testTokenNew('DAI', 'DAI', assetValue, signerWithAddresses)
+  const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue, signerWithAddresses)
 
-  const convenience = await convenienceInit(maturity, assetToken, collateralToken, signerWithAddress)
-  await assetToken.approve(convenience.convenienceContract.address, assetValue)
-  await collateralToken.approve(convenience.convenienceContract.address, collateralValue)
+  const convenience = await convenienceInit(maturity, assetToken, collateralToken, signerWithAddresses)
+
+  // cos)
+  for(let i=0;i<signerWithAddresses.length;i++){
+    // console.log(i)
+  await assetToken.connect(signerWithAddresses[i]).approve(convenience.convenienceContract.address, assetValue)
+  await collateralToken.connect(signerWithAddresses[i]).approve(convenience.convenienceContract.address, collateralValue)
+  }
   return { convenience, assetToken, collateralToken, maturity }
 }
 export async function newLiquidityFixture(
@@ -49,6 +54,7 @@ export async function newLiquidityFixture(
   newLiquidityParams: NewLiquidityParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.newLiquidity(
     fixture.maturity,
     fixture.assetToken.address,
@@ -67,6 +73,7 @@ export async function newLiquidityETHAssetFixture(
   newLiquidityParams: NewLiquidityParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.newLiquidityETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -84,6 +91,7 @@ export async function newLiquidityETHCollateralFixture(
   newLiquidityParams: NewLiquidityParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.newLiquidityETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -101,6 +109,7 @@ export async function liquidityGivenAssetFixture(
   liquidityGivenAssetParams: LiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenAsset(
     fixture.maturity,
     fixture.assetToken.address,
@@ -120,6 +129,7 @@ export async function liquidityGivenAssetETHAssetFixture(
   liquidityGivenAssetParams: LiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenAssetETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -138,6 +148,7 @@ export async function liquidityGivenAssetETHCollateralFixture(
   liquidityGivenAssetParams: LiquidityGivenAssetParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenAssetETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -156,6 +167,7 @@ export async function liquidityGivenDebtFixture(
   liquidityGivenAssetParams: LiquidityGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenDebt(
     fixture.maturity,
     fixture.assetToken.address,
@@ -175,6 +187,7 @@ export async function liquidityGivenDebtETHAssetFixture(
   liquidityGivenAssetParams: LiquidityGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenDebtETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -193,6 +206,7 @@ export async function liquidityGivenDebtETHCollateralFixture(
   liquidityGivenAssetParams: LiquidityGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenDebtETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -211,6 +225,7 @@ export async function liquidityGivenCollateralFixture(
   liquidityGivenAssetParams: LiquidityGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -230,6 +245,7 @@ export async function liquidityGivenCollateralETHAssetFixture(
   liquidityGivenAssetParams: LiquidityGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenCollateralETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -248,6 +264,7 @@ export async function liquidityGivenCollateralETHCollateralFixture(
   liquidityGivenAssetParams: LiquidityGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.liquidityGivenCollateralETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -266,6 +283,7 @@ export async function removeLiquidityFixture(
   removeLiquidityParams: RemoveLiquidityParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.removeLiquidity(
     fixture.maturity,
     fixture.assetToken.address,
@@ -282,6 +300,7 @@ export async function removeLiquidityETHAssetFixture(
   removeLiquidityParams: RemoveLiquidityParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.removeLiquidityETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -297,6 +316,7 @@ export async function removeLiquidityETHCollateralFixture(
   removeLiquidityParams: RemoveLiquidityParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.removeLiquidityETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -312,6 +332,7 @@ export async function lendGivenBondFixture(
   lendGivenBondParams: LendGivenBondParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenBond(
     fixture.maturity,
     fixture.assetToken.address,
@@ -329,6 +350,7 @@ export async function lendGivenBondETHAssetFixture(
   lendGivenBondParams: LendGivenBondParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenBondETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -345,6 +367,7 @@ export async function lendGivenBondETHCollateralFixture(
   lendGivenBondParams: LendGivenBondParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenBondETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -361,6 +384,7 @@ export async function lendGivenInsuranceFixture(
   lendGivenInsuranceParams: LendGivenInsuranceParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenInsurance(
     fixture.maturity,
     fixture.assetToken.address,
@@ -378,6 +402,7 @@ export async function lendGivenInsuranceETHAssetFixture(
   lendGivenInsuranceParams: LendGivenInsuranceParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenInsuranceETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -394,6 +419,7 @@ export async function lendGivenInsuranceETHCollateralFixture(
   lendGivenInsuranceParams: LendGivenInsuranceParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenInsuranceETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -410,6 +436,7 @@ export async function lendGivenPercentFixture(
   lendGivenPercentParams: LendGivenPercentParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenPercent(
     fixture.maturity,
     fixture.assetToken.address,
@@ -428,6 +455,7 @@ export async function lendGivenPercentETHAssetFixture(
   lendGivenPercentParams: LendGivenPercentParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenPercentETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -445,6 +473,7 @@ export async function lendGivenPercentETHCollateralFixture(
   lendGivenPercentParams: LendGivenPercentParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.lendGivenPercentETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -458,6 +487,7 @@ export async function lendGivenPercentETHCollateralFixture(
 }
 export async function collectFixture(fixture: Fixture, signer: SignerWithAddress, collectParams: CollectParams) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.collect(
     fixture.maturity,
     fixture.assetToken.address,
@@ -473,6 +503,7 @@ export async function collectETHAssetFixture(
   collectParams: CollectParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.collectETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -487,6 +518,7 @@ export async function collectETHCollateralFixture(
   collectParams: CollectParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.collectETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -501,6 +533,7 @@ export async function borrowGivenDebtFixture(
   borrowGivenDebtParams: BorrowGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenDebt(
     fixture.maturity,
     fixture.assetToken.address,
@@ -519,6 +552,7 @@ export async function borrowGivenDebtETHAssetFixture(
   borrowGivenDebtParams: BorrowGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenDebtETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -536,6 +570,7 @@ export async function borrowGivenDebtETHCollateralFixture(
   borrowGivenDebtParams: BorrowGivenDebtParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenDebtETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -553,6 +588,7 @@ export async function borrowGivenCollateralFixture(
   borrowGivenCollateralParams: BorrowGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -571,6 +607,7 @@ export async function borrowGivenCollateralETHAssetFixture(
   borrowGivenCollateralParams: BorrowGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenCollateralETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -588,6 +625,7 @@ export async function borrowGivenCollateralETHCollateralFixture(
   borrowGivenCollateralParams: BorrowGivenCollateralParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenCollateralETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -605,6 +643,7 @@ export async function borrowGivenPercentFixture(
   borrowGivenPercentParams: BorrowGivenPercentParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenPercent(
     fixture.maturity,
     fixture.assetToken.address,
@@ -624,6 +663,7 @@ export async function borrowGivenPercentETHAssetFixture(
   borrowGivenPercentParams: BorrowGivenPercentParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenPercentETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -642,6 +682,7 @@ export async function borrowGivenPercentETHCollateralFixture(
   borrowGivenPercentParams: BorrowGivenPercentParams
 ) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.borrowGivenPercentETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -656,6 +697,7 @@ export async function borrowGivenPercentETHCollateralFixture(
 }
 export async function repayFixture(fixture: Fixture, signer: SignerWithAddress, repayParams: RepayParams) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.repay(
     fixture.maturity,
     fixture.assetToken.address,
@@ -669,6 +711,7 @@ export async function repayFixture(fixture: Fixture, signer: SignerWithAddress, 
 
 export async function repayETHAssetFixture(fixture: Fixture, signer: SignerWithAddress, repayParams: RepayParams) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.repayETHAsset(
     fixture.maturity,
     fixture.collateralToken.address,
@@ -680,6 +723,7 @@ export async function repayETHAssetFixture(fixture: Fixture, signer: SignerWithA
 }
 export async function repayETHCollateralFixture(fixture: Fixture, signer: SignerWithAddress, repayParams: RepayParams) {
   const { convenience, assetToken, collateralToken, maturity } = fixture
+  convenience.updateSigner(signer)
   const txn = await fixture.convenience.repayETHCollateral(
     fixture.maturity,
     fixture.assetToken.address,
@@ -689,49 +733,49 @@ export async function repayETHCollateralFixture(fixture: Fixture, signer: Signer
 
   return { convenience, assetToken, collateralToken, maturity }
 }
-export async function mintNewCoreFixture(
-  signer: SignerWithAddress,
-  maturity: bigint,
-  xIncrease: bigint,
-  yIncrease: bigint,
-  zIncrease: bigint
-) {
-  const assetToken = await testTokenNew('DAI', 'DAI', assetValue)
-  const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
+// export async function mintNewCoreFixture(
+//   signer: SignerWithAddress,
+//   maturity: bigint,
+//   xIncrease: bigint,
+//   yIncrease: bigint,
+//   zIncrease: bigint
+// ) {
+//   const assetToken = await testTokenNew('DAI', 'DAI', assetValue,)
+//   const collateralToken = await testTokenNew('Matic', 'MATIC', collateralValue)
 
-  const pairContractCalleeFactory = await ethers.getContractFactory('TimeswapPairCallee')
-  const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
-  const factoryContractFactory = await ethers.getContractFactory('TimeswapFactory')
+//   const pairContractCalleeFactory = await ethers.getContractFactory('TimeswapPairCallee')
+//   const pairContractFactory = await ethers.getContractFactory('TimeswapPair')
+//   const factoryContractFactory = await ethers.getContractFactory('TimeswapFactory')
 
-  const factory = (await factoryContractFactory.deploy(signer.address, 3000, 3000)) as TimeswapFactory
-  await factory.deployed()
+//   const factory = (await factoryContractFactory.deploy(signer.address, 3000, 3000)) as TimeswapFactory
+//   await factory.deployed()
 
-  await factory.createPair(assetToken.address, collateralToken.address)
-  const pairContract = pairContractFactory.attach(
-    await factory.getPair(assetToken.address, collateralToken.address)
-  ) as TimeswapPair
+//   await factory.createPair(assetToken.address, collateralToken.address)
+//   const pairContract = pairContractFactory.attach(
+//     await factory.getPair(assetToken.address, collateralToken.address)
+//   ) as TimeswapPair
 
-  const pairContractCallee = (await pairContractCalleeFactory.deploy(pairContract.address)) as TimeswapPairCallee
-  await assetToken.connect(signer).approve(pairContractCallee.address, 1n << 112n)
+//   const pairContractCallee = (await pairContractCalleeFactory.deploy(pairContract.address)) as TimeswapPairCallee
+//   await assetToken.connect(signer).approve(pairContractCallee.address, 1n << 112n)
 
-  await collateralToken.connect(signer).approve(pairContractCallee.address, 1n << 112n)
+//   await collateralToken.connect(signer).approve(pairContractCallee.address, 1n << 112n)
 
-  await pairContractCallee.mint(maturity, signer.address, xIncrease, yIncrease, zIncrease)
+//   await pairContractCallee.mint(maturity, signer.address, xIncrease, yIncrease, zIncrease)
 
-  const { convenience, weth } = await deploy(assetToken, collateralToken, maturity, factory)
+//   const { convenience, weth } = await deploy(assetToken, collateralToken, maturity, factory)
 
-  await assetToken.connect(signer).approve(convenience.address, 1n << 112n)
+//   await assetToken.connect(signer).approve(convenience.address, 1n << 112n)
 
-  await collateralToken.connect(signer).approve(convenience.address, 1n << 112n)
-  return {
-    convenience: new Convenience(convenience, factory, weth, signer),
-    assetToken,
-    collateralToken,
-    maturity,
-    pairContractCallee,
-    pairContract,
-  }
-}
+//   await collateralToken.connect(signer).approve(convenience.address, 1n << 112n)
+//   return {
+//     convenience: new Convenience(convenience, factory, weth, signer),
+//     assetToken,
+//     collateralToken,
+//     maturity,
+//     pairContractCallee,
+//     pairContract,
+//   }
+// }
 export async function mintMathCalleeGivenNewFixture(
   fixture: Fixture,
   signer: SignerWithAddress,

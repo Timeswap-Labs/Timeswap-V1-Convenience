@@ -35,7 +35,7 @@ async function fixture(): Promise<Fixture> {
   maturity = (await now()) + 31536000n
   signers = await ethers.getSigners()
 
-  const constructor = await constructorFixture(1n << 150n, 1n << 150n, maturity, signers[0])
+  const constructor = await constructorFixture(1n << 150n, 1n << 150n, maturity, [signers[0]])
 
   return constructor
 }
