@@ -100,6 +100,11 @@ export const getLendGivenPercentParams = (
   xReserve += xIncrease
 
   if (percent <= 0x80000000) {
+    let yMin = xIncrease
+    yMin *= state.y
+    yMin = divUp(yMin, xReserve)
+    yMin >>= 4n
+
     let yMid = state.y
     let subtrahend = state.y
     subtrahend *= state.y
@@ -108,8 +113,10 @@ export const getLendGivenPercentParams = (
     yMid -= subtrahend
 
     let _yDecrease = yMid
+    _yDecrease -= yMin
     _yDecrease *= percent
     _yDecrease >>= 31n
+    _yDecrease += yMin
 
     let yReserve = state.y
     yReserve -= _yDecrease
