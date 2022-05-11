@@ -138,6 +138,11 @@ export const getBorrowGivenPercentParams = (
   xReserve -= xDecrease
 
   if (percent <= 0x80000000) {
+    let yMin = xDecrease
+    yMin *= state.y
+    yMin = divUp(yMin, xReserve)
+    yMin = shiftRightUp(yMin, 4n)
+
     let yMid = state.y
     yMid *= state.y
     yMid = mulDivUp(yMid, state.x, xReserve)
@@ -145,8 +150,10 @@ export const getBorrowGivenPercentParams = (
     yMid -= state.y
 
     let _yIncrease = yMid
+    _yIncrease -= yMin
     _yIncrease *= percent
     _yIncrease = shiftRightUp(_yIncrease, 31n)
+    _yIncrease += yMin
 
     let yReserve = state.y
     yReserve += _yIncrease
