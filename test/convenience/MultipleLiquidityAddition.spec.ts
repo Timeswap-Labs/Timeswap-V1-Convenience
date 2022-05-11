@@ -95,7 +95,7 @@ describe.only('Multiple Liquidity Given Asset', () => {
        "Total liq on conv": liqConv.toString()
     }
 
-      console.log('New iquidity Completed')
+      console.log('New liquidity Completed')
 
       // FIRST ADD LIQUIDITY
       beforeLiq = afterLiq
@@ -125,7 +125,7 @@ describe.only('Multiple Liquidity Given Asset', () => {
        "Total liq on conv": liqConv.toString()
     }
     // console.log(signers[19])
-    console.log('1st Addiquidity Completed')
+    console.log('1st AddLiquidity Completed')
 
     //ADD Liquidity from 1-12
      for(let i=1;i<testCase.addLiquidityParams.length;i++){
