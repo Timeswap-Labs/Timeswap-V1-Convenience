@@ -661,6 +661,7 @@ export class Convenience {
     maxCollateral: bigint,
     percent: bigint
   ) {
+    console.log(this.signer.address)
     return await this.convenienceContract.connect(this.signer).borrowGivenPercent({
       maturity: maturity,
       asset: asset,

@@ -1,8 +1,8 @@
 const testcases = [{
     newLiquidityParams: {
-      assetIn: 10000000000000000000000n,
-      debtIn: 12000000000000000000000n,
-      collateralIn: 1000000000000000000000n,
+      assetIn: 1000000000000000000000n,
+      debtIn: 1499200000000000000000n,
+      collateralIn: 1499200000000000000000n,
     },
     lenGivenBondParams: {
         assetIn: 1000n,
@@ -10,9 +10,15 @@ const testcases = [{
         minInsurance: 50n,
     },
     borrowGivenCollateralParams: {
-        assetOut: 2000n,
+        assetOut: 1000000000000000000000n,
         collateralIn: 190n,
         maxDebt: 3000n,
+      },
+      borrowGivenPercentParams: {
+        assetOut: 1000000000000000000000n,
+        percent: 2n**31n,
+        maxDebt: 10000000000000000000000n,
+        maxCollateral: 10000000000000000000000n
       },
     addLiquidityParams: [
     {

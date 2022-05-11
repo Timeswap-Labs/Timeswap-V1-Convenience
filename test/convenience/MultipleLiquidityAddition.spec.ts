@@ -13,7 +13,9 @@ import {
   newLiquidityETHCollateralFixture,
   liquidityGivenAssetETHCollateralFixture,
   lendGivenBondFixture,
-  borrowGivenCollateralFixture
+  borrowGivenCollateralFixture,
+  borrowGivenPercentFixture,
+  repayFixture
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
@@ -55,32 +57,59 @@ async function fixture(): Promise<Fixture> {
 describe.only('Multiple Liquidity Given Asset', () => {
   testCases.forEach((testCase, index) => {
     it(`Succeeded ${index}`, async () => {
-      const { maturity, assetToken, collateralToken } = await loadFixture(fixture)
+      const { maturity, assetToken, collateralToken, convenience } = await loadFixture(fixture)
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
-      await setTime(Number(currentTime + 5000n))
-      const newLiquidity = await newLiquidityFixture(constructorFixture, signers[0], testCase.newLiquidityParams)
-      await setTime(Number(currentTime + 10000n))
-      const lendGivenBond  = await lendGivenBondFixture(newLiquidity,signers[0],testCase.lenGivenBondParams)
-      const borrowGivenCoxgit llateral = await borrowGivenCollateralFixture(lendGivenBond, signers[0],testCase.borrowGivenCollateralParams)
-      const pair = await newLiquidity.convenience.factoryContract.getPair(newLiquidity.assetToken.address, newLiquidity.collateralToken.address)
-      const pairContract = TimeswapPair__factory.connect(pair, ethers.provider);
       
+      // await setTime(Number(currentTime + 5000n))
       let percent = {}
 
-      let beforeLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
-      let addLiquidity = await liquidityGivenAssetFixture(
-        borrowGivenCollateral,
-        signers[0],
-        testCase.addLiquidityParams[0]
-      )
+
+      // NEW LIQUIDITY
+      let beforeLiq = 0n
+      const newLiquidity = await newLiquidityFixture(constructorFixture, signers[19], testCase.newLiquidityParams)
+      const pair = await constructorFixture.convenience.factoryContract.getPair(constructorFixture.assetToken.address, constructorFixture.collateralToken.address)
+      const pairContract = TimeswapPair__factory.connect(pair, ethers.provider);
       let afterLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
       let liqTokenContract = Liquidity__factory.connect((await newLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,newLiquidity.maturity)).liquidity,ethers.provider)
       let liqConv = await pairContract.liquidityOf(maturity,newLiquidity.convenience.convenienceContract.address)
-      let liqIssued =  await liqTokenContract.balanceOf(signers[0].address)
+      let liqIssued =  await liqTokenContract.balanceOf(signers[19].address)
       let totalLiqSupplied = await liqTokenContract.totalSupply()
-        percent[signers[0].address] =percent[signers[0].address] ={
+      // await setTime(Number(currentTime + 10000n))
+    //   const lendGivenBond  = await lendGivenBondFixture(newLiquidity,signers[0],testCase.lenGivenBondParams)
+    //   const borrowGivenCollateral = await borrowGivenCollateralFixture(lendGivenBond, signers[0],testCase.borrowGivenCollateralParams)
+
+
+    percent[signers[19].address] ={
+        "Asset In": testCase.newLiquidityParams.assetIn.toString(),
+        "Max Collateral": testCase.addLiquidityParams[0].maxCollateral.toString(),
+        "Total liquidity Before": beforeLiq.toString(),
+        "Total liquidity After": afterLiq.toString(),
+       "Percent Liquidity Issued": String(Number(((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000).toString(),
+       "Total Liquidity": afterLiq.toString(),
+       "User Address": signers[19].address,
+       "Liq Issued": liqIssued.toString(),
+       "Total liq supplied": totalLiqSupplied.toString(),
+       "LI": (afterLiq - beforeLiq).toString(),
+       "Total liq on conv": liqConv.toString()
+    }
+
+      console.log('New iquidity Completed')
+
+      // FIRST ADD LIQUIDITY
+      beforeLiq = afterLiq
+      let addLiquidity = await liquidityGivenAssetFixture(
+        newLiquidity,
+        signers[0],
+        testCase.addLiquidityParams[0]
+      )
+      afterLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
+      liqTokenContract = Liquidity__factory.connect((await newLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,newLiquidity.maturity)).liquidity,ethers.provider)
+      liqConv = await pairContract.liquidityOf(maturity,newLiquidity.convenience.convenienceContract.address)
+      liqIssued =  await liqTokenContract.balanceOf(signers[0].address)
+      totalLiqSupplied = await liqTokenContract.totalSupply()
+       percent[signers[0].address] ={
         "Asset In": testCase.addLiquidityParams[0].assetIn.toString(),
         "Min Liquidity": testCase.addLiquidityParams[0].minLiquidity.toString(),
         "Max Debt": testCase.addLiquidityParams[0].maxDebt.toString(),
@@ -95,6 +124,10 @@ describe.only('Multiple Liquidity Given Asset', () => {
        "LI": (afterLiq - beforeLiq).toString(),
        "Total liq on conv": liqConv.toString()
     }
+    // console.log(signers[19])
+    console.log('1st Addiquidity Completed')
+
+    //ADD Liquidity from 1-12
      for(let i=1;i<testCase.addLiquidityParams.length;i++){
         beforeLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
        addLiquidity = await liquidityGivenAssetFixture(
@@ -126,41 +159,80 @@ describe.only('Multiple Liquidity Given Asset', () => {
          "User Address": signers[i].address,
          "Liq Issued": liqIssued.toString(),
          "Total liq supplied": totalLiqSupplied.toString(),
+         "LI": (afterLiq - beforeLiq).toString(),
          "Total liq on conv": liqConv.toString()
       }
-          
+    }
+          console.log('Add liquidity Completed')
       
-    //   await addMultipleLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
+    // //   await addMultipleLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
 
-     }
-     
+    //  }
+         // BORROW  TRANSACTION
+        //  console.log(signers[17])
+    const borrowGivenPercent = await borrowGivenPercentFixture(addLiquidity,signers[17],testCase.borrowGivenPercentParams)
+    let borrowEventFilter = await pairContract.filters.Borrow()
+    let borrowEvents = await pairContract.queryFilter(borrowEventFilter)    
+    // console.log('borrow events',borrowEvents)
+    // await loadFixture(borrowGivenPercent)
+    // console.log(convenience.convenienceContract)
+    console.log('Borrow Completed')
+    const due = await pairContract.dueOf(maturity,convenience.convenienceContract.address,13)
+    console.log('debt is',due.debt)
+    console.log('collateral is',due.collateral)
+    console.log('due is',due);
+
+    //REPAY TRANSACTION
+    const repay = await repayFixture(borrowGivenPercent,signers[17],{ids: [13n], maxAssetsIn: [BigInt(due.debt.toString())]})
+    let repayEventFilter = await pairContract.filters.Pay(null,null,signers[17].address)
+    let repayEvents = await pairContract.queryFilter(repayEventFilter)
+    // console.log(repayEvents)
+    console.log('Repay Completed')
     //  console.log(percent)
     //  console.log('liq addition done')
      await advanceTime(Number(maturity))
      let beforeBurn = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
-     let removeLiquidity = await removeLiquidityFixture(addLiquidity,signers[0],{liquidityIn: BigInt(percent[signers[0].address]["Liq Issued"])}) 
+     let removeLiquidity = await removeLiquidityFixture(repay,signers[19],{liquidityIn: BigInt(percent[signers[19].address]["Liq Issued"])}) 
      let afterBurn = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
-     percent[signers[0].address] = {...percent[signers[0].address], ...{
+     let burnEventFilter = await pairContract.filters.Burn(null,null,signers[19].address)
+     let burnEvents = await pairContract.queryFilter(burnEventFilter)
+    //  console.log(events[0].args.assetOut,events[0].args.collateralOut)
+    // events.forEach((event)=> {
+    //     if event
+    // })
+     percent[signers[19].address] = {...percent[signers[19].address], ...{
          'Liq burned': (beforeBurn - afterBurn).toString(),
-         'Liq left in Conv': (await pairContract.totalLiquidity(newLiquidity.maturity)).toString()
+         'Liq left in Conv': (await pairContract.totalLiquidity(newLiquidity.maturity)).toString(),
+         'Asset Out': burnEvents[0].args.assetOut.toString(),
+         'Collateral Out': burnEvents[0].args.collateralOut.toString(),
+         'signer': 19,
+         'address': signers[19]
      }}
     //  console.log(testCase.addLiquidityParams.length)
-     for(let i=1;i<testCase.addLiquidityParams.length;i++){
+     for(let i=0;i<testCase.addLiquidityParams.length;i++){
         beforeBurn = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
         // console.log(percent[signers[i].address]["Liq Issued"])
         // console.log(await liqTokenContract.balanceOf(signers[i].address))
         removeLiquidity = await removeLiquidityFixture(removeLiquidity,signers[i],{liquidityIn: BigInt(percent[signers[i].address]["Liq Issued"])}) 
         afterBurn= (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
+        let burnEvent = await pairContract.filters.Burn(null,null,signers[i].address)
+        let events = await pairContract.queryFilter(burnEvent)
+        // console.log(events[0].args.assetOut,events[0].args.collateralOut)
         percent[signers[i].address] = {...percent[signers[i].address], ...{
             'Liq burned': (beforeBurn - afterBurn).toString(),
-            'Liq left in Conv': (await pairContract.totalLiquidity(newLiquidity.maturity)).toString()
+            'Liq left in Conv': (await pairContract.totalLiquidity(newLiquidity.maturity)).toString(),
+            'Asset Out': events[0].args.assetOut.toString(),
+            'Collateral Out': events[0].args.collateralOut.toString(),
+            'signer': i,
+            'address': signers[i]
         }}
         // console.log(i)
      }
-    //  console.log(addLiquidity)
+    // console.log(percent)
+    // //  console.log(addLiquidity)
     percent = Object.values(percent)
-    // console.log(JSON.stringify(percent))
-    //  console.log(percent)
+    console.log(JSON.stringify(percent))
+     console.log(percent)
      fs.writeFile('multipleLiq.json', JSON.stringify(percent),function(err) {
         if (err) throw err;
         console.log('complete');
