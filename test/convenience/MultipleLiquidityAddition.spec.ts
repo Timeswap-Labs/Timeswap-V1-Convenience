@@ -1,7 +1,10 @@
 import { ethers, waffle } from 'hardhat'
-import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime, advanceTime } from '../shared/Helper'
+import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime, advanceTime, getBlock } from '../shared/Helper'
 import { expect } from '../shared/Expect'
 import * as LiquidityMath from '../libraries/LiquidityMath'
+import * as LendMath from '../libraries/LendMath'
+import { FEE, PROTOCOL_FEE } from '../shared/Constants'
+
 import {
   newLiquidityFixture,
   constructorFixture,
@@ -15,14 +18,19 @@ import {
   lendGivenBondFixture,
   borrowGivenCollateralFixture,
   borrowGivenPercentFixture,
-  repayFixture
+  repayFixture,
+  collectFixture
 } from '../shared/Fixtures'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import {
+  BondInterest__factory,
+  BondPrincipal__factory,
   CollateralizedDebt__factory,
   ERC20__factory,
+  InsuranceInterest__factory,
+  InsurancePrincipal__factory,
   Liquidity__factory,
   TestToken,
   TimeswapPair,
@@ -34,6 +42,7 @@ import { Convenience } from '../shared/Convenience'
 import { multipleLiquidityAddition as testCases } from '../test-cases/index'
 import { json } from 'stream/consumers'
 import testcases from '../test-cases/liquidity/LiquidityGivenAsset'
+import { test } from 'mocha'
 const { loadFixture } = waffle
 
 let maturity = 0n
@@ -61,44 +70,59 @@ describe.only('Multiple Liquidity Given Asset', () => {
       let currentTime = await now()
 
       const constructorFixture = await loadFixture(fixture)
-      
+
       // await setTime(Number(currentTime + 5000n))
       let percent = {}
-
+      let lend_percent = {}
 
       // NEW LIQUIDITY
       let beforeLiq = 0n
+
       const newLiquidity = await newLiquidityFixture(constructorFixture, signers[19], testCase.newLiquidityParams)
       const pair = await constructorFixture.convenience.factoryContract.getPair(constructorFixture.assetToken.address, constructorFixture.collateralToken.address)
       const pairContract = TimeswapPair__factory.connect(pair, ethers.provider);
+
+      let protFeeBefore = (await pairContract.protocolFeeStored()).toBigInt();
+      let feeBefore = (await pairContract.fee()).toBigInt();
+
       let afterLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
       let liqTokenContract = Liquidity__factory.connect((await newLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,newLiquidity.maturity)).liquidity,ethers.provider)
       let liqConv = await pairContract.liquidityOf(maturity,newLiquidity.convenience.convenienceContract.address)
       let liqIssued =  await liqTokenContract.balanceOf(signers[19].address)
       let totalLiqSupplied = await liqTokenContract.totalSupply()
+
+       let protFeeAfter = (await pairContract.protocolFee()).toBigInt()
+       let feeAfter = (await pairContract.fee()).toBigInt()
+
+
       // await setTime(Number(currentTime + 10000n))
     //   const lendGivenBond  = await lendGivenBondFixture(newLiquidity,signers[0],testCase.lenGivenBondParams)
     //   const borrowGivenCollateral = await borrowGivenCollateralFixture(lendGivenBond, signers[0],testCase.borrowGivenCollateralParams)
 
-
     percent[signers[19].address] ={
-        "Asset In": testCase.newLiquidityParams.assetIn.toString(),
-        "Max Collateral": testCase.addLiquidityParams[0].maxCollateral.toString(),
-        "Total liquidity Before": beforeLiq.toString(),
-        "Total liquidity After": afterLiq.toString(),
+       "Asset In": testCase.newLiquidityParams.assetIn.toString(),
+       "Max Collateral": testCase.addLiquidityParams[0].maxCollateral.toString(),
+       "Total liquidity Before": beforeLiq.toString(),
+       "Total liquidity After": afterLiq.toString(),
        "Percent Liquidity Issued": String(Number(((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000).toString(),
        "Total Liquidity": afterLiq.toString(),
        "User Address": signers[19].address,
        "Liq Issued": liqIssued.toString(),
        "Total liq supplied": totalLiqSupplied.toString(),
        "LI": (afterLiq - beforeLiq).toString(),
-       "Total liq on conv": liqConv.toString()
+       "Total liq on conv": liqConv.toString(),
+       'signer': 19,
     }
 
       console.log('New liquidity Completed')
 
       // FIRST ADD LIQUIDITY
       beforeLiq = afterLiq
+
+       protFeeBefore = (await pairContract.protocolFeeStored()).toBigInt();
+       feeBefore = (await pairContract.fee()).toBigInt();
+
+
       let addLiquidity = await liquidityGivenAssetFixture(
         newLiquidity,
         signers[0],
@@ -109,32 +133,50 @@ describe.only('Multiple Liquidity Given Asset', () => {
       liqConv = await pairContract.liquidityOf(maturity,newLiquidity.convenience.convenienceContract.address)
       liqIssued =  await liqTokenContract.balanceOf(signers[0].address)
       totalLiqSupplied = await liqTokenContract.totalSupply()
-       percent[signers[0].address] ={
-        "Asset In": testCase.addLiquidityParams[0].assetIn.toString(),
-        "Min Liquidity": testCase.addLiquidityParams[0].minLiquidity.toString(),
-        "Max Debt": testCase.addLiquidityParams[0].maxDebt.toString(),
-        "Max Collateral": testCase.addLiquidityParams[0].maxCollateral.toString(),
-        "Total liquidity Before": beforeLiq.toString(),
-        "Total liquidity After": afterLiq.toString(),
+
+       protFeeAfter = (await pairContract.protocolFee()).toBigInt()
+       feeAfter = (await pairContract.fee()).toBigInt()
+
+
+
+
+      percent[signers[0].address] ={
+       "Asset In": testCase.addLiquidityParams[0].assetIn.toString(),
+       "Min Liquidity": testCase.addLiquidityParams[0].minLiquidity.toString(),
+       "Max Debt": testCase.addLiquidityParams[0].maxDebt.toString(),
+       "Max Collateral": testCase.addLiquidityParams[0].maxCollateral.toString(),
+       "Total liquidity Before": beforeLiq.toString(),
+       "Total liquidity After": afterLiq.toString(),
        "Percent Liquidity Issued": String(Number(((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000).toString(),
        "Total Liquidity": afterLiq.toString(),
        "User Address": signers[0].address,
        "Liq Issued": liqIssued.toString(),
        "Total liq supplied": totalLiqSupplied.toString(),
        "LI": (afterLiq - beforeLiq).toString(),
-       "Total liq on conv": liqConv.toString()
+       "Total liq on conv": liqConv.toString(),
+       "signer": 0,
+
     }
-    // console.log(signers[19])
-    console.log('1st AddLiquidity Completed')
+
+    console.log('1st Add Liquidity Completed')
+    // let liqEventFilter = await pairContract.filters.Mint()
+    // let liqEvents = await pairContract.queryFilter(liqEventFilter)
 
     //ADD Liquidity from 1-12
      for(let i=1;i<testCase.addLiquidityParams.length;i++){
         beforeLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
+
+        protFeeBefore = (await pairContract.protocolFeeStored()).toBigInt();
+        feeBefore = (await pairContract.fee()).toBigInt();
+
        addLiquidity = await liquidityGivenAssetFixture(
         addLiquidity,
         signers[i],
         testCase.addLiquidityParams[i]
       )
+      protFeeAfter = (await pairContract.protocolFee()).toBigInt()
+      feeAfter = (await pairContract.fee()).toBigInt()
+
       afterLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
     //    liqTokenContract = Liquidity__factory.connect((await addLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,maturity)).liquidity,ethers.provider)
         // console.log(assetToken.address)
@@ -147,55 +189,228 @@ describe.only('Multiple Liquidity Given Asset', () => {
        liqIssued =  await liqTokenContract.balanceOf(signers[i].address)
        totalLiqSupplied = await liqTokenContract.totalSupply()
 
-      percent[signers[i].address] ={
-          "Asset In": testCase.addLiquidityParams[i].assetIn.toString(),
-          "Min Liquidity": testCase.addLiquidityParams[i].minLiquidity.toString(),
-          "Max Debt": testCase.addLiquidityParams[i].maxDebt.toString(),
-          "Max Collateral": testCase.addLiquidityParams[i].maxCollateral.toString(),
-          "Total liquidity Before": beforeLiq.toString(),
-          "Total liquidity After": afterLiq.toString(),
-          "Percent Liquidity Issued": String(Number(((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000),
-         "Total Liquidity": afterLiq.toString(),
-         "User Address": signers[i].address,
-         "Liq Issued": liqIssued.toString(),
-         "Total liq supplied": totalLiqSupplied.toString(),
-         "LI": (afterLiq - beforeLiq).toString(),
-         "Total liq on conv": liqConv.toString()
-      }
+        percent[signers[i].address] ={
+            "Asset In": testCase.addLiquidityParams[i].assetIn.toString(),
+            "Min Liquidity": testCase.addLiquidityParams[i].minLiquidity.toString(),
+            "Max Debt": testCase.addLiquidityParams[i].maxDebt.toString(),
+            "Max Collateral": testCase.addLiquidityParams[i].maxCollateral.toString(),
+            "Total liquidity Before": beforeLiq.toString(),
+            "Total liquidity After": afterLiq.toString(),
+            "Percent Liquidity Issued": String(Number(((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000),
+          "Total Liquidity": afterLiq.toString(),
+          "User Address": signers[i].address,
+          "Liq Issued": liqIssued.toString(),
+          "Total liq supplied": totalLiqSupplied.toString(),
+          "LI": (afterLiq - beforeLiq).toString(),
+          "Total liq on conv": liqConv.toString(),
+          'signer': i,
+
+        }
     }
           console.log('Add liquidity Completed')
-      
+
     // //   await addMultipleLiquidityProperties(testCase, currentTime, addLiquidity, assetToken.address, collateralToken.address)
 
     //  }
-         // BORROW  TRANSACTION
-        //  console.log(signers[17])
-    const borrowGivenPercent = await borrowGivenPercentFixture(addLiquidity,signers[17],testCase.borrowGivenPercentParams)
-    let borrowEventFilter = await pairContract.filters.Borrow()
-    let borrowEvents = await pairContract.queryFilter(borrowEventFilter)    
-    // console.log('borrow events',borrowEvents)
-    // await loadFixture(borrowGivenPercent)
-    // console.log(convenience.convenienceContract)
-    console.log('Borrow Completed')
-    const due = await pairContract.dueOf(maturity,convenience.convenienceContract.address,13)
-    console.log('debt is',due.debt)
-    console.log('collateral is',due.collateral)
-    console.log('due is',due);
+    beforeLiq = afterLiq
 
-    //REPAY TRANSACTION
-    const repay = await repayFixture(borrowGivenPercent,signers[17],{ids: [13n], maxAssetsIn: [BigInt(due.debt.toString())]})
-    let repayEventFilter = await pairContract.filters.Pay(null,null,signers[17].address)
-    let repayEvents = await pairContract.queryFilter(repayEventFilter)
-    // console.log(repayEvents)
-    console.log('Repay Completed')
+    // LEND TX  13 signer
+    // natives
+    let bondPrincipalContract = BondPrincipal__factory.connect((await addLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,addLiquidity.maturity)).bondPrincipal,ethers.provider)
+    let bondInterestContract = BondInterest__factory.connect((await addLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,addLiquidity.maturity)).bondInterest,ethers.provider)
+    let insurancePrincipalContract = InsurancePrincipal__factory.connect((await addLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,addLiquidity.maturity)).insurancePrincipal,ethers.provider)
+    let insuranceInterestContract  = InsuranceInterest__factory.connect((await addLiquidity.convenience.getNatives(assetToken.address,collateralToken.address,addLiquidity.maturity)).insuranceInterest,ethers.provider)
+
+    let bondPrincipalBalance  = await bondPrincipalContract.balanceOf(signers[13].address)
+    let bondInterestBalance  = await bondInterestContract.balanceOf(signers[13].address)
+
+    let iitBal = await insuranceInterestContract.balanceOf(signers[13].address)
+    let iptBal = await insurancePrincipalContract.balanceOf(signers[13].address)
+
+    await setTime(Number(currentTime + 10000n))
+
+      let beforeClaim = (await pairContract.claimsOf(addLiquidity.maturity, signers[13].address ))
+
+      protFeeBefore = (await pairContract.protocolFeeStored()).toBigInt();
+      feeBefore = (await pairContract.fee()).toBigInt();
+
+      beforeLiq =   (await pairContract.totalLiquidity(addLiquidity.maturity)).toBigInt()
+
+      let lendGivenBond = await lendGivenBondFixture(addLiquidity, signers[13], testCase.lendGivenBondParamsX)
+
+      let lendEventFilter = await pairContract.filters.Lend()
+      let lendEvents = await pairContract.queryFilter(lendEventFilter)
+      console.log('lend event', lendEvents)
+      afterLiq = (await pairContract.totalLiquidity(lendGivenBond.maturity)).toBigInt()
+
+      // let afterClaim = (await pairContract.claimsOf(lendGivenBond.maturity, signers[13].address ))
+      bondPrincipalBalance  = await bondPrincipalContract.balanceOf(signers[13].address)
+
+
+console.log('bond pt ',bondPrincipalBalance);
+      liqConv = await pairContract.liquidityOf(maturity,newLiquidity.convenience.convenienceContract.address)
+      liqIssued =  await liqTokenContract.balanceOf(signers[13].address)
+      totalLiqSupplied = await liqTokenContract.totalSupply()
+      let lendersLiq = await pairContract.liquidityOf(maturity,signers[13].address)
+
+    console.log('liq issued 13',lendersLiq   );
+      percent[signers[13].address] ={
+        "Asset In": testCase.lendGivenBondParamsX.assetIn.toString(),
+        "Bond Out": bondPrincipalBalance.toString(),
+        // "Min Liquidity": testCase.lendGivenBondParams.minLiquidity.toString(),
+        // "Max Debt  ": testCase.addLiquidityParams[0].maxDebt.toString(),
+        // "Max Collateral": testCase.addLiquidityParams[0].maxCollateral.toString(),
+        "Total liquidity Before": beforeLiq.toString(),
+        "Total liquidity After": afterLiq.toString(),
+        "Percent Liquidity Issued": String(Number(((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000),
+        "Total Liquidity": afterLiq.toString(),
+        "User Address": signers[0].address,
+        "Liq Issued": liqIssued.toString(),
+        "Total liq supplied": totalLiqSupplied.toString(),
+        "LI": (afterLiq - beforeLiq).toString(),
+        "Total liq on conv": liqConv.toString(),
+
+    }
+    console.log('1st Lend Completed')
+
+  // LENDING 14 -17 signers
+    for(let i=14;i<18;i++){
+      // let feeBefore = (await pairContract.feeStored(maturity)).toBigInt();
+      protFeeBefore = (await pairContract.protocolFeeStored()).toBigInt();
+
+      feeBefore = (await pairContract.fee()).toBigInt();
+
+      beforeLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
+
+      let beforeClaim = (await pairContract.claimsOf(maturity,convenience.convenienceContract.address))
+
+      lendGivenBond = await lendGivenBondFixture(lendGivenBond,signers[i],testCase.lendGivenBondParams)
+
+      afterLiq = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
+
+      protFeeAfter = (await pairContract.protocolFee()).toBigInt()
+      feeAfter = (await pairContract.fee()).toBigInt()
+      bondPrincipalBalance  = await bondPrincipalContract.balanceOf(signers[i].address)
+      // bondInterestBalance  = await bondInterestContract.balanceOf(signers[i].address)
+      // iitBal = await insuranceInterestContract.balanceOf(signers[i].address)
+      // iptBal = await insurancePrincipalContract.balanceOf(signers[i].address)
+
+
+      let afterClaim = (await pairContract.claimsOf(maturity,convenience.convenienceContract.address))
+      // claimVal = afterClaimL
+      feeAfter = (await pairContract.feeStored(maturity)).toBigInt();
+      console.log('addr',i);
+      console.log('>feeb>', feeBefore)
+      console.log('>>pfeeb', protFeeBefore)
+      console.log('>>feeA', feeAfter)
+      console.log('>>pfa', protFeeAfter)
+
+    percent[signers[i].address] ={
+      "Asset In": testCase.lendGivenBondParams.assetIn.toString(),
+      "Bond Out": bondPrincipalBalance.toString(),
+      // "Min Insurance": testCase.lendGivenBondParams.minInsurance.toString(),
+      // "Min Liquidity": testCase.addLiquidityParams[i].minLiquidity.toString(),
+      // "Max Debt": testCase.addLiquidityParams[i].maxDebt.toString(),
+      // "Max Collateral": testCase.addLiquidityParams[i].maxCollateral.toString(),
+      "Total liquidity Before": beforeLiq.toString(),
+      "Total liquidity After": afterLiq.toString(),
+      "Percent Liquidity Issued": String(Number(((afterLiq - beforeLiq)*10_000n) / afterLiq) / 10_000),
+      "Total Liquidity": afterLiq.toString(),
+      "User Address": signers[i].address,
+      "Liq Issued": liqIssued.toString(),
+      "Total liq supplied": totalLiqSupplied.toString(),
+      "LI": (afterLiq - beforeLiq).toString(),
+      "Total liq on conv": liqConv.toString(),
+      "address": signers[i].address,
+      "signer" : i,
+
+    }
+  }
+  console.log('Lend Completed')
+
+    feeBefore = feeAfter
+
+   // BORROW  TRANSACTION - signer18
+    // feeBefore = (await pairContract.feeStored(maturity)).toBigInt();
+    feeBefore = (await pairContract.fee()).toBigInt();
+    protFeeBefore = (await pairContract.protocolFeeStored()).toBigInt();
+
+    const borrowGivenPercent = await borrowGivenPercentFixture(lendGivenBond,signers[18],testCase.borrowGivenPercentParams)
+
+    protFeeAfter = (await pairContract.protocolFee()).toBigInt()
+    feeAfter = (await pairContract.feeStored(maturity)).toBigInt();
+    const due = await pairContract.dueOf(maturity,convenience.convenienceContract.address,13) //id :13
+    console.log('borow param', due);
+
+    percent[signers[18].address] = {...percent[signers[18].address], ...{
+      // 'Liq burned': (beforeBurn - afterBurn).toString(),
+      'Liq left in Conv': (await pairContract.totalLiquidity(newLiquidity.maturity)).toString(),
+      'Asset Out': testCase.lendGivenBondParams.assetIn.toString(),
+      'CollateralIn':due.collateral.toString(),
+      'signer': 18,
+      'address': signers[18].address,
+
+    }
+  }
+    console.log('Borrow Completed')
+
+
+    await advanceTime(Number(maturity))
+
+    console.log('>Pool matures, borrower defaults');
     //  console.log(percent)
     //  console.log('liq addition done')
-     await advanceTime(Number(maturity))
+
+
+     //Lender withdraws signers13
+
+     beforeLiq = (await pairContract.totalLiquidity(borrowGivenPercent.maturity)).toBigInt()
+
+     let collect = await collectFixture(borrowGivenPercent, signers[13], testCase.collectParamsX)
+
+     afterLiq = (await pairContract.totalLiquidity(borrowGivenPercent.maturity)).toBigInt()
+     let burnE = await pairContract.queryFilter
+
+
+     percent[signers[13].address] = {...percent[signers[13].address], ...{
+      'Liq burned': (beforeLiq - afterLiq).toString(),
+      'Liq left in Conv': (await pairContract.totalLiquidity(newLiquidity.maturity)).toString(),
+      // 'Asset Out': burnEvents[0].args.assetOut.toString(),
+      // 'Collateral Out': burnEvents[0].args.collateralOut.toString(),
+      'signer': 13,
+      'address': signers[13].address
+  }}
+
+    //all lenders withdraw signers14-17
+
+    for(let i=0;i<4;i++){
+      let k = i+14
+      beforeLiq = (await pairContract.totalLiquidity(borrowGivenPercent.maturity)).toBigInt()
+
+      collect = await collectFixture(collect,signers[k],testCase.collectParams[i])
+     afterLiq = (await pairContract.totalLiquidity(borrowGivenPercent.maturity)).toBigInt()
+
+      percent[signers[k].address] = {...percent[signers[k].address], ...{
+        'Liq burned': (beforeLiq - afterLiq).toString(),
+        'Liq left in Conv': (await pairContract.totalLiquidity(newLiquidity.maturity)).toString(),
+        // 'Asset Out': burnEvents[0].args.assetOut.toString(),
+        // 'Collateral Out': burnEvents[0].args.collateralOut.toString(),
+        'signer': k,
+        'address': signers[k].address
+    }}
+    }
+
+    console.log('Collect Complete, all Lenders withdraw');
+
+     // Liquidity BURN signers19
+
      let beforeBurn = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
-     let removeLiquidity = await removeLiquidityFixture(repay,signers[19],{liquidityIn: BigInt(percent[signers[19].address]["Liq Issued"])}) 
+     let removeLiquidity = await removeLiquidityFixture(collect,signers[19],{liquidityIn: BigInt(percent[signers[19].address]["Liq Issued"])})
      let afterBurn = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
+
      let burnEventFilter = await pairContract.filters.Burn(null,null,signers[19].address)
      let burnEvents = await pairContract.queryFilter(burnEventFilter)
+    //  console.log('burn event',burnEvents)
     //  console.log(events[0].args.assetOut,events[0].args.collateralOut)
     // events.forEach((event)=> {
     //     if event
@@ -206,14 +421,21 @@ describe.only('Multiple Liquidity Given Asset', () => {
          'Asset Out': burnEvents[0].args.assetOut.toString(),
          'Collateral Out': burnEvents[0].args.collateralOut.toString(),
          'signer': 19,
-         'address': signers[19]
+         'address': signers[19].address
      }}
-    //  console.log(testCase.addLiquidityParams.length)
+
+        //REPAY TRANSACTION  >E504
+    // const repay = await repayFixture(borrowGivenPercent,signers[17],{ids: [13n], maxAssetsIn: [BigInt(due.debt.toString())]})
+    // let repayEventFilter = await pairContract.filters.Pay(null,null,signers[17].address)
+    // let repayEvents = await pairContract.queryFilter(repayEventFilter)
+    // console.log(repayEvents)
+    // console.log('Repay Completed')
+
      for(let i=0;i<testCase.addLiquidityParams.length;i++){
         beforeBurn = (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
         // console.log(percent[signers[i].address]["Liq Issued"])
         // console.log(await liqTokenContract.balanceOf(signers[i].address))
-        removeLiquidity = await removeLiquidityFixture(removeLiquidity,signers[i],{liquidityIn: BigInt(percent[signers[i].address]["Liq Issued"])}) 
+        removeLiquidity = await removeLiquidityFixture(removeLiquidity,signers[i],{liquidityIn: BigInt(percent[signers[i].address]["Liq Issued"])})
         afterBurn= (await pairContract.totalLiquidity(newLiquidity.maturity)).toBigInt()
         let burnEvent = await pairContract.filters.Burn(null,null,signers[i].address)
         let events = await pairContract.queryFilter(burnEvent)
@@ -221,19 +443,24 @@ describe.only('Multiple Liquidity Given Asset', () => {
         percent[signers[i].address] = {...percent[signers[i].address], ...{
             'Liq burned': (beforeBurn - afterBurn).toString(),
             'Liq left in Conv': (await pairContract.totalLiquidity(newLiquidity.maturity)).toString(),
-            'Asset Out': events[0].args.assetOut.toString(),
+            // 'Asset Out': events[0].args.assetOut.toBigInt().toString(),
             'Collateral Out': events[0].args.collateralOut.toString(),
             'signer': i,
-            'address': signers[i]
+            'address': signers[i].address
         }}
         // console.log(i)
      }
-    // console.log(percent)
-    // //  console.log(addLiquidity)
+     console.log('Liquidity Tokens Burn Complete');
+     console.log('feee stored ', ( await pairContract.feeStored(maturity)));
+     console.log('PROT feee stored ', ( await pairContract.protocolFeeStored()));
+
+     // console.log(percent)
+
     percent = Object.values(percent)
-    console.log(JSON.stringify(percent))
-     console.log(percent)
-     fs.writeFile('multipleLiq.json', JSON.stringify(percent),function(err) {
+    // if(ethers.BigNumber.isBigNumber(percent))percent.to
+    // console.log(JSON.stringify(percent))
+    // //  console.log(percent)
+     fs.writeFile('testLiq.json', JSON.stringify(percent),function(err) {
         if (err) throw err;
         console.log('complete');
         })
@@ -390,4 +617,63 @@ async function addMultipleLiquidityProperties(
 
   expect(collateralBalanceContract).equalBigInt(collateral)
   expect(debtBalanceContract).equalBigInt(debt)
+}
+
+async function lendGivenBondProperties(
+  data: {
+    newLiquidityParams: {
+      assetIn: bigint
+      debtIn: bigint
+      collateralIn: bigint
+    }
+    lendGivenBondParams: {
+      assetIn: bigint
+      bondOut: bigint
+      minInsurance: bigint
+    }
+  },
+  currentTime: bigint,
+  fixture: {
+    convenience: Convenience
+    assetToken: TestToken
+    collateralToken: TestToken
+    maturity: bigint
+  },
+  assetAddress: string,
+  collateralAddress: string
+) {
+  const neededTime = (await now()) + 100n
+
+  const result = fixture
+
+  let [yIncreaseNewLiquidity, zIncreaseNewLiquidity] = [0n, 0n]
+  const maybeNewLiq = LiquidityMath.getNewLiquidityParams(
+    data.newLiquidityParams.assetIn,
+    data.newLiquidityParams.debtIn,
+    data.newLiquidityParams.collateralIn,
+    currentTime + 5_000n,
+    maturity
+  )
+  if (maybeNewLiq !== false) {
+    yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
+    zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
+  }
+
+  const state = {
+    x: data.newLiquidityParams.assetIn,
+    y: yIncreaseNewLiquidity,
+    z: zIncreaseNewLiquidity,
+  }
+  const { yDecrease: yDecreaseLendGivenBond, zDecrease: zDecreaseLendGivenBond } = LendMath.getLendGivenBondParams(
+    state,
+    FEE,
+    PROTOCOL_FEE,
+    maturity,
+    currentTime + 10_000n,
+    data.lendGivenBondParams.assetIn,
+    data.lendGivenBondParams.bondOut
+  )
+  const delState = { x: data.lendGivenBondParams.assetIn, y: yDecreaseLendGivenBond, z: zDecreaseLendGivenBond }
+  const bond = LendMath.getBond(delState, maturity, currentTime + 10_000n)
+  expect(bond).gteBigInt(data.lendGivenBondParams.bondOut)
 }
