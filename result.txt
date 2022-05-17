@@ -1,0 +1,187 @@
+yarn run v1.22.18
+$ /home/waverune/timeswap/Timeswap-V1-Convenience/node_modules/.bin/hardhat test
+No need to generate any newer typings.
+
+
+  Multiple Liquidity Given Asset
+liq evt 19  [
+  {
+    blockNumber: 97,
+    blockHash: '0xadf276d9467ffbb30f100d431a0ece031b033e7741e9dcfc7eb31d0efc0e0b52',
+    transactionIndex: 0,
+    removed: false,
+    address: '0xcB85d19b18a739E777D0b373Df1a3Fb7991715De',
+    data: '0x000000000000000000000000000000000000000000000000000000006464ab4c00000000000000000000000000000000000000000000003635c9adc5dea000000000000000000000000000000000000000000000003635c9adc5dea0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000051459458e5e1a00000000000000000000000000000000000000000000000000051459458e5e1a0000000000000000000000000000000000000000000000000000000000000000000610000000000000000000000000000000000000000000000000000000000000000',
+    topics: [
+      '0x88018ff4a4eb65189878e69e43401baaf50cfe5cdc5d0412a32f646d193b88f6',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3'
+    ],
+    transactionHash: '0x83d1c85b4b581dfa29839e467bc30383b273d82a5aaac09ce28106651cd8fb29',
+    logIndex: 7,
+    removeListener: [Function (anonymous)],
+    getBlock: [Function (anonymous)],
+    getTransaction: [Function (anonymous)],
+    getTransactionReceipt: [Function (anonymous)],
+    event: 'Mint',
+    eventSignature: 'Mint(uint256,address,address,address,uint256,uint256,uint256,(uint112,uint112,uint32),uint256)',
+    decode: [Function (anonymous)],
+    args: [
+      BigNumber { value: "1684319052" },
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      BigNumber { value: "1000000000000000000000" },
+      BigNumber { value: "65536000000000000000000000" },
+      BigNumber { value: "0" },
+      [Array],
+      BigNumber { value: "0" },
+      maturity: BigNumber { value: "1684319052" },
+      sender: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      liquidityTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      dueTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      assetIn: BigNumber { value: "1000000000000000000000" },
+      liquidityOut: BigNumber { value: "65536000000000000000000000" },
+      id: BigNumber { value: "0" },
+      dueOut: [Array],
+      feeIn: BigNumber { value: "0" }
+    ]
+  }
+]
+New liquidity Completed
+signer 0
+liq evt 19   BigNumber { value: "1499200000000000000000" }
+1st Add Liquidity Completed
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 1
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 2
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 3
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 4
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 5
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 6
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 7
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 8
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 9
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 10
+addliq evt  BigNumber { value: "1499200000000000000000" }
+>>> 11
+Add liquidity Completed
+lend event [
+  {
+    blockNumber: 110,
+    blockHash: '0xeb63b9e112065538d1067a175884aca428ce88921c310dfc7d82023d1266ddc4',
+    transactionIndex: 0,
+    removed: false,
+    address: '0xcB85d19b18a739E777D0b373Df1a3Fb7991715De',
+    data: '0x000000000000000000000000000000000000000000000000000000006464ab4c00000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000003e3000000000000000000000000000000000000000000000000000000000000000f000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000002bb00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000002',
+    topics: [
+      '0xc6ae44b99f4b17a71cd3ae5da13dc05e88b22f10c92b25a20336fe8daae23195',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3'
+    ],
+    transactionHash: '0x3d57a80296afc54421b63282994040bc1ed643d6bf1308644b9dcd5410b59bfd',
+    logIndex: 3,
+    removeListener: [Function (anonymous)],
+    getBlock: [Function (anonymous)],
+    getTransaction: [Function (anonymous)],
+    getTransactionReceipt: [Function (anonymous)],
+    event: 'Lend',
+    eventSignature: 'Lend(uint256,address,address,address,uint256,(uint112,uint112,uint112,uint112),uint256,uint256)',
+    decode: [Function (anonymous)],
+    args: [
+      BigNumber { value: "1684319052" },
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      BigNumber { value: "1000" },
+      [Array],
+      BigNumber { value: "3" },
+      BigNumber { value: "2" },
+      maturity: BigNumber { value: "1684319052" },
+      sender: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      bondTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      insuranceTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      assetIn: BigNumber { value: "1000" },
+      claimsOut: [Array],
+      feeIn: BigNumber { value: "3" },
+      protocolFeeIn: BigNumber { value: "2" }
+    ]
+  }
+]
+before liq 1310720000000000000000000000n
+after liq 1310720000000000000000000000n
+liq issued 13 [
+  BigNumber { value: "0" },
+  BigNumber { value: "0" },
+  BigNumber { value: "0" },
+  BigNumber { value: "0" },
+  bondPrincipal: BigNumber { value: "0" },
+  bondInterest: BigNumber { value: "0" },
+  insurancePrincipal: BigNumber { value: "0" },
+  insuranceInterest: BigNumber { value: "0" }
+]
+1st Lend Completed
+###############################
+###############################
+###############################
+###############################
+Lend Completed
+borrow percentage params {
+  assetOut: 1000000000000000000000n,
+  percent: 0n,
+  maxDebt: 20000000000000000000000n,
+  maxCollateral: 20000000000000000000000n
+}
+0xdD2FD4581271e230360230F9337D5c0430Bf44C0
+here borrow event [
+  BigNumber { value: "1004300895579945063219" },
+  BigNumber { value: "1098969273653706457312" },
+  115,
+  debt: BigNumber { value: "1004300895579945063219" },
+  collateral: BigNumber { value: "1098969273653706457312" },
+  startBlock: 115
+]
+conv due [
+  BigNumber { value: "1004300895579945063219" },
+  BigNumber { value: "1098969273653706457312" },
+  115,
+  debt: BigNumber { value: "1004300895579945063219" },
+  collateral: BigNumber { value: "1098969273653706457312" },
+  startBlock: 115
+]
+Borrow Completed
+>Pool matures, borrower defaults
+    1) Succeeded 0
+
+
+  0 passing (13s)
+  1 failing
+
+  1) Multiple Liquidity Given Asset
+       Succeeded 0:
+     Error: VM Exception while processing transaction: reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside of an unchecked block)
+    at BondInterest._burn (contracts/base/ERC20.sol:80)
+    at Withdraw._collect (contracts/libraries/Withdraw.sol:97)
+    at Withdraw.collect (contracts/libraries/Withdraw.sol:19)
+    at TimeswapConvenience.collect (contracts/TimeswapConvenience.sol:395)
+    at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1772:23)
+    at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:466:16)
+    at async EthModule._sendTransactionAndReturnHash (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:1496:18)
+    at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:118:18)
+    at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+  
+
+
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

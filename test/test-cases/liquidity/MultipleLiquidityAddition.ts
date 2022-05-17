@@ -82,10 +82,11 @@ const testcases = [{
       },
       borrowGivenPercentParams: {
         assetOut: 1000000000000000000000n,
-        percent: 2n**31n,
-        maxDebt: 10000000000000000000000n,
-        maxCollateral: 10000000000000000000000n
+        percent: 0n,
+        maxDebt: 20000000000000000000000n,
+        maxCollateral: 20000000000000000000000n
       },
+
     addLiquidityParams: [
     {
       assetIn: 1000000000000000000000n,
