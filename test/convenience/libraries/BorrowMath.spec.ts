@@ -394,7 +394,7 @@ async function borrowMathGivenPercentProperties(
     FEE,
     data.borrowGivenPercentParams.assetOut,
     maturity,
-    currentTime,
+    currentTime+10_000n,
     data.borrowGivenPercentParams.percent
   )
   expect(yIncrease).equalBigInt(borrowGivenPercentParams.yIncrease)
