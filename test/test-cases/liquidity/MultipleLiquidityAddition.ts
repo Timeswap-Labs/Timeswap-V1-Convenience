@@ -2,16 +2,23 @@ const testcases = [{
     newLiquidityParams: {
       assetIn: 1000000000000000000000n,
       debtIn: 1499200000000000000000n,
-      collateralIn: 1499200000000000000000n,
+      collateralIn: 14992000000000000000000n,
+
+    },
+    newLiquidityParamsX: {
+      assetIn: 1000000000000000000000n,
+      debtIn: 1000000000000000000001n,
+      collateralIn: 1500000000000000000001n,
+      minLiquidity: 100000000000000000000n,
     },
     lendGivenBondParams: {
-      assetIn: 1000000000000000000000n,
-      bondOut: 1010000000000000000000n,
+      assetIn: 100000000000000000000n,
+      bondOut: 101000000000000000000n,
       minInsurance: 50000000000000000000n,
     },
     lendGivenBondParamsX: {
       assetIn: 1000n,
-      bondOut: 1010n,
+      bondOut: 1100n,
       minInsurance: 50n,
     },
     collectParamsX: {
@@ -33,17 +40,17 @@ const testcases = [{
     },
     collectParams16: {
       claims: {
-        bondPrincipal: 995717522230564855191,
-    bondInterest: 14282477769435144809,
-    insurancePrincipal:610653816608959483879n,
-    insuranceInterest: 555525717670180575728n,
+        bondPrincipal: 995717522230564855191n,
+        bondInterest: 14282477769435144809n,
+        insurancePrincipal:6427935097465587826514n,
+        insuranceInterest: 6033549478532333547398n,
       },
     },collectParams17: {
       claims: {
         bondPrincipal:     995717522636339575299n,
         bondInterest:      14282477363660424701n,
-        insurancePrincipal:560752467858652426366n,
-        insuranceInterest: 509346976148717766692n,
+        insurancePrincipal:6427934998274001900810n,
+        insuranceInterest: 6033549478532333547398,
       },
     },
     collectParams:
