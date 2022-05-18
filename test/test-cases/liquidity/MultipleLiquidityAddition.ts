@@ -2,8 +2,20 @@ const testcases = [{
     newLiquidityParams: {
       assetIn: 1000000000000000000000n,
       debtIn: 1499200000000000000000n,
-      collateralIn: 14992000000000000000000n,
+      collateralIn: 1499200000000000000000n,
 
+    },
+    lendGivenPercentParams: {
+      assetIn: 1000000000000000000001n,
+      percent: 4294967295n,
+      minBond: 100000000000000000000n,
+      minInsurance: 100000000000n,
+    },
+    lendGivenPercentParamsX: {
+      assetIn: 1000000000000000000001n,
+      percent: 4294967295n,
+      minBond: 100000000000000000000n,
+      minInsurance: 100000000000n,
     },
     newLiquidityParamsX: {
       assetIn: 1000000000000000000000n,
@@ -12,21 +24,17 @@ const testcases = [{
       minLiquidity: 100000000000000000000n,
     },
     lendGivenBondParams: {
-      assetIn: 100000000000000000000n,
-      bondOut: 101000000000000000000n,
-      minInsurance: 50000000000000000000n,
+      assetIn: 1000000000000000000000n,
+      bondOut: 1100000000000000000000n,
+      minInsurance: 10000000000n,
     },
-    lendGivenBondParamsX: {
-      assetIn: 1000n,
-      bondOut: 1100n,
-      minInsurance: 50n,
-    },
+
     collectParamsX: {
       claims: {
-        bondPrincipal: 10n,
-        bondInterest: 5n,
-        insurancePrincipal: 40n,
-        insuranceInterest: 4n,
+        bondPrincipal: 995717522095306615229n,
+        bondInterest: 0n,
+        insurancePrincipal: 514031732135330096017n,
+        insuranceInterest: 123766662078n,
       },
     },
 
@@ -87,11 +95,17 @@ const testcases = [{
         collateralIn: 190n,
         maxDebt: 3000n,
       },
+      borrowGivenPercentParamsX: {
+        assetOut: 1000000000000000000000n,
+        percent: 4294967295n,
+        maxDebt: 2000000000000000000000n,
+        maxCollateral: 2000000000000000000000n
+      },
       borrowGivenPercentParams: {
         assetOut: 1000000000000000000000n,
-        percent: 0n,
-        maxDebt: 20000000000000000000000n,
-        maxCollateral: 20000000000000000000000n
+        percent: 4294967295n,
+        maxDebt: 9163990956869185396432n,
+        maxCollateral: 5000000000000000000000n,
       },
 
     addLiquidityParams: [

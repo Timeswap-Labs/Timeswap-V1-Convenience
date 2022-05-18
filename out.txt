@@ -1,0 +1,250 @@
+yarn run v1.22.18
+$ /home/waverune/timeswap/Timeswap-V1-Convenience/node_modules/.bin/hardhat test
+No need to generate any newer typings.
+
+
+  Multiple Liquidity Given Asset
+liq evt 19  [
+  {
+    blockNumber: 97,
+    blockHash: '0x8298a30866e61193033daca5fcd2443f466c9b496036260a21769a9af48e6908',
+    transactionIndex: 0,
+    removed: false,
+    address: '0xcB85d19b18a739E777D0b373Df1a3Fb7991715De',
+    data: '0x000000000000000000000000000000000000000000000000000000006466982f00000000000000000000000000000000000000000000003635c9adc5dea000000000000000000000000000000000000000000000003635c9adc5dea000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003635c9adc5dea0000100000000000000000000000000000000000000000000005150ae84a8cdf0000100000000000000000000000000000000000000000000000000000000000000610000000000000000000000000000000000000000000000000000000000000000',
+    topics: [
+      '0x88018ff4a4eb65189878e69e43401baaf50cfe5cdc5d0412a32f646d193b88f6',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3'
+    ],
+    transactionHash: '0x0647cb2e8af3e214f34cd84c034de7d04b574077dafc229aa97b56246a9aea85',
+    logIndex: 7,
+    removeListener: [Function (anonymous)],
+    getBlock: [Function (anonymous)],
+    getTransaction: [Function (anonymous)],
+    getTransactionReceipt: [Function (anonymous)],
+    event: 'Mint',
+    eventSignature: 'Mint(uint256,address,address,address,uint256,uint256,uint256,(uint112,uint112,uint32),uint256)',
+    decode: [Function (anonymous)],
+    args: [
+      BigNumber { value: "1684445231" },
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      BigNumber { value: "1000000000000000000000" },
+      BigNumber { value: "65536000000000000000000000" },
+      BigNumber { value: "0" },
+      [Array],
+      BigNumber { value: "0" },
+      maturity: BigNumber { value: "1684445231" },
+      sender: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      liquidityTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      dueTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      assetIn: BigNumber { value: "1000000000000000000000" },
+      liquidityOut: BigNumber { value: "65536000000000000000000000" },
+      id: BigNumber { value: "0" },
+      dueOut: [Array],
+      feeIn: BigNumber { value: "0" }
+    ]
+  }
+]
+liq evt 19   BigNumber { value: "1500000000000000000001" }
+New liquidity Completed
+signer 0
+liq evt 0   BigNumber { value: "1500000000000000000001" }
+evt mintt 2 [
+  {
+    blockNumber: 97,
+    blockHash: '0x8298a30866e61193033daca5fcd2443f466c9b496036260a21769a9af48e6908',
+    transactionIndex: 0,
+    removed: false,
+    address: '0xcB85d19b18a739E777D0b373Df1a3Fb7991715De',
+    data: '0x000000000000000000000000000000000000000000000000000000006466982f00000000000000000000000000000000000000000000003635c9adc5dea000000000000000000000000000000000000000000000003635c9adc5dea000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003635c9adc5dea0000100000000000000000000000000000000000000000000005150ae84a8cdf0000100000000000000000000000000000000000000000000000000000000000000610000000000000000000000000000000000000000000000000000000000000000',
+    topics: [
+      '0x88018ff4a4eb65189878e69e43401baaf50cfe5cdc5d0412a32f646d193b88f6',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3'
+    ],
+    transactionHash: '0x0647cb2e8af3e214f34cd84c034de7d04b574077dafc229aa97b56246a9aea85',
+    logIndex: 7,
+    removeListener: [Function (anonymous)],
+    getBlock: [Function (anonymous)],
+    getTransaction: [Function (anonymous)],
+    getTransactionReceipt: [Function (anonymous)],
+    event: 'Mint',
+    eventSignature: 'Mint(uint256,address,address,address,uint256,uint256,uint256,(uint112,uint112,uint32),uint256)',
+    decode: [Function (anonymous)],
+    args: [
+      BigNumber { value: "1684445231" },
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      BigNumber { value: "1000000000000000000000" },
+      BigNumber { value: "65536000000000000000000000" },
+      BigNumber { value: "0" },
+      [Array],
+      BigNumber { value: "0" },
+      maturity: BigNumber { value: "1684445231" },
+      sender: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      liquidityTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      dueTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      assetIn: BigNumber { value: "1000000000000000000000" },
+      liquidityOut: BigNumber { value: "65536000000000000000000000" },
+      id: BigNumber { value: "0" },
+      dueOut: [Array],
+      feeIn: BigNumber { value: "0" }
+    ]
+  },
+  {
+    blockNumber: 98,
+    blockHash: '0x7f0b210bedc993fb73cd2cee986a9e21fe4ceb2fcf28921dc8517a9a00be60b5',
+    transactionIndex: 0,
+    removed: false,
+    address: '0xcB85d19b18a739E777D0b373Df1a3Fb7991715De',
+    data: '0x000000000000000000000000000000000000000000000000000000006466982f00000000000000000000000000000000000000000000003635c9adc5dea000000000000000000000000000000000000000000000003635c9adc5dea000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000003635c9adc5dea0000100000000000000000000000000000000000000000000005150ae6fb33f1920d200000000000000000000000000000000000000000000000000000000000000620000000000000000000000000000000000000000000000000000000000000000',
+    topics: [
+      '0x88018ff4a4eb65189878e69e43401baaf50cfe5cdc5d0412a32f646d193b88f6',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3'
+    ],
+    transactionHash: '0x3dfdc59a91399989aaa3e923920f661127d005fc8df2cfeebc45ba2bf298842c',
+    logIndex: 5,
+    removeListener: [Function (anonymous)],
+    getBlock: [Function (anonymous)],
+    getTransaction: [Function (anonymous)],
+    getTransactionReceipt: [Function (anonymous)],
+    event: 'Mint',
+    eventSignature: 'Mint(uint256,address,address,address,uint256,uint256,uint256,(uint112,uint112,uint32),uint256)',
+    decode: [Function (anonymous)],
+    args: [
+      BigNumber { value: "1684445231" },
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      BigNumber { value: "1000000000000000000000" },
+      BigNumber { value: "65536000000000000000000000" },
+      BigNumber { value: "1" },
+      [Array],
+      BigNumber { value: "0" },
+      maturity: BigNumber { value: "1684445231" },
+      sender: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      liquidityTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      dueTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      assetIn: BigNumber { value: "1000000000000000000000" },
+      liquidityOut: BigNumber { value: "65536000000000000000000000" },
+      id: BigNumber { value: "1" },
+      dueOut: [Array],
+      feeIn: BigNumber { value: "0" }
+    ]
+  }
+]
+1st Add Liquidity Completed
+lend event [
+  {
+    blockNumber: 99,
+    blockHash: '0x68861e7db75056e5cae9cc1577f240b10ad73318cde04562516cfbb0907b09fe',
+    transactionIndex: 0,
+    removed: false,
+    address: '0xcB85d19b18a739E777D0b373Df1a3Fb7991715De',
+    data: '0x000000000000000000000000000000000000000000000000000000006466982f00000000000000000000000000000000000000000000003635c9adc5dea00001000000000000000000000000000000000000000000000035fa5b42cee2eaa9bd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001bdd9f90eb9518a3910000000000000000000000000000000000000000000000000000001cd11163be000000000000000000000000000000000000000000000000279ef1f9fd238ed800000000000000000000000000000000000000000000000013cf78fcfe91c76c',
+    topics: [
+      '0xc6ae44b99f4b17a71cd3ae5da13dc05e88b22f10c92b25a20336fe8daae23195',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3',
+      '0x0000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba3'
+    ],
+    transactionHash: '0x498d67ae3e0f76a24ea0d11bcc0860b2147147488e63ca719b4d1cff166fbb21',
+    logIndex: 3,
+    removeListener: [Function (anonymous)],
+    getBlock: [Function (anonymous)],
+    getTransaction: [Function (anonymous)],
+    getTransactionReceipt: [Function (anonymous)],
+    event: 'Lend',
+    eventSignature: 'Lend(uint256,address,address,address,uint256,(uint112,uint112,uint112,uint112),uint256,uint256)',
+    decode: [Function (anonymous)],
+    args: [
+      BigNumber { value: "1684445231" },
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      BigNumber { value: "1000000000000000000001" },
+      [Array],
+      BigNumber { value: "2854985269795589848" },
+      BigNumber { value: "1427492634897794924" },
+      maturity: BigNumber { value: "1684445231" },
+      sender: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      bondTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      insuranceTo: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+      assetIn: BigNumber { value: "1000000000000000000001" },
+      claimsOut: [Array],
+      feeIn: BigNumber { value: "2854985269795589848" },
+      protocolFeeIn: BigNumber { value: "1427492634897794924" }
+    ]
+  }
+]
+bpt BigNumber { value: "995717522095306615229" }
+bit BigNumber { value: "0" }
+ipt BigNumber { value: "514031732135330096017" }
+iit BigNumber { value: "123766662078" }
+before liq 131072000000000000000000000n
+after liq 131072000000000000000000000n
+claims of lender [
+  BigNumber { value: "995717522095306615229" },
+  BigNumber { value: "0" },
+  BigNumber { value: "514031732135330096017" },
+  BigNumber { value: "123766662078" },
+  bondPrincipal: BigNumber { value: "995717522095306615229" },
+  bondInterest: BigNumber { value: "0" },
+  insurancePrincipal: BigNumber { value: "514031732135330096017" },
+  insuranceInterest: BigNumber { value: "123766662078" }
+]
+liq issued 13 [
+  BigNumber { value: "0" },
+  BigNumber { value: "0" },
+  BigNumber { value: "0" },
+  BigNumber { value: "0" },
+  bondPrincipal: BigNumber { value: "0" },
+  bondInterest: BigNumber { value: "0" },
+  insurancePrincipal: BigNumber { value: "0" },
+  insuranceInterest: BigNumber { value: "0" }
+]
+1st Lend Completed
+Lend Completed
+borrow percentage params {
+  assetOut: 1000000000000000000000n,
+  percent: 4294967295n,
+  maxDebt: 9163990956869185396432n,
+  maxCollateral: 5000000000000000000000n
+}
+0xdD2FD4581271e230360230F9337D5c0430Bf44C0
+here borrow event [
+  BigNumber { value: "1004300896262066089550" },
+  BigNumber { value: "779931320832948028635" },
+  100,
+  debt: BigNumber { value: "1004300896262066089550" },
+  collateral: BigNumber { value: "779931320832948028635" },
+  startBlock: 100
+]
+Borrow Completed
+>Pool matures, borrower defaults
+ [
+  BigNumber { value: "995717522095306615229" },
+  BigNumber { value: "0" },
+  asset: BigNumber { value: "995717522095306615229" },
+  collateral: BigNumber { value: "0" }
+]
+^^^^^^^^^^^^^^^^^^
+burn, aset collatral
+BigNumber { value: "500710676591220113332" } BigNumber { value: "1889965648894026019543" }
+Liquidity Tokens Burn Complete
+feee stored  BigNumber { value: "100" }
+PROT feee stored  BigNumber { value: "2861124722253158107" }
+    ✔ Succeeded 0 (3885ms)
+
+
+  1 passing (4s)
+
+Done in 11.04s.
