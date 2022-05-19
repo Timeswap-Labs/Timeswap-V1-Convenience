@@ -64,8 +64,8 @@ export async function newLiquidityFixture(
     newLiquidityParams.collateralIn
   )
   await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function newLiquidityETHAssetFixture(
   fixture: Fixture,
@@ -82,8 +82,8 @@ export async function newLiquidityETHAssetFixture(
     newLiquidityParams.collateralIn
   )
   await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function newLiquidityETHCollateralFixture(
   fixture: Fixture,
@@ -99,9 +99,8 @@ export async function newLiquidityETHCollateralFixture(
     newLiquidityParams.debtIn,
     newLiquidityParams.collateralIn
   )
-  await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function liquidityGivenAssetFixture(
   fixture: Fixture,
@@ -119,9 +118,9 @@ export async function liquidityGivenAssetFixture(
     liquidityGivenAssetParams.maxDebt,
     liquidityGivenAssetParams.maxCollateral
   )
-  await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  txn.wait()
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function liquidityGivenAssetETHAssetFixture(
   fixture: Fixture,
@@ -139,8 +138,8 @@ export async function liquidityGivenAssetETHAssetFixture(
     liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function liquidityGivenAssetETHCollateralFixture(
   fixture: Fixture,
@@ -158,8 +157,8 @@ export async function liquidityGivenAssetETHCollateralFixture(
     liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function liquidityGivenDebtFixture(
   fixture: Fixture,
@@ -178,8 +177,8 @@ export async function liquidityGivenDebtFixture(
     liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function liquidityGivenDebtETHAssetFixture(
   fixture: Fixture,
@@ -216,8 +215,8 @@ export async function liquidityGivenDebtETHCollateralFixture(
     liquidityGivenAssetParams.maxCollateral
   )
   await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function liquidityGivenCollateralFixture(
   fixture: Fixture,
@@ -236,8 +235,8 @@ export async function liquidityGivenCollateralFixture(
     liquidityGivenAssetParams.maxAsset
   )
   await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function liquidityGivenCollateralETHAssetFixture(
   fixture: Fixture,
@@ -274,8 +273,8 @@ export async function liquidityGivenCollateralETHCollateralFixture(
     liquidityGivenAssetParams.maxAsset
   )
   await txn.wait()
-
-  return { convenience, assetToken, collateralToken, maturity }
+  const txnHash = txn.hash
+  return { convenience, assetToken, collateralToken, maturity, txnHash }
 }
 export async function removeLiquidityFixture(
   fixture: Fixture,
