@@ -26,11 +26,16 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import * as fc from 'fast-check'
 import { LiquidityGivenAssetParams, NewLiquidityParams } from '../types'
 import {
+  BondInterest,
   BondInterest__factory,
+  BondPrincipal,
   BondPrincipal__factory,
+  CollateralizedDebt,
   CollateralizedDebt__factory,
   ERC20__factory,
+  InsuranceInterest,
   InsuranceInterest__factory,
+  InsurancePrincipal,
   InsurancePrincipal__factory,
   Liquidity,
   Liquidity__factory,
@@ -45,8 +50,17 @@ import { multipleLiquidityAddition as testCases } from '../test-cases/index'
 import { json } from 'stream/consumers'
 import testcases from '../test-cases/liquidity/LiquidityGivenAsset'
 import { test } from 'mocha'
-import { Signer } from 'ethers'
+import { BigNumber, Signer } from 'ethers'
 const { loadFixture } = waffle
+
+interface Natives {
+  liquidity: Liquidity,
+  bondInterest: BondInterest,
+  bondPrincipal: BondPrincipal,
+  insuranceInterest: InsuranceInterest,
+  insurancePrincipal: InsurancePrincipal,
+  collateralizedDebt: CollateralizedDebt
+}
 
 let maturity = 0n
 let signers: SignerWithAddress[] = []
@@ -67,7 +81,7 @@ async function getPoolLiquidity(pair: TimeswapPair, maturity: bigint){
 }
 
 async function getLiquidityBalanceOf(liquiditityToken: Liquidity, signer: SignerWithAddress){
-  return await liquiditityToken.balanceOf(signer.address)
+  return await (await liquiditityToken.balanceOf(signer.address)).toBigInt()
 }
 
 async function getFee(pair: TimeswapPair){
@@ -76,39 +90,46 @@ async function getFee(pair: TimeswapPair){
     protocolFee: (await pair.fee()).toBigInt()
   }
 }
-
- async function executeTransaction(fixture: Fixture, pair: TimeswapPair,signer: SignerWithAddress, params,type: string) {
+async function getNatives(convenience: Convenience,asset:string, collateral: string, maturity:bigint):Promise<Natives>{
+  const nativeAddresses = await convenience.getNatives(asset,collateral,maturity)
+  return {
+    liquidity: Liquidity__factory.connect(nativeAddresses.liquidity,ethers.provider),
+    bondPrincipal: BondPrincipal__factory.connect(nativeAddresses.bondPrincipal,ethers.provider),
+    bondInterest: BondInterest__factory.connect(nativeAddresses.bondInterest,ethers.provider),
+    insuranceInterest: InsuranceInterest__factory.connect(nativeAddresses.insuranceInterest,ethers.provider),
+    insurancePrincipal: InsurancePrincipal__factory.connect(nativeAddresses.insurancePrincipal,ethers.provider),
+    collateralizedDebt: CollateralizedDebt__factory.connect(nativeAddresses.collateralizedDebt,ethers.provider)
+  }
+}
+ async function executeTransaction(fixture: Fixture, pair: TimeswapPair,signer: SignerWithAddress, natives: Natives,params,type: string) {
   if(type === 'AL'){
     const initialLiquidity = (await getPoolLiquidity(pair,fixture.maturity))
-    console.log('hd')
-    console.log(params)
     const addLiquidity = await liquidityGivenAssetFixture(fixture,signer,params)
-    console.log('gd')
     const currentLiquidity = (await getPoolLiquidity(pair,fixture.maturity))
     // const {fee,protocolFee} = await getFee(pair)
-    console.log('reached here')
     const liquidityIssued = currentLiquidity - initialLiquidity
-    // const userBalance = await getLiquidityBalanceOf()
+    const userBalance = await getLiquidityBalanceOf(natives.liquidity,signer)
     return {
       fixture: addLiquidity,
       transactionState: {
       "AssetIn": params.assetIn,
       "CollateralIn": params.collateralIn,
-      "TotalLiquidity Before": initialLiquidity,
-      "TotalLiquidity After": currentLiquidity,
+      "TotalLiquidityBefore": initialLiquidity,
+      "TotalLiquidityAfter": currentLiquidity,
       "UserAddress": signer.address,
+      "UserBalance": userBalance,
       "LiquidityIssued": liquidityIssued
       }
     }
   }
   else if(type==='BL'){
-    console.log(params)
+    params.liquidityIn =  params.liquidityIn
     const initialLiquidity = (await getPoolLiquidity(pair,fixture.maturity))
     const removeLiquidity = await removeLiquidityFixture(fixture,signer,params)
     const currentLiquidity = (await getPoolLiquidity(pair,fixture.maturity))
     // const {fee,protocolFee} = await getFee(pair)
     const liquidityIssued = currentLiquidity - initialLiquidity
-    // const userBalance = await getLiquidityBalanceOf()
+    const userBalance = await getLiquidityBalanceOf(natives.liquidity,signer)
     return {
       fixture: removeLiquidity,
       transactionState: {
@@ -116,6 +137,7 @@ async function getFee(pair: TimeswapPair){
       "CollateralOut": params.collateralIn,
       "TotalLiquidityBefore": initialLiquidity,
       "TotalLiquidityAfter": currentLiquidity,
+      "UserBalance": userBalance,
       "UserAddress": signer.address,
       "LiquidityTokensBurnt": liquidityIssued
       }
@@ -137,17 +159,17 @@ describe.only('Multiple Liquidity Given Asset', () => {
       let currentFixture = await newLiquidityFixture(constructorFixture,signers[19],testCase.newLiquidityParams)
       const pair = await constructorFixture.convenience.factoryContract.getPair(constructorFixture.assetToken.address, constructorFixture.collateralToken.address)
       const pairContract = TimeswapPair__factory.connect(pair, ethers.provider);
-
+      const natives = await getNatives(convenience,assetToken.address,collateralToken.address,maturity)
       for(let i=0;i<testCase.addLiquidityParams.length;i++){
         console.log(`completing ${i} addliquidity`)
-        let {fixture,transactionState} = await executeTransaction(currentFixture,pairContract,signers[i],testCase.addLiquidityParams[i],'AL')
+        let {fixture,transactionState} = await executeTransaction(currentFixture,pairContract,signers[i],natives,testCase.addLiquidityParams[i],'AL')
         currentFixture = fixture
         transactionStates.push(transactionState)
       }
       advanceTimeAndBlock(Number(maturity))
       for(let i=0;i<testCase.addLiquidityParams.length;i++){
         console.log(`Burning liquidity for ${i}`)
-        let {fixture,transactionState} = await executeTransaction(currentFixture,pairContract,signers[i],{liquidityIn: transactionStates[i].LiquidityIssued},'AL')
+        let {fixture,transactionState} = await executeTransaction(currentFixture,pairContract,signers[i],natives,{liquidityIn: transactionStates[i].LiquidityIssued},'BL')
         currentFixture = fixture
         transactionStates.push(transactionState)
         
