@@ -1,5 +1,5 @@
 import { ethers, waffle } from 'hardhat'
-import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime } from '../../shared/Helper'
+import { mulDiv, now, min, shiftRightUp, mulDivUp, advanceTimeAndBlock, setTime, divUp } from '../../shared/Helper'
 import { expect } from '../../shared/Expect'
 import * as LiquidityMath from '../../libraries/LiquidityMath'
 import * as LendMath from '../../libraries/LendMath'
@@ -30,7 +30,7 @@ import {
 import * as LiquidityFilter from '../../filters/Liquidity'
 import { Convenience } from '../../shared/Convenience'
 import { FEE, PROTOCOL_FEE } from '../../shared/Constants'
-import { yMinLendTestCases as lendTestCases } from '../../test-cases/index'
+import { lendGivenPercentTestCases, yMinLendTestCases as lendTestCases } from '../../test-cases/index'
 import { yMinBorrowTestCases as borrowTestCases } from '../../test-cases/index'
 
 const { loadFixture } = waffle
@@ -49,7 +49,7 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-describe('YMin Math Lend', () => {
+describe.only('YMin Math Lend', () => {
   async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 3153600000n
     signers = await ethers.getSigners()
@@ -83,7 +83,7 @@ describe('YMin Math Lend', () => {
     }).timeout(100000)
   })
 })
-describe('YMin Math Borrow', () => {
+describe.only('YMin Math Borrow', () => {
     async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 3156n
     signers = await ethers.getSigners()
@@ -148,7 +148,6 @@ async function lendMathGivenPercentProperties(
     yIncreaseNewLiquidity = maybeNewLiq.yIncreaseNewLiquidity
     zIncreaseNewLiquidity = maybeNewLiq.zIncreaseNewLiquidity
   }
-
   const state = {
     x: xIncreaseNewLiquidity,
     y: yIncreaseNewLiquidity,
@@ -165,7 +164,8 @@ async function lendMathGivenPercentProperties(
     data.lendGivenPercentParams.assetIn,
     data.lendGivenPercentParams.percent
   )
-  expect(yDecrease).gteBigInt(BigInt(0))
+  const yMin = (lendGivenPercentParamsFromConv.xIncrease*state.y/(state.x+lendGivenPercentParamsFromConv.xIncrease))>>4n
+  expect(yDecrease).gteBigInt(yMin)
   expect(yDecrease).equalBigInt(lendGivenPercentParamsFromConv.yDecrease)
   expect(zDecrease).equalBigInt(lendGivenPercentParamsFromConv.zDecrease)
 }
@@ -220,6 +220,8 @@ async function borrowMathGivenPercentProperties(
     currentTime +1_00n,
     data.borrowGivenPercentParams.percent
   )
+  const yMin = shiftRightUp( divUp((borrowGivenPercentParams.xDecrease*state.y),(borrowGivenPercentParams.xDecrease+state.x)),4n)
+  expect(yIncrease).gteBigInt(yMin)
   expect(yIncrease).equalBigInt(borrowGivenPercentParams.yIncrease)
   expect(zIncrease).equalBigInt(borrowGivenPercentParams.zIncrease)
 }
