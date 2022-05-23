@@ -78,13 +78,12 @@ describe('YMin Math Lend', () => {
 
       const [xIncrease, yDecrease, zDecrease] = (await loadFixture(success)).map((x) => x.toBigInt())
 
-
       await lendMathGivenPercentProperties(testCase, currentTime, maturity, yDecrease, zDecrease)
     }).timeout(100000)
   })
 })
 describe('YMin Math Borrow', () => {
-    async function fixture(): Promise<Fixture> {
+  async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 3156n
     signers = await ethers.getSigners()
 
@@ -114,7 +113,6 @@ describe('YMin Math Borrow', () => {
     }).timeout(600000)
   })
 })
-
 
 async function lendMathGivenPercentProperties(
   data: {
@@ -164,7 +162,8 @@ async function lendMathGivenPercentProperties(
     data.lendGivenPercentParams.assetIn,
     data.lendGivenPercentParams.percent
   )
-  const yMin = (lendGivenPercentParamsFromConv.xIncrease*state.y/(state.x+lendGivenPercentParamsFromConv.xIncrease))>>4n
+  const yMin =
+    ((lendGivenPercentParamsFromConv.xIncrease * state.y) / (state.x + lendGivenPercentParamsFromConv.xIncrease)) >> 4n
   expect(yDecrease).gteBigInt(yMin)
   expect(yDecrease).equalBigInt(lendGivenPercentParamsFromConv.yDecrease)
   expect(zDecrease).equalBigInt(lendGivenPercentParamsFromConv.zDecrease)
@@ -217,12 +216,10 @@ async function borrowMathGivenPercentProperties(
     FEE,
     data.borrowGivenPercentParams.assetOut,
     maturity,
-    currentTime +1_00n,
+    currentTime + 1_00n,
     data.borrowGivenPercentParams.percent
   )
   const yMin = shiftRightUp( divUp((borrowGivenPercentParams.xDecrease*state.y),(borrowGivenPercentParams.xDecrease-state.x)),4n)
-  console.log('yMin',yMin);
-  console.log('yIncrease',yIncrease);
   expect(yIncrease).gteBigInt(yMin)
   expect(yIncrease).equalBigInt(borrowGivenPercentParams.yIncrease)
   expect(zIncrease).equalBigInt(borrowGivenPercentParams.zIncrease)
