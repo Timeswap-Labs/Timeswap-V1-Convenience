@@ -219,7 +219,10 @@ async function borrowMathGivenPercentProperties(
     currentTime + 1_00n,
     data.borrowGivenPercentParams.percent
   )
-  const yMin = shiftRightUp( divUp((borrowGivenPercentParams.xDecrease*state.y),(borrowGivenPercentParams.xDecrease-state.x)),4n)
+  const yMin = shiftRightUp(
+    divUp(borrowGivenPercentParams.xDecrease * state.y, borrowGivenPercentParams.xDecrease - state.x),
+    4n
+  )
   expect(yIncrease).gteBigInt(yMin)
   expect(yIncrease).equalBigInt(borrowGivenPercentParams.yIncrease)
   expect(zIncrease).equalBigInt(borrowGivenPercentParams.zIncrease)
