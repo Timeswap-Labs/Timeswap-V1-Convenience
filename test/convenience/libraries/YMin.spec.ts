@@ -110,7 +110,7 @@ describe('YMin Math Borrow', () => {
         return borrowGivenPercent
       }
       const [xDecrease, yIncrease, zIncrease] = (await loadFixture(success)).map((x) => x.toBigInt())
-      // await borrowMathGivenPercentProperties(testCase, currentTime, maturity, yIncrease, zIncrease)
+      await borrowMathGivenPercentProperties(testCase, currentTime, maturity, yIncrease, zIncrease)
     }).timeout(600000)
   })
 })
@@ -220,7 +220,9 @@ async function borrowMathGivenPercentProperties(
     currentTime +1_00n,
     data.borrowGivenPercentParams.percent
   )
-  const yMin = shiftRightUp( divUp((borrowGivenPercentParams.xDecrease*state.y),(borrowGivenPercentParams.xDecrease+state.x)),4n)
+  const yMin = shiftRightUp( divUp((borrowGivenPercentParams.xDecrease*state.y),(borrowGivenPercentParams.xDecrease-state.x)),4n)
+  console.log('yMin',yMin);
+  console.log('yIncrease',yIncrease);
   expect(yIncrease).gteBigInt(yMin)
   expect(yIncrease).equalBigInt(borrowGivenPercentParams.yIncrease)
   expect(zIncrease).equalBigInt(borrowGivenPercentParams.zIncrease)
