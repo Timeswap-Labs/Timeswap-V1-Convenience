@@ -49,7 +49,7 @@ async function fixture(): Promise<Fixture> {
   return constructor
 }
 
-describe.only('YMin Math Lend', () => {
+describe('YMin Math Lend', () => {
   async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 3153600000n
     signers = await ethers.getSigners()
@@ -83,7 +83,7 @@ describe.only('YMin Math Lend', () => {
     }).timeout(100000)
   })
 })
-describe.only('YMin Math Borrow', () => {
+describe('YMin Math Borrow', () => {
     async function fixture(): Promise<Fixture> {
     maturity = (await now()) + 3156n
     signers = await ethers.getSigners()
