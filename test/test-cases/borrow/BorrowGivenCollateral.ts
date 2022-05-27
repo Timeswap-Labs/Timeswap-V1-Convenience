@@ -31,7 +31,7 @@ const testCases = [
     },
     borrowGivenCollateralParams: {
       assetOut: 1000000000000000000000n,
-      collateralIn: 110103527586059978031n,
+      collateralIn: 100003527586059978031n,
       maxDebt: 1210000000000000000000n,
     },
   },
