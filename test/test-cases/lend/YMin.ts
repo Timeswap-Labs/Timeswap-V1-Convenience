@@ -38,6 +38,45 @@ const testCases = [
       minInsurance: 0n,
     },
   },
+  {
+    newLiquidityParams: {
+      assetIn: 100000000n,
+      debtIn: 120000000n,
+      collateralIn: 100000000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 100000000n,
+      percent: 0x00000000n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 100000000n,
+      debtIn: 120000000n,
+      collateralIn: 100000000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 100000000n,
+      percent: 0x70000000n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
+  {
+    newLiquidityParams: {
+      assetIn: 100000000n,
+      debtIn: 120000000n,
+      collateralIn: 100000000n,
+    },
+    lendGivenPercentParams: {
+      assetIn: 200000000n,
+      percent: 0x40000000n,
+      minBond: 0n,
+      minInsurance: 0n,
+    },
+  },
 ]
 //scenaros where yDecrease would be zero
 export default testCases
