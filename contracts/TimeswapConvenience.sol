@@ -4,6 +4,12 @@ pragma solidity =0.8.4;
 
 import {IConvenience} from './interfaces/IConvenience.sol';
 import {IFactory} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IFactory.sol';
+import {IMint} from './interfaces/IMint.sol';
+import {IBurn} from './interfaces/IBurn.sol';
+import {ILend} from './interfaces/ILend.sol';
+import {IWithdraw} from './interfaces/IWithdraw.sol';
+import {IBorrow} from './interfaces/IBorrow.sol';
+import {IPay} from './interfaces/IPay.sol';
 import {IWETH} from './interfaces/IWETH.sol';
 import {IDue} from './interfaces/IDue.sol';
 import {IPair} from '@timeswap-labs/timeswap-v1-core/contracts/interfaces/IPair.sol';
@@ -80,7 +86,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function newLiquidity(NewLiquidity calldata params)
+    function newLiquidity(IMint.NewLiquidity calldata params)
         external
         override
         returns (
@@ -94,7 +100,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function newLiquidityETHAsset(NewLiquidityETHAsset calldata params)
+    function newLiquidityETHAsset(IMint.NewLiquidityETHAsset calldata params)
         external
         payable
         override
@@ -109,7 +115,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function newLiquidityETHCollateral(NewLiquidityETHCollateral calldata params)
+    function newLiquidityETHCollateral(IMint.NewLiquidityETHCollateral calldata params)
         external
         payable
         override
@@ -124,7 +130,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenAsset(LiquidityGivenAsset calldata params)
+    function liquidityGivenAsset(IMint.LiquidityGivenAsset calldata params)
         external
         override
         returns (
@@ -138,7 +144,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenAssetETHAsset(LiquidityGivenAssetETHAsset calldata params)
+    function liquidityGivenAssetETHAsset(IMint.LiquidityGivenAssetETHAsset calldata params)
         external
         payable
         override
@@ -153,7 +159,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenAssetETHCollateral(LiquidityGivenAssetETHCollateral calldata params)
+    function liquidityGivenAssetETHCollateral(IMint.LiquidityGivenAssetETHCollateral calldata params)
         external
         payable
         override
@@ -174,7 +180,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenDebt(LiquidityGivenDebt calldata params)
+    function liquidityGivenDebt(IMint.LiquidityGivenDebt calldata params)
         external
         override
         returns (
@@ -188,7 +194,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenDebtETHAsset(LiquidityGivenDebtETHAsset calldata params)
+    function liquidityGivenDebtETHAsset(IMint.LiquidityGivenDebtETHAsset calldata params)
         external
         payable
         override
@@ -203,7 +209,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenDebtETHCollateral(LiquidityGivenDebtETHCollateral calldata params)
+    function liquidityGivenDebtETHCollateral(IMint.LiquidityGivenDebtETHCollateral calldata params)
         external
         payable
         override
@@ -224,7 +230,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenCollateral(LiquidityGivenCollateral calldata params)
+    function liquidityGivenCollateral(IMint.LiquidityGivenCollateral calldata params)
         external
         override
         returns (
@@ -238,7 +244,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenCollateralETHAsset(LiquidityGivenCollateralETHAsset calldata params)
+    function liquidityGivenCollateralETHAsset(IMint.LiquidityGivenCollateralETHAsset calldata params)
         external
         payable
         override
@@ -259,7 +265,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function liquidityGivenCollateralETHCollateral(LiquidityGivenCollateralETHCollateral calldata params)
+    function liquidityGivenCollateralETHCollateral(IMint.LiquidityGivenCollateralETHCollateral calldata params)
         external
         payable
         override
@@ -280,7 +286,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function removeLiquidity(RemoveLiquidity calldata params)
+    function removeLiquidity(IBurn.RemoveLiquidity calldata params)
         external
         override
         returns (uint256 assetOut, uint128 collateralOut)
@@ -289,7 +295,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function removeLiquidityETHAsset(RemoveLiquidityETHAsset calldata params)
+    function removeLiquidityETHAsset(IBurn.RemoveLiquidityETHAsset calldata params)
         external
         override
         returns (uint256 assetOut, uint128 collateralOut)
@@ -298,7 +304,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function removeLiquidityETHCollateral(RemoveLiquidityETHCollateral calldata params)
+    function removeLiquidityETHCollateral(IBurn.RemoveLiquidityETHCollateral calldata params)
         external
         override
         returns (uint256 assetOut, uint128 collateralOut)
@@ -307,7 +313,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenBond(LendGivenBond calldata params)
+    function lendGivenBond(ILend.LendGivenBond calldata params)
         external
         override
         returns (uint256 assetIn, IPair.Claims memory claimsOut)
@@ -316,7 +322,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenBondETHAsset(LendGivenBondETHAsset calldata params)
+    function lendGivenBondETHAsset(ILend.LendGivenBondETHAsset calldata params)
         external
         payable
         override
@@ -326,7 +332,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
+    function lendGivenBondETHCollateral(ILend.LendGivenBondETHCollateral calldata params)
         external
         override
         returns (uint256 assetIn, IPair.Claims memory claimsOut)
@@ -335,7 +341,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenInsurance(LendGivenInsurance calldata params)
+    function lendGivenInsurance(ILend.LendGivenInsurance calldata params)
         external
         override
         returns (uint256 assetIn, IPair.Claims memory claimsOut)
@@ -344,7 +350,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenInsuranceETHAsset(LendGivenInsuranceETHAsset calldata params)
+    function lendGivenInsuranceETHAsset(ILend.LendGivenInsuranceETHAsset calldata params)
         external
         payable
         override
@@ -354,7 +360,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenInsuranceETHCollateral(LendGivenInsuranceETHCollateral calldata params)
+    function lendGivenInsuranceETHCollateral(ILend.LendGivenInsuranceETHCollateral calldata params)
         external
         override
         returns (uint256 assetIn, IPair.Claims memory claimsOut)
@@ -363,7 +369,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenPercent(LendGivenPercent calldata params)
+    function lendGivenPercent(ILend.LendGivenPercent calldata params)
         external
         override
         returns (uint256 assetIn, IPair.Claims memory claimsOut)
@@ -372,7 +378,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenPercentETHAsset(LendGivenPercentETHAsset calldata params)
+    function lendGivenPercentETHAsset(ILend.LendGivenPercentETHAsset calldata params)
         external
         payable
         override
@@ -382,7 +388,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function lendGivenPercentETHCollateral(LendGivenPercentETHCollateral calldata params)
+    function lendGivenPercentETHCollateral(ILend.LendGivenPercentETHCollateral calldata params)
         external
         override
         returns (uint256 assetIn, IPair.Claims memory claimsOut)
@@ -391,12 +397,12 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function collect(Collect calldata params) external override returns (IPair.Tokens memory tokensOut) {
+    function collect(IWithdraw.Collect calldata params) external override returns (IPair.Tokens memory tokensOut) {
         tokensOut = Withdraw.collect(natives, factory, params);
     }
 
     /// @inheritdoc IConvenience
-    function collectETHAsset(CollectETHAsset calldata params)
+    function collectETHAsset(IWithdraw.CollectETHAsset calldata params)
         external
         override
         returns (IPair.Tokens memory tokensOut)
@@ -405,7 +411,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function collectETHCollateral(CollectETHCollateral calldata params)
+    function collectETHCollateral(IWithdraw.CollectETHCollateral calldata params)
         external
         override
         returns (IPair.Tokens memory tokensOut)
@@ -414,7 +420,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenDebt(BorrowGivenDebt calldata params)
+    function borrowGivenDebt(IBorrow.BorrowGivenDebt calldata params)
         external
         override
         returns (
@@ -427,7 +433,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
+    function borrowGivenDebtETHAsset(IBorrow.BorrowGivenDebtETHAsset calldata params)
         external
         override
         returns (
@@ -440,7 +446,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
+    function borrowGivenDebtETHCollateral(IBorrow.BorrowGivenDebtETHCollateral calldata params)
         external
         payable
         override
@@ -454,7 +460,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenCollateral(BorrowGivenCollateral calldata params)
+    function borrowGivenCollateral(IBorrow.BorrowGivenCollateral calldata params)
         external
         override
         returns (
@@ -467,7 +473,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
+    function borrowGivenCollateralETHAsset(IBorrow.BorrowGivenCollateralETHAsset calldata params)
         external
         override
         returns (
@@ -480,7 +486,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
+    function borrowGivenCollateralETHCollateral(IBorrow.BorrowGivenCollateralETHCollateral calldata params)
         external
         payable
         override
@@ -494,7 +500,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenPercent(BorrowGivenPercent calldata params)
+    function borrowGivenPercent(IBorrow.BorrowGivenPercent calldata params)
         external
         override
         returns (
@@ -507,7 +513,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenPercentETHAsset(BorrowGivenPercentETHAsset calldata params)
+    function borrowGivenPercentETHAsset(IBorrow.BorrowGivenPercentETHAsset calldata params)
         external
         override
         returns (
@@ -520,7 +526,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function borrowGivenPercentETHCollateral(BorrowGivenPercentETHCollateral calldata params)
+    function borrowGivenPercentETHCollateral(IBorrow.BorrowGivenPercentETHCollateral calldata params)
         external
         payable
         override
@@ -534,12 +540,12 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function repay(Repay calldata params) external override returns (uint128 assetIn, uint128 collateralOut) {
+    function repay(IPay.Repay calldata params) external override returns (uint128 assetIn, uint128 collateralOut) {
         (assetIn, collateralOut) = Pay.pay(natives, factory, params);
     }
 
     /// @inheritdoc IConvenience
-    function repayETHAsset(RepayETHAsset calldata params)
+    function repayETHAsset(IPay.RepayETHAsset calldata params)
         external
         payable
         override
@@ -549,7 +555,7 @@ contract TimeswapConvenience is IConvenience {
     }
 
     /// @inheritdoc IConvenience
-    function repayETHCollateral(RepayETHCollateral calldata params)
+    function repayETHCollateral(IPay.RepayETHCollateral calldata params)
         external
         override
         returns (uint128 assetIn, uint128 collateralOut)
