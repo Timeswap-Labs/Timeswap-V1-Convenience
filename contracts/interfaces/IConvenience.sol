@@ -25,12 +25,6 @@ import {IDeployPair} from './IDeployPair.sol';
 /// @title Timeswap Convenience Interface
 /// @author Ricsson W. Ngo
 interface IConvenience is
-    IMint,
-    ILend,
-    IWithdraw,
-    IBorrow,
-    IPay,
-    IBurn,
     ITimeswapMintCallback,
     ITimeswapLendCallback,
     ITimeswapBorrowCallback,
@@ -82,7 +76,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function newLiquidity(NewLiquidity calldata params)
+    function newLiquidity(IMint.NewLiquidity calldata params)
         external
         returns (
             uint256 assetIn,
@@ -101,7 +95,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function newLiquidityETHAsset(NewLiquidityETHAsset calldata params)
+    function newLiquidityETHAsset(IMint.NewLiquidityETHAsset calldata params)
         external
         payable
         returns (
@@ -121,7 +115,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function newLiquidityETHCollateral(NewLiquidityETHCollateral calldata params)
+    function newLiquidityETHCollateral(IMint.NewLiquidityETHCollateral calldata params)
         external
         payable
         returns (
@@ -139,7 +133,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenAsset(LiquidityGivenAsset calldata params)
+    function liquidityGivenAsset(IMint.LiquidityGivenAsset calldata params)
         external
         returns (
             uint256 assetIn,
@@ -157,7 +151,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenAssetETHAsset(LiquidityGivenAssetETHAsset calldata params)
+    function liquidityGivenAssetETHAsset(IMint.LiquidityGivenAssetETHAsset calldata params)
         external
         payable
         returns (
@@ -177,7 +171,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenAssetETHCollateral(LiquidityGivenAssetETHCollateral calldata params)
+    function liquidityGivenAssetETHCollateral(IMint.LiquidityGivenAssetETHCollateral calldata params)
         external
         payable
         returns (
@@ -195,7 +189,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenDebt(LiquidityGivenDebt calldata params)
+    function liquidityGivenDebt(IMint.LiquidityGivenDebt calldata params)
         external
         returns (
             uint256 assetIn,
@@ -213,7 +207,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenDebtETHAsset(LiquidityGivenDebtETHAsset calldata params)
+    function liquidityGivenDebtETHAsset(IMint.LiquidityGivenDebtETHAsset calldata params)
         external
         payable
         returns (
@@ -233,7 +227,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenDebtETHCollateral(LiquidityGivenDebtETHCollateral calldata params)
+    function liquidityGivenDebtETHCollateral(IMint.LiquidityGivenDebtETHCollateral calldata params)
         external
         payable
         returns (
@@ -251,7 +245,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenCollateral(LiquidityGivenCollateral calldata params)
+    function liquidityGivenCollateral(IMint.LiquidityGivenCollateral calldata params)
         external
         returns (
             uint256 assetIn,
@@ -269,7 +263,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenCollateralETHAsset(LiquidityGivenCollateralETHAsset calldata params)
+    function liquidityGivenCollateralETHAsset(IMint.LiquidityGivenCollateralETHAsset calldata params)
         external
         payable
         returns (
@@ -289,7 +283,7 @@ interface IConvenience is
     /// @return liquidityOut The amount of liquidity balance received by liquidityTo.
     /// @return id The array index of the collateralized debt received by dueTo.
     /// @return dueOut The collateralized debt received by dueTo.
-    function liquidityGivenCollateralETHCollateral(LiquidityGivenCollateralETHCollateral calldata params)
+    function liquidityGivenCollateralETHCollateral(IMint.LiquidityGivenCollateralETHCollateral calldata params)
         external
         payable
         returns (
@@ -303,7 +297,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IBurn interface.
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return collateralOut The amount of collateral ERC20 received by collateralTo.
-    function removeLiquidity(RemoveLiquidity calldata params)
+    function removeLiquidity(IBurn.RemoveLiquidity calldata params)
         external
         returns (uint256 assetOut, uint128 collateralOut);
 
@@ -312,7 +306,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IBurn interface.
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return collateralOut The amount of collateral ERC20 received by collateralTo.
-    function removeLiquidityETHAsset(RemoveLiquidityETHAsset calldata params)
+    function removeLiquidityETHAsset(IBurn.RemoveLiquidityETHAsset calldata params)
         external
         returns (uint256 assetOut, uint128 collateralOut);
 
@@ -321,7 +315,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IBurn interface.
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return collateralOut The amount of collateral ERC20 received by collateralTo.
-    function removeLiquidityETHCollateral(RemoveLiquidityETHCollateral calldata params)
+    function removeLiquidityETHCollateral(IBurn.RemoveLiquidityETHCollateral calldata params)
         external
         returns (uint256 assetOut, uint128 collateralOut);
 
@@ -331,7 +325,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenBond(LendGivenBond calldata params)
+    function lendGivenBond(ILend.LendGivenBond calldata params)
         external
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
@@ -341,7 +335,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenBondETHAsset(LendGivenBondETHAsset calldata params)
+    function lendGivenBondETHAsset(ILend.LendGivenBondETHAsset calldata params)
         external
         payable
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
@@ -352,7 +346,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenBondETHCollateral(LendGivenBondETHCollateral calldata params)
+    function lendGivenBondETHCollateral(ILend.LendGivenBondETHCollateral calldata params)
         external
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
@@ -362,7 +356,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenInsurance(LendGivenInsurance calldata params)
+    function lendGivenInsurance(ILend.LendGivenInsurance calldata params)
         external
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
@@ -372,7 +366,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenInsuranceETHAsset(LendGivenInsuranceETHAsset calldata params)
+    function lendGivenInsuranceETHAsset(ILend.LendGivenInsuranceETHAsset calldata params)
         external
         payable
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
@@ -383,7 +377,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenInsuranceETHCollateral(LendGivenInsuranceETHCollateral calldata params)
+    function lendGivenInsuranceETHCollateral(ILend.LendGivenInsuranceETHCollateral calldata params)
         external
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
@@ -393,7 +387,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenPercent(LendGivenPercent calldata params)
+    function lendGivenPercent(ILend.LendGivenPercent calldata params)
         external
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
@@ -403,7 +397,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenPercentETHAsset(LendGivenPercentETHAsset calldata params)
+    function lendGivenPercentETHAsset(ILend.LendGivenPercentETHAsset calldata params)
         external
         payable
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
@@ -414,26 +408,28 @@ interface IConvenience is
     /// @param params The parameters for this function found in ILend interface.
     /// @return assetIn The amount of asset ERC20 deposited.
     /// @return claimsOut The amount of bond ERC20 and insurance ERC20 received by bondTo and insuranceTo.
-    function lendGivenPercentETHCollateral(LendGivenPercentETHCollateral calldata params)
+    function lendGivenPercentETHCollateral(ILend.LendGivenPercentETHCollateral calldata params)
         external
         returns (uint256 assetIn, IPair.Claims memory claimsOut);
 
     /// @dev Calls the withdraw function and withdraw asset and collateral from a pool.
     /// @param params The parameters for this function found in IWithdraw interface.
     /// @return tokensOut The amount of asset ERC20 and collateral ERC20 received by assetTo and collateralTo.
-    function collect(Collect calldata params) external returns (IPair.Tokens memory tokensOut);
+    function collect(IWithdraw.Collect calldata params) external returns (IPair.Tokens memory tokensOut);
 
     /// @dev Calls the withdraw function and withdraw asset and collateral from a pool.
     /// @dev The asset received is ETH which will be unwrapped from WETH.
     /// @param params The parameters for this function found in IWithdraw interface.
     /// @return tokensOut The amount of asset ERC20 and collateral ERC20 received by assetTo and collateralTo.
-    function collectETHAsset(CollectETHAsset calldata params) external returns (IPair.Tokens memory tokensOut);
+    function collectETHAsset(IWithdraw.CollectETHAsset calldata params)
+        external
+        returns (IPair.Tokens memory tokensOut);
 
     /// @dev Calls the withdraw function and withdraw asset and collateral from a pool.
     /// @dev The collateral received is ETH which will be unwrapped from WETH.
     /// @param params The parameters for this function found in IWithdraw interface.
     /// @return tokensOut The amount of asset ERC20 and collateral ERC20 received by assetTo and collateralTo.
-    function collectETHCollateral(CollectETHCollateral calldata params)
+    function collectETHCollateral(IWithdraw.CollectETHCollateral calldata params)
         external
         returns (IPair.Tokens memory tokensOut);
 
@@ -444,7 +440,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenDebt(BorrowGivenDebt calldata params)
+    function borrowGivenDebt(IBorrow.BorrowGivenDebt calldata params)
         external
         returns (
             uint256 assetOut,
@@ -459,7 +455,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenDebtETHAsset(BorrowGivenDebtETHAsset calldata params)
+    function borrowGivenDebtETHAsset(IBorrow.BorrowGivenDebtETHAsset calldata params)
         external
         returns (
             uint256 assetOut,
@@ -474,7 +470,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenDebtETHCollateral(BorrowGivenDebtETHCollateral calldata params)
+    function borrowGivenDebtETHCollateral(IBorrow.BorrowGivenDebtETHCollateral calldata params)
         external
         payable
         returns (
@@ -490,7 +486,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenCollateral(BorrowGivenCollateral calldata params)
+    function borrowGivenCollateral(IBorrow.BorrowGivenCollateral calldata params)
         external
         returns (
             uint256 assetOut,
@@ -505,7 +501,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenCollateralETHAsset(BorrowGivenCollateralETHAsset calldata params)
+    function borrowGivenCollateralETHAsset(IBorrow.BorrowGivenCollateralETHAsset calldata params)
         external
         returns (
             uint256 assetOut,
@@ -520,7 +516,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenCollateralETHCollateral(BorrowGivenCollateralETHCollateral calldata params)
+    function borrowGivenCollateralETHCollateral(IBorrow.BorrowGivenCollateralETHCollateral calldata params)
         external
         payable
         returns (
@@ -536,7 +532,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenPercent(BorrowGivenPercent calldata params)
+    function borrowGivenPercent(IBorrow.BorrowGivenPercent calldata params)
         external
         returns (
             uint256 assetOut,
@@ -551,7 +547,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenPercentETHAsset(BorrowGivenPercentETHAsset calldata params)
+    function borrowGivenPercentETHAsset(IBorrow.BorrowGivenPercentETHAsset calldata params)
         external
         returns (
             uint256 assetOut,
@@ -566,7 +562,7 @@ interface IConvenience is
     /// @return assetOut The amount of asset ERC20 received by assetTo.
     /// @return id The token id of collateralized debt ERC721 received by dueTo.
     /// @return dueOut The collateralized debt ERC721 received by dueTo.
-    function borrowGivenPercentETHCollateral(BorrowGivenPercentETHCollateral calldata params)
+    function borrowGivenPercentETHCollateral(IBorrow.BorrowGivenPercentETHCollateral calldata params)
         external
         payable
         returns (
@@ -581,7 +577,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IPay interface.
     /// @return assetIn The total amount of asset ERC20 paid.
     /// @return collateralOut The total amount of collateral ERC20 receceived by to;
-    function repay(Repay calldata params) external returns (uint128 assetIn, uint128 collateralOut);
+    function repay(IPay.Repay calldata params) external returns (uint128 assetIn, uint128 collateralOut);
 
     /// @dev Calls the pay function and withdraw collateral from a pool given debt is paid or being paid.
     //// @dev The asset being paid is ETH which will be wrapped as WETH.
@@ -589,7 +585,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IPay interface.
     /// @return assetIn The total amount of asset ERC20 paid.
     /// @return collateralOut The total amount of collateral ERC20 receceived by to;
-    function repayETHAsset(RepayETHAsset calldata params)
+    function repayETHAsset(IPay.RepayETHAsset calldata params)
         external
         payable
         returns (uint128 assetIn, uint128 collateralOut);
@@ -601,7 +597,7 @@ interface IConvenience is
     /// @param params The parameters for this function found in IPay interface.
     /// @return assetIn The total amount of asset ERC20 paid.
     /// @return collateralOut The total amount of collateral ERC20 receceived by to;
-    function repayETHCollateral(RepayETHCollateral calldata params)
+    function repayETHCollateral(IPay.RepayETHCollateral calldata params)
         external
         returns (uint128 assetIn, uint128 collateralOut);
 }

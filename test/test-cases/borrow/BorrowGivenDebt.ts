@@ -7,7 +7,7 @@ const testCases = [
     },
     borrowGivenDebtParams: {
       assetOut: 1000n,
-      debtIn: 1010n,
+      debtIn: 1200n,
       maxCollateral: 5000n,
     },
   },
@@ -67,7 +67,7 @@ const testCases = [
     },
     borrowGivenDebtParams: {
       assetOut: 1000000000000000000000n,
-      debtIn: 1010000000000000000000n,
+      debtIn: 1200000000000000000000n,
       maxCollateral: 5000000000000000000000n,
     },
   },
