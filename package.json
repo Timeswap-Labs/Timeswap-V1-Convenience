@@ -4,7 +4,7 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "version": "1.1.4-Beta.1",
+  "version": "1.1.5-Beta",
   "homepage": "https://timeswap.io",
   "keywords": [
     "timeswap",
@@ -62,7 +62,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
-    "@timeswap-labs/timeswap-v1-core": "1.1.4-Beta",
+    "@timeswap-labs/timeswap-v1-core": "1.1.5-Beta",
     "@typechain/ethers-v5": "^9.0.0",
     "@typechain/hardhat": "^5.0.0",
     "@types/chai": "^4.3.0",

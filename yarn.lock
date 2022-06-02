@@ -767,10 +767,10 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@timeswap-labs/timeswap-v1-core@1.1.4-Beta":
-  version "1.1.4-Beta"
-  resolved "https://registry.yarnpkg.com/@timeswap-labs/timeswap-v1-core/-/timeswap-v1-core-1.1.4-Beta.tgz#cca657fa23af22ba3db9fd95a34ffa7b903b1388"
-  integrity sha512-Ua6QjbTf1Gnzc4/8FHcOktCUliAoW/Gm4QgKRzcJRrKXt6C43gc+492d3rW7EuxTBpATRWOpiBJ3jvROYzBIAQ==
+"@timeswap-labs/timeswap-v1-core@1.1.5-Beta":
+  version "1.1.5-Beta"
+  resolved "https://registry.yarnpkg.com/@timeswap-labs/timeswap-v1-core/-/timeswap-v1-core-1.1.5-Beta.tgz#fa54feb7f5d5961b86ec4497ef88c4e175c48c79"
+  integrity sha512-CupKzhuI5vwKnUNK5kfs1+XGKsZKLoRduLEe3JcX4a0TBHFSRqSAmsge3Ua2ENABhPJ1nu/uvDzvH+0rJbnJ8g==
   dependencies:
     "@openzeppelin/contracts" "^4.5.0"
     dotenv "^16.0.0"
