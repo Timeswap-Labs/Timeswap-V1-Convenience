@@ -26,12 +26,14 @@ import {Borrow} from './libraries/Borrow.sol';
 import {Pay} from './libraries/Pay.sol';
 import {DeployNative} from './libraries/DeployNative.sol';
 import {SafeTransfer} from './libraries/SafeTransfer.sol';
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+
 
 /// @title Timeswap Convenience
 /// @author Timeswap Labs
 /// @notice It is recommnded to use this contract to interact with Timeswap Core contract.
 /// @notice All error messages are abbreviated and can be found in the documentation.
-contract TimeswapConvenience is IConvenience {
+contract TimeswapConvenience is IConvenience, ERC2771Context {
     using SafeTransfer for IERC20;
 
     /* ===== MODEL ===== */
@@ -60,7 +62,7 @@ contract TimeswapConvenience is IConvenience {
     /// @dev Initializes the Convenience contract.
     /// @param _factory The address of factory contract used by this contract.
     /// @param _weth The address of the Wrapped ETH contract.
-    constructor(IFactory _factory, IWETH _weth) {
+    constructor(IFactory _factory, IWETH _weth, address _trustedForwarder) public ERC2771Context(_trustedForwarder) {
         require(address(_factory) != address(0), 'E601');
         require(address(_weth) != address(0), 'E601');
         require(address(_factory) != address(_weth), 'E612');
