@@ -12,9 +12,9 @@ import {BorrowMath} from './BorrowMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import {ERC2771Context} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+import {ERC2771Context} from '@openzeppelin/contracts/metatx/ERC2771Context.sol';
 
-library Borrow {
+library Borrow is ERC2771Context {
     using BorrowMath for IPair;
     using Deploy for IConvenience.Native;
 

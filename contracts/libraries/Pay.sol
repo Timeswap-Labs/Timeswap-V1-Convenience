@@ -12,10 +12,9 @@ import {IDue} from '../interfaces/IDue.sol';
 import {PayMath} from './PayMath.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import {ERC2771Context} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+import {ERC2771Context} from '@openzeppelin/contracts/metatx/ERC2771Context.sol';
 
-
-library Pay {
+library Pay is ERC2771Context {
     using PayMath for IPair;
 
     function pay(
