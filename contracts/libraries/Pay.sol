@@ -12,6 +12,8 @@ import {IDue} from '../interfaces/IDue.sol';
 import {PayMath} from './PayMath.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
+import {ERC2771Context} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+
 
 library Pay {
     using PayMath for IPair;
@@ -28,7 +30,7 @@ library Pay {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                _msgSender(),
+                ERC2771Context._msgSender(),
                 params.collateralTo,
                 params.ids,
                 params.maxAssetsIn,
@@ -82,7 +84,7 @@ library Pay {
                 params.asset,
                 weth,
                 params.maturity,
-                _msgSender(),
+                ERC2771Context._msgSender(),
                 address(this),
                 params.ids,
                 params.maxAssetsIn,

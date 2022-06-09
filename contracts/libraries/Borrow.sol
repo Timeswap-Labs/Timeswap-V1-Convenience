@@ -12,6 +12,7 @@ import {BorrowMath} from './BorrowMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
+import {ERC2771Context} from "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
 library Borrow {
     using BorrowMath for IPair;
@@ -38,7 +39,7 @@ library Borrow {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                _msgSender(),
+                ERC2771Context._msgSender(),
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
@@ -71,7 +72,7 @@ library Borrow {
                 weth,
                 params.collateral,
                 params.maturity,
-                _msgSender(),
+                ERC2771Context._msgSender(),
                 address(this),
                 params.dueTo,
                 params.assetOut,
@@ -149,7 +150,7 @@ library Borrow {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                _msgSender(),
+                ERC2771Context._msgSender(),
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
@@ -182,7 +183,7 @@ library Borrow {
                 weth,
                 params.collateral,
                 params.maturity,
-                _msgSender(),
+                ERC2771Context._msgSender(),
                 address(this),
                 params.dueTo,
                 params.assetOut,
@@ -260,7 +261,7 @@ library Borrow {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                _msgSender(),
+                ERC2771Context._msgSender(),
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
@@ -294,7 +295,7 @@ library Borrow {
                 weth,
                 params.collateral,
                 params.maturity,
-                _msgSender(),
+                ERC2771Context._msgSender(),
                 address(this),
                 params.dueTo,
                 params.assetOut,
