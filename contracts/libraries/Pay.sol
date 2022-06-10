@@ -12,15 +12,15 @@ import {IDue} from '../interfaces/IDue.sol';
 import {PayMath} from './PayMath.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import {ERC2771Context} from '@openzeppelin/contracts/metatx/ERC2771Context.sol';
 
-library Pay is ERC2771Context {
+library Pay {
     using PayMath for IPair;
 
     function pay(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
-        IPay.Repay memory params
+        IPay.Repay memory params,
+        address from
     ) external returns (uint128 assetIn, uint128 collateralOut) {
         (assetIn, collateralOut) = _pay(
             natives,
@@ -29,7 +29,7 @@ library Pay is ERC2771Context {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                ERC2771Context._msgSender(),
+                from,
                 params.collateralTo,
                 params.ids,
                 params.maxAssetsIn,
@@ -74,7 +74,8 @@ library Pay is ERC2771Context {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IPay.RepayETHCollateral memory params
+        IPay.RepayETHCollateral memory params,
+        address from
     ) external returns (uint128 assetIn, uint128 collateralOut) {
         (assetIn, collateralOut) = _pay(
             natives,
@@ -83,7 +84,7 @@ library Pay is ERC2771Context {
                 params.asset,
                 weth,
                 params.maturity,
-                ERC2771Context._msgSender(),
+                from,
                 address(this),
                 params.ids,
                 params.maxAssetsIn,

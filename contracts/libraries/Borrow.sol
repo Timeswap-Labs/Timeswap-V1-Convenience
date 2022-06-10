@@ -12,9 +12,8 @@ import {BorrowMath} from './BorrowMath.sol';
 import {Deploy} from './Deploy.sol';
 import {MsgValue} from './MsgValue.sol';
 import {ETH} from './ETH.sol';
-import {ERC2771Context} from '@openzeppelin/contracts/metatx/ERC2771Context.sol';
 
-library Borrow is ERC2771Context {
+library Borrow {
     using BorrowMath for IPair;
     using Deploy for IConvenience.Native;
 
@@ -22,7 +21,8 @@ library Borrow is ERC2771Context {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IBorrow.BorrowGivenDebt calldata params
+        IBorrow.BorrowGivenDebt calldata params,
+        address from
     )
         external
         returns (
@@ -39,7 +39,7 @@ library Borrow is ERC2771Context {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                ERC2771Context._msgSender(),
+                from,
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
@@ -55,7 +55,8 @@ library Borrow is ERC2771Context {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenDebtETHAsset calldata params
+        IBorrow.BorrowGivenDebtETHAsset calldata params,
+        address from
     )
         external
         returns (
@@ -72,7 +73,7 @@ library Borrow is ERC2771Context {
                 weth,
                 params.collateral,
                 params.maturity,
-                ERC2771Context._msgSender(),
+                from,
                 address(this),
                 params.dueTo,
                 params.assetOut,
@@ -91,7 +92,8 @@ library Borrow is ERC2771Context {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenDebtETHCollateral calldata params
+        IBorrow.BorrowGivenDebtETHCollateral calldata params,
+        address from
     )
         external
         returns (
@@ -125,7 +127,7 @@ library Borrow is ERC2771Context {
             unchecked {
                 excess -= dueOut.collateral;
             }
-            ETH.transfer(payable(msg.sender), excess);
+            ETH.transfer(payable(from), excess);
         }
     }
 
@@ -133,7 +135,8 @@ library Borrow is ERC2771Context {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IBorrow.BorrowGivenCollateral calldata params
+        IBorrow.BorrowGivenCollateral calldata params,
+        address from
     )
         external
         returns (
@@ -150,7 +153,7 @@ library Borrow is ERC2771Context {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                ERC2771Context._msgSender(),
+                from,
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
@@ -166,7 +169,8 @@ library Borrow is ERC2771Context {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenCollateralETHAsset calldata params
+        IBorrow.BorrowGivenCollateralETHAsset calldata params,
+        address from
     )
         external
         returns (
@@ -183,7 +187,7 @@ library Borrow is ERC2771Context {
                 weth,
                 params.collateral,
                 params.maturity,
-                ERC2771Context._msgSender(),
+                from,
                 address(this),
                 params.dueTo,
                 params.assetOut,
@@ -202,7 +206,8 @@ library Borrow is ERC2771Context {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenCollateralETHCollateral calldata params
+        IBorrow.BorrowGivenCollateralETHCollateral calldata params,
+        address from
     )
         external
         returns (
@@ -236,7 +241,7 @@ library Borrow is ERC2771Context {
             unchecked {
                 excess -= dueOut.collateral;
             }
-            ETH.transfer(payable(msg.sender), excess);
+            ETH.transfer(payable(from), excess);
         }
     }
 
@@ -244,7 +249,8 @@ library Borrow is ERC2771Context {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IBorrow.BorrowGivenPercent calldata params
+        IBorrow.BorrowGivenPercent calldata params,
+        address from
     )
         external
         returns (
@@ -261,7 +267,7 @@ library Borrow is ERC2771Context {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                ERC2771Context._msgSender(),
+                from,
                 params.assetTo,
                 params.dueTo,
                 params.assetOut,
@@ -278,7 +284,8 @@ library Borrow is ERC2771Context {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenPercentETHAsset calldata params
+        IBorrow.BorrowGivenPercentETHAsset calldata params,
+        address from
     )
         external
         returns (
@@ -295,7 +302,7 @@ library Borrow is ERC2771Context {
                 weth,
                 params.collateral,
                 params.maturity,
-                ERC2771Context._msgSender(),
+                from,
                 address(this),
                 params.dueTo,
                 params.assetOut,
@@ -315,7 +322,8 @@ library Borrow is ERC2771Context {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IBorrow.BorrowGivenPercentETHCollateral calldata params
+        IBorrow.BorrowGivenPercentETHCollateral calldata params,
+        address from
     )
         external
         returns (
@@ -350,7 +358,7 @@ library Borrow is ERC2771Context {
             unchecked {
                 excess -= dueOut.collateral;
             }
-            ETH.transfer(payable(msg.sender), excess);
+            ETH.transfer(payable(from), excess);
         }
     }
 

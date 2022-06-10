@@ -21,7 +21,8 @@ library Mint {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IMint.NewLiquidity calldata params
+        IMint.NewLiquidity calldata params,
+        address from
     )
         external
         returns (
@@ -39,8 +40,8 @@ library Mint {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                msg.sender,
-                msg.sender,
+                from,
+                from,
                 params.liquidityTo,
                 params.dueTo,
                 params.assetIn,
@@ -56,7 +57,8 @@ library Mint {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IMint.NewLiquidityETHAsset calldata params
+        IMint.NewLiquidityETHAsset calldata params,
+        address from
     )
         external
         returns (
@@ -77,7 +79,7 @@ library Mint {
                 params.collateral,
                 params.maturity,
                 address(this),
-                msg.sender,
+                from,
                 params.liquidityTo,
                 params.dueTo,
                 assetInETH,
@@ -93,7 +95,8 @@ library Mint {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IMint.NewLiquidityETHCollateral calldata params
+        IMint.NewLiquidityETHCollateral calldata params,
+        address from
     )
         external
         returns (
@@ -113,7 +116,7 @@ library Mint {
                 params.asset,
                 weth,
                 params.maturity,
-                msg.sender,
+                from,
                 address(this),
                 params.liquidityTo,
                 params.dueTo,
@@ -129,7 +132,8 @@ library Mint {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IMint.LiquidityGivenAsset calldata params
+        IMint.LiquidityGivenAsset calldata params,
+        address from
     )
         external
         returns (
@@ -147,8 +151,8 @@ library Mint {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                msg.sender,
-                msg.sender,
+                from,
+                from,
                 params.liquidityTo,
                 params.dueTo,
                 params.assetIn,
@@ -165,7 +169,8 @@ library Mint {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IMint.LiquidityGivenAssetETHAsset calldata params
+        IMint.LiquidityGivenAssetETHAsset calldata params,
+        address from
     )
         external
         returns (
@@ -186,7 +191,7 @@ library Mint {
                 params.collateral,
                 params.maturity,
                 address(this),
-                msg.sender,
+                from,
                 params.liquidityTo,
                 params.dueTo,
                 assetInETH,
@@ -203,7 +208,8 @@ library Mint {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IMint.LiquidityGivenAssetETHCollateral calldata params
+        IMint.LiquidityGivenAssetETHCollateral calldata params,
+        address from
     )
         external
         returns (
@@ -223,7 +229,7 @@ library Mint {
                 params.asset,
                 weth,
                 params.maturity,
-                msg.sender,
+                from,
                 address(this),
                 params.liquidityTo,
                 params.dueTo,
@@ -248,7 +254,8 @@ library Mint {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IMint.LiquidityGivenDebt memory params
+        IMint.LiquidityGivenDebt memory params,
+        address from
     )
         external
         returns (
@@ -266,8 +273,8 @@ library Mint {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                msg.sender,
-                msg.sender,
+                from,
+                from,
                 params.liquidityTo,
                 params.dueTo,
                 params.debtIn,
@@ -284,7 +291,8 @@ library Mint {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IMint.LiquidityGivenDebtETHAsset memory params
+        IMint.LiquidityGivenDebtETHAsset memory params,
+        address from
     )
         external
         returns (
@@ -305,7 +313,7 @@ library Mint {
                 params.collateral,
                 params.maturity,
                 address(this),
-                msg.sender,
+                from,
                 params.liquidityTo,
                 params.dueTo,
                 params.debtIn,
@@ -330,7 +338,8 @@ library Mint {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IMint.LiquidityGivenDebtETHCollateral memory params
+        IMint.LiquidityGivenDebtETHCollateral memory params,
+        address from
     )
         external
         returns (
@@ -350,7 +359,7 @@ library Mint {
                 params.asset,
                 weth,
                 params.maturity,
-                msg.sender,
+                from,
                 address(this),
                 params.liquidityTo,
                 params.dueTo,
@@ -375,7 +384,8 @@ library Mint {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IConvenience convenience,
         IFactory factory,
-        IMint.LiquidityGivenCollateral memory params
+        IMint.LiquidityGivenCollateral memory params,
+        address from
     )
         external
         returns (
@@ -393,8 +403,8 @@ library Mint {
                 params.asset,
                 params.collateral,
                 params.maturity,
-                msg.sender,
-                msg.sender,
+                from,
+                from,
                 params.liquidityTo,
                 params.dueTo,
                 params.collateralIn,
@@ -411,7 +421,8 @@ library Mint {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IMint.LiquidityGivenCollateralETHAsset memory params
+        IMint.LiquidityGivenCollateralETHAsset memory params,
+        address from
     )
         external
         returns (
@@ -432,7 +443,7 @@ library Mint {
                 params.collateral,
                 params.maturity,
                 address(this),
-                msg.sender,
+                from,
                 params.liquidityTo,
                 params.dueTo,
                 params.collateralIn,
@@ -457,7 +468,8 @@ library Mint {
         IConvenience convenience,
         IFactory factory,
         IWETH weth,
-        IMint.LiquidityGivenCollateralETHCollateral memory params
+        IMint.LiquidityGivenCollateralETHCollateral memory params,
+        address from
     )
         external
         returns (
@@ -477,7 +489,7 @@ library Mint {
                 params.asset,
                 weth,
                 params.maturity,
-                msg.sender,
+                from,
                 address(this),
                 params.liquidityTo,
                 params.dueTo,
