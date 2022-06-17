@@ -116,7 +116,8 @@ library Pay {
             params.maturity,
             collateralizedDebt,
             params.ids,
-            params.maxAssetsIn
+            params.maxAssetsIn,
+            params.from
         );
 
         (assetIn, collateralOut) = pair.pay(

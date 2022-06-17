@@ -14,7 +14,8 @@ library PayMath {
         uint256 maturity,
         IDue collateralizedDebt,
         uint256[] memory ids,
-        uint112[] memory maxAssetsIn
+        uint112[] memory maxAssetsIn,
+        address from
     ) internal view returns (uint112[] memory assetsIn, uint112[] memory collateralsOut) {
         uint256 length = ids.length;
 
@@ -25,7 +26,7 @@ library PayMath {
             IPair.Due memory due = pair.dueOf(maturity, address(this), ids[i]);
 
             if (assetsIn[i] > due.debt) assetsIn[i] = due.debt;
-            if (msg.sender == collateralizedDebt.ownerOf(ids[i])) {
+            if (from == collateralizedDebt.ownerOf(ids[i])) {
                 uint256 _collateralOut = due.collateral;
                 if (due.debt != 0) {
                     _collateralOut *= assetsIn[i];
