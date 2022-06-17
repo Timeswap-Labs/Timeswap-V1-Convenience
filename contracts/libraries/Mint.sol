@@ -246,7 +246,7 @@ library Mint {
             unchecked {
                 excess -= dueOut.collateral;
             }
-            ETH.transfer(payable(msg.sender), excess);
+            ETH.transfer(payable(from), excess);
         }
     }
 
@@ -329,7 +329,7 @@ library Mint {
             unchecked {
                 excess -= assetIn;
             }
-            ETH.transfer(payable(msg.sender), excess);
+            ETH.transfer(payable(from), excess);
         }
     }
 
@@ -376,7 +376,7 @@ library Mint {
             unchecked {
                 excess -= dueOut.collateral;
             }
-            ETH.transfer(payable(msg.sender), excess);
+            ETH.transfer(payable(from), excess);
         }
     }
 
@@ -459,7 +459,7 @@ library Mint {
             unchecked {
                 excess -= assetIn;
             }
-            ETH.transfer(payable(msg.sender), excess);
+            ETH.transfer(payable(from), excess);
         }
     }
 

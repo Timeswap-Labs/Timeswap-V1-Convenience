@@ -14,7 +14,8 @@ library Burn {
     function removeLiquidity(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
-        IBurn.RemoveLiquidity calldata params
+        IBurn.RemoveLiquidity calldata params,
+        address from
     ) external returns (uint256 assetOut, uint128 collateralOut) {
         (assetOut, collateralOut) = _removeLiquidity(
             natives,
@@ -26,7 +27,8 @@ library Burn {
                 params.assetTo,
                 params.collateralTo,
                 params.liquidityIn
-            )
+            ),
+            from
         );
     }
 
@@ -34,7 +36,8 @@ library Burn {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBurn.RemoveLiquidityETHAsset calldata params
+        IBurn.RemoveLiquidityETHAsset calldata params,
+        address from
     ) external returns (uint256 assetOut, uint128 collateralOut) {
         (assetOut, collateralOut) = _removeLiquidity(
             natives,
@@ -46,7 +49,8 @@ library Burn {
                 address(this),
                 params.collateralTo,
                 params.liquidityIn
-            )
+            ),
+            from
         );
 
         if (assetOut != 0) {
@@ -59,7 +63,8 @@ library Burn {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IBurn.RemoveLiquidityETHCollateral calldata params
+        IBurn.RemoveLiquidityETHCollateral calldata params,
+        address from
     ) external returns (uint256 assetOut, uint128 collateralOut) {
         (assetOut, collateralOut) = _removeLiquidity(
             natives,
@@ -71,7 +76,8 @@ library Burn {
                 params.assetTo,
                 address(this),
                 params.liquidityIn
-            )
+            ),
+            from
         );
 
         if (collateralOut != 0) {
@@ -82,7 +88,8 @@ library Burn {
 
     function _removeLiquidity(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IBurn._RemoveLiquidity memory params
+        IBurn._RemoveLiquidity memory params,
+        address from
     ) private returns (uint256 assetOut, uint128 collateralOut) {
         IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
@@ -94,6 +101,6 @@ library Burn {
             IPair.BurnParam(params.maturity, params.assetTo, params.collateralTo, params.liquidityIn)
         );
 
-        native.liquidity.burn(msg.sender, params.liquidityIn);
+        native.liquidity.burn(from, params.liquidityIn);
     }
 }
