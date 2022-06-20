@@ -80,7 +80,7 @@
   },
   "resolutions": {
     "yargs-parser": "18.1.2",
-    "undici":"5.5.1"
+    "undici": "5.5.1"
   },
   "scripts": {
     "compile": "hardhat compile",
