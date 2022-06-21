@@ -34,7 +34,8 @@ library Pay {
                 params.ids,
                 params.maxAssetsIn,
                 params.deadline
-            )
+            ),
+            from
         );
     }
 
@@ -54,12 +55,13 @@ library Pay {
                 weth,
                 params.collateral,
                 params.maturity,
-                from,
+                address(this),
                 params.collateralTo,
                 params.ids,
                 params.maxAssetsIn,
                 params.deadline
-            )
+            ),
+            from
         );
 
         if (maxAssetIn > assetIn) {
@@ -90,7 +92,8 @@ library Pay {
                 params.ids,
                 params.maxAssetsIn,
                 params.deadline
-            )
+            ),
+            from
         );
 
         if (collateralOut != 0) {
@@ -101,7 +104,8 @@ library Pay {
 
     function _pay(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
-        IPay._Repay memory params
+        IPay._Repay memory params,
+        address sourceFrom
     ) private returns (uint128 assetIn, uint128 collateralOut) {
         require(params.deadline >= block.timestamp, 'E504');
         require(params.maturity > block.timestamp, 'E508');
@@ -118,7 +122,7 @@ library Pay {
             collateralizedDebt,
             params.ids,
             params.maxAssetsIn,
-            params.from
+            sourceFrom
         );
 
         (assetIn, collateralOut) = pair.pay(
@@ -129,7 +133,7 @@ library Pay {
                 params.ids,
                 assetsIn,
                 collateralsOut,
-                bytes(abi.encode(params.asset, params.collateral, params.from, params.maturity))
+                bytes(abi.encode(params.asset, params.collateral, params.from, params.maturity)) 
             )
         );
     }
