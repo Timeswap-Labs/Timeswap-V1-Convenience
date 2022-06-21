@@ -89,7 +89,7 @@ library Withdraw {
     function _collect(
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IWithdraw._Collect memory params, 
-        from
+        address from
     ) private returns (IPair.Tokens memory tokensOut) {
         IPair pair = params.factory.getPair(params.asset, params.collateral);
         require(address(pair) != address(0), 'E501');
