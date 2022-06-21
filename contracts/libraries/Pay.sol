@@ -42,7 +42,8 @@ library Pay {
         mapping(IERC20 => mapping(IERC20 => mapping(uint256 => IConvenience.Native))) storage natives,
         IFactory factory,
         IWETH weth,
-        IPay.RepayETHAsset memory params
+        IPay.RepayETHAsset memory params,
+        address from
     ) external returns (uint128 assetIn, uint128 collateralOut) {
         uint128 maxAssetIn = MsgValue.getUint112();
 
@@ -53,7 +54,7 @@ library Pay {
                 weth,
                 params.collateral,
                 params.maturity,
-                address(this),
+                from,
                 params.collateralTo,
                 params.ids,
                 params.maxAssetsIn,
@@ -66,7 +67,7 @@ library Pay {
             unchecked {
                 excess -= assetIn;
             }
-            ETH.transfer(payable(msg.sender), excess);
+            ETH.transfer(payable(from), excess);
         }
     }
 

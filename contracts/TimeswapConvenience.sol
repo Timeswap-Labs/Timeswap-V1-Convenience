@@ -615,7 +615,8 @@ contract TimeswapConvenience is IConvenience, ERC2771Context {
         override
         returns (uint128 assetIn, uint128 collateralOut)
     {
-        (assetIn, collateralOut) = Pay.payETHAsset(natives, factory, weth, params);
+        address from = _msgSender();
+        (assetIn, collateralOut) = Pay.payETHAsset(natives, factory, weth, params, from);
     }
 
     /// @inheritdoc IConvenience
